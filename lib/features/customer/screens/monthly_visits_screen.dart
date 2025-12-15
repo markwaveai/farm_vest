@@ -58,6 +58,7 @@ class MonthlyVisitsScreen extends StatefulWidget {
 
 class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
   late DateTime _selectedMonth;
+  late DateTime _selectedDate;
   List<VisitSlot> _visitSlots = [];
   final String _currentUserId =
       'current_user_id'; // Replace with actual user ID
@@ -67,7 +68,8 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedMonth = DateTime.now();
+    _selectedDate = DateTime.now();
+    _selectedMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
     _loadVisitData();
   }
 
@@ -81,8 +83,8 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
     if (lastVisit != null) {
       final lastVisitDate = DateTime.parse(lastVisit);
       _hasVisitedThisMonth =
-          lastVisitDate.month == DateTime.now().month &&
-          lastVisitDate.year == DateTime.now().year;
+          lastVisitDate.month == _selectedMonth.month &&
+          lastVisitDate.year == _selectedMonth.year;
     }
 
     // Generate slots for the current month
@@ -91,13 +93,13 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
   }
 
   void _generateVisitSlots() {
-    final now = DateTime.now();
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final daysInMonth =
+        DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0).day;
     final slots = <VisitSlot>[];
 
     // Generate slots for each working day (Mon-Fri) of the current month
     for (var day = 1; day <= daysInMonth; day++) {
-      final date = DateTime(now.year, now.month, day);
+      final date = DateTime(_selectedMonth.year, _selectedMonth.month, day);
 
       // Skip weekends (6 = Saturday, 7 = Sunday)
       if (date.weekday >= 6) continue;
@@ -112,14 +114,14 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
         ),
       );
 
-      slots.add(
-        VisitSlot(
-          date: date,
-          time: '2:00 PM - 4:00 PM',
-          maxSlots: 10,
-          bookedSlots: 0, // In real app, load from backend
-        ),
-      );
+      // slots.add(
+      //   VisitSlot(
+      //     date: date,
+      //     time: '2:00 PM - 4:00 PM',
+      //     maxSlots: 10,
+      //     bookedSlots: 0, // In real app, load from backend
+      //   ),
+      // );
     }
 
     setState(() => _visitSlots = slots);
@@ -178,6 +180,11 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
             fallbackRoute: '/customer-dashboard',
           ),
         ),
+        actions: [
+          IconButton(onPressed: (){
+            _buildVisitedMessage();
+          }, icon: Icon(Icons.history))
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -283,6 +290,7 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
   Widget _buildCalendar() {
     return Column(
       children: [
+        _buildSlotSummaryCard(),
         _buildMonthSelector(),
         Expanded(
           child: ListView.builder(
@@ -298,6 +306,153 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
     );
   }
 
+  Widget _buildSlotSummaryCard() {
+    final totalCapacity = _visitSlots.fold<int>(0, (sum, s) => sum + s.maxSlots);
+    final totalBooked = _visitSlots.fold<int>(0, (sum, s) => sum + s.bookedSlots);
+    final totalAvailable = (totalCapacity - totalBooked).clamp(0, totalCapacity);
+    final progress = totalCapacity == 0 ? 0.0 : (totalBooked / totalCapacity);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Card(
+        elevation: 6,
+        shadowColor: Colors.black.withOpacity(0.12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.primary.withOpacity(0.10),
+                Colors.white,
+              ],
+            ),
+          ),
+        child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.insights,
+                              size: 18,
+                              color: AppTheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                  Text(
+                    'Slots Summary',
+                    style: AppTheme.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                  Text(
+                    DateFormat('MMMM yyyy').format(_selectedMonth),
+                    style: AppTheme.bodySmall.copyWith(
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$totalBooked / $totalCapacity',
+                        style: AppTheme.bodySmall.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                    Expanded(
+                      child: _buildSummaryPill(
+                    title: 'Available',
+                    value: totalAvailable.toString(),
+                    color: Colors.green,
+                        icon: Icons.event_available,
+                      ),
+                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildSummaryPill(
+                    title: 'Filled',
+                    value: totalBooked.toString(),
+                    color: Colors.red,
+                        icon: Icons.event_busy,
+                      ),
+                  ),
+                ],
+              ),
+            ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryPill({
+    required String title,
+    required String value,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.black.withOpacity(0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTheme.bodySmall.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: AppTheme.bodyMedium.copyWith(
+              fontWeight: FontWeight.w800,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMonthSelector() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -308,9 +463,41 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: _previousMonth,
           ),
-          Text(
-            DateFormat('MMMM yyyy').format(_selectedMonth),
-            style: AppTheme.headingMedium,
+          Expanded(
+            child: Center(
+              child: InkWell(
+                onTap: _pickDate,
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppTheme.mediumGrey.withOpacity(0.35),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.calendar_month,
+                        size: 18,
+                        color: AppTheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        DateFormat('dd MMM yyyy').format(_selectedDate),
+                        style: AppTheme.headingMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.arrow_forward_ios),
@@ -319,6 +506,24 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(now.year - 5, 1, 1),
+      lastDate: DateTime(now.year + 5, 12, 31),
+    );
+
+    if (picked == null) return;
+
+    setState(() {
+      _selectedDate = picked;
+      _selectedMonth = DateTime(picked.year, picked.month, 1);
+    });
+    await _loadVisitData();
   }
 
   Widget _buildVisitSlot(VisitSlot slot) {
@@ -335,9 +540,9 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
           '${DateFormat('EEEE, MMM d').format(slot.date)} • ${slot.time}',
           style: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w500),
         ),
-        subtitle: Text(
+        subtitle: Text( isFull?'Slots Full':isPastDate?'Unavailable':
           '${slot.maxSlots - slot.bookedSlots} slots available',
-          style: TextStyle(color: isFull ? Colors.red : Colors.green),
+          style: TextStyle(color: isFull ? Colors.red :isPastDate? Colors.grey: Colors.green),
         ),
         trailing: isBooked
             ? Row(
@@ -348,22 +553,27 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
                     child: const Text('View'),
                   ),
                   const SizedBox(width: 8),
-                  const Chip(
+                   Chip(
                     label: Text(
                       'Booked',
                       style: TextStyle(color: Colors.white),
                     ),
-                    backgroundColor: AppTheme.primary,
+                    backgroundColor:isPastDate? Colors.grey: AppTheme.primary,
                   ),
                 ],
               )
             : ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isFull || isPastDate || _hasVisitedThisMonth
+                    ? Colors.grey
+                    : AppTheme.primary,
+              ),
                 onPressed: isFull || isPastDate || _hasVisitedThisMonth
                     ? isFull
                           ? null
                           : () => _showAlreadyScheduledMessage()
                     : () => _bookSlot(slot),
-                child: Text(isFull ? 'Full' : 'Book Slot'),
+                child: Text(isFull ? 'Full' :isPastDate? 'Expired':'Book Slot'),
               ),
       ),
     );
@@ -420,8 +630,9 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
           _selectedMonth.month - 1,
           1,
         );
-        // In a real app, load slots for the selected month from backend
+        _selectedDate = _selectedMonth;
       });
+      _loadVisitData();
     }
   }
 
@@ -432,7 +643,8 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
         _selectedMonth.month + 1,
         1,
       );
-      // In a real app, load slots for the selected month from backend
+      _selectedDate = _selectedMonth;
     });
+    _loadVisitData();
   }
 }

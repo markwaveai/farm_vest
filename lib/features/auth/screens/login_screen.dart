@@ -1,10 +1,13 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/toast_utils.dart';
 import '../providers/auth_provider.dart';
+import 'package:pinput/pinput.dart';
+
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -19,8 +22,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _otpController = TextEditingController();
   bool _isOtpSent = false;
 
+  bool get _isMobileValid => _mobileController.text.trim().length == 10;
+  bool get _isOtpValid => _otpController.text.trim().length == 6;
+
+  @override
+  void initState() {
+    super.initState();
+    _mobileController.addListener(_onInputChanged);
+    _otpController.addListener(_onInputChanged);
+  }
+
+  void _onInputChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    _mobileController.removeListener(_onInputChanged);
+    _otpController.removeListener(_onInputChanged);
     _mobileController.dispose();
     _otpController.dispose();
     super.dispose();
@@ -89,94 +108,160 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 if (!_isOtpSent) ...[
                   // Mobile Number Field
                   Container(
-                    decoration: BoxDecoration(
-                      color: AppTheme.white,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: TextFormField(
-                      controller: _mobileController,
-                      keyboardType: TextInputType.phone,
-                      style: AppTheme.bodyLarge,
-                      decoration: InputDecoration(
-                        labelText: 'Mobile Number',
-                        prefixIcon: const Icon(
-                          Icons.phone_android,
-                          color: AppTheme.primary,
-                        ),
-                        hintText: 'Enter your mobile number',
-                        hintStyle: AppTheme.bodyMedium.copyWith(
-                          color: AppTheme.mediumGrey,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.radiusM,
-                          ),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: Colors.transparent,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your mobile number';
-                        }
-                        // Simple regex for testing, can be more strict if needed
-                        if (value.length < 10) {
-                          return 'Please enter a valid mobile number';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
+  decoration: BoxDecoration(
+    color: AppTheme.white,
+    borderRadius: BorderRadius.circular(AppConstants.radiusM),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.06),
+        blurRadius: 12,
+        offset: const Offset(0, 6),
+      ),
+    ],
+  ),
+  child: TextFormField(
+    controller: _mobileController,
+    keyboardType: TextInputType.phone,
+    autofillHints: const [AutofillHints.telephoneNumber],
+    style: AppTheme.bodyLarge.copyWith(
+      letterSpacing: 1.2,
+    ),
+    inputFormatters: [
+      FilteringTextInputFormatter.digitsOnly,
+      LengthLimitingTextInputFormatter(10),
+    ],
+    onChanged: (_) => setState(() {}),
+    validator: (value) {
+      if (value == null || value.length != 10) {
+        return 'Enter a valid 10-digit mobile number';
+      }
+      return null;
+    },
+    decoration: InputDecoration(
+      labelText: 'Mobile Number',
+      hintText: 'Enter 10-digit number',
+      floatingLabelBehavior: FloatingLabelBehavior.auto,
+
+      prefixIcon: const Icon(
+        Icons.phone_android,
+        size: 22,
+        color: AppTheme.primary,
+      ),
+
+      filled: true,
+      fillColor: Colors.transparent,
+
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 18,
+        horizontal: 16,
+      ),
+
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        borderSide: BorderSide(
+          color: AppTheme.mediumGrey.withOpacity(0.4),
+          width: 1,
+        ),
+      ),
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        borderSide: const BorderSide(
+          color: AppTheme.primary,
+          width: 2,
+        ),
+      ),
+
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        borderSide: const BorderSide(
+          color: Colors.red,
+          width: 1.2,
+        ),
+      ),
+
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        borderSide: const BorderSide(
+          color: Colors.red,
+          width: 2,
+        ),
+      ),
+    ),
+  ),
+)
                 ] else ...[
                   // OTP Field
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppTheme.white,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: TextFormField(
-                      controller: _otpController,
-                      keyboardType: TextInputType.number,
-                      style: AppTheme.bodyLarge,
-                      decoration: InputDecoration(
-                        labelText: 'WhatsApp OTP',
-                        prefixIcon: const Icon(
-                          Icons.lock_clock,
-                          color: AppTheme.primary,
-                        ),
-                        hintText: 'Enter OTP',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.radiusM,
-                          ),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: Colors.transparent,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter the OTP';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
+                  // OTP Field (Box Style)
+Container(
+  decoration: BoxDecoration(
+   // color: AppTheme.white,
+    borderRadius: BorderRadius.circular(AppConstants.radiusM),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.05),
+        blurRadius: 10,
+        offset: const Offset(0, 4),
+      ),
+    ],
+  ),
+  padding: const EdgeInsets.symmetric(vertical: 16),
+  child: Center(
+    child: Pinput(
+      length: 6,
+      controller: _otpController,
+      keyboardType: TextInputType.number,
+      autofocus: true,
+      onChanged: (value){setState(() {
+        
+      });},
+      onCompleted: (value) {
+        setState(() {
+          
+        });
+        // Optional: auto-verify when OTP complete
+        // _handleVerifyOtp();
+      },
+      validator: (value) {
+        if (value == null || value.length != 6) {
+          return 'Enter valid 6 digit OTP';
+        }
+        return null;
+      },
+      defaultPinTheme: PinTheme(
+        width: 48,
+        height: 55,
+        textStyle: AppTheme.bodyLarge.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppTheme.mediumGrey),
+        ),
+      ),
+      focusedPinTheme: PinTheme(
+        width: 48,
+        height: 55,
+        textStyle: AppTheme.bodyLarge.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppTheme.primary, width: 2),
+        ),
+      ),
+      submittedPinTheme: PinTheme(
+        width: 48,
+        height: 55,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: AppTheme.primary.withOpacity(0.1),
+          border: Border.all(color: AppTheme.primary),
+        ),
+      ),
+    ),
+  ),
+),
                 ],
 
                 const SizedBox(height: AppConstants.spacingXL),
@@ -186,9 +271,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: authState.isLoading
+                    onPressed: 
+                    authState.isLoading
                         ? null
-                        : (_isOtpSent ? _handleVerifyOtp : _handleSendOtp),
+                        : (_isOtpSent
+                            ? (_isOtpValid ? _handleVerifyOtp : null)
+                            : (_isMobileValid ? _handleSendOtp : null)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
                       foregroundColor: AppTheme.white,

@@ -82,6 +82,7 @@ dependencies:
 dependency_overrides:
   fl_chart: ^0.69.0
   pluto_grid: ^8.1.0
+  pinput: ^6.0.1
 
 dev_dependencies:
   flutter_test:
