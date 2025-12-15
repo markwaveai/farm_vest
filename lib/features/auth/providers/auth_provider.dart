@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/services/api_services.dart';
 import '../models/whatsapp_otp_response.dart';
 
-enum UserRole { customer, supervisor, doctor, assistant, unknown }
+enum UserRole { customer, supervisor, doctor, assistant, admin, unknown }
 
 class AuthState {
   final bool isLoading;
@@ -84,6 +84,9 @@ class AuthController extends Notifier<AuthState> {
         case 'assistant':
           role = UserRole.assistant;
           break;
+        case 'admin':
+          role = UserRole.admin;
+          break;
         default:
           role = UserRole.customer;
       }
@@ -108,6 +111,9 @@ class AuthController extends Notifier<AuthState> {
         break;
       case UserRole.assistant:
         roleString = 'assistant';
+        break;
+      case UserRole.admin:
+        roleString = 'admin';
         break;
       default:
         roleString = 'customer';
@@ -139,6 +145,8 @@ class AuthController extends Notifier<AuthState> {
         detectedRole = UserRole.doctor;
       } else if (apiRole.toLowerCase() == 'assistant') {
         detectedRole = UserRole.assistant;
+      } else if (apiRole.toLowerCase() == 'admin') {
+        detectedRole = UserRole.admin;
       }
     } else {
       // Fallback Mock logic for dev/testing if API doesn't return role or valid role
@@ -150,6 +158,8 @@ class AuthController extends Notifier<AuthState> {
         detectedRole = UserRole.doctor;
       } else if (mobileNumber.endsWith('3')) {
         detectedRole = UserRole.assistant;
+      } else if (mobileNumber.endsWith('9')) {
+        detectedRole = UserRole.admin;
       } else {
         detectedRole = UserRole.customer;
       }

@@ -1,74 +1,312 @@
+import 'package:buffalo_visualizer/providers/simulation_provider.dart';
+import 'package:buffalo_visualizer/widgets/asset_market_value.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
+import 'package:farm_vest/features/customer/models/unit_response.dart';
+import 'package:farm_vest/features/customer/providers/buffalo_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../core/theme/app_theme.dart';
 
-class ValuationFactor {
-  final String name;
-  final double weight;
-  final double score;
-  final String description;
-
-  ValuationFactor({
-    required this.name,
-    required this.weight,
-    required this.score,
-    required this.description,
-  });
-}
-
-class AssetValuationScreen extends StatefulWidget {
+class AssetValuationScreen extends ConsumerStatefulWidget {
   const AssetValuationScreen({super.key});
 
   @override
-  State<AssetValuationScreen> createState() => _AssetValuationScreenState();
+  ConsumerState<AssetValuationScreen> createState() =>
+      _AssetValuationScreenState();
 }
 
-class _AssetValuationScreenState extends State<AssetValuationScreen> {
-  final double _currentValuation = 185000;
-  final double _lastMonthValuation = 178000;
-  final List<ValuationFactor> _factors = [
-    ValuationFactor(
-      name: 'Age',
-      weight: 0.25,
-      score: 0.85,
-      description: '4 years 2 months - Prime productive age',
-    ),
-    ValuationFactor(
-      name: 'Milk Production',
-      weight: 0.35,
-      score: 0.92,
-      description: '12L/day - Above average production',
-    ),
-    ValuationFactor(
-      name: 'Health Score',
-      weight: 0.25,
-      score: 0.95,
-      description: 'Excellent health with no major issues',
-    ),
-    ValuationFactor(
-      name: 'Market Price',
-      weight: 0.15,
-      score: 0.88,
-      description: 'Current market conditions favorable',
-    ),
-  ];
+class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    symbol: '₹',
+    decimalDigits: 0,
+  );
+  final NumberFormat _numberFormat = NumberFormat.decimalPattern();
+
+  @override
+  void initState() {
+    super.initState();
+    // Sync simulation with user's actual unit count if available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final unitAsync = ref.read(unitResponseProvider);
+      if (unitAsync.hasValue) {
+        _syncUnits(unitAsync.value);
+      }
+    });
+  }
+
+  void _syncUnits(UnitResponse? response) {
+    if (response?.overallStats?.totalUnits != null) {
+      final userUnits = response!.overallStats!.totalUnits!.toDouble();
+      final currentSimUnits = ref.read(simulationProvider).units;
+
+      if (userUnits > 0 && userUnits != currentSimUnits) {
+        // Update simulation to match local units
+        Future.microtask(() {
+          ref
+              .read(simulationProvider.notifier)
+              .updateSettings(units: userUnits);
+        });
+      }
+    }
+  }
+
+  // Reproduces logic from buffer_visualizer's CostEstimationTable to prepare data
+  Map<String, dynamic> _processBuffaloDetails(Map<String, dynamic> treeData) {
+    final buffaloList = treeData['buffaloes'] as List<dynamic>? ?? [];
+    Map<String, dynamic> buffaloDetails = {};
+    int counter = 1;
+
+    // STEP 1: Parents (Gen 0)
+    for (var buffalo in buffaloList) {
+      if (buffalo['generation'] == 0) {
+        // A, B, C...
+        final prefix = String.fromCharCode(65 + (counter - 1) % 26);
+        final id = '$prefix${(counter - 1) ~/ 26 + 1}';
+        counter++;
+
+        buffaloDetails[buffalo['id'].toString()] = {
+          'id': id,
+          'originalId': buffalo['id'],
+          'generation': 0,
+          'unit': buffalo['unit'] ?? 1,
+          'acquisitionMonth': buffalo['acquisitionMonth'] ?? 0,
+          'birthYear':
+              buffalo['birthYear'] ??
+              ((treeData['startYear'] ?? DateTime.now().year) - 5),
+          'birthMonth': buffalo['birthMonth'] ?? 0,
+          'children': <dynamic>[],
+        };
+      }
+    }
+
+    // STEP 2: Children
+    final sortedBuffaloes = [...buffaloList];
+    sortedBuffaloes.sort(
+      (a, b) => (a['generation'] as int).compareTo(b['generation'] as int),
+    );
+
+    for (var buffalo in sortedBuffaloes) {
+      if (buffalo['generation'] > 0) {
+        final parentEntry = buffaloDetails.entries.firstWhere(
+          (entry) => entry.value['originalId'] == buffalo['parentId'],
+          orElse: () => const MapEntry('null', {}),
+        );
+
+        if (parentEntry.key != 'null') {
+          final parent = parentEntry.value;
+          final int childIndex = (parent['children'] as List).length + 1;
+          final childId = "${parent['id']}-$childIndex";
+
+          final newBuffalo = {
+            'id': childId,
+            'originalId': buffalo['id'],
+            'generation': buffalo['generation'],
+            'unit': parent['unit'],
+            'acquisitionMonth': parent['acquisitionMonth'],
+            'birthYear': buffalo['birthYear'],
+            'birthMonth':
+                buffalo['birthMonth'] ?? buffalo['acquisitionMonth'] ?? 0,
+            'children': <dynamic>[],
+            'parentId': parent['originalId'],
+          };
+
+          buffaloDetails[buffalo['id'].toString()] = newBuffalo;
+          (parent['children'] as List).add(newBuffalo);
+        }
+      }
+    }
+
+    return buffaloDetails;
+  }
+
+  int _calculateAgeInMonths(
+    Map<String, dynamic> buffalo,
+    int targetYear, [
+    int targetMonth = 0,
+  ]) {
+    final birthYear = buffalo['birthYear'] as int;
+    final birthMonth = buffalo['birthMonth'] as int;
+    final totalMonths =
+        (targetYear - birthYear) * 12 + (targetMonth - birthMonth);
+    return totalMonths < 0 ? 0 : totalMonths;
+  }
+
+  int _getBuffaloValueByAge(int ageInMonths) {
+    if (ageInMonths >= 60) return 175000;
+    if (ageInMonths >= 48) return 150000;
+    if (ageInMonths >= 40) return 100000;
+    if (ageInMonths >= 36) return 50000;
+    if (ageInMonths >= 30) return 50000;
+    if (ageInMonths >= 24) return 35000;
+    if (ageInMonths >= 18) return 25000;
+    if (ageInMonths >= 12) return 12000;
+    if (ageInMonths >= 6) return 6000;
+    return 3000;
+  }
+
+  Widget _buildTopStats(
+    Map<String, dynamic> treeData,
+    Map<String, dynamic>? revenueData,
+  ) {
+    // 1. Calculate Initial Investment
+    final double units = (treeData['units'] as num?)?.toDouble() ?? 1.0;
+    final double initialInvestment = units * 363000;
+
+    // 2. Calculate Final Asset Value (at end of simulation)
+    final startYear = treeData['startYear'] ?? DateTime.now().year;
+    final int durationYears = (treeData['years'] as int?) ?? 10;
+    final int lastYear = startYear + durationYears - 1;
+
+    final buffaloDetails = _processBuffaloDetails(treeData);
+
+    double finalAssetValue = 0;
+    int totalAnimals = (treeData['totalBuffaloes'] as num?)?.toInt() ?? 0;
+
+    if (totalAnimals == 0) {
+      totalAnimals = buffaloDetails.values
+          .where((b) => (b['birthYear'] as int) <= lastYear)
+          .length;
+    }
+
+    buffaloDetails.forEach((k, buffalo) {
+      final bYear = buffalo['birthYear'] as int;
+      if (bYear <= lastYear) {
+        final age = _calculateAgeInMonths(buffalo, lastYear, 11);
+        finalAssetValue += _getBuffaloValueByAge(age);
+      }
+    });
+
+    // 3. Total Revenue
+    final double totalRevenue =
+        (revenueData?['totalRevenue'] as num?)?.toDouble() ?? 0.0;
+
+    // 4. ROI (Multiple)
+    final double totalReturn = finalAssetValue + totalRevenue;
+    final multiple = initialInvestment > 0
+        ? (totalReturn / initialInvestment)
+        : 0.0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  'Initial Investment',
+                  _currencyFormat.format(initialInvestment),
+                  Icons.account_balance_wallet,
+                  Colors.blue,
+                ),
+              ),
+              const SizedBox(width: AppConstants.spacingM),
+              Expanded(
+                child: _buildStatCard(
+                  'Total Revenue',
+                  _currencyFormat.format(totalRevenue),
+                  Icons.monetization_on,
+                  Colors.orange,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  'Projected Value',
+                  _currencyFormat.format(finalAssetValue),
+                  Icons.trending_up,
+                  Colors.green,
+                ),
+              ),
+              const SizedBox(width: AppConstants.spacingM),
+              Expanded(
+                child: _buildStatCard(
+                  'Herd Growth',
+                  '${multiple.toStringAsFixed(1)}x Returns\n$totalAnimals Buffaloes',
+                  Icons.pets,
+                  Colors.purple,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      constraints: const BoxConstraints(minHeight: 100),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final valuationChange = _currentValuation - _lastMonthValuation;
-    final changePercentage = (valuationChange / _lastMonthValuation) * 100;
-    final overallScore = _factors.fold(
-      0.0,
-      (sum, factor) => sum + (factor.score * factor.weight),
-    );
+    final simState = ref.watch(simulationProvider);
+
+    // Listen for data loading to sync units
+    ref.listen(unitResponseProvider, (prev, next) {
+      next.whenData((response) => _syncUnits(response));
+    });
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Asset Valuation'),
+        title: const Text('Asset Market Value'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => NavigationHelper.safePopOrNavigate(
@@ -77,391 +315,27 @@ class _AssetValuationScreenState extends State<AssetValuationScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Current Valuation Card
-            Card(
-              elevation: 4,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppConstants.spacingL),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppTheme.primary, AppTheme.secondary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(AppConstants.radiusL),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Current Valuation',
-                      style: TextStyle(color: AppTheme.white, fontSize: 16),
-                    ),
-                    const SizedBox(height: AppConstants.spacingS),
-                    Text(
-                      '₹${NumberFormat('#,##,###').format(_currentValuation)}',
-                      style: const TextStyle(
-                        color: AppTheme.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingM),
-                    Row(
-                      children: [
-                        Icon(
-                          changePercentage >= 0
-                              ? Icons.trending_up
-                              : Icons.trending_down,
-                          color: AppTheme.white,
-                          size: AppConstants.iconS,
-                        ),
-                        const SizedBox(width: AppConstants.spacingXS),
-                        Text(
-                          '₹${NumberFormat('#,###').format(valuationChange.abs())} (${changePercentage.toStringAsFixed(1)}%)',
-                          style: const TextStyle(
-                            color: AppTheme.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: AppConstants.spacingS),
-                        const Text(
-                          'vs last month',
-                          style: TextStyle(color: AppTheme.white, fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-
-            // Valuation Growth Chart
-            const Text('Valuation Trend', style: AppTheme.headingMedium),
-            const SizedBox(height: AppConstants.spacingM),
-
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.spacingM),
-                child: SizedBox(
-                  height: 200,
-                  child: LineChart(
-                    LineChartData(
-                      gridData: const FlGridData(show: false),
-                      titlesData: FlTitlesData(
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            getTitlesWidget: (value, meta) {
-                              const months = [
-                                'Jul',
-                                'Aug',
-                                'Sep',
-                                'Oct',
-                                'Nov',
-                                'Dec',
-                              ];
-                              if (value.toInt() < months.length) {
-                                return Text(
-                                  months[value.toInt()],
-                                  style: AppTheme.bodySmall,
-                                );
-                              }
-                              return const Text('');
-                            },
-                          ),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            getTitlesWidget: (value, meta) {
-                              return Text(
-                                '${(value / 1000).toInt()}K',
-                                style: AppTheme.bodySmall,
-                              );
-                            },
-                          ),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                      ),
-                      borderData: FlBorderData(show: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: const [
-                            FlSpot(0, 165000),
-                            FlSpot(1, 168000),
-                            FlSpot(2, 172000),
-                            FlSpot(3, 175000),
-                            FlSpot(4, 178000),
-                            FlSpot(5, 185000),
-                          ],
-                          isCurved: true,
-                          color: AppTheme.primary,
-                          barWidth: 3,
-                          isStrokeCapRound: true,
-                          dotData: const FlDotData(show: true),
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color: AppTheme.secondary.withValues(alpha: 0.1),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-
-            // Valuation Factors
-            const Text('Valuation Factors', style: AppTheme.headingMedium),
-            const SizedBox(height: AppConstants.spacingM),
-
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.spacingM),
-                child: Column(
-                  children: [
-                    // Overall Score
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Overall Score',
-                          style: AppTheme.headingSmall,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppConstants.spacingM,
-                            vertical: AppConstants.spacingS,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.successGreen.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(
-                              AppConstants.radiusS,
-                            ),
-                          ),
-                          child: Text(
-                            '${(overallScore * 100).toStringAsFixed(0)}%',
-                            style: const TextStyle(
-                              color: AppTheme.successGreen,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppConstants.spacingL),
-
-                    // Factor breakdown
-                    ...(_factors.map((factor) => _buildFactorRow(factor))),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-
-            // Comparison with Market
-            const Text('Market Comparison', style: AppTheme.headingMedium),
-            const SizedBox(height: AppConstants.spacingM),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _buildComparisonCard(
-                    'Market Average',
-                    '₹165,000',
-                    'Similar age & breed',
-                    Icons.trending_flat,
-                    AppTheme.mediumGrey,
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacingM),
-                Expanded(
-                  child: _buildComparisonCard(
-                    'Your Asset',
-                    '₹185,000',
-                    '12% above market',
-                    Icons.trending_up,
-                    AppTheme.successGreen,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-
-            // Recommendations
-            const Text('Recommendations', style: AppTheme.headingMedium),
-            const SizedBox(height: AppConstants.spacingM),
-
-            _buildRecommendationCard(
-              'Maintain Health Standards',
-              'Continue regular health checkups to maintain the excellent health score',
-              Icons.health_and_safety,
-              AppTheme.successGreen,
-            ),
-            const SizedBox(height: AppConstants.spacingM),
-
-            _buildRecommendationCard(
-              'Optimize Milk Production',
-              'Consider nutrition supplements to potentially increase daily milk yield',
-              Icons.water_drop,
-              AppTheme.primary,
-            ),
-            const SizedBox(height: AppConstants.spacingM),
-
-            _buildRecommendationCard(
-              'Monitor Market Trends',
-              'Keep track of market prices for better valuation timing',
-              Icons.analytics,
-              AppTheme.secondary,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFactorRow(ValuationFactor factor) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                factor.name,
-                style: AppTheme.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                '${(factor.score * 100).toStringAsFixed(0)}%',
-                style: AppTheme.bodyMedium.copyWith(
-                  color: _getScoreColor(factor.score),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          LinearProgressIndicator(
-            value: factor.score,
-            backgroundColor: AppTheme.lightGrey,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              _getScoreColor(factor.score),
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            factor.description,
-            style: AppTheme.bodySmall.copyWith(color: AppTheme.mediumGrey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildComparisonCard(
-    String title,
-    String value,
-    String subtitle,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: AppConstants.iconL),
-            const SizedBox(height: AppConstants.spacingS),
-            Text(title, style: AppTheme.bodySmall, textAlign: TextAlign.center),
-            const SizedBox(height: AppConstants.spacingXS),
-            Text(
-              value,
-              style: AppTheme.headingSmall.copyWith(color: color),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppConstants.spacingXS),
-            Text(
-              subtitle,
-              style: AppTheme.bodySmall.copyWith(color: AppTheme.mediumGrey),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecommendationCard(
-    String title,
-    String description,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(icon, color: color, size: AppConstants.iconM),
-            ),
-            const SizedBox(width: AppConstants.spacingM),
-            Expanded(
+      body: simState.isLoading || simState.treeData == null
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(AppConstants.spacingM),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: AppTheme.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingXS),
-                  Text(
-                    description,
-                    style: AppTheme.bodySmall.copyWith(
-                      color: AppTheme.mediumGrey,
-                    ),
+                  _buildTopStats(simState.treeData!, simState.revenueData),
+                  AssetMarketValueWidget(
+                    treeData: simState.treeData!,
+                    yearlyData:
+                        (simState.revenueData?['yearlyData'] as List<dynamic>?)
+                            ?.cast<Map<String, dynamic>>() ??
+                        [],
+                    formatCurrency: (d) => _currencyFormat.format(d),
+                    formatNumber: (n) => _numberFormat.format(n),
+                    calculateAgeInMonths: _calculateAgeInMonths,
+                    buffaloDetails: _processBuffaloDetails(simState.treeData!),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
-  }
-
-  Color _getScoreColor(double score) {
-    if (score >= 0.9) return AppTheme.successGreen;
-    if (score >= 0.7) return AppTheme.primary;
-    if (score >= 0.5) return AppTheme.warningOrange;
-    return AppTheme.errorRed;
   }
 }

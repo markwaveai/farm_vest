@@ -131,7 +131,6 @@ class AppTheme {
         primary: primary,
         secondary: secondary,
         surface: white,
-        background: lightGrey,
         error: errorRed,
       ),
     );

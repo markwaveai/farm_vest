@@ -160,7 +160,7 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
         prefixIcon: Icon(icon, color: AppTheme.primary),
         border: const OutlineInputBorder(),
         filled: !enabled,
-        fillColor: AppTheme.lightGrey.withOpacity(0.3),
+        fillColor: AppTheme.lightGrey.withValues(alpha: 0.3),
       ),
       maxLines: maxLines,
       readOnly: !enabled,
@@ -183,7 +183,7 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppTheme.lightGrey.withOpacity(0.3),
+            color: AppTheme.lightGrey.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Row(

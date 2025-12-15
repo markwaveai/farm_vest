@@ -21,7 +21,7 @@ class CustomCurvedNavigationBar extends StatelessWidget {
         color: Colors.transparent,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -66,8 +66,9 @@ class CustomCurvedNavigationBar extends StatelessWidget {
               final isSelected = currentIndex == index;
 
               // Skip middle item as it's handled separately
-              if (index == 2)
+              if (index == 2) {
                 return const SizedBox(width: 60); // Space for middle button
+              }
 
               return GestureDetector(
                 onTap: () => onTap(index),
@@ -78,9 +79,7 @@ class CustomCurvedNavigationBar extends StatelessWidget {
                     children: [
                       Icon(
                         isSelected ? item.activeIcon : item.icon,
-                        color: isSelected
-                            ? AppTheme.primary
-                            : Colors.grey[600],
+                        color: isSelected ? AppTheme.primary : Colors.grey[600],
                         size: 24,
                       ),
                       const SizedBox(height: 4),

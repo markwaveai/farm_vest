@@ -34,7 +34,7 @@ class EmployeeDashboardCard extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Icon(icon, size: 28, color: color),

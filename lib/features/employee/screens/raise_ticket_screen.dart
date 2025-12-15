@@ -2,7 +2,6 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -166,6 +165,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
 
             // Buffalo Selection
             DropdownButtonFormField<String>(
+              // ignore: deprecated_member_use
               value: _selectedBuffalo,
               decoration: const InputDecoration(
                 labelText: 'Select Buffalo',
@@ -173,6 +173,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
               ),
               items: _buffaloIds.map((buffaloId) {
                 return DropdownMenuItem(
+                  // ignore: deprecated_member_use
                   value: buffaloId,
                   child: Text(buffaloId),
                 );
@@ -187,6 +188,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
 
             // Issue Type Selection
             DropdownButtonFormField<String>(
+              // ignore: deprecated_member_use
               value: _selectedIssueType,
               decoration: const InputDecoration(
                 labelText: 'Issue Type',
@@ -194,6 +196,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
               ),
               items: _issueTypes.map((issueType) {
                 return DropdownMenuItem(
+                  // ignore: deprecated_member_use
                   value: issueType,
                   child: Text(issueType),
                 );
@@ -208,6 +211,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
 
             // Priority Selection
             DropdownButtonFormField<TicketPriority>(
+              // ignore: deprecated_member_use
               value: _selectedPriority,
               decoration: const InputDecoration(
                 labelText: 'Priority',
@@ -215,6 +219,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
               ),
               items: TicketPriority.values.map((priority) {
                 return DropdownMenuItem(
+                  // ignore: deprecated_member_use
                   value: priority,
                   child: Text(_getPriorityName(priority)),
                 );
@@ -392,7 +397,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                     vertical: AppConstants.spacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: priorityInfo.color.withOpacity(0.1),
+                    color: priorityInfo.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Text(
@@ -411,7 +416,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                     vertical: AppConstants.spacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: priorityInfo.color.withOpacity(0.1),
+                    color: priorityInfo.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Row(
@@ -441,7 +446,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                     vertical: AppConstants.spacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: statusInfo.color.withOpacity(0.1),
+                    color: statusInfo.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Text(

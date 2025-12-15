@@ -52,7 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadius.circular(50),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primary.withOpacity(0.3),
+                          color: AppTheme.primary.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -94,7 +94,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadius.circular(AppConstants.radiusM),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -143,7 +143,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadius.circular(AppConstants.radiusM),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -198,7 +198,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       elevation: 4,
-                      shadowColor: AppTheme.primary.withOpacity(0.4),
+                      shadowColor: AppTheme.primary.withValues(alpha: 0.4),
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
@@ -318,6 +318,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             break;
           case UserRole.assistant:
             context.go('/assistant-dashboard');
+            break;
+          case UserRole.admin:
+            context.go('/admin-dashboard');
             break;
           default:
             // fallback

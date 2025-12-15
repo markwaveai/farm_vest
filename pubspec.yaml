@@ -46,7 +46,7 @@ dependencies:
   cached_network_image: ^3.3.1
   
   # Charts
-  fl_chart: ^0.68.0
+  fl_chart: ^0.60.0
   
   # Animations
   lottie: ^3.1.2
@@ -56,11 +56,32 @@ dependencies:
   video_player: ^2.8.6
   
   # Utilities
-  intl: ^0.19.0
+  intl: ^0.20.0
   shared_preferences: ^2.2.3
   flutter_riverpod: ^3.0.3
   http: ^1.6.0
   fluttertoast: ^9.0.0
+  webview_flutter: ^4.9.0
+  
+  # Visualizer Dependencies
+  buffalo_visualizer:
+    git:
+      url: https://github.com/markwaveai/bufallo_visualizer.git
+  csv: ^5.0.0
+  path_provider: ^2.0.14
+  share_plus: ^10.0.0
+  syncfusion_flutter_charts: ^31.2.18 # Trying a recent version, or verify from temp_visualizer if version was specified. It was empty in temp_visualizer pubspec, implying "any". I'll use "any" or omit version to be safe, or pick a stable one. Let's use 'any' implies leaving blank.
+  pluto_grid: ^7.0.2 # Same here
+  file_saver: ^0.2.0
+  universal_html: ^2.2.4
+  data_table_2: ^2.5.10
+  excel: ^4.0.6
+  pdf: ^3.11.3
+  printing: ^5.14.2
+
+dependency_overrides:
+  fl_chart: ^0.69.0
+  pluto_grid: ^8.1.0
 
 dev_dependencies:
   flutter_test:

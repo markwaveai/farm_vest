@@ -428,7 +428,7 @@ class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
                     vertical: AppConstants.spacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Text(
@@ -448,7 +448,7 @@ class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
                       vertical: AppConstants.spacingXS,
                     ),
                     decoration: BoxDecoration(
-                      color: AppTheme.errorRed.withOpacity(0.1),
+                      color: AppTheme.errorRed.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppConstants.radiusS),
                     ),
                     child: const Text(

@@ -2,7 +2,6 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -128,6 +127,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
 
                       // Buffalo Selection
                       DropdownButtonFormField<String>(
+                        // ignore: deprecated_member_use
                         value: _selectedBuffalo,
                         decoration: const InputDecoration(
                           labelText: 'Select Buffalo',
@@ -135,6 +135,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                         ),
                         items: _buffaloIds.map((buffaloId) {
                           return DropdownMenuItem(
+                            // ignore: deprecated_member_use
                             value: buffaloId,
                             child: Text(buffaloId),
                           );
@@ -149,6 +150,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
 
                       // Issue Type Selection
                       DropdownButtonFormField<IssueType>(
+                        // ignore: deprecated_member_use
                         value: _selectedIssueType,
                         decoration: const InputDecoration(
                           labelText: 'Issue Type',
@@ -156,6 +158,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                         ),
                         items: IssueType.values.map((type) {
                           return DropdownMenuItem(
+                            // ignore: deprecated_member_use
                             value: type,
                             child: Text(_getIssueTypeName(type)),
                           );
@@ -192,6 +195,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                         subtitle: const Text(
                           'Check if animal needs to be moved to isolation',
                         ),
+                        // ignore: deprecated_member_use
                         value: _requiresTransfer,
                         onChanged: (value) {
                           setState(() {
@@ -269,7 +273,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: issueInfo.color.withOpacity(0.1),
+                    color: issueInfo.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(
@@ -296,7 +300,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                               vertical: AppConstants.spacingXS,
                             ),
                             decoration: BoxDecoration(
-                              color: issueInfo.color.withOpacity(0.1),
+                              color: issueInfo.color.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(
                                 AppConstants.radiusS,
                               ),
@@ -330,7 +334,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                     vertical: AppConstants.spacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(issue.status).withOpacity(0.1),
+                    color: _getStatusColor(issue.status).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Text(
@@ -355,10 +359,10 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
               Container(
                 padding: const EdgeInsets.all(AppConstants.spacingM),
                 decoration: BoxDecoration(
-                  color: AppTheme.warningOrange.withOpacity(0.1),
+                  color: AppTheme.warningOrange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppConstants.radiusM),
                   border: Border.all(
-                    color: AppTheme.warningOrange.withOpacity(0.3),
+                    color: AppTheme.warningOrange.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(

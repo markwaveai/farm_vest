@@ -1,11 +1,12 @@
-/// Enums for the FarmVest application
+// Enums for the FarmVest application
 
 /// Defines the different types of users in the application
 enum UserType {
   customer('customer'),
   supervisor('supervisor'),
   doctor('doctor'),
-  assistant('assistant');
+  assistant('assistant'),
+  admin('admin');
 
   final String value;
   const UserType(this.value);
@@ -24,6 +25,7 @@ enum AppRoutes {
   userTypeSelection('/user-type-selection'),
   login('/login'),
   customerDashboard('/customer-dashboard'),
+  adminDashboard('/admin-dashboard'),
   unitDetails('/unit-details'),
   cctvLive('/cctv-live'),
   monthlyVisits('/monthly-visits'),

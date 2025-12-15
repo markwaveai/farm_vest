@@ -2,7 +2,6 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 
 class FAQ {
@@ -124,7 +123,7 @@ class _SupportScreenState extends State<SupportScreen> {
 
             // Emergency Contact
             Card(
-              color: AppTheme.errorRed.withOpacity(0.1),
+              color: AppTheme.errorRed.withValues(alpha: 0.1),
               child: Padding(
                 padding: const EdgeInsets.all(AppConstants.spacingM),
                 child: Row(
@@ -370,11 +369,13 @@ class _SupportScreenState extends State<SupportScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String>(
+              // ignore: deprecated_member_use
               value: selectedPriority,
               decoration: const InputDecoration(labelText: 'Priority'),
               items: ['Low', 'Medium', 'High', 'Critical']
                   .map(
                     (priority) => DropdownMenuItem(
+                      // ignore: deprecated_member_use
                       value: priority,
                       child: Text(priority),
                     ),

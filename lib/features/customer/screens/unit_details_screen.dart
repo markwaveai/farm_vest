@@ -1,6 +1,5 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/navigation_helper.dart';
 
@@ -35,7 +34,7 @@ class UnitDetailsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppConstants.radiusL),
                   gradient: LinearGradient(
                     colors: [
-                      AppTheme.lightSecondary.withOpacity(0.3),
+                      AppTheme.lightSecondary.withValues(alpha: 0.3),
                       AppTheme.secondary.withValues(alpha: 0.1),
                     ],
                     begin: Alignment.topLeft,

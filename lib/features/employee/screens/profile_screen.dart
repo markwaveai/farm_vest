@@ -75,7 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: AppTheme.primary.withOpacity(0.1),
+                          backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
                           child: const Icon(
                             Icons.person,
                             size: 50,
@@ -390,7 +390,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppConstants.radiusM),
       ),
       child: Column(

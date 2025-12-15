@@ -21,6 +21,7 @@ import '../../features/employee/screens/milk_production_screen.dart';
 import '../../features/employee/screens/profile_screen.dart';
 import '../../features/employee/screens/raise_ticket_screen.dart';
 import '../../features/employee/screens/supervisor_dashboard_screen.dart';
+import '../../features/admin/screens/admin_dashboard_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -115,6 +116,12 @@ class AppRouter {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+
+      // Admin Routes
+      GoRoute(
+        path: '/admin-dashboard',
+        builder: (context, state) => const AdminDashboardScreen(),
       ),
 
       // Common Routes

@@ -394,7 +394,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
                     vertical: AppConstants.spacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: severityColor.withOpacity(0.1),
+                    color: severityColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Text(
@@ -492,7 +492,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(icon, color: color, size: AppConstants.iconM),

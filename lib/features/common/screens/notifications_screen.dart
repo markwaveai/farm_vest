@@ -192,7 +192,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      color: isUnread ? color.withOpacity(0.05) : null,
+      color: isUnread ? color.withValues(alpha: 0.05) : null,
       child: InkWell(
         onTap: () {
           if (isUnread) {
@@ -210,7 +210,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(icon, color: color, size: AppConstants.iconM),

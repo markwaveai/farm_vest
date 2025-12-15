@@ -1,7 +1,6 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -199,7 +198,7 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen>
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: recordInfo.color.withOpacity(0.1),
+                    color: recordInfo.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(
@@ -235,7 +234,7 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen>
                     vertical: AppConstants.spacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: recordInfo.color.withOpacity(0.1),
+                    color: recordInfo.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Text(
