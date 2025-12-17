@@ -182,7 +182,7 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
         ),
         actions: [
           IconButton(onPressed: (){
-            _buildVisitedMessage();
+            
           }, icon: Icon(Icons.history))
         ],
       ),
@@ -219,6 +219,8 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
             ),
             const SizedBox(height: 16),
             Card(
+              shadowColor: AppTheme.dark.withOpacity(0.5),
+              elevation:1.0,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(

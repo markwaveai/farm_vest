@@ -107,6 +107,7 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen>
           ),
         ),
         bottom: TabBar(
+          labelColor: AppTheme.darkPrimary,
           controller: _tabController,
           isScrollable: true,
           labelStyle: TextStyle(

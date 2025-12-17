@@ -87,7 +87,7 @@ class _SupportScreenState extends State<SupportScreen> {
               crossAxisCount: 2,
               crossAxisSpacing: AppConstants.spacingM,
               mainAxisSpacing: AppConstants.spacingM,
-              childAspectRatio: 1.2,
+              childAspectRatio: 1.1,
               children: [
                 _buildActionCard(
                   'Contact Support',
@@ -237,6 +237,7 @@ class _SupportScreenState extends State<SupportScreen> {
     VoidCallback onTap,
   ) {
     return Card(
+
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppConstants.radiusL),
@@ -256,6 +257,9 @@ class _SupportScreenState extends State<SupportScreen> {
               ),
               const SizedBox(height: AppConstants.spacingXS),
               Text(
+                
+              softWrap: true,
+              
                 subtitle,
                 style: AppTheme.bodySmall,
                 textAlign: TextAlign.center,
