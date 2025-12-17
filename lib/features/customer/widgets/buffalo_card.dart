@@ -44,7 +44,7 @@ class BuffaloCard extends StatelessWidget {
     final imageUrl = murrahImages[random.nextInt(murrahImages.length)];
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
@@ -156,7 +156,7 @@ class BuffaloCard extends StatelessWidget {
 
   Widget _buildInfoSection() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(color: AppTheme.beige.withValues(alpha: 0.3)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -164,15 +164,15 @@ class BuffaloCard extends StatelessWidget {
         children: [
           // Breed
           _buildInfoRow('Breed', breed.toUpperCase()),
-          const SizedBox(height: 3),
+          const SizedBox(height: 1),
 
           // Purchase Date
           _buildInfoRow('Purchase', farmName),
-          const SizedBox(height: 3),
+          const SizedBox(height: 1),
 
           // Location
           _buildInfoRow('Location', location.toUpperCase()),
-          const SizedBox(height: 3),
+          const SizedBox(height: 1),
 
           // Tree Details
           _buildInfoRow('Age', age),

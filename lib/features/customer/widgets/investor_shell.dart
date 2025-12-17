@@ -356,29 +356,29 @@ class CurvedBottomNavClipper extends CustomClipper<Path> {
       notchCenter - notchRadius,
       0,
       notchCenter - notchRadius,
-      15,
+      5,
     );
 
     // Create the bottom curve of the notch
     path.quadraticBezierTo(
       notchCenter - notchRadius,
-      notchRadius + 15,
+      notchRadius + 3,
       notchCenter,
-      notchRadius + 20,
+      notchRadius + 6,
     );
 
     path.quadraticBezierTo(
       notchCenter + notchRadius,
-      notchRadius + 15,
+      notchRadius + 3,
       notchCenter + notchRadius,
-      15,
+      5,
     );
 
     // Complete the notch curve
     path.quadraticBezierTo(
       notchCenter + notchRadius,
       0,
-      notchCenter + notchRadius + 10,
+      notchCenter + notchRadius + 5,
       0,
     );
 
