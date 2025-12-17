@@ -122,6 +122,7 @@ class Unit {
   final String? status;
   final String? paymentStatus;
   final String? paymentType;
+  final String? placedAt;
   final List<Animal>? buffalos;
 
   Unit({
@@ -134,6 +135,7 @@ class Unit {
     this.status,
     this.paymentStatus,
     this.paymentType,
+    this.placedAt,
     this.buffalos,
   });
 
@@ -148,6 +150,7 @@ class Unit {
       status: json['status'],
       paymentStatus: json['paymentStatus'],
       paymentType: json['paymentType'],
+      placedAt: json['placedAt'],
       buffalos: json['buffalos'] != null
           ? List<Animal>.from(json['buffalos'].map((x) => Animal.fromJson(x)))
           : [],

@@ -75,7 +75,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
+                          backgroundColor: AppTheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
                           child: const Icon(
                             Icons.person,
                             size: 50,
@@ -171,8 +173,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       // Phone
                       TextFormField(
-                        controller: _phoneController,
-                        enabled: _isEditing,
+                        // controller: _phoneController,
+                        initialValue: _phoneController.text,
+                        enabled: false,
+                        readOnly: true,
                         keyboardType: TextInputType.phone,
                         decoration: const InputDecoration(
                           labelText: 'Phone Number',
@@ -325,17 +329,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             // Action Buttons
             if (!_isEditing) ...[
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    // Handle password change
-                    _showChangePasswordDialog();
-                  },
-                  icon: const Icon(Icons.lock),
-                  label: const Text('Change Password'),
-                ),
-              ),
+              // SizedBox(
+              //   width: double.infinity,
+              //   child: OutlinedButton.icon(
+              //     onPressed: () {
+              //       // Handle password change
+              //       _showChangePasswordDialog();
+              //     },
+              //     icon: const Icon(Icons.lock),
+              //     label: const Text('Change Password'),
+              //   ),
+              // ),
               const SizedBox(height: AppConstants.spacingM),
 
               SizedBox(

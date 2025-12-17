@@ -1,12 +1,12 @@
 import 'package:buffalo_visualizer/providers/simulation_provider.dart';
 import 'package:buffalo_visualizer/widgets/asset_market_value.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
-import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/features/customer/models/unit_response.dart';
 import 'package:farm_vest/features/customer/providers/buffalo_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:farm_vest/core/theme/app_theme.dart';
 
 class AssetValuationScreen extends ConsumerStatefulWidget {
   const AssetValuationScreen({super.key});
@@ -198,7 +198,7 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
                   'Initial Investment',
                   _currencyFormat.format(initialInvestment),
                   Icons.account_balance_wallet,
-                  Colors.blue,
+                  AppTheme.slate,
                 ),
               ),
               const SizedBox(width: AppConstants.spacingM),
@@ -207,7 +207,7 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
                   'Total Revenue',
                   _currencyFormat.format(totalRevenue),
                   Icons.monetization_on,
-                  Colors.orange,
+                  AppTheme.secondary,
                 ),
               ),
             ],
@@ -220,7 +220,7 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
                   'Projected Value',
                   _currencyFormat.format(finalAssetValue),
                   Icons.trending_up,
-                  Colors.green,
+                  AppTheme.primary,
                 ),
               ),
               const SizedBox(width: AppConstants.spacingM),
@@ -229,7 +229,7 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
                   'Herd Growth',
                   '${multiple.toStringAsFixed(1)}x Returns\n$totalAnimals Buffaloes',
                   Icons.pets,
-                  Colors.purple,
+                  AppTheme.tertiary,
                 ),
               ),
             ],
@@ -305,16 +305,6 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Asset Market Value'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => NavigationHelper.safePopOrNavigate(
-            context,
-            fallbackRoute: '/customer-dashboard',
-          ),
-        ),
-      ),
       body: simState.isLoading || simState.treeData == null
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

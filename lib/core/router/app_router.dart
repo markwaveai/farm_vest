@@ -1,14 +1,16 @@
-import 'package:farm_vest/features/customer/screens/customer_profile_screen.dart';
+import 'package:farm_vest/features/customer/screens/cctv_main_screen.dart';
+import 'package:farm_vest/features/customer/screens/investor_profile_screen.dart';
+import 'package:farm_vest/features/customer/widgets/investor_shell.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/customer/screens/buffalo_calves_screen.dart';
 import '../../features/customer/models/unit_response.dart';
-import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/screens/new_login_screen.dart';
+import '../../features/auth/screens/onboarding_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
 
 import '../../features/common/screens/notifications_screen.dart';
 import '../../features/customer/screens/asset_valuation_screen.dart';
-import '../../features/customer/screens/cctv_live_screen.dart';
-import '../../features/customer/screens/customer_dashboard_screen.dart';
+import '../../features/customer/screens/investor_dashboard_screen.dart';
 import '../../features/customer/screens/health_records_screen.dart';
 import '../../features/customer/screens/monthly_visits_screen.dart';
 import '../../features/customer/screens/revenue_screen.dart';
@@ -34,24 +36,46 @@ class AppRouter {
       ),
 
       GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+
+      GoRoute(
         path: '/login',
         builder: (context, state) {
-          return const LoginScreen();
+          return const NewLoginScreen();
         },
       ),
 
       // Customer Routes
-      GoRoute(
-        path: '/customer-dashboard',
-        builder: (context, state) => const CustomerDashboardScreen(),
+      ShellRoute(
+        builder: (context, state, child) => InvestorShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/customer-dashboard',
+            builder: (context, state) => const InvestorDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/asset-valuation',
+            builder: (context, state) => const AssetValuationScreen(),
+          ),
+          GoRoute(
+            path: '/cctv-live',
+            builder: (context, state) => const CCTVMainScreen(),
+          ),
+          GoRoute(
+            path: '/revenue',
+            builder: (context, state) => const RevenueScreen(),
+          ),
+          GoRoute(
+            path: '/customer-profile',
+            builder: (context, state) => const InvestorProfileScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/unit-details',
         builder: (context, state) => const UnitDetailsScreen(),
-      ),
-      GoRoute(
-        path: '/cctv-live',
-        builder: (context, state) => const CCTVLiveScreen(),
       ),
       GoRoute(
         path: '/monthly-visits',
@@ -62,20 +86,8 @@ class AppRouter {
         builder: (context, state) => const HealthRecordsScreen(),
       ),
       GoRoute(
-        path: '/revenue',
-        builder: (context, state) => const RevenueScreen(),
-      ),
-      GoRoute(
-        path: '/asset-valuation',
-        builder: (context, state) => const AssetValuationScreen(),
-      ),
-      GoRoute(
         path: '/support',
         builder: (context, state) => const SupportScreen(),
-      ),
-      GoRoute(
-        path: '/customer-profile',
-        builder: (context, state) => const CustomerProfileScreen(),
       ),
       GoRoute(
         path: '/buffalo-calves',

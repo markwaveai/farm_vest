@@ -1,12 +1,12 @@
 import 'package:buffalo_visualizer/providers/simulation_provider.dart';
 import 'package:buffalo_visualizer/widgets/monthly_revenue_break.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
-import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/features/customer/models/unit_response.dart';
 import 'package:farm_vest/features/customer/providers/buffalo_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:farm_vest/core/theme/app_theme.dart';
 
 class RevenueScreen extends ConsumerStatefulWidget {
   const RevenueScreen({super.key});
@@ -238,7 +238,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
               'Total Projected\nRevenue',
               _currencyFormat.format(totalRevenue),
               Icons.account_balance_wallet,
-              Colors.green,
+              AppTheme.secondary,
             ),
           ),
           const SizedBox(width: AppConstants.spacingM),
@@ -247,7 +247,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
               'Monthly\nAverage',
               _currencyFormat.format(avgMonthly),
               Icons.calendar_today,
-              Colors.blue,
+              AppTheme.primary,
             ),
           ),
         ],
@@ -335,16 +335,6 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
         (simState.revenueData?['totalRevenue'] as num?)?.toDouble() ?? 0.0;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Revenue Analysis'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => NavigationHelper.safePopOrNavigate(
-            context,
-            fallbackRoute: '/customer-dashboard',
-          ),
-        ),
-      ),
       body: simState.isLoading || simState.treeData == null
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

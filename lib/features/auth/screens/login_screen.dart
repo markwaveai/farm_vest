@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/toast_utils.dart';
-import '../providers/auth_provider.dart';
 import 'package:pinput/pinput.dart';
 
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/toast_utils.dart';
+import '../../customer/providers/buffalo_provider.dart';
+import '../providers/auth_provider.dart';
+import '../../../core/utils/app_enums.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -108,160 +110,167 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 if (!_isOtpSent) ...[
                   // Mobile Number Field
                   Container(
-  decoration: BoxDecoration(
-    color: AppTheme.white,
-    borderRadius: BorderRadius.circular(AppConstants.radiusM),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.06),
-        blurRadius: 12,
-        offset: const Offset(0, 6),
-      ),
-    ],
-  ),
-  child: TextFormField(
-    controller: _mobileController,
-    keyboardType: TextInputType.phone,
-    autofillHints: const [AutofillHints.telephoneNumber],
-    style: AppTheme.bodyLarge.copyWith(
-      letterSpacing: 1.2,
-    ),
-    inputFormatters: [
-      FilteringTextInputFormatter.digitsOnly,
-      LengthLimitingTextInputFormatter(10),
-    ],
-    onChanged: (_) => setState(() {}),
-    validator: (value) {
-      if (value == null || value.length != 10) {
-        return 'Enter a valid 10-digit mobile number';
-      }
-      return null;
-    },
-    decoration: InputDecoration(
-      labelText: 'Mobile Number',
-      hintText: 'Enter 10-digit number',
-      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    decoration: BoxDecoration(
+                      color: AppTheme.white,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.dark.withOpacity(0.06),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: TextFormField(
+                      controller: _mobileController,
+                      keyboardType: TextInputType.phone,
+                      autofillHints: const [AutofillHints.telephoneNumber],
+                      style: AppTheme.bodyLarge.copyWith(letterSpacing: 1.2),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                      onChanged: (_) => setState(() {}),
+                      validator: (value) {
+                        if (value == null || value.length != 10) {
+                          return 'Enter a valid 10-digit mobile number';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Mobile Number',
+                        hintText: 'Enter 10-digit number',
+                        floatingLabelBehavior: FloatingLabelBehavior.auto,
 
-      prefixIcon: const Icon(
-        Icons.phone_android,
-        size: 22,
-        color: AppTheme.primary,
-      ),
+                        prefixIcon: const Icon(
+                          Icons.phone_android,
+                          size: 22,
+                          color: AppTheme.primary,
+                        ),
 
-      filled: true,
-      fillColor: Colors.transparent,
+                        filled: true,
+                        fillColor: Colors.transparent,
 
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 18,
-        horizontal: 16,
-      ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 18,
+                          horizontal: 16,
+                        ),
 
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        borderSide: BorderSide(
-          color: AppTheme.mediumGrey.withOpacity(0.4),
-          width: 1,
-        ),
-      ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusM,
+                          ),
+                          borderSide: BorderSide(
+                            color: AppTheme.mediumGrey.withOpacity(0.4),
+                            width: 1,
+                          ),
+                        ),
 
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        borderSide: const BorderSide(
-          color: AppTheme.primary,
-          width: 2,
-        ),
-      ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusM,
+                          ),
+                          borderSide: const BorderSide(
+                            color: AppTheme.primary,
+                            width: 2,
+                          ),
+                        ),
 
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        borderSide: const BorderSide(
-          color: Colors.red,
-          width: 1.2,
-        ),
-      ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusM,
+                          ),
+                          borderSide: const BorderSide(
+                            color: AppTheme.errorRed,
+                            width: 1.2,
+                          ),
+                        ),
 
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        borderSide: const BorderSide(
-          color: Colors.red,
-          width: 2,
-        ),
-      ),
-    ),
-  ),
-)
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusM,
+                          ),
+                          borderSide: const BorderSide(
+                            color: AppTheme.errorRed,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ] else ...[
                   // OTP Field
                   // OTP Field (Box Style)
-Container(
-  decoration: BoxDecoration(
-   // color: AppTheme.white,
-    borderRadius: BorderRadius.circular(AppConstants.radiusM),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.05),
-        blurRadius: 10,
-        offset: const Offset(0, 4),
-      ),
-    ],
-  ),
-  padding: const EdgeInsets.symmetric(vertical: 16),
-  child: Center(
-    child: Pinput(
-      length: 6,
-      controller: _otpController,
-      keyboardType: TextInputType.number,
-      autofocus: true,
-      onChanged: (value){setState(() {
-        
-      });},
-      onCompleted: (value) {
-        setState(() {
-          
-        });
-        // Optional: auto-verify when OTP complete
-        // _handleVerifyOtp();
-      },
-      validator: (value) {
-        if (value == null || value.length != 6) {
-          return 'Enter valid 6 digit OTP';
-        }
-        return null;
-      },
-      defaultPinTheme: PinTheme(
-        width: 48,
-        height: 55,
-        textStyle: AppTheme.bodyLarge.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppTheme.mediumGrey),
-        ),
-      ),
-      focusedPinTheme: PinTheme(
-        width: 48,
-        height: 55,
-        textStyle: AppTheme.bodyLarge.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppTheme.primary, width: 2),
-        ),
-      ),
-      submittedPinTheme: PinTheme(
-        width: 48,
-        height: 55,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: AppTheme.primary.withOpacity(0.1),
-          border: Border.all(color: AppTheme.primary),
-        ),
-      ),
-    ),
-  ),
-),
+                  Container(
+                    decoration: BoxDecoration(
+                      // color: AppTheme.white,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.dark.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: Pinput(
+                        length: 6,
+                        controller: _otpController,
+                        keyboardType: TextInputType.number,
+                        autofocus: true,
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                        onCompleted: (value) {
+                          setState(() {});
+                          // Optional: auto-verify when OTP complete
+                          // _handleVerifyOtp();
+                        },
+                        validator: (value) {
+                          if (value == null || value.length != 6) {
+                            return 'Enter valid 6 digit OTP';
+                          }
+                          return null;
+                        },
+                        defaultPinTheme: PinTheme(
+                          width: 48,
+                          height: 55,
+                          textStyle: AppTheme.bodyLarge.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: AppTheme.mediumGrey),
+                          ),
+                        ),
+                        focusedPinTheme: PinTheme(
+                          width: 48,
+                          height: 55,
+                          textStyle: AppTheme.bodyLarge.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: AppTheme.primary,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        submittedPinTheme: PinTheme(
+                          width: 48,
+                          height: 55,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppTheme.primary.withOpacity(0.1),
+                            border: Border.all(color: AppTheme.primary),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
 
                 const SizedBox(height: AppConstants.spacingXL),
@@ -271,12 +280,11 @@ Container(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: 
-                    authState.isLoading
+                    onPressed: authState.isLoading
                         ? null
                         : (_isOtpSent
-                            ? (_isOtpValid ? _handleVerifyOtp : null)
-                            : (_isMobileValid ? _handleSendOtp : null)),
+                              ? (_isOtpValid ? _handleVerifyOtp : null)
+                              : (_isMobileValid ? _handleSendOtp : null)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
                       foregroundColor: AppTheme.white,
@@ -387,27 +395,38 @@ Container(
 
       if (isValid) {
         final mobile = _mobileController.text.trim();
-        // Proceed to role setup
-        final role = await ref
+
+        // Complete login and fetch user data
+        final loginData = await ref
             .read(authProvider.notifier)
-            .completeLogin(mobile);
+            .completeLoginWithData(mobile);
+
+        if (!mounted) return;
+
+        final role = loginData['role'] as UserType;
+
+        // Invalidate buffalo provider to trigger data fetch for customer role
+        if (role == UserType.customer) {
+          // This will trigger the unitResponseProvider to fetch fresh data
+          ref.invalidate(unitResponseProvider);
+        }
 
         if (!mounted) return;
 
         switch (role) {
-          case UserRole.customer:
+          case UserType.customer:
             context.go('/customer-dashboard');
             break;
-          case UserRole.supervisor:
+          case UserType.supervisor:
             context.go('/supervisor-dashboard');
             break;
-          case UserRole.doctor:
+          case UserType.doctor:
             context.go('/doctor-dashboard');
             break;
-          case UserRole.assistant:
+          case UserType.assistant:
             context.go('/assistant-dashboard');
             break;
-          case UserRole.admin:
+          case UserType.admin:
             context.go('/admin-dashboard');
             break;
           default:

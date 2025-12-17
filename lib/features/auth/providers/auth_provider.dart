@@ -1,17 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../core/services/api_services.dart';
+import '../../../core/utils/app_enums.dart';
+import '../../auth/data/repositories/auth_repository.dart';
+import '../models/user_model.dart';
 import '../models/whatsapp_otp_response.dart';
 
-enum UserRole { customer, supervisor, doctor, assistant, admin, unknown }
+// Re-export UserType as UserRole to minimize breaking changes in screens temporarily
+// or we should update screens. Let's update screens to use UserType later.
+// For now, I will use UserType internally but I can alias it if I want to save time,
+// but Clean Architecture suggests using the Domain entity (UserType).
+// I will update the screens in the next steps.
+
+final authProvider = NotifierProvider<AuthController, AuthState>(
+  AuthController.new,
+);
 
 class AuthState {
   final bool isLoading;
-  final UserRole? role;
+  final UserType? role;
   final String? error;
   final WhatsappOtpResponse? otpResponse;
   final String? mobileNumber;
+  final UserModel? userData;
 
   AuthState({
     this.isLoading = false,
@@ -19,14 +29,16 @@ class AuthState {
     this.error,
     this.otpResponse,
     this.mobileNumber,
+    this.userData,
   });
 
   AuthState copyWith({
     bool? isLoading,
-    UserRole? role,
+    UserType? role,
     String? error,
     WhatsappOtpResponse? otpResponse,
     String? mobileNumber,
+    UserModel? userData,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
@@ -34,11 +46,14 @@ class AuthState {
       error: error ?? this.error,
       otpResponse: otpResponse ?? this.otpResponse,
       mobileNumber: mobileNumber ?? this.mobileNumber,
+      userData: userData ?? this.userData,
     );
   }
 }
 
 class AuthController extends Notifier<AuthState> {
+  AuthRepository get _repository => ref.read(authRepositoryProvider);
+
   @override
   AuthState build() {
     return AuthState();
@@ -48,10 +63,8 @@ class AuthController extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final response = await ApiServices.sendWhatsappOtp(phone);
-
+      final response = await _repository.sendOtp(phone);
       state = state.copyWith(isLoading: false, otpResponse: response);
-
       return response;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: "Failed to send OTP");
@@ -65,118 +78,135 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> checkLoginStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final mobile = prefs.getString('mobile_number');
-    final roleString = prefs.getString('user_role');
+    final session = await _repository.getSession();
 
-    if (mobile != null && roleString != null) {
-      UserRole role;
-      switch (roleString) {
-        case 'customer':
-          role = UserRole.customer;
-          break;
-        case 'supervisor':
-          role = UserRole.supervisor;
-          break;
-        case 'doctor':
-          role = UserRole.doctor;
-          break;
-        case 'assistant':
-          role = UserRole.assistant;
-          break;
-        case 'admin':
-          role = UserRole.admin;
-          break;
-        default:
-          role = UserRole.customer;
-      }
-      state = state.copyWith(mobileNumber: mobile, role: role);
+    if (session != null) {
+      state = state.copyWith(
+        mobileNumber: session['mobile'],
+        role: session['role'],
+        userData: session['userData'],
+      );
     }
-  }
-
-  Future<void> _saveUserSession(String mobile, UserRole role) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('mobile_number', mobile);
-
-    String roleString;
-    switch (role) {
-      case UserRole.customer:
-        roleString = 'customer';
-        break;
-      case UserRole.supervisor:
-        roleString = 'supervisor';
-        break;
-      case UserRole.doctor:
-        roleString = 'doctor';
-        break;
-      case UserRole.assistant:
-        roleString = 'assistant';
-        break;
-      case UserRole.admin:
-        roleString = 'admin';
-        break;
-      default:
-        roleString = 'customer';
-    }
-    await prefs.setString('user_role', roleString);
   }
 
   // Logic to determine role after OTP is verified
-  Future<UserRole> completeLogin(String mobileNumber) async {
+  // Merged completeLogin and completeLoginWithData for cleaner code
+  Future<Map<String, dynamic>> completeLoginWithData(
+    String mobileNumber,
+  ) async {
     state = state.copyWith(isLoading: true, error: null);
 
-    // Check if we have a role from the OTP response
-    String? apiRole;
-    if (state.otpResponse?.user != null) {
+    // Fetch user data from Repository
+    UserModel? userData;
+    try {
+      userData = await _repository.getUserData(mobileNumber);
+    } catch (e) {
+      // Continue if fetch fails
+    }
+
+    // Determine Role
+    String? apiRole = userData?.role;
+    if (apiRole == null && state.otpResponse?.user != null) {
       apiRole = state.otpResponse!.user!['role']?.toString();
     }
 
-    state = state.copyWith(isLoading: false, mobileNumber: mobileNumber);
-
-    UserRole detectedRole = UserRole.customer;
+    UserType detectedRole = UserType.customer;
 
     if (apiRole != null) {
-      // Map API roles to UserRole enum
-      if (apiRole.toLowerCase() == 'investor') {
-        detectedRole = UserRole.customer;
-      } else if (apiRole.toLowerCase() == 'supervisor') {
-        detectedRole = UserRole.supervisor;
-      } else if (apiRole.toLowerCase() == 'doctor') {
-        detectedRole = UserRole.doctor;
-      } else if (apiRole.toLowerCase() == 'assistant') {
-        detectedRole = UserRole.assistant;
-      } else if (apiRole.toLowerCase() == 'admin') {
-        detectedRole = UserRole.admin;
-      }
+      // Using UserType.fromString which handles casing and default
+      detectedRole = UserType.fromString(apiRole);
     } else {
-      // Fallback Mock logic for dev/testing if API doesn't return role or valid role
+      // Fallback Mock logic
       if (mobileNumber.endsWith('0')) {
-        detectedRole = UserRole.customer;
+        detectedRole = UserType.customer;
       } else if (mobileNumber.endsWith('1')) {
-        detectedRole = UserRole.supervisor;
+        detectedRole = UserType.supervisor;
       } else if (mobileNumber.endsWith('2')) {
-        detectedRole = UserRole.doctor;
+        detectedRole = UserType.doctor;
       } else if (mobileNumber.endsWith('3')) {
-        detectedRole = UserRole.assistant;
+        detectedRole = UserType.assistant;
       } else if (mobileNumber.endsWith('9')) {
-        detectedRole = UserRole.admin;
-      } else {
-        detectedRole = UserRole.customer;
+        detectedRole = UserType.admin;
       }
     }
 
-    state = state.copyWith(role: detectedRole);
-    await _saveUserSession(mobileNumber, detectedRole);
-    return detectedRole;
+    state = state.copyWith(
+      mobileNumber: mobileNumber,
+      role: detectedRole,
+      userData: userData,
+      isLoading: false,
+    );
+
+    await _repository.saveUserSession(
+      mobile: mobileNumber,
+      role: detectedRole,
+      userData: userData,
+    );
+
+    return {'role': detectedRole, 'userData': userData};
   }
 
   Future<void> logout() async {
     state = AuthState();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await _repository.clearSession();
+  }
+
+  Future<void> refreshUserData() async {
+    if (state.mobileNumber == null) return;
+
+    state = state.copyWith(isLoading: true);
+
+    try {
+      final userData = await _repository.getUserData(state.mobileNumber!);
+      if (userData != null) {
+        state = state.copyWith(userData: userData, isLoading: false);
+        await _repository.saveUserSession(
+          mobile: state.mobileNumber!,
+          role: state.role ?? UserType.customer,
+          userData: userData,
+        );
+      } else {
+        state = state.copyWith(isLoading: false);
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: "Failed to refresh user data",
+      );
+    }
+  }
+
+  Future<UserModel?> updateUserdata({
+    required String userId,
+    Map<String, dynamic>? extraFields,
+  }) async {
+    state = state.copyWith(isLoading: true);
+
+    try {
+      if (userId.isEmpty) {
+        throw ArgumentError("Mobile number is required");
+      }
+
+      final payload = <String, dynamic>{};
+      if (extraFields != null && extraFields.isNotEmpty) {
+        payload.addAll(extraFields);
+      }
+
+      final user = await _repository.updateUserProfile(
+        mobile: userId,
+        body: payload,
+      );
+
+      return user;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return null;
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
+  void updateLocalUserData(UserModel user) {
+    state = state.copyWith(userData: user);
   }
 }
-
-final authProvider = NotifierProvider<AuthController, AuthState>(
-  AuthController.new,
-);

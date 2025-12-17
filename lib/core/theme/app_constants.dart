@@ -1,7 +1,8 @@
 // App constants
 class AppConstants {
   static const String appName = 'FarmVest';
-
+  static const String apiUrl =
+      'https://markwave-live-apis-couipk45fa-el.a.run.app';
   static const String poweredBy = 'Powered by MarkWave';
 
   // Animation durations

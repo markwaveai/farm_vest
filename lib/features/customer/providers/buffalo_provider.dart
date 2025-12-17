@@ -146,7 +146,7 @@ final filteredBuffaloListProvider = Provider<AsyncValue<List<Animal>>>((ref) {
       final matchesLocation =
           filter.selectedLocations.isEmpty ||
           filter.selectedLocations.contains('all') ||
-          filter.selectedLocations.contains('Hyderabad');
+          filter.selectedLocations.contains('Kurnool');
 
       final matchesHealth = filter.statusFilter == 'all' || true;
 
@@ -165,7 +165,7 @@ final allFarmsProvider = Provider<List<String>>((ref) {
 });
 
 final allLocationsProvider = Provider<List<String>>((ref) {
-  return ['Hyderabad'];
+  return ['Kurnool'];
 });
 
 // 6. Stats Providers

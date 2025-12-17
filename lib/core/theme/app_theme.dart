@@ -1,60 +1,66 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Farm-themed color palette
-  static const Color primary = Color(0xFF2E7D32); // Dark Green
+  // Brand Cost Color Palette (from image)
+  static const Color primary = Color(0xFF2E7D32); // Green
+  static const Color secondary = Color(0xFFFF5722); // Orange
+  static const Color tertiary = Color(0xFF00695C); // Teal Gradient Start
+  static const Color beige = Color(0xFFFFF8E1); // Cream/Beige
+  static const Color slate = Color(0xFF455A64); // Blue Grey
+  static const Color dark = Color(0xFF263238); // Dark/Black
+
+  // Derived variants
   static const Color darkPrimary = Color(0xFF1B5E20);
   static const Color lightPrimary = Color(0xFF4CAF50);
+  static const Color darkSecondary = Color(0xFFE64A19);
+  static const Color lightSecondary = Color(0xFFFF8A65);
 
-  // Secondary/Accent (Orange)
-  static const Color secondary = Color(0xFFFF9800);
-  static const Color darkSecondary = Color(0xFFE65100);
-  static const Color lightSecondary = Color(0xFFFFB74D);
-
+  // Standard Colors
   static const Color white = Color(0xFFFFFFFF);
   static const Color lightGrey = Color(0xFFF5F5F5);
   static const Color mediumGrey = Color(0xFF9E9E9E);
-  static const Color darkGrey = Color(0xFF424242);
+  static const Color darkGrey = dark; // Mapped to brand dark
 
-  static const Color errorRed = Color(0xFFE53935);
-  static const Color warningOrange = Color(0xFFFF9800);
-  static const Color successGreen = Color(0xFF4CAF50);
+  // Semantic Colors
+  static const Color errorRed = Color(0xFFD32F2F);
+  static const Color warningOrange = secondary;
+  static const Color successGreen = primary;
 
   // Text styles
   static const TextStyle headingLarge = TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
-    color: darkGrey,
+    color: dark,
   );
 
   static const TextStyle headingMedium = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.w600,
-    color: darkGrey,
+    color: dark,
   );
 
   static const TextStyle headingSmall = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    color: darkGrey,
+    color: dark,
   );
 
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.normal,
-    color: darkGrey,
+    color: dark,
   );
 
   static const TextStyle bodyMedium = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.normal,
-    color: darkGrey,
+    color: slate, // Use slate for body text variety
   );
 
   static const TextStyle bodySmall = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.normal,
-    color: mediumGrey,
+    color: slate,
   );
 
   static const TextStyle buttonText = TextStyle(
@@ -68,22 +74,23 @@ class AppTheme {
     return ThemeData(
       primarySwatch: Colors.green,
       primaryColor: primary,
-      scaffoldBackgroundColor: white,
+      scaffoldBackgroundColor: white, // Keep white for clean look
       appBarTheme: const AppBarTheme(
-        backgroundColor: primary,
-        foregroundColor: white,
+        backgroundColor: white, // Modern: White App Bar
+        foregroundColor: dark, // Dark text
         elevation: 0,
         centerTitle: true,
+        iconTheme: IconThemeData(color: dark),
         titleTextStyle: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: white,
+          color: dark,
         ),
       ),
       cardTheme: CardThemeData(
         color: white,
         elevation: 2,
-        shadowColor: Colors.black12,
+        shadowColor: slate.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -109,6 +116,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: mediumGrey),
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: primary, width: 2),
@@ -119,20 +130,19 @@ class AppTheme {
         ),
         fillColor: lightGrey,
         filled: true,
+        hintStyle: TextStyle(color: slate.withValues(alpha: 0.6)),
       ),
-      // bottomNavigationBarTheme:  BottomNavigationBarTheme(
-      //   backgroundColor: white,
-      //   selectedItemColor: primary,
-      //   unselectedItemColor: mediumGrey,
-      //   type: BottomNavigationBarType.fixed,
-      //   elevation: 8,
-      // ),
       colorScheme: const ColorScheme.light(
         primary: primary,
         secondary: secondary,
+        tertiary: tertiary, // Added tertiary
         surface: white,
         error: errorRed,
+        onPrimary: white,
+        onSecondary: white,
+        onSurface: dark,
       ),
+      // Custom extensions could go here
     );
   }
 }

@@ -191,11 +191,11 @@ class _SupportScreenState extends State<SupportScreen> {
                     ),
                     const SizedBox(height: AppConstants.spacingM),
 
-                    _buildContactInfo(Icons.phone, 'Phone', '+91 98765 43210'),
+                    _buildContactInfo(Icons.phone, 'Phone', '+91 7702710290'),
                     _buildContactInfo(
                       Icons.email,
                       'Email',
-                      'support@markwave.com',
+                      'contact@markwave.ai',
                     ),
                     _buildContactInfo(
                       Icons.access_time,
@@ -205,7 +205,7 @@ class _SupportScreenState extends State<SupportScreen> {
                     _buildContactInfo(
                       Icons.location_on,
                       'Address',
-                      'MarkWave Technologies, Bangalore',
+                      'PSR Prime Towers, 2nd Floor,506,DLF,\nGachibowli, Hyderabad-500032',
                     ),
                   ],
                 ),
@@ -302,6 +302,8 @@ class _SupportScreenState extends State<SupportScreen> {
               ),
               Text(
                 value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: AppTheme.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),

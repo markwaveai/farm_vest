@@ -54,6 +54,7 @@ dependencies:
   # Camera & Video
   camera: ^0.10.5+9
   video_player: ^2.8.6
+  flutter_vlc_player: ^7.4.4
   
   # Utilities
   intl: ^0.20.0

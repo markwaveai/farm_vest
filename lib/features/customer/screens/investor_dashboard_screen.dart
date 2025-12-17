@@ -8,43 +8,18 @@ import '../providers/dashboard_stats_provider.dart';
 import '../widgets/buffalo_card.dart';
 import '../models/unit_response.dart';
 
-class CustomerDashboardScreen extends ConsumerStatefulWidget {
-  const CustomerDashboardScreen({super.key});
+class InvestorDashboardScreen extends ConsumerStatefulWidget {
+  const InvestorDashboardScreen({super.key});
 
   @override
-  ConsumerState<CustomerDashboardScreen> createState() =>
+  ConsumerState<InvestorDashboardScreen> createState() =>
       _CustomerDashboardScreenState();
 }
 
 class _CustomerDashboardScreenState
-    extends ConsumerState<CustomerDashboardScreen> {
-  int _currentIndex = 0;
+    extends ConsumerState<InvestorDashboardScreen> {
   bool _isGridView = true;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        // Home - already on dashboard
-        break;
-      case 1:
-        context.go('/asset-valuation');
-        break;
-      case 2:
-        context.go('/cctv-live');
-        break;
-      case 3:
-        context.go('/revenue');
-        break;
-      case 4:
-        context.go('/customer-profile');
-        break;
-    }
-  }
 
   // Previously _hasActiveFilters logic
   bool get _hasActiveFilters {
@@ -65,19 +40,6 @@ class _CustomerDashboardScreenState
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text('My Buffaloes'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => context.go(
-              '/notifications',
-              extra: {'fallbackRoute': '/customer-dashboard'},
-            ),
-          ),
-        ],
-      ),
-      drawer: _buildDrawer(),
       body: RefreshIndicator(
         onRefresh: () {
           // Add your refresh logic here. With Riverpod, this might trigger a provider refresh.
@@ -126,7 +88,7 @@ class _CustomerDashboardScreenState
                     _buildStatItem(
                       context,
                       value: data['calves'] ?? '0',
-                      label: 'Calfs',
+                      label: 'Calves',
                       icon: Icons.child_care,
                       isCompact: true,
                     ),
@@ -208,203 +170,6 @@ class _CustomerDashboardScreenState
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppTheme.secondary,
-        unselectedItemColor: Colors.grey[600],
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics_outlined),
-            activeIcon: Icon(Icons.analytics),
-            label: 'Assets',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.videocam_outlined),
-            activeIcon: Icon(Icons.videocam),
-            label: 'Live',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.attach_money_outlined),
-            activeIcon: Icon(Icons.attach_money),
-            label: 'Revenue',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          // Drawer Header
-          DrawerHeader(
-            decoration: const BoxDecoration(color: AppTheme.primary),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppTheme.white,
-                  child: Icon(Icons.person, size: 30, color: AppTheme.primary),
-                ),
-                const SizedBox(height: AppConstants.spacingM),
-                Text(
-                  'FarmVest',
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'farmvest@gmail.com',
-                  style: AppTheme.bodySmall.copyWith(
-                    color: AppTheme.white.withValues(alpha: 0.8),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Menu Items
-          ListTile(
-            leading: const Icon(Icons.home, color: AppTheme.primary),
-            title: const Text('Dashboard'),
-            onTap: () {
-              Navigator.pop(context); // Close drawer
-              if (ModalRoute.of(context)?.settings.name !=
-                  '/customer-dashboard') {
-                context.go('/customer-dashboard');
-              }
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.calendar_today, color: AppTheme.primary),
-            title: const Text('Monthly Visits'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/monthly-visits');
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.videocam, color: AppTheme.primary),
-            title: const Text('Live CCTV'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/cctv-live');
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(
-              Icons.medical_services,
-              color: AppTheme.primary,
-            ),
-            title: const Text('Health Records'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/health-records');
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.assessment, color: AppTheme.primary),
-            title: const Text('Revenue'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/revenue');
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(
-              Icons.account_balance_wallet,
-              color: AppTheme.primary,
-            ),
-            title: const Text('Asset Valuation'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/asset-valuation');
-            },
-          ),
-
-          const Divider(),
-
-          // Support Section
-          ListTile(
-            leading: const Icon(Icons.help_outline, color: AppTheme.primary),
-            title: const Text('Help & Support'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/support');
-            },
-          ),
-
-          // Profile Section
-          ListTile(
-            leading: const Icon(Icons.person, color: AppTheme.primary),
-            title: const Text('My Profile'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/customer-profile');
-            },
-          ),
-
-          const Divider(),
-
-          // Logout
-          ListTile(
-            leading: const Icon(Icons.logout, color: AppTheme.errorRed),
-            title: const Text(
-              'Logout',
-              style: TextStyle(color: AppTheme.errorRed),
-            ),
-            onTap: () {
-              Navigator.pop(context); // Close drawer
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Logout'),
-                  content: const Text('Are you sure you want to logout?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context); // Close dialog
-                        context.go('/login'); // Navigate to login
-                      },
-                      child: const Text(
-                        'Logout',
-                        style: TextStyle(color: AppTheme.errorRed),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
       ),
     );
   }
@@ -561,8 +326,8 @@ class _CustomerDashboardScreenState
         }
 
         return BuffaloCard(
-          farmName: 'FarmVest Unit',
-          location: 'Hyderabad',
+          farmName: 'FarmVest Unit1',
+          location: 'kurnool',
           id: buffalo.breedId ?? 'Unknown ID',
           healthStatus: 'Healthy',
           lastMilking: 'Checked recently',

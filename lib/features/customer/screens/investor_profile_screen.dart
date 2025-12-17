@@ -1,62 +1,67 @@
 // lib/features/customer/screens/profile_screen.dart
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-import 'package:farm_vest/core/utils/navigation_helper.dart';
-import 'package:farm_vest/core/utils/toast_utils.dart';
+import 'package:farm_vest/features/auth/models/user_model.dart';
+import 'package:farm_vest/features/auth/providers/auth_provider.dart';
+import 'package:farm_vest/features/customer/providers/buffalo_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:farm_vest/features/customer/models/unit_response.dart';
 import 'package:go_router/go_router.dart';
 
-class CustomerProfileScreen extends StatefulWidget {
-  const CustomerProfileScreen({super.key});
+class InvestorProfileScreen extends ConsumerStatefulWidget {
+  const InvestorProfileScreen({super.key});
 
   @override
-  State<CustomerProfileScreen> createState() => _CustomerProfileScreenState();
+  ConsumerState<InvestorProfileScreen> createState() =>
+      _CustomerProfileScreenState();
 }
 
-class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
-  // Sample customer data - in a real app, this would come from an API or state management
-  final Map<String, String> _customerData = {
-    'name': 'Rajesh Kumar',
-    'email': 'rajesh.kumar@example.com',
-    'phone': '+91 98765 43210',
-    'address': '123 Farm Villa, Bangalore, Karnataka - 560001',
-    'membershipSince': 'Jan 2023',
-    'totalInvested': '₹25,00,000',
-    'currentValuation': '₹28,50,000',
-  };
-
+class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
   bool _isEditing = false;
   final _formKey = GlobalKey<FormState>();
 
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _addressController;
+  late final TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = ref.read(authProvider).userData;
+    _nameController = TextEditingController(text: user?.name ?? '');
+    _emailController = TextEditingController(text: user?.email ?? '');
+    _addressController = TextEditingController(text: user?.address ?? '');
+    _phoneController = TextEditingController(text: user?.mobile ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final userData = authState.userData;
+    final unitResponse = ref.watch(unitResponseProvider).value;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Profile'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => NavigationHelper.safePopOrNavigate(
-            context,
-            fallbackRoute: '/customer-dashboard',
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(_isEditing ? Icons.save : Icons.edit),
-            onPressed: _toggleEdit,
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           children: [
             // Profile Header
-            _buildProfileHeader(),
+            _buildProfileHeader(userData),
             const SizedBox(height: AppConstants.spacingL),
 
             // Profile Details
-            _buildProfileForm(),
+            _buildProfileForm(userData, unitResponse),
 
             const SizedBox(height: AppConstants.spacingL),
 
@@ -68,7 +73,7 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(UserModel? userData) {
     return Column(
       children: [
         const CircleAvatar(
@@ -77,16 +82,34 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
           child: Icon(Icons.person, size: 50, color: Colors.white),
         ),
         const SizedBox(height: AppConstants.spacingM),
-        Text(_customerData['name']!, style: AppTheme.headingMedium),
+        Text(userData?.name ?? '', style: AppTheme.headingMedium),
         Text(
-          _customerData['email']!,
+          userData?.email ?? '',
           style: AppTheme.bodyMedium.copyWith(color: AppTheme.mediumGrey),
         ),
       ],
     );
   }
 
-  Widget _buildProfileForm() {
+  Widget _buildProfileForm(UserModel? userData, UnitResponse? unitResponse) {
+    DateTime? membershipSince;
+    if (unitResponse?.units?.isNotEmpty ?? false) {
+      final dates = unitResponse!.units!
+          .where((u) => u.placedAt != null)
+          .map(
+            (u) => u.placedAt != null && u.placedAt!.isNotEmpty
+                ? DateTime.parse(u.placedAt!)
+                : DateTime.now(),
+          )
+          .toList();
+      if (dates.isNotEmpty) {
+        membershipSince = dates.reduce((a, b) => a.isBefore(b) ? a : b);
+      }
+    }
+
+    final formattedDate = membershipSince != null
+        ? '${membershipSince.day}/${membershipSince.month}/${membershipSince.year}'
+        : 'N/A';
     return Form(
       key: _formKey,
       child: Column(
@@ -94,28 +117,28 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
         children: [
           _buildFormField(
             label: 'Full Name',
-            value: _customerData['name']!,
+            controller: _nameController,
             icon: Icons.person,
             enabled: _isEditing,
           ),
           const SizedBox(height: AppConstants.spacingM),
           _buildFormField(
             label: 'Email',
-            value: _customerData['email']!,
+            controller: _emailController,
             icon: Icons.email,
             enabled: _isEditing,
           ),
           const SizedBox(height: AppConstants.spacingM),
           _buildFormField(
             label: 'Phone',
-            value: _customerData['phone']!,
+            controller: _phoneController,
             icon: Icons.phone,
-            enabled: _isEditing,
+            enabled: false,
           ),
           const SizedBox(height: AppConstants.spacingM),
           _buildFormField(
             label: 'Address',
-            value: _customerData['address']!,
+            controller: _addressController,
             icon: Icons.location_on,
             maxLines: 2,
             enabled: _isEditing,
@@ -125,20 +148,8 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
           // Read-only fields
           _buildReadOnlyField(
             label: 'Membership Since',
-            value: _customerData['membershipSince']!,
+            value: formattedDate,
             icon: Icons.calendar_today,
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-          _buildReadOnlyField(
-            label: 'Total Invested',
-            value: _customerData['totalInvested']!,
-            icon: Icons.account_balance_wallet,
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-          _buildReadOnlyField(
-            label: 'Current Valuation',
-            value: _customerData['currentValuation']!,
-            icon: Icons.assessment,
           ),
         ],
       ),
@@ -147,13 +158,13 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
 
   Widget _buildFormField({
     required String label,
-    required String value,
+    required TextEditingController controller,
     required IconData icon,
     int maxLines = 1,
     bool enabled = false,
   }) {
     return TextFormField(
-      initialValue: value,
+      controller: controller,
       enabled: enabled,
       decoration: InputDecoration(
         labelText: label,
@@ -202,12 +213,6 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
     return Column(
       children: [
         ListTile(
-          leading: const Icon(Icons.lock, color: AppTheme.primary),
-          title: const Text('Change Password'),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: () => _showChangePasswordDialog(),
-        ),
-        ListTile(
           leading: const Icon(Icons.help_outline, color: AppTheme.primary),
           title: const Text('Help & Support'),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -225,70 +230,6 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
     );
   }
 
-  void _toggleEdit() {
-    if (_isEditing) {
-      if (_formKey.currentState!.validate()) {
-        // Save changes here
-        ToastUtils.showSuccess(context, 'Profile updated successfully');
-      } else {
-        return;
-      }
-    }
-    setState(() {
-      _isEditing = !_isEditing;
-    });
-  }
-
-  void _showChangePasswordDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Change Password'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Current Password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingM),
-            TextFormField(
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'New Password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingM),
-            TextFormField(
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Confirm New Password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ToastUtils.showSuccess(context, 'Password updated successfully');
-            },
-            child: const Text('Update Password'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showLogoutDialog() {
     showDialog(
       context: context,
@@ -301,10 +242,11 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement logout logic
-              context.go('/login');
+            onPressed: () async {
+              await ref.read(authProvider.notifier).logout();
+              if (mounted) {
+                context.go('/login');
+              }
             },
             child: const Text(
               'Logout',
