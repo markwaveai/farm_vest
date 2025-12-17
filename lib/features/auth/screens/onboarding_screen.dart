@@ -75,6 +75,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+  final isSmallPhone = size.height < 700;
+  final isMediumPhone = size.height >= 700 && size.height < 820;
     return Scaffold(
       backgroundColor: AppTheme.white,
       body: SafeArea(
@@ -155,43 +158,53 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildPage(OnboardingPage page) {
-    return Padding(
+ Widget _buildPage(OnboardingPage page) {
+  final size = MediaQuery.of(context).size;
+  final isSmallPhone = size.height < 700;
+  final isMediumPhone = size.height < 820;
+
+  return SingleChildScrollView(
+    physics: isSmallPhone
+        ? const BouncingScrollPhysics()
+        : const NeverScrollableScrollPhysics(),
+    child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Spacer(),
+          SizedBox(height: isSmallPhone ? 16 : 32),
 
           // Title
           Text(
             page.title,
             style: AppTheme.headingLarge.copyWith(
-              fontSize: 28,
+              fontSize: isSmallPhone ? 22 : 28,
               fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
             ),
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Description
           Text(
             page.description,
             style: AppTheme.bodyMedium.copyWith(
-              fontSize: 15,
-              height: 1.5,
+              fontSize: isSmallPhone ? 13 : 15,
+              height: 1.4,
               color: AppTheme.slate,
             ),
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 48),
+          SizedBox(height: isSmallPhone ? 24 : 48),
 
-          // Image with rounded container
+          // Image container (responsive height)
           Container(
-            height: 380,
+            height: isSmallPhone
+                ? 220
+                : isMediumPhone
+                    ? 300
+                    : 380,
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -209,12 +222,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Image.asset(
                 page.imagePath,
                 fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  // Fallback icon if image not found
+                errorBuilder: (_, __, ___) {
                   return Center(
                     child: Icon(
                       _getIconForPage(page.title),
-                      size: 180,
+                      size: isSmallPhone ? 120 : 180,
                       color: AppTheme.primary.withValues(alpha: 0.3),
                     ),
                   );
@@ -223,11 +235,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
 
-          const Spacer(),
+          SizedBox(height: isSmallPhone ? 24 : 48),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   IconData _getIconForPage(String title) {
     if (title.contains('Asset')) {
