@@ -59,18 +59,20 @@ class _InvestorShellState extends State<InvestorShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_getTitleForIndex(_currentIndex)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => context.go(
-              '/notifications',
-              extra: {'fallbackRoute': '/customer-dashboard'},
+      appBar: _currentIndex == 4
+          ? null
+          : AppBar(
+              title: Text(_getTitleForIndex(_currentIndex)),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () => context.go(
+                    '/notifications',
+                    extra: {'fallbackRoute': '/customer-dashboard'},
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
       drawer: _buildDrawer(),
       body: widget.child,
       bottomNavigationBar: Container(
@@ -237,18 +239,6 @@ class _InvestorShellState extends State<InvestorShell> {
             onTap: () {
               context.pop();
               context.go('/cctv-live');
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(
-              Icons.medical_services,
-              color: AppTheme.primary,
-            ),
-            title: const Text('Health Records'),
-            onTap: () {
-              context.pop();
-              context.push('/health-records');
             },
           ),
 

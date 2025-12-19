@@ -18,6 +18,7 @@ class UserModel {
   final bool isFormFilled;
   final bool verified;
   final bool otpVerified;
+  final bool isQuit;
 
   UserModel({
     required this.id,
@@ -39,6 +40,7 @@ class UserModel {
     this.isFormFilled = false,
     this.verified = false,
     this.otpVerified = false,
+    this.isQuit = false,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -62,6 +64,7 @@ class UserModel {
       isFormFilled: json['isFormFilled'] ?? false,
       verified: json['verified'] ?? false,
       otpVerified: json['otp_verified'] ?? false,
+      isQuit: json['isQuit'] ?? false,
     );
   }
 

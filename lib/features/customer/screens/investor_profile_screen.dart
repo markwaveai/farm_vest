@@ -26,6 +26,8 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
   late final TextEditingController _addressController;
   late final TextEditingController _phoneController;
 
+  bool _isSaving = false;
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +47,47 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     super.dispose();
   }
 
+  Future<void> _toggleEdit() async {
+    if (_isEditing) {
+      // Save logic
+      if (_formKey.currentState!.validate()) {
+        setState(() => _isSaving = true);
+        final authNotifier = ref.read(authProvider.notifier);
+        final user = ref.read(authProvider).userData;
+
+        if (user != null) {
+          final updatedUser = await authNotifier.updateUserdata(
+            userId: user.mobile,
+            extraFields: {
+              'name': _nameController.text,
+              'email': _emailController.text,
+              'address': _addressController.text,
+            },
+          );
+
+          if (updatedUser != null) {
+            authNotifier.updateLocalUserData(updatedUser);
+            if (mounted) {
+              setState(() => _isEditing = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Profile updated successfully')),
+              );
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Failed to update profile')),
+              );
+            }
+          }
+        }
+        if (mounted) setState(() => _isSaving = false);
+      }
+    } else {
+      setState(() => _isEditing = true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -52,6 +95,26 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     final unitResponse = ref.watch(unitResponseProvider).value;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Profile'),
+        actions: [
+          if (_isSaving)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else
+            IconButton(
+              icon: Icon(_isEditing ? Icons.save : Icons.edit),
+              onPressed: _toggleEdit,
+              tooltip: _isEditing ? 'Save Changes' : 'Edit Profile',
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(
@@ -76,10 +139,31 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
   Widget _buildProfileHeader(UserModel? userData) {
     return Column(
       children: [
-        const CircleAvatar(
-          radius: 50,
-          backgroundColor: AppTheme.primary,
-          child: Icon(Icons.person, size: 50, color: Colors.white),
+        Stack(
+          children: [
+            const CircleAvatar(
+              radius: 50,
+              backgroundColor: AppTheme.primary,
+              child: Icon(Icons.person, size: 50, color: Colors.white),
+            ),
+            if (_isEditing)
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: AppTheme.secondary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: AppConstants.spacingM),
         Text(userData?.name ?? '', style: AppTheme.headingMedium),
@@ -93,12 +177,12 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
 
   Widget _buildProfileForm(UserModel? userData, UnitResponse? unitResponse) {
     DateTime? membershipSince;
-    if (unitResponse?.units?.isNotEmpty ?? false) {
-      final dates = unitResponse!.units!
-          .where((u) => u.placedAt != null)
+    if (unitResponse?.orders?.isNotEmpty ?? false) {
+      final dates = unitResponse!.orders!
+          .where((o) => o.placedAt != null)
           .map(
-            (u) => u.placedAt != null && u.placedAt!.isNotEmpty
-                ? DateTime.parse(u.placedAt!)
+            (o) => o.placedAt != null && o.placedAt!.isNotEmpty
+                ? DateTime.parse(o.placedAt!)
                 : DateTime.now(),
           )
           .toList();
@@ -171,10 +255,18 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
         prefixIcon: Icon(icon, color: AppTheme.primary),
         border: const OutlineInputBorder(),
         filled: !enabled,
-        fillColor: AppTheme.lightGrey.withValues(alpha: 0.3),
+        fillColor: enabled
+            ? Colors.white
+            : AppTheme.lightGrey.withValues(alpha: 0.3),
       ),
       maxLines: maxLines,
       readOnly: !enabled,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter $label';
+        }
+        return null;
+      },
     );
   }
 
@@ -196,6 +288,7 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
           decoration: BoxDecoration(
             color: AppTheme.lightGrey.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Colors.grey.shade400),
           ),
           child: Row(
             children: [
@@ -213,12 +306,17 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     return Column(
       children: [
         ListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          tileColor: Colors.grey.shade50,
           leading: const Icon(Icons.help_outline, color: AppTheme.primary),
           title: const Text('Help & Support'),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () => context.go('/support'),
         ),
+        const SizedBox(height: 8),
         ListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          tileColor: Colors.grey.shade50,
           leading: const Icon(Icons.logout, color: AppTheme.errorRed),
           title: const Text(
             'Logout',

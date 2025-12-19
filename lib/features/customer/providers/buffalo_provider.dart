@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/api_services.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../customer/models/unit_response.dart';
+import 'package:farm_vest/features/customer/models/unit_response.dart';
 // import 'package:flutter_riverpod/legacy.dart'; // Removing legacy if unused or keep if needed, but adding ApiServices
 
 // 1. Logic for the Filter State
@@ -112,12 +112,12 @@ final rawBuffaloListProvider = Provider<AsyncValue<List<Animal>>>((ref) {
   final responseAsync = ref.watch(unitResponseProvider);
 
   return responseAsync.whenData((response) {
-    if (response?.units == null) return [];
+    if (response?.orders == null) return [];
 
     List<Animal> buffaloes = [];
-    for (var unit in response!.units!) {
-      if (unit.buffalos != null) {
-        buffaloes.addAll(unit.buffalos!);
+    for (var order in response!.orders!) {
+      if (order.buffalos != null && order.paymentStatus == 'PAID') {
+        buffaloes.addAll(order.buffalos!);
       }
     }
     return buffaloes;
@@ -141,12 +141,12 @@ final filteredBuffaloListProvider = Provider<AsyncValue<List<Animal>>>((ref) {
       final matchesFarm =
           filter.selectedFarms.isEmpty ||
           filter.selectedFarms.contains('all') ||
-          filter.selectedFarms.contains('FarmVest Unit');
+          filter.selectedFarms.contains(buffalo.farmName ?? 'Kurnool');
 
       final matchesLocation =
           filter.selectedLocations.isEmpty ||
           filter.selectedLocations.contains('all') ||
-          filter.selectedLocations.contains('Kurnool');
+          filter.selectedLocations.contains(buffalo.farmLocation ?? 'Kurnool');
 
       final matchesHealth = filter.statusFilter == 'all' || true;
 
@@ -161,11 +161,43 @@ final filteredBuffaloListProvider = Provider<AsyncValue<List<Animal>>>((ref) {
 
 // 5. Unique Values Providers (for Filter Chips)
 final allFarmsProvider = Provider<List<String>>((ref) {
-  return ['FarmVest Unit'];
+  final responseAsync = ref.watch(unitResponseProvider);
+  return responseAsync.whenData((response) {
+        Set<String> farms = {};
+        if (response?.orders != null) {
+          for (var order in response!.orders!) {
+            if (order.buffalos != null) {
+              for (var buffalo in order.buffalos!) {
+                if (buffalo.farmName != null) {
+                  farms.add(buffalo.farmName!);
+                }
+              }
+            }
+          }
+        }
+        return farms.toList();
+      }).value ??
+      ['Kurnool'];
 });
 
 final allLocationsProvider = Provider<List<String>>((ref) {
-  return ['Kurnool'];
+  final responseAsync = ref.watch(unitResponseProvider);
+  return responseAsync.whenData((response) {
+        Set<String> locations = {};
+        if (response?.orders != null) {
+          for (var order in response!.orders!) {
+            if (order.buffalos != null) {
+              for (var buffalo in order.buffalos!) {
+                if (buffalo.farmLocation != null) {
+                  locations.add(buffalo.farmLocation!);
+                }
+              }
+            }
+          }
+        }
+        return locations.toList();
+      }).value ??
+      ['Kurnool'];
 });
 
 // 6. Stats Providers
@@ -180,8 +212,8 @@ final buffaloStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((ref) {
 
     // Read directly from OverallStats
     if (response?.overallStats != null) {
-      buffaloCount = response!.overallStats!.totalUnits ?? 0;
-      calfCount = response.overallStats!.totalCalves ?? 0;
+      buffaloCount = response!.overallStats!.buffaloesCount ?? 0;
+      calfCount = response.overallStats!.calvesCount ?? 0;
     }
 
     // Read directly from Financials

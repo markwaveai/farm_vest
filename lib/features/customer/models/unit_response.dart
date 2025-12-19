@@ -2,7 +2,8 @@ class UnitResponse {
   final int? statusCode;
   final String? status;
   final String? userId;
-  final List<Unit>? units;
+  final String? userCreatedAt;
+  final List<Order>? orders;
   final Financials? financials;
   final CpfSummary? cpfSummary;
   final OverallStats? overallStats;
@@ -11,7 +12,8 @@ class UnitResponse {
     this.statusCode,
     this.status,
     this.userId,
-    this.units,
+    this.userCreatedAt,
+    this.orders,
     this.financials,
     this.cpfSummary,
     this.overallStats,
@@ -22,8 +24,9 @@ class UnitResponse {
       statusCode: json['statuscode'],
       status: json['status'],
       userId: json['userId'],
-      units: json['units'] != null
-          ? List<Unit>.from(json['units'].map((x) => Unit.fromJson(x)))
+      userCreatedAt: json['userCreatedAt'],
+      orders: json['orders'] != null
+          ? List<Order>.from(json['orders'].map((x) => Order.fromJson(x)))
           : [],
       financials: json['financials'] != null
           ? Financials.fromJson(json['financials'])
@@ -40,15 +43,25 @@ class UnitResponse {
 
 class Financials {
   final num? totalRevenueEarned;
-  final num? investment;
+  final num? investmentWithCPF;
+  final num? investmentWithoutCPF;
+  final num? totalCpfValue;
   final num? netProfit;
 
-  Financials({this.totalRevenueEarned, this.investment, this.netProfit});
+  Financials({
+    this.totalRevenueEarned,
+    this.investmentWithCPF,
+    this.investmentWithoutCPF,
+    this.totalCpfValue,
+    this.netProfit,
+  });
 
   factory Financials.fromJson(Map<String, dynamic> json) {
     return Financials(
       totalRevenueEarned: json['totalRevenueEarned'],
-      investment: json['investment'],
+      investmentWithCPF: json['investmentWithCPF'],
+      investmentWithoutCPF: json['investmentWithoutCPF'],
+      totalCpfValue: json['totalCpfValue'],
       netProfit: json['netProfit'],
     );
   }
@@ -88,34 +101,42 @@ class CpfSummary {
 
 class OverallStats {
   final num? totalUnits;
-  final num? totalCalves;
+  final num? buffaloesCount;
+  final num? calvesCount;
   final num? pregnantBuffaloes;
   final num? healthyBuffaloes;
   final num? underTreatment;
+  final num? totalAssetValue;
 
   OverallStats({
     this.totalUnits,
-    this.totalCalves,
+    this.buffaloesCount,
+    this.calvesCount,
     this.pregnantBuffaloes,
     this.healthyBuffaloes,
     this.underTreatment,
+    this.totalAssetValue,
   });
 
   factory OverallStats.fromJson(Map<String, dynamic> json) {
     return OverallStats(
       totalUnits: json['totalUnits'],
-      totalCalves: json['totalCalves'],
+      buffaloesCount: json['buffaloesCount'],
+      calvesCount: json['calvesCount'],
       pregnantBuffaloes: json['pregnantBuffaloes'],
       healthyBuffaloes: json['healthyBuffaloes'],
       underTreatment: json['underTreatment'],
+      totalAssetValue: json['totalAssetValue'],
     );
   }
 }
 
-class Unit {
+class Order {
   final String? id;
   final String? userId;
-  final String? buffaloId;
+  final String? userCreatedAt;
+  final String? paymentSessionDate;
+  final String? breedId;
   final int? numUnits;
   final int? buffaloCount;
   final int? calfCount;
@@ -123,12 +144,20 @@ class Unit {
   final String? paymentStatus;
   final String? paymentType;
   final String? placedAt;
+  final String? approvalDate;
+  final num? baseUnitCost;
+  final num? cpfUnitCost;
+  final num? unitCost;
+  final num? totalCost;
+  final bool? withCpf;
   final List<Animal>? buffalos;
 
-  Unit({
+  Order({
     this.id,
     this.userId,
-    this.buffaloId,
+    this.userCreatedAt,
+    this.paymentSessionDate,
+    this.breedId,
     this.numUnits,
     this.buffaloCount,
     this.calfCount,
@@ -136,14 +165,22 @@ class Unit {
     this.paymentStatus,
     this.paymentType,
     this.placedAt,
+    this.approvalDate,
+    this.baseUnitCost,
+    this.cpfUnitCost,
+    this.unitCost,
+    this.totalCost,
+    this.withCpf,
     this.buffalos,
   });
 
-  factory Unit.fromJson(Map<String, dynamic> json) {
-    return Unit(
+  factory Order.fromJson(Map<String, dynamic> json) {
+    return Order(
       id: json['id'],
       userId: json['userId'],
-      buffaloId: json['buffaloId'],
+      userCreatedAt: json['userCreatedAt'],
+      paymentSessionDate: json['paymentSessionDate'],
+      breedId: json['breedId'],
       numUnits: json['numUnits'],
       buffaloCount: json['buffaloCount'],
       calfCount: json['calfCount'],
@@ -151,6 +188,12 @@ class Unit {
       paymentStatus: json['paymentStatus'],
       paymentType: json['paymentType'],
       placedAt: json['placedAt'],
+      approvalDate: json['approvalDate'],
+      baseUnitCost: json['baseUnitCost'],
+      cpfUnitCost: json['cpfUnitCost'],
+      unitCost: json['unitCost'],
+      totalCost: json['totalCost'],
+      withCpf: json['withCpf'],
       buffalos: json['buffalos'] != null
           ? List<Animal>.from(json['buffalos'].map((x) => Animal.fromJson(x)))
           : [],
@@ -165,6 +208,13 @@ class Animal {
   final num? ageYears;
   final String? status;
   final String? type;
+  final String? cpfDueDate;
+  final String? expectedMaturationDate;
+  final String? shedNumber;
+  final String? farmName;
+  final String? farmLocation;
+  final String? healthStatus;
+  final num? assetValue;
   final List<Animal>? children;
 
   Animal({
@@ -174,6 +224,13 @@ class Animal {
     this.ageYears,
     this.status,
     this.type,
+    this.cpfDueDate,
+    this.expectedMaturationDate,
+    this.shedNumber,
+    this.farmName,
+    this.farmLocation,
+    this.healthStatus,
+    this.assetValue,
     this.children,
   });
 
@@ -185,6 +242,13 @@ class Animal {
       ageYears: json['ageYears'],
       status: json['status'],
       type: json['type'],
+      cpfDueDate: json['cpfDueDate'],
+      expectedMaturationDate: json['expectedMaturationDate'],
+      shedNumber: json['shedNumber'],
+      farmName: json['farmName'],
+      farmLocation: json['farmLocation'],
+      healthStatus: json['healthStatus'],
+      assetValue: json['assetValue'],
       children: json['children'] != null
           ? (json['children'] as List).map((i) => Animal.fromJson(i)).toList()
           : null,

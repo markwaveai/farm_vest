@@ -11,7 +11,6 @@ import '../../features/auth/screens/splash_screen.dart';
 import '../../features/common/screens/notifications_screen.dart';
 import '../../features/customer/screens/asset_valuation_screen.dart';
 import '../../features/customer/screens/investor_dashboard_screen.dart';
-import '../../features/customer/screens/health_records_screen.dart';
 import '../../features/customer/screens/monthly_visits_screen.dart';
 import '../../features/customer/screens/revenue_screen.dart';
 import '../../features/customer/screens/support_screen.dart';
@@ -81,10 +80,7 @@ class AppRouter {
         path: '/monthly-visits',
         builder: (context, state) => const MonthlyVisitsScreen(),
       ),
-      GoRoute(
-        path: '/health-records',
-        builder: (context, state) => const HealthRecordsScreen(),
-      ),
+
       GoRoute(
         path: '/support',
         builder: (context, state) => const SupportScreen(),

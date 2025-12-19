@@ -12,34 +12,23 @@ final dashboardStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((
     String count = '0';
     String calves = '0';
     String revenue = '₹0';
-    String netProfit = '₹0';
-
     String buffaloes = '0';
 
+    String assetValue = '₹0';
     if (response != null) {
       // 1. Counts from OverallStats
       if (response.overallStats != null) {
         count = (response.overallStats!.totalUnits ?? 0).toString();
-        calves = (response.overallStats!.totalCalves ?? 0).toString();
-      }
-
-      // Calculate Buffalo Count manually as it's not in overallStats
-      if (response.units != null) {
-        int buffaloSum = 0;
-        for (var unit in response.units!) {
-          if (unit.paymentStatus == 'PAID') {
-            buffaloSum += unit.buffaloCount ?? 0;
-          }
-        }
-        buffaloes = buffaloSum.toString();
+        calves = (response.overallStats!.calvesCount ?? 0).toString();
+        buffaloes = (response.overallStats!.buffaloesCount ?? 0).toString();
+        assetValue =
+            '₹${(response.overallStats!.totalAssetValue ?? 0).toStringAsFixed(0)}';
       }
 
       // 2. Financials
       if (response.financials != null) {
         revenue =
             '₹${(response.financials!.totalRevenueEarned ?? 0).toStringAsFixed(0)}';
-        netProfit =
-            '₹${(response.financials!.netProfit ?? 0).toStringAsFixed(0)}';
       }
     }
 
@@ -48,7 +37,7 @@ final dashboardStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((
       'buffaloes': buffaloes,
       'calves': calves,
       'revenue': revenue,
-      'netProfit': netProfit,
+      'assetValue': assetValue,
     };
   });
 });

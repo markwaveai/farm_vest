@@ -1,12 +1,12 @@
-import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:farm_vest/features/customer/models/unit_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../core/theme/app_theme.dart';
 import '../providers/buffalo_provider.dart';
 import '../providers/dashboard_stats_provider.dart';
 import '../widgets/buffalo_card.dart';
-import '../models/unit_response.dart';
 
 class InvestorDashboardScreen extends ConsumerStatefulWidget {
   const InvestorDashboardScreen({super.key});
@@ -69,42 +69,52 @@ class _CustomerDashboardScreenState
                   border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildStatItem(
-                      context,
-                      value: data['count'] ?? '0',
-                      label: 'Total Units',
-                      icon: Icons.grid_view, // Changed icon to distinguish
-                      isCompact: true,
+                    Expanded(
+                      child: _buildStatItem(
+                        context,
+                        value: data['count'] ?? '0',
+                        label: 'Total Units',
+                        icon: Icons.grid_view,
+                        isCompact: true,
+                      ),
                     ),
-                    _buildStatItem(
-                      context,
-                      value: data['buffaloes'] ?? '0',
-                      label: 'Buffaloes',
-                      icon: Icons.pets,
-                      isCompact: true,
+                    Expanded(
+                      child: _buildStatItem(
+                        context,
+                        value: data['buffaloes'] ?? '0',
+                        label: 'Buffaloes',
+                        icon: Icons.pets,
+                        isCompact: true,
+                      ),
                     ),
-                    _buildStatItem(
-                      context,
-                      value: data['calves'] ?? '0',
-                      label: 'Calves',
-                      icon: Icons.child_care,
-                      isCompact: true,
+                    Expanded(
+                      child: _buildStatItem(
+                        context,
+                        value: data['calves'] ?? '0',
+                        label: 'Calves',
+                        icon: Icons.child_care,
+                        isCompact: true,
+                      ),
                     ),
-                    _buildStatItem(
-                      context,
-                      value: data['revenue']?.toString() ?? '₹0',
-                      label: 'Revenue',
-                      icon: Icons.trending_up,
-                      isCompact: true,
+                    Expanded(
+                      child: _buildStatItem(
+                        context,
+                        value: data['assetValue']?.toString() ?? '₹0',
+                        label: 'Asset Value',
+                        icon: Icons.account_balance,
+                        isCompact: true,
+                      ),
                     ),
-                    _buildStatItem(
-                      context,
-                      value: data['netProfit']?.toString() ?? '₹0',
-                      label: 'Net Profit',
-                      icon: Icons.monetization_on,
-                      isCompact: true,
+                    Expanded(
+                      child: _buildStatItem(
+                        context,
+                        value: data['revenue']?.toString() ?? '₹0',
+                        label: 'Revenue',
+                        icon: Icons.trending_up,
+                        isCompact: true,
+                      ),
                     ),
                   ],
                 ),
@@ -326,10 +336,10 @@ class _CustomerDashboardScreenState
         }
 
         return BuffaloCard(
-          farmName: 'FarmVest Unit1',
-          location: 'kurnool',
-          id: buffalo.breedId ?? 'Unknown ID',
-          healthStatus: 'Healthy',
+          farmName: buffalo.farmName ?? 'FarmVest Unit',
+          location: buffalo.farmLocation ?? 'Kurnool',
+          id: buffalo.id ?? 'Unknown ID',
+          healthStatus: buffalo.healthStatus ?? 'Healthy',
           lastMilking: 'Checked recently',
           age: '${buffalo.ageYears ?? 0} years',
           breed: buffalo.breedId ?? 'Unknown Breed',
@@ -369,10 +379,10 @@ class _CustomerDashboardScreenState
         }
 
         return BuffaloCard(
-          farmName: 'FarmVest Unit',
-          location: 'Hyderabad',
-          id: buffalo.breedId ?? 'Unknown ID',
-          healthStatus: 'Healthy',
+          farmName: buffalo.farmName ?? 'FarmVest Unit',
+          location: buffalo.farmLocation ?? 'Hyderabad',
+          id: buffalo.id ?? 'Unknown ID',
+          healthStatus: buffalo.healthStatus ?? 'Healthy',
           lastMilking: 'Checked recently',
           age: '${buffalo.ageYears ?? 0} years',
           breed: buffalo.breedId ?? 'Unknown Breed',

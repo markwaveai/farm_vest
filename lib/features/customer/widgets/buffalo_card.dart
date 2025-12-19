@@ -13,6 +13,7 @@ class BuffaloCard extends StatelessWidget {
   final String age;
   final String breed;
   final bool isGridView;
+  final bool showLiveButton; // Add flag to control live button visibility
   final VoidCallback? onTap;
   final VoidCallback? onCalvesTap;
 
@@ -33,6 +34,7 @@ class BuffaloCard extends StatelessWidget {
     required this.age,
     required this.breed,
     this.isGridView = true,
+    this.showLiveButton = true, // Default to true
     this.onTap,
     this.onCalvesTap,
   });
@@ -79,8 +81,9 @@ class BuffaloCard extends StatelessWidget {
                 final hasTightHeight = maxH.isFinite && maxH > 0;
 
                 final baseTotalHeight = 160.0 + 62.0 + 44.0;
-                final heightScale =
-                    hasTightHeight ? (maxH / baseTotalHeight).clamp(0.75, 1.0) : 1.0;
+                final heightScale = hasTightHeight
+                    ? (maxH / baseTotalHeight).clamp(0.75, 1.0)
+                    : 1.0;
 
                 final scale = baseScale < heightScale ? baseScale : heightScale;
 
@@ -177,25 +180,32 @@ class BuffaloCard extends StatelessWidget {
             Positioned(
               bottom: isSmallPhone ? 6 : 8,
               left: isSmallPhone ? 6 : 8,
-              child: _buildCalvesButton(isSmallPhone: isSmallPhone, scale: scale),
+              child: _buildCalvesButton(
+                isSmallPhone: isSmallPhone,
+                scale: scale,
+              ),
             ),
 
           // Bottom Right: Live Button
-          Positioned(
-            bottom: isSmallPhone ? 6 : 8,
-            right: isSmallPhone ? 6 : 8,
-            child: _buildLiveButton(
-              context,
-              isSmallPhone: isSmallPhone,
-              scale: scale,
+          if (showLiveButton)
+            Positioned(
+              bottom: isSmallPhone ? 6 : 8,
+              right: isSmallPhone ? 6 : 8,
+              child: _buildLiveButton(
+                context,
+                isSmallPhone: isSmallPhone,
+                scale: scale,
+              ),
             ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoSection({required bool isSmallPhone, required double scale}) {
+  Widget _buildInfoSection({
+    required bool isSmallPhone,
+    required double scale,
+  }) {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: 10 * scale,
@@ -206,18 +216,18 @@ class BuffaloCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Breed
+          // Au Id (formerly Breed)
           _buildInfoRow(
-            'Breed',
+            'Au Id',
             breed.toUpperCase(),
             isSmallPhone: isSmallPhone,
             scale: scale,
           ),
           SizedBox(height: 1 * scale),
 
-          // Purchase Date
+          // Site Name (formerly Purchase)
           _buildInfoRow(
-            'Purchase',
+            'Site Name',
             farmName,
             isSmallPhone: isSmallPhone,
             scale: scale,
@@ -231,10 +241,6 @@ class BuffaloCard extends StatelessWidget {
             isSmallPhone: isSmallPhone,
             scale: scale,
           ),
-          SizedBox(height: 1 * scale),
-
-          // Tree Details
-          _buildInfoRow('Age', age, isSmallPhone: isSmallPhone, scale: scale),
         ],
       ),
     );
@@ -317,7 +323,7 @@ class BuffaloCard extends StatelessWidget {
           // ID Value
           Expanded(
             child: Text(
-              id.toUpperCase(),
+              breed.toUpperCase(),
               style: TextStyle(
                 fontSize: 13 * scale,
                 color: AppTheme.white,
@@ -336,11 +342,7 @@ class BuffaloCard extends StatelessWidget {
               color: AppTheme.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(5),
             ),
-            child: Icon(
-              Icons.copy,
-              size: 12 * scale,
-              color: AppTheme.white,
-            ),
+            child: Icon(Icons.copy, size: 12 * scale, color: AppTheme.white),
           ),
         ],
       ),
@@ -356,10 +358,7 @@ class BuffaloCard extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 7 * scale,
-        vertical: 3 * scale,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 7 * scale, vertical: 3 * scale),
       decoration: BoxDecoration(
         color: statusColor,
         borderRadius: BorderRadius.circular(10),
@@ -382,7 +381,10 @@ class BuffaloCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCalvesButton({required bool isSmallPhone, required double scale}) {
+  Widget _buildCalvesButton({
+    required bool isSmallPhone,
+    required double scale,
+  }) {
     return GestureDetector(
       onTap: onCalvesTap,
       child: Container(
@@ -445,11 +447,7 @@ class BuffaloCard extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.videocam,
-              size: 12 * scale,
-              color: AppTheme.white,
-            ),
+            Icon(Icons.videocam, size: 12 * scale, color: AppTheme.white),
             SizedBox(width: 2 * scale),
             Text(
               'Live',

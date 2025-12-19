@@ -29,7 +29,6 @@ enum AppRoutes {
   unitDetails('/unit-details'),
   cctvLive('/cctv-live'),
   monthlyVisits('/monthly-visits'),
-  healthRecords('/health-records'),
   revenue('/revenue'),
   assetValuation('/asset-valuation'),
   support('/support'),

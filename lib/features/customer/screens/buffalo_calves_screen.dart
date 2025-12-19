@@ -43,6 +43,7 @@ class BuffaloCalvesScreen extends StatelessWidget {
                   age: calf.ageYears != null ? '${calf.ageYears} years' : 'N/A',
                   breed: calf.breedId ?? 'Unknown Breed',
                   isGridView: true,
+                  showLiveButton: false,
                   onTap: () {
                     // Navigate to details if needed, or do nothing as requested
                     // context.go('/unit-details', extra: {'buffalo': calf});

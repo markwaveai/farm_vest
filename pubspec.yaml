@@ -39,22 +39,22 @@ dependencies:
   go_router: ^14.2.7
   
   # State Management
-  provider: ^6.1.2
+  # provider removed
   
   # UI Components
-  flutter_svg: ^2.0.10+1
-  cached_network_image: ^3.3.1
+  # flutter_svg removed
+  # cached_network_image removed
   
   # Charts
-  fl_chart: ^0.60.0
+  # fl_chart removed
   
   # Animations
-  lottie: ^3.1.2
+  # lottie removed
   
   # Camera & Video
-  camera: ^0.10.5+9
+  # camera removed
   video_player: ^2.8.6
-  flutter_vlc_player: ^7.4.4
+  # flutter_vlc_player removed
   
   # Utilities
   intl: ^0.20.0
@@ -62,27 +62,26 @@ dependencies:
   flutter_riverpod: ^3.0.3
   http: ^1.6.0
   fluttertoast: ^9.0.0
-  webview_flutter: ^4.9.0
+  # webview_flutter removed
   
   # Visualizer Dependencies
   buffalo_visualizer:
     git:
       url: https://github.com/markwaveai/bufallo_visualizer.git
-  csv: ^5.0.0
+  # csv removed
   path_provider: ^2.0.14
-  share_plus: ^10.0.0
-  syncfusion_flutter_charts: ^31.2.18 # Trying a recent version, or verify from temp_visualizer if version was specified. It was empty in temp_visualizer pubspec, implying "any". I'll use "any" or omit version to be safe, or pick a stable one. Let's use 'any' implies leaving blank.
-  pluto_grid: ^7.0.2 # Same here
-  file_saver: ^0.2.0
-  universal_html: ^2.2.4
-  data_table_2: ^2.5.10
-  excel: ^4.0.6
-  pdf: ^3.11.3
-  printing: ^5.14.2
+  # share_plus removed
+  # syncfusion_flutter_charts removed
+  # pluto_grid removed
+  # file_saver removed
+  # universal_html removed
+  # data_table_2 removed
+  # excel removed
+  # pdf removed
+  # printing removed
+  screen_protector: ^1.4.11
 
 dependency_overrides:
-  fl_chart: ^0.69.0
-  pluto_grid: ^8.1.0
   pinput: ^6.0.1
 
 dev_dependencies:
