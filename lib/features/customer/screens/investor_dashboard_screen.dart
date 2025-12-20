@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../auth/providers/auth_provider.dart'; // Added import
 import '../providers/buffalo_provider.dart';
 import '../providers/dashboard_stats_provider.dart';
 import '../widgets/buffalo_card.dart';
@@ -20,6 +21,29 @@ class _CustomerDashboardScreenState
     extends ConsumerState<InvestorDashboardScreen> {
   bool _isGridView = true;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+    // Sync controller with current provider state if needed (e.g. restarts)
+    final currentQuery = ref.read(buffaloFilterProvider).searchQuery;
+    if (currentQuery.isNotEmpty) {
+      _searchController.text = currentQuery;
+    }
+
+    // Force refresh data on screen load to ensure freshness
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(unitResponseProvider);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   // Previously _hasActiveFilters logic
   bool get _hasActiveFilters {
@@ -35,8 +59,21 @@ class _CustomerDashboardScreenState
     final buffalos = ref.watch(filteredBuffaloListProvider);
     final stats = ref.watch(dashboardStatsProvider);
 
-    // We watch the filter provider just to rebuild if active filters change (for the filter icon color)
-    ref.watch(buffaloFilterProvider);
+    // Listen to auth changes to fetch data once user is available
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (previous?.mobileNumber != next.mobileNumber &&
+          next.mobileNumber != null) {
+        ref.invalidate(unitResponseProvider);
+      }
+    });
+
+    // Sync search controller if provider changes externally (e.g. Clear All)
+    ref.listen<BuffaloFilterState>(buffaloFilterProvider, (previous, next) {
+      if (previous?.searchQuery != next.searchQuery &&
+          _searchController.text != next.searchQuery) {
+        _searchController.text = next.searchQuery;
+      }
+    });
 
     return Scaffold(
       key: _scaffoldKey,
@@ -238,6 +275,7 @@ class _CustomerDashboardScreenState
         children: [
           // Search Bar
           TextField(
+            controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search by ID...',
               prefixIcon: const Icon(Icons.search),

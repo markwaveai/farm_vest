@@ -131,12 +131,11 @@ final filteredBuffaloListProvider = Provider<AsyncValue<List<Animal>>>((ref) {
 
   return allBuffaloesAsync.whenData((allBuffaloes) {
     return allBuffaloes.where((buffalo) {
+      final query = filter.searchQuery.toLowerCase();
       final matchesSearch =
-          filter.searchQuery.isEmpty ||
-          (buffalo.id?.toLowerCase().contains(
-                filter.searchQuery.toLowerCase(),
-              ) ??
-              false);
+          query.isEmpty ||
+          (buffalo.id?.toLowerCase().contains(query) ?? false) ||
+          (buffalo.breedId?.toLowerCase().contains(query) ?? false);
 
       final matchesFarm =
           filter.selectedFarms.isEmpty ||
@@ -148,7 +147,10 @@ final filteredBuffaloListProvider = Provider<AsyncValue<List<Animal>>>((ref) {
           filter.selectedLocations.contains('all') ||
           filter.selectedLocations.contains(buffalo.farmLocation ?? 'Kurnool');
 
-      final matchesHealth = filter.statusFilter == 'all' || true;
+      final matchesHealth =
+          filter.statusFilter == 'all' ||
+          (buffalo.healthStatus?.toLowerCase() ==
+              filter.statusFilter.toLowerCase());
 
       return matchesSearch &&
           matchesFarm &&

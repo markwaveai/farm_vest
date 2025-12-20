@@ -137,9 +137,9 @@ class Order {
   final String? userCreatedAt;
   final String? paymentSessionDate;
   final String? breedId;
-  final int? numUnits;
-  final int? buffaloCount;
-  final int? calfCount;
+  final num? numUnits;
+  final num? buffaloCount;
+  final num? calfCount;
   final String? status;
   final String? paymentStatus;
   final String? paymentType;

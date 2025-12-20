@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -280,71 +282,87 @@ class BuffaloCard extends StatelessWidget {
   }
 
   Widget _buildFooter({required bool isSmallPhone, required double scale}) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 10 * scale,
-        vertical: 6 * scale,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [AppTheme.primary, AppTheme.primary.withValues(alpha: 0.85)],
+    return GestureDetector(
+      onTap: () async {
+        await Clipboard.setData(ClipboardData(text: breed.toUpperCase()));
+        Fluttertoast.showToast(
+          msg: "ID Copied",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppTheme.dark.withValues(alpha: 0.9),
+          textColor: AppTheme.white,
+          fontSize: 14.0,
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 10 * scale,
+          vertical: 6 * scale,
         ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(16),
-          bottomRight: Radius.circular(16),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          // ID Badge
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 6 * scale,
-              vertical: 3 * scale,
-            ),
-            decoration: BoxDecoration(
-              color: AppTheme.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              'ID',
-              style: TextStyle(
-                fontSize: 9 * scale,
-                color: AppTheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              AppTheme.primary,
+              AppTheme.primary.withValues(alpha: 0.85),
+            ],
           ),
-          SizedBox(width: 6 * scale),
-
-          // ID Value
-          Expanded(
-            child: Text(
-              breed.toUpperCase(),
-              style: TextStyle(
-                fontSize: 13 * scale,
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(16),
+            bottomRight: Radius.circular(16),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            // ID Badge
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 6 * scale,
+                vertical: 3 * scale,
+              ),
+              decoration: BoxDecoration(
                 color: AppTheme.white,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.3,
+                borderRadius: BorderRadius.circular(10),
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+              child: Text(
+                'ID',
+                style: TextStyle(
+                  fontSize: 9 * scale,
+                  color: AppTheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          ),
+            SizedBox(width: 6 * scale),
 
-          // Copy Icon
-          Container(
-            padding: EdgeInsets.all(3 * scale),
-            decoration: BoxDecoration(
-              color: AppTheme.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(5),
+            // ID Value
+            Expanded(
+              child: Text(
+                breed.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 13 * scale,
+                  color: AppTheme.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.3,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ),
-            child: Icon(Icons.copy, size: 12 * scale, color: AppTheme.white),
-          ),
-        ],
+
+            // Copy Icon
+            Container(
+              padding: EdgeInsets.all(3 * scale),
+              decoration: BoxDecoration(
+                color: AppTheme.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Icon(Icons.copy, size: 12 * scale, color: AppTheme.white),
+            ),
+          ],
+        ),
       ),
     );
   }
