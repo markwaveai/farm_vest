@@ -80,6 +80,7 @@ dependencies:
   # pdf removed
   # printing removed
   screen_protector: ^1.4.11
+  qr_flutter: ^4.1.0
 
 dependency_overrides:
   pinput: ^6.0.1

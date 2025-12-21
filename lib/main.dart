@@ -4,19 +4,20 @@ import 'package:screen_protector/screen_protector.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 
 void main() {
   runApp(const ProviderScope(child: FarmVestApp()));
 }
 
-class FarmVestApp extends StatefulWidget {
+class FarmVestApp extends ConsumerStatefulWidget {
   const FarmVestApp({super.key});
 
   @override
-  State<FarmVestApp> createState() => _FarmVestAppState();
+  ConsumerState<FarmVestApp> createState() => _FarmVestAppState();
 }
 
-class _FarmVestAppState extends State<FarmVestApp> {
+class _FarmVestAppState extends ConsumerState<FarmVestApp> {
   @override
   void initState() {
     super.initState();
@@ -32,9 +33,13 @@ class _FarmVestAppState extends State<FarmVestApp> {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = ref.watch(themeProvider);
+
     return MaterialApp.router(
       title: 'FarmVest - Smart Dairy Management',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
     );

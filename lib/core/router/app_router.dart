@@ -92,6 +92,7 @@ class AppRouter {
           return BuffaloCalvesScreen(
             calves: extras['calves'] as List<Animal>,
             parentId: extras['parentId'] as String,
+            parent: extras['parent'] as Animal?,
           );
         },
       ),

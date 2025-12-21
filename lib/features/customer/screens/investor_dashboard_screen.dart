@@ -94,7 +94,7 @@ class _CustomerDashboardScreenState
                 ),
                 margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -103,7 +103,11 @@ class _CustomerDashboardScreenState
                       offset: const Offset(0, 4),
                     ),
                   ],
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+                  border: Border.all(
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.grey.withValues(alpha: 0.2)
+                        : Colors.grey.withValues(alpha: 0.1),
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -269,6 +273,9 @@ class _CustomerDashboardScreenState
   }
 
   Widget _buildSearchAndFilterBar() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
@@ -276,15 +283,24 @@ class _CustomerDashboardScreenState
           // Search Bar
           TextField(
             controller: _searchController,
+            style: theme.textTheme.bodyMedium,
             decoration: InputDecoration(
               hintText: 'Search by ID...',
-              prefixIcon: const Icon(Icons.search),
+              hintStyle: TextStyle(
+                color: isDark ? Colors.grey[500] : Colors.grey,
+              ),
+              prefixIcon: Icon(
+                Icons.search,
+                color: isDark ? Colors.grey[400] : null,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: isDark
+                  ? AppTheme.darkSurfaceVariant
+                  : Colors.grey[100],
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 0,
@@ -294,7 +310,7 @@ class _CustomerDashboardScreenState
                   Icons.filter_alt,
                   color: _hasActiveFilters
                       ? AppTheme.primary
-                      : Colors.grey[700],
+                      : (isDark ? Colors.grey[400] : Colors.grey[700]),
                 ),
                 onPressed: () => _showFilterSheet(context),
               ),
@@ -317,24 +333,23 @@ class _CustomerDashboardScreenState
     bool isCompact = false,
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final iconSize = isCompact ? 18.0 : 20.0;
     final padding = isCompact ? 6.0 : 8.0;
-    final valueStyle = isCompact
-        ? theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppTheme.secondary,
-            fontSize: 16,
-          )
-        : theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppTheme.secondary,
-          );
-    final labelStyle = isCompact
-        ? theme.textTheme.bodySmall?.copyWith(
-            fontSize: 10,
-            color: Colors.grey[600],
-          )
-        : theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]);
+
+    final valueStyle =
+        (isCompact ? theme.textTheme.titleMedium : theme.textTheme.titleLarge)
+            ?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.secondary,
+              fontSize: isCompact ? 16 : null,
+            );
+
+    final labelStyle = theme.textTheme.bodySmall?.copyWith(
+      fontSize: isCompact ? 10 : null,
+      color: isDark ? Colors.grey[400] : Colors.grey[600],
+    );
 
     return Column(
       children: [
@@ -360,7 +375,7 @@ class _CustomerDashboardScreenState
         crossAxisCount: 2,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
-        childAspectRatio: 0.75, // Taller cards
+        childAspectRatio: 0.82, // Optimized for content
       ),
       itemCount: buffalos.length,
       itemBuilder: (context, index) {
@@ -393,6 +408,7 @@ class _CustomerDashboardScreenState
                     extra: {
                       'calves': calves,
                       'parentId': buffalo.id ?? 'Unknown',
+                      'parent': buffalo,
                     },
                   );
                 }
@@ -436,6 +452,7 @@ class _CustomerDashboardScreenState
                     extra: {
                       'calves': calves,
                       'parentId': buffalo.id ?? 'Unknown',
+                      'parent': buffalo,
                     },
                   );
                 }
@@ -594,6 +611,9 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
     required Function(Set<String>) onSelectionChanged,
     bool singleSelect = false,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -638,16 +658,23 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
                 }
                 onSelectionChanged(newSelection);
               },
-              backgroundColor: Colors.grey[200],
+              backgroundColor: isDark
+                  ? AppTheme.darkSurfaceVariant
+                  : Colors.grey[200],
               selectedColor: AppTheme.secondary.withValues(alpha: 0.2),
+              checkmarkColor: isSelected ? AppTheme.secondary : null,
               labelStyle: TextStyle(
-                color: isSelected ? AppTheme.secondary : Colors.black87,
+                color: isSelected
+                    ? AppTheme.secondary
+                    : (isDark ? Colors.grey[300] : Colors.black87),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: isSelected ? AppTheme.secondary : Colors.grey[300]!,
+                  color: isSelected
+                      ? AppTheme.secondary
+                      : (isDark ? Colors.grey[700]! : Colors.grey[300]!),
                 ),
               ),
             );

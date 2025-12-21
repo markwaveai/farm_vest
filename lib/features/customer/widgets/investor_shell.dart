@@ -3,16 +3,19 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class InvestorShell extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/theme_provider.dart';
+
+class InvestorShell extends ConsumerStatefulWidget {
   final Widget child;
 
   const InvestorShell({super.key, required this.child});
 
   @override
-  State<InvestorShell> createState() => _InvestorShellState();
+  ConsumerState<InvestorShell> createState() => _InvestorShellState();
 }
 
-class _InvestorShellState extends State<InvestorShell> {
+class _InvestorShellState extends ConsumerState<InvestorShell> {
   int _currentIndex = 0;
 
   void _onItemTapped(int index) {
@@ -58,12 +61,21 @@ class _InvestorShellState extends State<InvestorShell> {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = ref.watch(themeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+
     return Scaffold(
       appBar: _currentIndex == 4
           ? null
           : AppBar(
               title: Text(_getTitleForIndex(_currentIndex)),
               actions: [
+                IconButton(
+                  icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                  onPressed: () {
+                    ref.read(themeProvider.notifier).toggleTheme();
+                  },
+                ),
                 IconButton(
                   icon: const Icon(Icons.notifications_outlined),
                   onPressed: () => context.go(
@@ -95,7 +107,7 @@ class _InvestorShellState extends State<InvestorShell> {
             unselectedItemColor: Colors.grey[600],
             showSelectedLabels: true,
             showUnselectedLabels: true,
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).cardColor,
             elevation: 0,
             items: [
               BottomNavigationBarItem(

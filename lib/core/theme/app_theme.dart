@@ -21,12 +21,17 @@ class AppTheme {
   static const Color mediumGrey = Color(0xFF9E9E9E);
   static const Color darkGrey = dark; // Mapped to brand dark
 
+  // Dark Theme specific colors (additions)
+  static const Color darkBackground = Color(0xFF121212);
+  static const Color darkSurface = Color(0xFF1E1E1E);
+  static const Color darkSurfaceVariant = Color(0xFF2C2C2C);
+
   // Semantic Colors
   static const Color errorRed = Color(0xFFD32F2F);
   static const Color warningOrange = secondary;
   static const Color successGreen = primary;
 
-  // Text styles
+  // Text styles (Light Mode)
   static const TextStyle headingLarge = TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
@@ -143,6 +148,94 @@ class AppTheme {
         onSurface: dark,
       ),
       // Custom extensions could go here
+    );
+  }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      primarySwatch: Colors.green,
+      primaryColor: primary,
+      scaffoldBackgroundColor: darkBackground,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: darkSurface,
+        foregroundColor: white,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: white),
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: white,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: darkSurface,
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.3),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      iconTheme: const IconThemeData(color: white),
+      textTheme: const TextTheme(
+        // We override text styles for dark mode manually or let Flutter adapt
+        // But AppTheme.* constants are static, so widgets using them directly won't update automatically
+        // unless they use Theme.of(context).textTheme...
+        // For now, let's at least set the defaults
+        titleLarge: TextStyle(color: white, fontWeight: FontWeight.bold),
+        titleMedium: TextStyle(color: white),
+        bodyLarge: TextStyle(color: white),
+        bodyMedium: TextStyle(color: Color(0xFFB0BEC5)), // Lighter slate
+        bodySmall: TextStyle(color: Colors.grey),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          textStyle: buttonText,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: lightPrimary, // Lighter green for dark mode
+          side: const BorderSide(color: lightPrimary),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.grey),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey.shade700),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: lightPrimary, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        fillColor: darkSurfaceVariant,
+        filled: true,
+        hintStyle: TextStyle(color: Colors.grey.withValues(alpha: 0.6)),
+        labelStyle: const TextStyle(color: Colors.grey),
+      ),
+      colorScheme: const ColorScheme.dark(
+        primary: primary,
+        secondary: secondary,
+        tertiary: tertiary,
+        surface: darkSurface,
+        error: errorRed,
+        onPrimary: white,
+        onSecondary: white,
+        onSurface: white,
+      ),
     );
   }
 }
