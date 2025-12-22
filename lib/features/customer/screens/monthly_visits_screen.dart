@@ -1,530 +1,168 @@
+import 'package:farm_vest/core/services/api_services.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
+import 'package:farm_vest/features/auth/providers/auth_provider.dart';
+import 'package:farm_vest/features/customer/models/visit_model.dart';
+import 'package:farm_vest/features/customer/models/visit_params.dart';
+import 'package:farm_vest/features/customer/providers/visit_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 
-class VisitSlot {
-  final String time;
-  final int totalCapacity;
-  int bookedCount;
-  bool isSelected;
-
-  bool get isFull => bookedCount >= totalCapacity;
-
-  VisitSlot({
-    required this.time,
-    required this.totalCapacity,
-    required this.bookedCount,
-    this.isSelected = false,
-  });
-}
-
-class MonthlyVisitsScreen extends StatefulWidget {
+class MonthlyVisitsScreen extends ConsumerStatefulWidget {
   const MonthlyVisitsScreen({super.key});
 
   @override
-  State<MonthlyVisitsScreen> createState() => _MonthlyVisitsScreenState();
+  ConsumerState<MonthlyVisitsScreen> createState() =>
+      _MonthlyVisitsScreenState();
 }
 
-class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
+class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
   DateTime _selectedDate = DateTime.now();
-  List<VisitSlot> _slots = [];
-  bool _isLoading = true;
-  bool _hasBookedThisMonth = false;
-  DateTime? _userBookingDate; // Track exact date of booking if any
-  String? _userBookingTime;
-  final int _slotCapacity = 5;
+  String? _selectedSlotTime;
+
+  // Hardcoded constant as per user request context
+  final String _farmLocation = "Kurnool";
+  final String _locationId = "LOC-123";
 
   @override
-  void initState() {
-    super.initState();
-    _checkMonthBooking();
-    _generateSlots();
-  }
+  Widget build(BuildContext context) {
+    // 1. Availability Request
+    final availabilityAsync = ref.watch(
+      visitAvailabilityProvider(
+        VisitAvailabilityParams(
+          date: DateFormat('yyyy-MM-dd').format(_selectedDate),
+          location: _farmLocation,
+        ),
+      ),
+    );
 
-  // Simulate checking if user has already booked for this month
-  Future<void> _checkMonthBooking() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Key format: visit_booking_userId_year_month
-    // For demo, we use a generic key or simulate
-    final currentMonthKey = 'visit_booking_2024_${_selectedDate.month}';
-    final savedBooking = prefs.getString(currentMonthKey);
+    // 2. User History Request (to check if already booked)
+    final historyAsync = ref.watch(myVisitsProvider);
 
-    if (savedBooking != null) {
-      final parts = savedBooking.split('|'); // date|time
-      if (parts.length == 2) {
-        setState(() {
-          _hasBookedThisMonth = true;
-          _userBookingDate = DateTime.parse(parts[0]);
-          _userBookingTime = parts[1];
-        });
-      }
-    }
-  }
+    bool hasBookedThisMonth = false;
+    Visit? bookedVisit;
 
-  void _generateSlots() {
-    setState(() => _isLoading = true);
-
-    // Simulate API delay
-    Future.delayed(const Duration(milliseconds: 500), () {
-      final List<String> times = [
-        "09:00 - 09:30 AM",
-        "09:30 - 10:00 AM",
-        "10:00 - 10:30 AM",
-        "10:30 - 11:00 AM",
-        "11:00 - 11:30 AM",
-        "11:30 - 12:00 PM",
-      ];
-
-      _slots = times.map((time) {
-        // Randomly simulate existing bookings for demo
-        // In real app, this comes from API
-        int booked = 0;
-        if (_selectedDate.day % 2 == 0) {
-          booked =
-              (time.hashCode %
-              (_slotCapacity + 1)); // Allow existing full slots
+    // Check if booked this month
+    historyAsync.whenData((visits) {
+      for (var visit in visits) {
+        try {
+          final visitDate = DateTime.parse(visit.visitDate);
+          if (visitDate.year == _selectedDate.year &&
+              visitDate.month == _selectedDate.month) {
+            hasBookedThisMonth = true;
+            bookedVisit = visit;
+            break;
+          }
+        } catch (e) {
+          // ignore date parse error
         }
-
-        return VisitSlot(
-          time: time,
-          totalCapacity: _slotCapacity,
-          bookedCount: booked,
-        );
-      }).toList();
-
-      setState(() => _isLoading = false);
-    });
-  }
-
-  void _onDateSelected(DateTime date) {
-    if (date.month != _selectedDate.month) {
-      // If month changes, we should ideally re-check month booking,
-      // but for this UI flow, let's assume valid range is current month/future.
-      // User requirement: "1 year 12 slots... monthly 1 slot"
-    }
-    setState(() {
-      _selectedDate = date;
-      // Reset selection when date changes
-      for (var s in _slots) {
-        s.isSelected = false;
       }
     });
-    _generateSlots(); // Reload slots for new date
-    _checkMonthBooking(); // Re-check if this month has a booking
-  }
 
-  void _onSlotTap(int index) {
-    if (_hasBookedThisMonth) {
-      ToastUtils.showInfo(
-        context,
-        "You have already booked a slot for this month.",
-      );
-      return;
-    }
-
-    final slot = _slots[index];
-    if (slot.isFull) return;
-
-    setState(() {
-      // Deselect others
-      for (var s in _slots) s.isSelected = false;
-      // Select tapped
-      _slots[index].isSelected = true;
-    });
-
-    _showBookingConfirmation(_slots[index]);
-  }
-
-  Future<void> _processBooking(VisitSlot slot) async {
-    // Mock API Request Payload
-    final requestPayload = {
-      "userId": "CURRENT_USER_ID", // TODO: Replace with actual ID
-      "date": DateFormat('yyyy-MM-dd').format(_selectedDate),
-      "time": slot.time,
-    };
-    debugPrint("\n--- [BACKEND REQUEST] ---");
-    debugPrint("POST /api/visits/book");
-    debugPrint(requestPayload.toString());
-    debugPrint("-------------------------\n");
-
-    // 1. Save to local storage (mock API)
-    final prefs = await SharedPreferences.getInstance();
-    final currentMonthKey = 'visit_booking_2024_${_selectedDate.month}';
-    final bookingValue = "${_selectedDate.toIso8601String()}|${slot.time}";
-    await prefs.setString(currentMonthKey, bookingValue);
-
-    // 2. Update State
-    setState(() {
-      _hasBookedThisMonth = true;
-      _userBookingDate = _selectedDate;
-      _userBookingTime = slot.time;
-      slot.bookedCount++;
-    });
-
-    // 3. Show QR Code
-    if (mounted) {
-      Navigator.pop(context); // Close confirmation dialog
-      _showSuccessQRDialog(slot);
-    }
-  }
-
-  void _showBookingConfirmation(VisitSlot slot) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Book Your Visit'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () => _showBookingHistory(),
+            tooltip: 'Booking History',
+          ),
+        ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => NavigationHelper.safePopOrNavigate(
+            context,
+            fallbackRoute: '/customer-dashboard',
+          ),
+        ),
       ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Confirm Booking", style: AppTheme.headingMedium),
-            const SizedBox(height: 16),
-            Text(
-              "You are booking a visit on:",
-              style: AppTheme.bodyMedium.copyWith(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today,
-                  color: AppTheme.primary,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  DateFormat('EEEE, d MMMM yyyy').format(_selectedDate),
-                  style: AppTheme.bodyLarge.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.access_time,
-                  color: AppTheme.primary,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  slot.time,
-                  style: AppTheme.bodyLarge.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
+      body: Column(
+        children: [
+          // Summary Card
+          _buildSlotSummaryCard(availabilityAsync, hasBookedThisMonth),
+
+          // Date Strip
+          _buildDateStrip(),
+
+          const SizedBox(height: 24),
+
+          // Slots Grid
+          Expanded(
+            child: Container(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _processBooking(slot),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(30),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
                   ),
-                ),
-                child: const Text(
-                  "Confirm & Generate pass",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                ],
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showSuccessQRDialog(VisitSlot slot) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 64),
-              const SizedBox(height: 16),
-              Text("Booking Confirmed!", style: AppTheme.headingMedium),
-              const SizedBox(height: 8),
-              Text("Here is your entry pass", style: AppTheme.bodyMedium),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      blurRadius: 10,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Available Slots", style: AppTheme.headingMedium),
+                        if (hasBookedThisMonth && bookedVisit != null)
+                          TextButton.icon(
+                            onPressed: () => _viewExistingPass(bookedVisit!),
+                            icon: const Icon(Icons.qr_code),
+                            label: const Text("View Pass"),
+                          ),
+                      ],
                     ),
-                  ],
-                ),
-                child: QrImageView(
-                  data:
-                      "VISIT-2024-${_selectedDate.month}-${_selectedDate.day}-${slot.time}",
-                  version: QrVersions.auto,
-                  size: 200.0,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Done"),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _viewExistingPass() {
-    if (_userBookingDate == null || _userBookingTime == null) return;
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Your Entry Pass", style: AppTheme.headingMedium),
-              const SizedBox(height: 8),
-              Text(
-                "${DateFormat('d MMM yyyy').format(_userBookingDate!)} at $_userBookingTime",
-                style: AppTheme.bodyLarge.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: QrImageView(
-                  data:
-                      "VISIT-2024-${_userBookingDate!.month}-${_userBookingDate!.day}-$_userBookingTime",
-                  version: QrVersions.auto,
-                  size: 200.0,
-                ),
-              ),
-              const SizedBox(height: 24),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Close"),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showBookingHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Filter keys starting with 'visit_booking_'
-    final keys = prefs
-        .getKeys()
-        .where((k) => k.startsWith('visit_booking_'))
-        .toList();
-
-    List<Map<String, dynamic>> bookings = [];
-    for (var key in keys) {
-      // Key: visit_booking_2024_12
-      // Value: 2024-12-19T...|09:00 AM
-      final value = prefs.getString(key);
-      if (value != null && value.contains('|')) {
-        final parts = value.split('|');
-        bookings.add({'date': DateTime.parse(parts[0]), 'time': parts[1]});
-      }
-    }
-
-    // Sort descending (newest first)
-    bookings.sort(
-      (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime),
-    );
-
-    if (!mounted) return;
-
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24.0),
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("My Bookings", style: AppTheme.headingMedium),
-            const SizedBox(height: 16),
-            Expanded(
-              child: bookings.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "No bookings found",
-                        style: TextStyle(color: Colors.grey),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: availabilityAsync.when(
+                        data: (data) => _buildTimeGrid(
+                          data?.availableSlots ?? <String>[],
+                          hasBookedThisMonth,
+                        ),
+                        error: (e, s) => Center(
+                          child: Text(
+                            "Could not load slots. Please try again.",
+                          ),
+                        ),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
                       ),
-                    )
-                  : ListView.builder(
-                      itemCount: bookings.length,
-                      itemBuilder: (context, index) {
-                        final booking = bookings[index];
-                        final date = booking['date'] as DateTime;
-                        final time = booking['time'] as String;
-                        final isPast = date.isBefore(
-                          DateTime.now().subtract(const Duration(days: 1)),
-                        );
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ListTile(
-                            leading: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: isPast
-                                    ? Colors.grey[200]
-                                    : AppTheme.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Icons.calendar_today,
-                                color: isPast ? Colors.grey : AppTheme.primary,
-                                size: 20,
-                              ),
-                            ),
-                            title: Text(
-                              DateFormat('MMM d, yyyy').format(date),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(time),
-                            trailing: isPast
-                                ? const Chip(
-                                    label: Text(
-                                      "Completed",
-                                      style: TextStyle(fontSize: 10),
-                                    ),
-                                  )
-                                : IconButton(
-                                    icon: const Icon(
-                                      Icons.qr_code,
-                                      color: AppTheme.primary,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context); // Close sheet
-                                      _showHistoricalQR(date, time);
-                                    },
-                                  ),
-                          ),
-                        );
-                      },
                     ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showHistoricalQR(DateTime date, String time) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Entry Pass", style: AppTheme.headingMedium),
-              const SizedBox(height: 8),
-              Text(
-                "${DateFormat('d MMM yyyy').format(date)} at $time",
-                style: AppTheme.bodyLarge.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      blurRadius: 10,
-                    ),
+                    const SizedBox(height: 20),
+                    _buildLegend(),
                   ],
                 ),
-                child: QrImageView(
-                  data: "VISIT-2024-${date.month}-${date.day}-$time",
-                  version: QrVersions.auto,
-                  size: 200.0,
-                ),
               ),
-              const SizedBox(height: 24),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Close"),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildSlotSummaryCard() {
-    final totalCapacity = _slots.fold<int>(
-      0,
-      (sum, s) => sum + s.totalCapacity,
-    );
-    final totalBooked = _slots.fold<int>(0, (sum, s) => sum + s.bookedCount);
-    final totalAvailable = (totalCapacity - totalBooked).clamp(
-      0,
-      totalCapacity,
-    );
+  Widget _buildSlotSummaryCard(
+    AsyncValue<VisitAvailability?> asyncData,
+    bool hasBooked,
+  ) {
+    int totalAvailable = 0;
+    // We don't have total capacity info from API, so just show available
+    asyncData.whenData((data) {
+      if (data != null) {
+        totalAvailable = data.availableSlots.length;
+      }
+    });
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -578,23 +216,7 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
                         ),
                       ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.04),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '$totalBooked / $totalCapacity',
-                        style: AppTheme.bodySmall.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
+                    // Removed total capacity badging as API doesn't support it
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -602,21 +224,31 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
                   children: [
                     Expanded(
                       child: _buildSummaryPill(
-                        title: 'Available',
+                        title: 'Available Slots',
                         value: totalAvailable.toString(),
                         color: Colors.green,
                         icon: Icons.event_available,
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildSummaryPill(
-                        title: 'Filled',
-                        value: totalBooked.toString(),
-                        color: Colors.red,
-                        icon: Icons.event_busy,
+                    if (hasBooked)
+                      Expanded(
+                        child: _buildSummaryPill(
+                          title: 'Status',
+                          value: 'Booked',
+                          color: AppTheme.primary,
+                          icon: Icons.check_circle,
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: _buildSummaryPill(
+                          title: 'Status',
+                          value: 'Open',
+                          color: Colors.orange,
+                          icon: Icons.event,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ],
@@ -663,93 +295,7 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Book Your Visit'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: _showBookingHistory,
-            tooltip: 'Booking History',
-          ),
-        ],
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => NavigationHelper.safePopOrNavigate(
-            context,
-            fallbackRoute: '/customer-dashboard',
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          _buildSlotSummaryCard(),
-
-          // 2. Date Strip
-          _buildDateStrip(),
-
-          const SizedBox(height: 24),
-
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(30),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Available Slots (${_slots.fold(0, (sum, s) => sum + (s.totalCapacity - s.bookedCount))}/${_slots.fold(0, (sum, s) => sum + s.totalCapacity)})",
-                          style: AppTheme.headingMedium,
-                        ),
-                        if (_hasBookedThisMonth)
-                          TextButton.icon(
-                            onPressed: _viewExistingPass,
-                            icon: const Icon(Icons.qr_code),
-                            label: const Text("View Pass"),
-                          ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    if (_isLoading)
-                      const Center(child: CircularProgressIndicator())
-                    else
-                      Expanded(child: _buildTimeGrid()),
-
-                    const SizedBox(height: 20),
-                    _buildLegend(),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDateStrip() {
-    // Generate next 30 days as per requirement (future bookings only within 30 days)
     final List<DateTime> dates = List.generate(
       30,
       (index) => DateTime.now().add(Duration(days: index)),
@@ -768,7 +314,12 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
               date.month == _selectedDate.month;
 
           return GestureDetector(
-            onTap: () => _onDateSelected(date),
+            onTap: () {
+              setState(() {
+                _selectedDate = date;
+                _selectedSlotTime = null; // Reset selection
+              });
+            },
             child: Container(
               width: 60,
               margin: const EdgeInsets.only(right: 12),
@@ -796,11 +347,7 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
                   ),
                   const SizedBox(height: 4),
                   if (isSelected)
-                    Container(
-                      height: 3,
-                      width: 20,
-                      color: AppTheme.successGreen,
-                    ),
+                    Container(height: 3, width: 20, color: AppTheme.primary),
                 ],
               ),
             ),
@@ -810,7 +357,29 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
     );
   }
 
-  Widget _buildTimeGrid() {
+  Widget _buildTimeGrid(List<String> availableSlots, bool hasBookedThisMonth) {
+    if (availableSlots.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.event_busy, size: 48, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              "No slots available",
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final now = DateTime.now();
+    final isToday =
+        _selectedDate.year == now.year &&
+        _selectedDate.month == now.month &&
+        _selectedDate.day == now.day;
+
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
@@ -818,32 +387,71 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),
-      itemCount: _slots.length,
+      itemCount: availableSlots.length,
       itemBuilder: (context, index) {
-        final slot = _slots[index];
-        bool isFull = slot.isFull;
-        bool isSelected = slot.isSelected;
-        int remaining = slot.totalCapacity - slot.bookedCount;
+        final time = availableSlots[index];
+        bool isSelected = _selectedSlotTime == time;
+        bool isExpired = false;
+
+        // Parse time to check expiry
+        DateTime? slotDateTime;
+        try {
+          final timeParts = time.split(':');
+          if (timeParts.length >= 2) {
+            slotDateTime = DateTime(
+              _selectedDate.year,
+              _selectedDate.month,
+              _selectedDate.day,
+              int.parse(timeParts[0]), // Hour
+              int.parse(timeParts[1]), // Minute
+            );
+          }
+        } catch (e) {
+          // ignore parse error
+        }
+
+        if (isToday && slotDateTime != null && slotDateTime.isBefore(now)) {
+          isExpired = true;
+        }
+
+        // Format time for display (09:00:00 -> 09:00 AM)
+        String displayTime = time;
+        try {
+          // Assume time is HH:mm:ss
+          final dt = DateFormat("HH:mm:ss").parse(time);
+          displayTime = DateFormat("h:mm a").format(dt);
+        } catch (e) {
+          // keep as is
+        }
 
         Color bgColor = Colors.transparent;
         Color borderColor = AppTheme.successGreen.withOpacity(0.3);
         Color textColor = Colors.black87;
-        Color subTextColor = Colors.grey[600]!;
 
-        if (isFull) {
+        if (isExpired) {
           bgColor = Colors.grey.shade100;
           borderColor = Colors.transparent;
           textColor = Colors.grey;
-          subTextColor = Colors.grey;
         } else if (isSelected) {
           bgColor = AppTheme.successGreen;
           borderColor = AppTheme.successGreen;
           textColor = Colors.white;
-          subTextColor = Colors.white.withValues(alpha: 0.9);
         }
 
         return InkWell(
-          onTap: isFull ? null : () => _onSlotTap(index),
+          onTap: (isExpired || hasBookedThisMonth)
+              ? (hasBookedThisMonth && !isExpired
+                    ? () => ToastUtils.showInfo(
+                        context,
+                        "You have already booked a slot for this month.",
+                      )
+                    : null)
+              : () {
+                  setState(() {
+                    _selectedSlotTime = time;
+                  });
+                  _showBookingConfirmation(time);
+                },
           borderRadius: BorderRadius.circular(12),
           child: Container(
             alignment: Alignment.center,
@@ -852,28 +460,14 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: borderColor, width: 1.5),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  slot.time.replaceAll(" AM", "\nAM").replaceAll(" PM", "\nPM"),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  isFull ? "Full" : "$remaining Available",
-                  style: TextStyle(
-                    color: subTextColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+            child: Text(
+              displayTime,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: textColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
             ),
           ),
         );
@@ -886,10 +480,7 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.primary.withOpacity(0.05),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(15),
-          topRight: Radius.circular(15),
-        ),
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -900,7 +491,11 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
             borderColor: AppTheme.successGreen.withOpacity(0.5),
           ),
           _buildLegendItem("Selected", AppTheme.successGreen),
-          _buildLegendItem("Booked", Colors.grey.shade300),
+          _buildLegendItem(
+            "Expired",
+            Colors.grey.shade100,
+            borderColor: Colors.transparent,
+          ),
         ],
       ),
     );
@@ -924,6 +519,361 @@ class _MonthlyVisitsScreenState extends State<MonthlyVisitsScreen> {
           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
       ],
+    );
+  }
+
+  void _showBookingConfirmation(String time) {
+    String displayTime = time;
+    try {
+      final dt = DateFormat("HH:mm:ss").parse(time);
+      displayTime = DateFormat("h:mm a").format(dt);
+    } catch (e) {
+      /*ignore*/
+    }
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Confirm Booking", style: AppTheme.headingMedium),
+            const SizedBox(height: 16),
+            Text(
+              "You are booking a visit on:",
+              style: AppTheme.bodyMedium.copyWith(color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today,
+                  color: AppTheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  DateFormat('EEEE, d MMMM yyyy').format(_selectedDate),
+                  style: AppTheme.bodyLarge.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(
+                  Icons.access_time,
+                  color: AppTheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  displayTime,
+                  style: AppTheme.bodyLarge.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _processBooking(time),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Confirm & Generate pass",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _processBooking(String time) async {
+    final authState = ref.read(authProvider);
+    final mobile = authState.mobileNumber;
+
+    if (mobile == null) {
+      ToastUtils.showError(context, "User not identified");
+      return;
+    }
+
+    // Format time to HH:mm if API expects that, but API docs example says "10:30".
+    // Available slots are "09:00:00". I will use 09:00.
+    String formattedTime = time;
+    try {
+      final dt = DateFormat("HH:mm:ss").parse(time);
+      formattedTime = DateFormat("HH:mm").format(dt);
+    } catch (e) {
+      // failed parse
+    }
+
+    final request = VisitBookingRequest(
+      farmLocation: _farmLocation,
+      locationId: _locationId,
+      startTime: formattedTime,
+      userMobile: mobile,
+      visitDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
+    );
+
+    Navigator.pop(context); // close confirmation sheet
+    // Show loading? or just await
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (c) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final visit = await ApiServices.bookVisit(request);
+
+    if (!mounted) return;
+    Navigator.pop(context); // close loading
+
+    if (visit != null) {
+      // Refresh history to show the new booking
+      ref.invalidate(myVisitsProvider);
+      // Refresh availability if needed
+      ref.invalidate(
+        visitAvailabilityProvider(
+          VisitAvailabilityParams(
+            date: DateFormat('yyyy-MM-dd').format(_selectedDate),
+            location: _farmLocation,
+          ),
+        ),
+      );
+
+      _showSuccessQRDialog(time);
+    } else {
+      ToastUtils.showError(context, "Booking failed. Please try again.");
+    }
+  }
+
+  void _showSuccessQRDialog(String time) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 64),
+              const SizedBox(height: 16),
+              Text("Booking Confirmed!", style: AppTheme.headingMedium),
+              const SizedBox(height: 8),
+              Text("Here is your entry pass", style: AppTheme.bodyMedium),
+              const SizedBox(height: 24),
+              _buildQrCode(_selectedDate, time),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Done"),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _viewExistingPass(Visit visit) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Your Entry Pass", style: AppTheme.headingMedium),
+              const SizedBox(height: 8),
+              Text(
+                "${visit.visitDate} at ${visit.startTime}",
+                style: AppTheme.bodyLarge.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              // We can use visit ID or similar for QR
+              _buildQrCode(DateTime.parse(visit.visitDate), visit.startTime),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Close"),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQrCode(DateTime date, String time) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 10),
+        ],
+      ),
+      child: QrImageView(
+        data: "VISIT-${date.year}-${date.month}-${date.day}-$time",
+        version: QrVersions.auto,
+        size: 200.0,
+      ),
+    );
+  }
+
+  void _showBookingHistory() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          final historyAsync = ref.watch(myVisitsProvider);
+
+          return Container(
+            padding: const EdgeInsets.all(24.0),
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("My Bookings", style: AppTheme.headingMedium),
+                    IconButton(
+                      onPressed: () => ref.invalidate(myVisitsProvider),
+                      icon: const Icon(Icons.refresh),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: historyAsync.when(
+                    data: (visits) {
+                      // Sort descending
+                      final sortedVisits = List<Visit>.from(visits);
+                      sortedVisits.sort(
+                        (a, b) => b.visitDate.compareTo(a.visitDate),
+                      );
+
+                      if (sortedVisits.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            "No bookings found",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        itemCount: sortedVisits.length,
+                        itemBuilder: (context, index) {
+                          final visit = sortedVisits[index];
+                          DateTime date;
+                          try {
+                            date = DateTime.parse(visit.visitDate);
+                          } catch (e) {
+                            date = DateTime.now();
+                          }
+
+                          final isPast = date.isBefore(
+                            DateTime.now().subtract(const Duration(days: 1)),
+                          );
+
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ListTile(
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: isPast
+                                      ? Colors.grey[200]
+                                      : AppTheme.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.calendar_today,
+                                  color: isPast
+                                      ? Colors.grey
+                                      : AppTheme.primary,
+                                  size: 20,
+                                ),
+                              ),
+                              title: Text(
+                                DateFormat('MMM d, yyyy').format(date),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text(visit.startTime),
+                              trailing: isPast
+                                  ? const Chip(
+                                      label: Text(
+                                        "Completed",
+                                        style: TextStyle(fontSize: 10),
+                                      ),
+                                    )
+                                  : IconButton(
+                                      icon: const Icon(
+                                        Icons.qr_code,
+                                        color: AppTheme.primary,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        _viewExistingPass(visit);
+                                      },
+                                    ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    error: (e, s) => Center(child: Text("Error: $e")),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
