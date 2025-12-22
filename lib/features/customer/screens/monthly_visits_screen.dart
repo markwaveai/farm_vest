@@ -664,13 +664,13 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
         ),
       );
 
-      _showSuccessQRDialog(time);
+      _showSuccessQRDialog(visit);
     } else {
       ToastUtils.showError(context, "Booking failed. Please try again.");
     }
   }
 
-  void _showSuccessQRDialog(String time) {
+  void _showSuccessQRDialog(Visit visit) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -687,7 +687,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
               const SizedBox(height: 8),
               Text("Here is your entry pass", style: AppTheme.bodyMedium),
               const SizedBox(height: 24),
-              _buildQrCode(_selectedDate, time),
+              _buildQrCode(visit),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
@@ -721,7 +721,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
               ),
               const SizedBox(height: 24),
               // We can use visit ID or similar for QR
-              _buildQrCode(DateTime.parse(visit.visitDate), visit.startTime),
+              _buildQrCode(visit),
               const SizedBox(height: 24),
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -734,7 +734,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     );
   }
 
-  Widget _buildQrCode(DateTime date, String time) {
+  Widget _buildQrCode(Visit visit) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -745,7 +745,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
         ],
       ),
       child: QrImageView(
-        data: "VISIT-${date.year}-${date.month}-${date.day}-$time",
+        data: visit.visitId, // Encoded visit ID for scanning
         version: QrVersions.auto,
         size: 200.0,
       ),
