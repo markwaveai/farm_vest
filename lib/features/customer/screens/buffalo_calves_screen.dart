@@ -49,7 +49,8 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
     // Combine parent and passed calves if needed.
     // If widget.parent has children populated, use them.
     // Otherwise attach widget.calves to widget.parent.
-
+ final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final effectiveRoot =
         widget.parent ?? Animal(id: widget.parentId, breedId: widget.parentId);
     // If the parent object doesn't have the children list populated but we have it in widget.calves:
@@ -59,11 +60,11 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
         : widget.calves;
 
     return Scaffold(
-      backgroundColor: AppTheme.lightGrey,
+      backgroundColor:isDark ? AppTheme.darkSurfaceVariant : AppTheme.lightGrey,
       appBar: AppBar(
         title: Text('Lineage: ${widget.parent?.breedId ?? widget.parentId}'),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor:isDark ? AppTheme.darkSurfaceVariant : Colors.white,
         elevation: 1,
       ),
       body: InteractiveViewer(

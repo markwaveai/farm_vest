@@ -48,7 +48,7 @@ class ApiServices {
   static Future<UnitResponse?> getUnits(String userId) async {
     try {
       final response = await http.get(
-        Uri.parse("${AppConstants.apiUrl}/purchases/units/$userId"),
+        Uri.parse("${AppConstants.apiUrl}/purchases/units/$userId?paymentStatus=PAID"),
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {

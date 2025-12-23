@@ -479,7 +479,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.05),
+        color: AppTheme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
@@ -493,7 +493,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
           _buildLegendItem("Selected", AppTheme.successGreen),
           _buildLegendItem(
             "Expired",
-            Colors.grey.shade100,
+            Colors.grey.shade400,
             borderColor: Colors.transparent,
           ),
         ],

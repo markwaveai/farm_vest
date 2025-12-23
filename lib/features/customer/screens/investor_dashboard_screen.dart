@@ -1,3 +1,5 @@
+import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:farm_vest/core/utils/svg_utils.dart';
 import 'package:farm_vest/features/customer/models/unit_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,7 @@ import '../../auth/providers/auth_provider.dart'; // Added import
 import '../providers/buffalo_provider.dart';
 import '../providers/dashboard_stats_provider.dart';
 import '../widgets/buffalo_card.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class InvestorDashboardScreen extends ConsumerStatefulWidget {
   const InvestorDashboardScreen({super.key});
@@ -23,6 +26,7 @@ class _CustomerDashboardScreenState
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late TextEditingController _searchController;
 
+  
   @override
   void initState() {
     super.initState();
@@ -55,6 +59,9 @@ class _CustomerDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallPhone = screenHeight < 600;
+    final isMediumPhone = screenHeight >= 600 && screenHeight < 800;
     final theme = Theme.of(context);
     final buffalos = ref.watch(filteredBuffaloListProvider);
     final stats = ref.watch(dashboardStatsProvider);
@@ -88,11 +95,16 @@ class _CustomerDashboardScreenState
             stats.when(
               data: (data) => Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 16,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmallPhone ? 0 : (isMediumPhone ? 2 : 12),
+                  vertical: isSmallPhone ? 12 : (isMediumPhone ? 14 : 16),
                 ),
-                margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                margin: EdgeInsets.fromLTRB(
+                  isSmallPhone ? 10 : 16,
+                  8,
+                  isSmallPhone ? 10 : 16,
+                  8,
+                ),
                 decoration: BoxDecoration(
                   color: theme.cardColor,
                   borderRadius: BorderRadius.circular(16),
@@ -118,6 +130,8 @@ class _CustomerDashboardScreenState
                         value: data['count'] ?? '0',
                         label: 'Total Units',
                         icon: Icons.grid_view,
+                        isSmallPhone: isSmallPhone,
+                        isMediumPhone: isMediumPhone,
                         isCompact: true,
                       ),
                     ),
@@ -127,6 +141,8 @@ class _CustomerDashboardScreenState
                         value: data['buffaloes'] ?? '0',
                         label: 'Buffaloes',
                         icon: Icons.pets,
+                        isSmallPhone: isSmallPhone,
+                        isMediumPhone: isMediumPhone,
                         isCompact: true,
                       ),
                     ),
@@ -135,16 +151,32 @@ class _CustomerDashboardScreenState
                         context,
                         value: data['calves'] ?? '0',
                         label: 'Calves',
-                        icon: Icons.child_care,
+                        icon: SvgPicture.string(
+                         
+                          height: 26,
+                          width: 26
+,                          SvgUtils.calvesSvg,
+                          fit: BoxFit.contain,
+                          color: AppTheme.secondary,
+                          colorFilter: ColorFilter.mode(
+                            Colors.red,
+                            BlendMode.srcIn,
+                         ),
+                        ),
+                        isSmallPhone: isSmallPhone,
+                        isMediumPhone: isMediumPhone,
                         isCompact: true,
                       ),
                     ),
                     Expanded(
                       child: _buildStatItem(
                         context,
-                        value: data['assetValue']?.toString() ?? '₹0',
+                        value: AppConstants.formatIndianCurrencyShort(data['assetValue']),
+                        
                         label: 'Asset Value',
                         icon: Icons.account_balance,
+                        isSmallPhone: isSmallPhone,
+                        isMediumPhone: isMediumPhone,
                         isCompact: true,
                       ),
                     ),
@@ -154,6 +186,8 @@ class _CustomerDashboardScreenState
                         value: data['revenue']?.toString() ?? '₹0',
                         label: 'Revenue',
                         icon: Icons.trending_up,
+                        isSmallPhone: isSmallPhone,
+                        isMediumPhone: isMediumPhone,
                         isCompact: true,
                       ),
                     ),
@@ -329,39 +363,62 @@ class _CustomerDashboardScreenState
     BuildContext context, {
     required String value,
     required String label,
-    required IconData icon,
+    required Object icon,
+    required bool isSmallPhone,
+    required bool isMediumPhone,
     bool isCompact = false,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final iconSize = isCompact ? 18.0 : 20.0;
-    final padding = isCompact ? 6.0 : 8.0;
+    final double iconSize = isCompact
+        ? (isSmallPhone ? 18.0 : (isMediumPhone ? 19.0 : 20.0))
+        : 20.0;
+    final double padding = isCompact
+        ? (isSmallPhone ? 4.0 : (isMediumPhone ? 5.0 : 6.0))
+        : 8.0;
+    final double gap = isCompact
+        ? (isSmallPhone ? 2.0 : (isMediumPhone ? 3.0 : 4.0))
+        : 8.0;
+    final double valueFontSize = isCompact
+        ? (isSmallPhone ? 13.0 : (isMediumPhone ? 14.0 : 16.0))
+        : 18.0;
+    final double labelFontSize = isCompact
+        ? (isSmallPhone ? 9.0 : (isMediumPhone ? 9.5 : 10.0))
+        : 12.0;
 
     final valueStyle =
         (isCompact ? theme.textTheme.titleMedium : theme.textTheme.titleLarge)
             ?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppTheme.secondary,
-              fontSize: isCompact ? 16 : null,
+              color:isDark ? AppTheme.white : AppTheme.secondary,
+              fontSize: isCompact ? valueFontSize : null,
             );
 
     final labelStyle = theme.textTheme.bodySmall?.copyWith(
-      fontSize: isCompact ? 10 : null,
+      fontSize: isCompact ? labelFontSize : null,
       color: isDark ? Colors.grey[400] : Colors.grey[600],
     );
+
+    final Widget iconWidget = icon is IconData
+        ? Icon(icon, color: AppTheme.secondary, size: iconSize)
+        : FittedBox(
+          fit: BoxFit.contain,
+          child: icon as Widget,
+        );
 
     return Column(
       children: [
         Container(
+         
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
-            color: AppTheme.secondary.withValues(alpha: 0.2),
+            color: isDark?AppTheme.white:AppTheme.secondary.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: AppTheme.secondary, size: iconSize),
+          child: iconWidget,
         ),
-        SizedBox(height: isCompact ? 4 : 8),
+        SizedBox(height: gap),
         Text(value, style: valueStyle),
         Text(label, style: labelStyle),
       ],
@@ -369,13 +426,18 @@ class _CustomerDashboardScreenState
   }
 
   Widget _buildGridView(List<Animal> buffalos) {
+    final height = MediaQuery.of(context).size.height;
+    final isSmallPhone = height < 700;
+    final isMediumPhone = height >= 700 && height < 800;
+    final childAspectRatio = isSmallPhone ? 0.71 : (isMediumPhone ? 0.76 : 0.75);
+
     return GridView.builder(
       padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
-        childAspectRatio: 0.82, // Optimized for content
+        childAspectRatio: childAspectRatio,
       ),
       itemCount: buffalos.length,
       itemBuilder: (context, index) {

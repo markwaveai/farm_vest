@@ -81,6 +81,7 @@ dependencies:
   # printing removed
   screen_protector: ^1.4.11
   qr_flutter: ^4.1.0
+  flutter_svg: ^2.2.3
 
 dependency_overrides:
   pinput: ^6.0.1
