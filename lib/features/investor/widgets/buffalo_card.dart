@@ -18,6 +18,7 @@ class BuffaloCard extends StatelessWidget {
   final bool showLiveButton; // Add flag to control live button visibility
   final VoidCallback? onTap;
   final VoidCallback? onCalvesTap;
+  final VoidCallback? onInvoiceTap;
 
   // Sample Murrah buffalo images
   static const List<String> murrahImages = [
@@ -39,6 +40,7 @@ class BuffaloCard extends StatelessWidget {
     this.showLiveButton = true, // Default to true
     this.onTap,
     this.onCalvesTap,
+    this.onInvoiceTap,
   });
 
   @override
@@ -93,8 +95,15 @@ class BuffaloCard extends StatelessWidget {
                   isSmallPhone: isSmallPhone,
                   isMediumPhone: isMediumPhone,
                 ),
-                _buildInfoSection(context, isSmallPhone: isSmallPhone,isMediumPhone:isMediumPhone),
-                _buildFooter(isSmallPhone: isSmallPhone, isMediumPhone:isMediumPhone),
+                _buildInfoSection(
+                  context,
+                  isSmallPhone: isSmallPhone,
+                  isMediumPhone: isMediumPhone,
+                ),
+                _buildFooter(
+                  isSmallPhone: isSmallPhone,
+                  isMediumPhone: isMediumPhone,
+                ),
               ],
             ),
           ),
@@ -109,9 +118,7 @@ class BuffaloCard extends StatelessWidget {
     required bool isSmallPhone,
     required bool isMediumPhone,
   }) {
-    final imageHeight = isSmallPhone
-        ? 105.0
-        : (isMediumPhone ? 125.0 : 140.0);
+    final imageHeight = isSmallPhone ? 105.0 : (isMediumPhone ? 125.0 : 140.0);
     final overlayPadding = isSmallPhone ? 6.0 : 8.0;
 
     return SizedBox(
@@ -197,6 +204,18 @@ class BuffaloCard extends StatelessWidget {
                 isMediumPhone: isMediumPhone,
               ),
             ),
+
+          // Top Left: Invoice Button
+          if (onInvoiceTap != null)
+            Positioned(
+              top: overlayPadding,
+              left: overlayPadding,
+              child: _buildInvoiceButton(
+                context,
+                isSmallPhone: isSmallPhone,
+                isMediumPhone: isMediumPhone,
+              ),
+            ),
         ],
       ),
     );
@@ -210,9 +229,7 @@ class BuffaloCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final paddingH = isSmallPhone ? 8.0 : 10.0;
-    final paddingV = isSmallPhone
-        ? 6.0
-        : (isMediumPhone ? 7.0 : 8.0);
+    final paddingV = isSmallPhone ? 6.0 : (isMediumPhone ? 7.0 : 8.0);
     final fontSize = isSmallPhone ? 10.0 : 11.0;
     final rowGap = isSmallPhone ? 3.0 : 4.0;
 
@@ -290,11 +307,12 @@ class BuffaloCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter({required bool isSmallPhone, required bool isMediumPhone}) {
+  Widget _buildFooter({
+    required bool isSmallPhone,
+    required bool isMediumPhone,
+  }) {
     final paddingH = isSmallPhone ? 8.0 : 10.0;
-    final paddingV = isSmallPhone
-        ? 6.0
-        : (isMediumPhone ? 7.0 : 8.0);
+    final paddingV = isSmallPhone ? 6.0 : (isMediumPhone ? 7.0 : 8.0);
     final badgeFont = isSmallPhone ? 9.0 : 10.0;
     final valueFont = isSmallPhone ? 12.0 : 13.0;
     final copyIconSize = isSmallPhone ? 13.0 : 14.0;
@@ -373,11 +391,7 @@ class BuffaloCard extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(5),
               ),
-              child: Icon(
-                Icons.copy,
-                size: copyIconSize,
-                color: Colors.white,
-              ),
+              child: Icon(Icons.copy, size: copyIconSize, color: Colors.white),
             ),
           ],
         ),
@@ -385,7 +399,10 @@ class BuffaloCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusChip({required bool isSmallPhone, required bool isMediumPhone}) {
+  Widget _buildStatusChip({
+    required bool isSmallPhone,
+    required bool isMediumPhone,
+  }) {
     Color statusColor = AppTheme.successGreen;
     if (healthStatus.toLowerCase().contains('warning')) {
       statusColor = AppTheme.warningOrange;
@@ -395,9 +412,7 @@ class BuffaloCard extends StatelessWidget {
 
     final fontSize = isSmallPhone ? 9.0 : 10.0;
     final paddingH = isSmallPhone ? 6.0 : 8.0;
-    final paddingV = isSmallPhone
-        ? 3.0
-        : (isMediumPhone ? 3.5 : 4.0);
+    final paddingV = isSmallPhone ? 3.0 : (isMediumPhone ? 3.5 : 4.0);
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
@@ -423,13 +438,14 @@ class BuffaloCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCalvesButton({required bool isSmallPhone, required bool isMediumPhone}) {
+  Widget _buildCalvesButton({
+    required bool isSmallPhone,
+    required bool isMediumPhone,
+  }) {
     final fontSize = isSmallPhone ? 9.0 : 10.0;
     final iconSize = isSmallPhone ? 11.0 : 12.0;
     final paddingH = isSmallPhone ? 6.0 : 8.0;
-    final paddingV = isSmallPhone
-        ? 4.0
-        : (isMediumPhone ? 4.5 : 5.0);
+    final paddingV = isSmallPhone ? 4.0 : (isMediumPhone ? 4.5 : 5.0);
 
     return GestureDetector(
       onTap: onCalvesTap,
@@ -470,9 +486,7 @@ class BuffaloCard extends StatelessWidget {
     final fontSize = isSmallPhone ? 9.0 : 10.0;
     final iconSize = isSmallPhone ? 11.0 : 12.0;
     final paddingH = isSmallPhone ? 6.0 : 8.0;
-    final paddingV = isSmallPhone
-        ? 4.0
-        : (isMediumPhone ? 4.5 : 5.0);
+    final paddingV = isSmallPhone ? 4.0 : (isMediumPhone ? 4.5 : 5.0);
 
     return GestureDetector(
       onTap: () {
@@ -498,6 +512,50 @@ class BuffaloCard extends StatelessWidget {
             SizedBox(width: isSmallPhone ? 3 : 4),
             Text(
               'Live',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInvoiceButton(
+    BuildContext context, {
+    required bool isSmallPhone,
+    required bool isMediumPhone,
+  }) {
+    final fontSize = isSmallPhone ? 9.0 : 10.0;
+    final iconSize = isSmallPhone ? 11.0 : 12.0;
+    final paddingH = isSmallPhone ? 6.0 : 8.0;
+    final paddingV = isSmallPhone ? 4.0 : (isMediumPhone ? 4.5 : 5.0);
+
+    return GestureDetector(
+      onTap: onInvoiceTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
+        decoration: BoxDecoration(
+          color: AppTheme.primary, // Or use a distinct color like purple/indigo
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primary.withValues(alpha: 0.4),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.receipt_long, size: iconSize, color: Colors.white),
+            SizedBox(width: isSmallPhone ? 3 : 4),
+            Text(
+              'Invoice',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: fontSize,

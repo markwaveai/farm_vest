@@ -1,8 +1,8 @@
 import 'package:buffalo_visualizer/providers/simulation_provider.dart';
 import 'package:buffalo_visualizer/widgets/monthly_revenue_break.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
-import 'package:farm_vest/features/customer/models/unit_response.dart';
-import 'package:farm_vest/features/customer/providers/buffalo_provider.dart';
+import 'package:farm_vest/features/investor/models/unit_response.dart';
+import 'package:farm_vest/features/investor/providers/buffalo_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';

@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../../features/auth/models/whatsapp_otp_response.dart';
 import '../../features/auth/models/user_model.dart';
-import 'package:farm_vest/features/customer/models/unit_response.dart';
+import 'package:farm_vest/features/investor/models/unit_response.dart';
 import 'package:flutter/foundation.dart';
-import '../../features/customer/models/visit_model.dart';
+import '../../features/investor/models/visit_model.dart';
 import '../theme/app_constants.dart';
 
 class ApiServices {

@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pinput/pinput.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/toast_utils.dart';
-import '../../customer/providers/buffalo_provider.dart';
+import '../../investor/providers/buffalo_provider.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/utils/app_enums.dart';
 

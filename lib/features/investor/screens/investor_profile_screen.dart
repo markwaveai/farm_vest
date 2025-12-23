@@ -3,10 +3,10 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/auth/models/user_model.dart';
 import 'package:farm_vest/features/auth/providers/auth_provider.dart';
-import 'package:farm_vest/features/customer/providers/buffalo_provider.dart';
+import 'package:farm_vest/features/investor/providers/buffalo_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:farm_vest/features/customer/models/unit_response.dart';
+import 'package:farm_vest/features/investor/models/unit_response.dart';
 import 'package:go_router/go_router.dart';
 
 class InvestorProfileScreen extends ConsumerStatefulWidget {

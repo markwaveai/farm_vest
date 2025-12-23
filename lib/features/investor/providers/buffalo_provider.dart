@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/api_services.dart';
 import '../../auth/providers/auth_provider.dart';
-import 'package:farm_vest/features/customer/models/unit_response.dart';
+import 'package:farm_vest/features/investor/models/unit_response.dart';
 // import 'package:flutter_riverpod/legacy.dart'; // Removing legacy if unused or keep if needed, but adding ApiServices
 
 // 1. Logic for the Filter State

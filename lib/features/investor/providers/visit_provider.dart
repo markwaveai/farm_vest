@@ -1,6 +1,6 @@
 import 'package:farm_vest/core/services/api_services.dart';
-import 'package:farm_vest/features/customer/models/visit_model.dart';
-import 'package:farm_vest/features/customer/models/visit_params.dart';
+import 'package:farm_vest/features/investor/models/visit_model.dart';
+import 'package:farm_vest/features/investor/models/visit_params.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 

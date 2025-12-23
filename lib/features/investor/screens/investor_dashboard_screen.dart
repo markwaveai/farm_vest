@@ -1,6 +1,6 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/svg_utils.dart';
-import 'package:farm_vest/features/customer/models/unit_response.dart';
+import 'package:farm_vest/features/investor/models/unit_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +11,7 @@ import '../providers/buffalo_provider.dart';
 import '../providers/dashboard_stats_provider.dart';
 import '../widgets/buffalo_card.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../widgets/invoice_screen.dart';
 
 class InvestorDashboardScreen extends ConsumerStatefulWidget {
   const InvestorDashboardScreen({super.key});
@@ -26,7 +27,6 @@ class _CustomerDashboardScreenState
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late TextEditingController _searchController;
 
-  
   @override
   void initState() {
     super.initState();
@@ -152,16 +152,15 @@ class _CustomerDashboardScreenState
                         value: data['calves'] ?? '0',
                         label: 'Calves',
                         icon: SvgPicture.string(
-                         
                           height: 26,
-                          width: 26
-,                          SvgUtils.calvesSvg,
+                          width: 26,
+                          SvgUtils.calvesSvg,
                           fit: BoxFit.contain,
                           color: AppTheme.secondary,
                           colorFilter: ColorFilter.mode(
                             Colors.red,
                             BlendMode.srcIn,
-                         ),
+                          ),
                         ),
                         isSmallPhone: isSmallPhone,
                         isMediumPhone: isMediumPhone,
@@ -171,8 +170,10 @@ class _CustomerDashboardScreenState
                     Expanded(
                       child: _buildStatItem(
                         context,
-                        value: AppConstants.formatIndianCurrencyShort(data['assetValue']),
-                        
+                        value: AppConstants.formatIndianCurrencyShort(
+                          data['assetValue'],
+                        ),
+
                         label: 'Asset Value',
                         icon: Icons.account_balance,
                         isSmallPhone: isSmallPhone,
@@ -391,7 +392,7 @@ class _CustomerDashboardScreenState
         (isCompact ? theme.textTheme.titleMedium : theme.textTheme.titleLarge)
             ?.copyWith(
               fontWeight: FontWeight.bold,
-              color:isDark ? AppTheme.white : AppTheme.secondary,
+              color: isDark ? AppTheme.white : AppTheme.secondary,
               fontSize: isCompact ? valueFontSize : null,
             );
 
@@ -402,18 +403,16 @@ class _CustomerDashboardScreenState
 
     final Widget iconWidget = icon is IconData
         ? Icon(icon, color: AppTheme.secondary, size: iconSize)
-        : FittedBox(
-          fit: BoxFit.contain,
-          child: icon as Widget,
-        );
+        : FittedBox(fit: BoxFit.contain, child: icon as Widget);
 
     return Column(
       children: [
         Container(
-         
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
-            color: isDark?AppTheme.white:AppTheme.secondary.withValues(alpha: 0.2),
+            color: isDark
+                ? AppTheme.white
+                : AppTheme.secondary.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: iconWidget,
@@ -429,7 +428,9 @@ class _CustomerDashboardScreenState
     final height = MediaQuery.of(context).size.height;
     final isSmallPhone = height < 700;
     final isMediumPhone = height >= 700 && height < 800;
-    final childAspectRatio = isSmallPhone ? 0.71 : (isMediumPhone ? 0.82 : 0.75);
+    final childAspectRatio = isSmallPhone
+        ? 0.71
+        : (isMediumPhone ? 0.82 : 0.75);
 
     return GridView.builder(
       padding: const EdgeInsets.all(8),
@@ -462,6 +463,31 @@ class _CustomerDashboardScreenState
           onTap: () {
             // Navigate to buffalo details with full object
             context.go('/unit-details', extra: {'buffalo': buffalo});
+          },
+          onInvoiceTap: () {
+            // Find relevant order
+            final unitResponse = ref.read(unitResponseProvider).value;
+            Order? order;
+            if (unitResponse?.orders != null) {
+              try {
+                order = unitResponse!.orders!.firstWhere(
+                  (o) => o.buffalos?.any((b) => b.id == buffalo.id) ?? false,
+                );
+              } catch (_) {}
+            }
+
+            if (order != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => InvoiceScreen(order: order!)),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Invoice not found for this unit"),
+                ),
+              );
+            }
           },
           onCalvesTap: calves.isNotEmpty
               ? () {
@@ -506,6 +532,31 @@ class _CustomerDashboardScreenState
           onTap: () {
             // Navigate to buffalo details
             context.go('/unit-details', extra: {'buffalo': buffalo});
+          },
+          onInvoiceTap: () {
+            // Find relevant order
+            final unitResponse = ref.read(unitResponseProvider).value;
+            Order? order;
+            if (unitResponse?.orders != null) {
+              try {
+                order = unitResponse!.orders!.firstWhere(
+                  (o) => o.buffalos?.any((b) => b.id == buffalo.id) ?? false,
+                );
+              } catch (_) {}
+            }
+
+            if (order != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => InvoiceScreen(order: order!)),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Invoice not found for this unit"),
+                ),
+              );
+            }
           },
           onCalvesTap: calves.isNotEmpty
               ? () {
