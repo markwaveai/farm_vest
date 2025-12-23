@@ -1,3 +1,4 @@
+import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/svg_utils.dart';
 import 'package:farm_vest/features/customer/models/unit_response.dart';
 import 'package:flutter/material.dart';
@@ -25,40 +26,7 @@ class _CustomerDashboardScreenState
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late TextEditingController _searchController;
 
-  String _formatIndianCurrencyShort(dynamic value) {
-    if (value == null) return '₹0';
-
-    num? amount;
-    if (value is num) {
-      amount = value;
-    } else {
-      final raw = value.toString();
-      final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
-      amount = num.tryParse(cleaned);
-    }
-
-    if (amount == null) return '₹0';
-
-    final isNegative = amount < 0;
-    final amt = amount.abs().round();
-
-    final cr = amt ~/ 10000000;
-    final afterCr = amt % 10000000;
-    final l = afterCr ~/ 100000;
-    final afterL = afterCr % 100000;
-    final k = afterL ~/ 1000;
-    final rem = afterL % 1000;
-
-    final parts = <String>[];
-    if (cr > 0) parts.add('${cr}Cr');
-    if (l > 0) parts.add('${l}L');
-    if (k > 0) parts.add('${k}K');
-    if (rem > 0 || parts.isEmpty) parts.add('$rem');
-
-    final text = '₹${parts.join(' ')}';
-    return isNegative ? '-$text' : text;
-  }
-
+  
   @override
   void initState() {
     super.initState();
@@ -203,7 +171,8 @@ class _CustomerDashboardScreenState
                     Expanded(
                       child: _buildStatItem(
                         context,
-                        value: _formatIndianCurrencyShort(data['assetValue']),
+                        value: AppConstants.formatIndianCurrencyShort(data['assetValue']),
+                        
                         label: 'Asset Value',
                         icon: Icons.account_balance,
                         isSmallPhone: isSmallPhone,

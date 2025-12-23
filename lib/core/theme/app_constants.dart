@@ -33,4 +33,38 @@ class AppConstants {
 
   // Headers
   static const String applicationJson = 'application/json';
+  static String formatIndianCurrencyShort(dynamic value) {
+    if (value == null) return '₹0';
+
+    num? amount;
+    if (value is num) {
+      amount = value;
+    } else {
+      final raw = value.toString();
+      final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
+      amount = num.tryParse(cleaned);
+    }
+
+    if (amount == null) return '₹0';
+
+    final isNegative = amount < 0;
+    final amt = amount.abs().round();
+
+    final cr = amt ~/ 10000000;
+    final afterCr = amt % 10000000;
+    final l = afterCr ~/ 100000;
+    final afterL = afterCr % 100000;
+    final k = afterL ~/ 1000;
+    final rem = afterL % 1000;
+
+    final parts = <String>[];
+    if (cr > 0) parts.add('${cr}Cr');
+    if (l > 0) parts.add('${l}L');
+    if (k > 0) parts.add('${k}K');
+    if (rem > 0 || parts.isEmpty) parts.add('$rem');
+
+    final text = '₹${parts.join(' ')}';
+    return isNegative ? '-$text' : text;
+  }
+
 }
