@@ -1,5 +1,7 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:farm_vest/features/auth/models/user_model.dart';
+import 'package:farm_vest/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -63,6 +65,8 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
+    final authState = ref.watch(authProvider);
+    final userData = authState.userData;
 
     return Scaffold(
       appBar: _currentIndex == 4
@@ -85,7 +89,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
                 ),
               ],
             ),
-      drawer: _buildDrawer(),
+      drawer: _buildDrawer(userData),
       body: widget.child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -192,7 +196,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
     );
   }
 
-  Widget _buildDrawer() {
+  Widget _buildDrawer(UserModel? userData) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -210,14 +214,14 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
                 ),
                 const SizedBox(height: AppConstants.spacingM),
                 Text(
-                  'FarmVest',
+                  userData?.name ?? '',
                   style: AppTheme.bodyMedium.copyWith(
                     color: AppTheme.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'farmvest@gmail.com',
+                  userData?.email??'',
                   style: AppTheme.bodySmall.copyWith(
                     color: AppTheme.white.withOpacity(0.8),
                   ),
@@ -232,7 +236,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             title: const Text('Dashboard'),
             onTap: () {
               context.pop(); // Close drawer
-              context.go('/customer-dashboard');
+              _onItemTapped(0);
             },
           ),
 
@@ -250,7 +254,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             title: const Text('Live CCTV'),
             onTap: () {
               context.pop();
-              context.go('/cctv-live');
+              _onItemTapped(2);
             },
           ),
 
@@ -259,7 +263,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             title: const Text('Revenue'),
             onTap: () {
               context.pop();
-              context.push('/revenue');
+              _onItemTapped(3);
             },
           ),
 
@@ -271,7 +275,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             title: const Text('Asset Valuation'),
             onTap: () {
               context.pop();
-              context.push('/asset-valuation');
+              _onItemTapped(1);
             },
           ),
 
@@ -293,7 +297,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             title: const Text('My Profile'),
             onTap: () {
               context.pop();
-              context.push('/customer-profile');
+              _onItemTapped(4);
             },
           ),
 

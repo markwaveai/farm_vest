@@ -429,7 +429,7 @@ class _CustomerDashboardScreenState
     final height = MediaQuery.of(context).size.height;
     final isSmallPhone = height < 700;
     final isMediumPhone = height >= 700 && height < 800;
-    final childAspectRatio = isSmallPhone ? 0.71 : (isMediumPhone ? 0.76 : 0.75);
+    final childAspectRatio = isSmallPhone ? 0.71 : (isMediumPhone ? 0.82 : 0.75);
 
     return GridView.builder(
       padding: const EdgeInsets.all(8),
