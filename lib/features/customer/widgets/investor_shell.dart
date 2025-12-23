@@ -103,7 +103,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             currentIndex: _currentIndex,
             onTap: _onItemTapped,
             type: BottomNavigationBarType.fixed,
-            selectedItemColor: AppTheme.secondary,
+            selectedItemColor: isDark ? AppTheme.white : AppTheme.secondary,
             unselectedItemColor: Colors.grey[600],
             showSelectedLabels: true,
             showUnselectedLabels: true,
