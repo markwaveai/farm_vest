@@ -1,4 +1,6 @@
 // App constants
+import 'package:intl/intl.dart';
+
 class AppConstants {
   static const String appName = 'FarmVest';
   static const String apiUrl =
@@ -6,6 +8,10 @@ class AppConstants {
   static const String visitApiUrl =
       'https://animalkart-farmvest-services-staging-jn6cma3vvq-el.a.run.app';
   static const String poweredBy = 'Powered by MarkWave';
+// responsive
+  static const double smallPhoneHeight = 600;
+  static const double mediumPhoneHeight = 800;
+  
 
   // Animation durations
   static const Duration shortAnimation = Duration(milliseconds: 300);
@@ -68,3 +74,13 @@ class AppConstants {
   }
 
 }
+
+class FormatUtils {
+  static const double halfUnitCost =
+        175000; // cost per 0.5 unit (1 buffalo + 1 calf)
+    static const double cpfPerUnit = 15000; // CPF per half unit
+  static String formatAmount(double amount) {
+    return NumberFormat.currency(locale: 'en_IN', symbol: 'Rs:').format(amount);
+  }
+}
+

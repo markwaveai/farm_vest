@@ -1,10 +1,10 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/svg_utils.dart';
 import 'package:farm_vest/features/investor/models/unit_response.dart';
+import 'package:farm_vest/features/investor/widgets/pdf_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../../core/theme/app_theme.dart';
 import '../../auth/providers/auth_provider.dart'; // Added import
 import '../providers/buffalo_provider.dart';
@@ -60,8 +60,8 @@ class _CustomerDashboardScreenState
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallPhone = screenHeight < 600;
-    final isMediumPhone = screenHeight >= 600 && screenHeight < 800;
+    final isSmallPhone = screenHeight < AppConstants.smallPhoneHeight;
+    final isMediumPhone = screenHeight >= AppConstants.smallPhoneHeight && screenHeight < AppConstants.mediumPhoneHeight;
     final theme = Theme.of(context);
     final buffalos = ref.watch(filteredBuffaloListProvider);
     final stats = ref.watch(dashboardStatsProvider);
@@ -437,7 +437,7 @@ class _CustomerDashboardScreenState
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
+        crossAxisSpacing: 0,
         childAspectRatio: childAspectRatio,
       ),
       itemCount: buffalos.length,
@@ -464,7 +464,7 @@ class _CustomerDashboardScreenState
             // Navigate to buffalo details with full object
             context.go('/unit-details', extra: {'buffalo': buffalo});
           },
-          onInvoiceTap: () {
+          onInvoiceTap: ()async {
             // Find relevant order
             final unitResponse = ref.read(unitResponseProvider).value;
             Order? order;
@@ -477,9 +477,14 @@ class _CustomerDashboardScreenState
             }
 
             if (order != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => InvoiceScreen(order: order!)),
+              final path = await InvoiceGenerator.generateInvoice(order);
+              if (!context.mounted) return;
+
+              Navigator.of(context, rootNavigator: true).push(
+                MaterialPageRoute(builder: (_) => InvoicePdfView(
+                  order: order!,
+                  filePath: path,
+                  )),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -533,7 +538,7 @@ class _CustomerDashboardScreenState
             // Navigate to buffalo details
             context.go('/unit-details', extra: {'buffalo': buffalo});
           },
-          onInvoiceTap: () {
+          onInvoiceTap: ()async {
             // Find relevant order
             final unitResponse = ref.read(unitResponseProvider).value;
             Order? order;
@@ -546,9 +551,11 @@ class _CustomerDashboardScreenState
             }
 
             if (order != null) {
+              final filePath = await InvoiceGenerator.generateInvoice(order!);
+              if (!context.mounted) return;
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => InvoiceScreen(order: order!)),
+                MaterialPageRoute(builder: (_) => InvoicePdfView(order: order!, filePath: filePath)),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(

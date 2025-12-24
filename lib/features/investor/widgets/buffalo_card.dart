@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -50,8 +51,9 @@ class BuffaloCard extends StatelessWidget {
     final imageUrl = murrahImages[random.nextInt(murrahImages.length)];
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallPhone = screenHeight < 600;
-    final isMediumPhone = screenHeight >= 600 && screenHeight < 800;
+    final isSmallPhone = AppConstants.smallPhoneHeight<600;
+    final isMediumPhone = AppConstants.mediumPhoneHeight >= AppConstants.smallPhoneHeight && screenHeight < 800;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -61,11 +63,9 @@ class BuffaloCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).brightness == Brightness.dark
-                ? AppTheme.darkSurface
+isDark                ? AppTheme.darkSurface
                 : AppTheme.beige.withValues(alpha: 0.3),
-            Theme.of(context).brightness == Brightness.dark
-                ? AppTheme.darkSurfaceVariant
+isDark                ? AppTheme.darkSurfaceVariant
                 : AppTheme.white,
           ],
         ),
@@ -95,12 +95,22 @@ class BuffaloCard extends StatelessWidget {
                   isSmallPhone: isSmallPhone,
                   isMediumPhone: isMediumPhone,
                 ),
-                _buildInfoSection(
-                  context,
-                  isSmallPhone: isSmallPhone,
-                  isMediumPhone: isMediumPhone,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                 
+                  children: [
+                    Expanded(
+                      child: _buildInfoSection(
+                        context,
+                        isSmallPhone: isSmallPhone,
+                        isMediumPhone: isMediumPhone,
+                      ),
+                    ),
+                   
+                  ],
                 ),
                 _buildFooter(
+                  context: context,
                   isSmallPhone: isSmallPhone,
                   isMediumPhone: isMediumPhone,
                 ),
@@ -204,18 +214,6 @@ class BuffaloCard extends StatelessWidget {
                 isMediumPhone: isMediumPhone,
               ),
             ),
-
-          // Top Left: Invoice Button
-          if (onInvoiceTap != null)
-            Positioned(
-              top: overlayPadding,
-              left: overlayPadding,
-              child: _buildInvoiceButton(
-                context,
-                isSmallPhone: isSmallPhone,
-                isMediumPhone: isMediumPhone,
-              ),
-            ),
         ],
       ),
     );
@@ -308,14 +306,14 @@ class BuffaloCard extends StatelessWidget {
   }
 
   Widget _buildFooter({
+    required BuildContext context,
     required bool isSmallPhone,
     required bool isMediumPhone,
   }) {
     final paddingH = isSmallPhone ? 8.0 : 10.0;
     final paddingV = isSmallPhone ? 6.0 : (isMediumPhone ? 7.0 : 8.0);
     final badgeFont = isSmallPhone ? 9.0 : 10.0;
-    final valueFont = isSmallPhone ? 12.0 : 13.0;
-    final copyIconSize = isSmallPhone ? 13.0 : 14.0;
+    final valueFont = isSmallPhone ? 12.0 : 10.0;
 
     return GestureDetector(
       onTap: () async {
@@ -383,16 +381,21 @@ class BuffaloCard extends StatelessWidget {
                 maxLines: 1,
               ),
             ),
-
-            // Copy Icon
-            Container(
-              padding: EdgeInsets.all(isSmallPhone ? 3 : 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(5),
+             // Copy Icon
+            // Container(
+            //   padding: EdgeInsets.all(isSmallPhone ? 3 : 4),
+            //   decoration: BoxDecoration(
+            //     color: Colors.white.withValues(alpha: 0.2),
+            //     borderRadius: BorderRadius.circular(5),
+            //   ),
+            //   child: Icon(Icons.copy, size: copyIconSize, color: Colors.white),
+            // ),
+            if (onInvoiceTap != null)
+              _buildInvoiceButton(
+                context,
+                isSmallPhone: isSmallPhone,
+                isMediumPhone: isMediumPhone,
               ),
-              child: Icon(Icons.copy, size: copyIconSize, color: Colors.white),
-            ),
           ],
         ),
       ),
@@ -530,7 +533,7 @@ class BuffaloCard extends StatelessWidget {
     required bool isMediumPhone,
   }) {
     final fontSize = isSmallPhone ? 9.0 : 10.0;
-    final iconSize = isSmallPhone ? 11.0 : 12.0;
+    final iconSize = isSmallPhone ? 11.0 : 13.0;
     final paddingH = isSmallPhone ? 6.0 : 8.0;
     final paddingV = isSmallPhone ? 4.0 : (isMediumPhone ? 4.5 : 5.0);
 
@@ -553,15 +556,15 @@ class BuffaloCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.receipt_long, size: iconSize, color: Colors.white),
-            SizedBox(width: isSmallPhone ? 3 : 4),
-            Text(
-              'Invoice',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            // SizedBox(width: isSmallPhone ? 3 : 4),
+            // Text(
+            //   'Invoice',
+            //   style: TextStyle(
+            //     color: Colors.white,
+            //     fontSize: fontSize,
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
           ],
         ),
       ),
