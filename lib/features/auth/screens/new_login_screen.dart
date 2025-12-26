@@ -1,5 +1,6 @@
 import '../../../core/widgets/primary_button.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,6 +45,43 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   }
 
   Future<void> _handleContinue() async {
+    if (kDebugMode && !_isOtpSent && _phoneNumber.length == 10) {
+      final loginData = await ref
+          .read(authProvider.notifier)
+          .completeLoginWithData(_phoneNumber);
+
+      if (!mounted) return;
+
+      final role = loginData['role'] as UserType;
+
+      if (role == UserType.customer) {
+        ref.invalidate(unitResponseProvider);
+      }
+
+      if (!mounted) return;
+
+      switch (role) {
+        case UserType.customer:
+          context.go('/customer-dashboard');
+          break;
+        case UserType.supervisor:
+          context.go('/supervisor-dashboard');
+          break;
+        case UserType.doctor:
+          context.go('/doctor-dashboard');
+          break;
+        case UserType.assistant:
+          context.go('/assistant-dashboard');
+          break;
+        case UserType.admin:
+          context.go('/admin-dashboard');
+          break;
+        default:
+          context.go('/customer-dashboard');
+      }
+      return;
+    }
+
     if (!_isOtpSent) {
       // Send OTP
       if (_phoneNumber.length == 10) {
