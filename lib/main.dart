@@ -1,3 +1,5 @@
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screen_protector/screen_protector.dart';
@@ -7,7 +9,12 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 
 void main() {
-  runApp(const ProviderScope(child: FarmVestApp()));
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => const ProviderScope(child: FarmVestApp()),
+    ),
+  );
 }
 
 class FarmVestApp extends ConsumerStatefulWidget {
@@ -42,6 +49,8 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
       themeMode: themeMode,
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
     );
   }
 }
