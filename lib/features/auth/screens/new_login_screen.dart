@@ -181,6 +181,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
+     resizeToAvoidBottomInset: true,
       backgroundColor: AppTheme.primary,
       body: SafeArea(
         child: Column(
@@ -263,19 +264,23 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
             const SizedBox(height: 32),
 
-            // White content area
-            Expanded(
-              child: Container(
-                width: double.infinity,
+              
+                  Expanded(
+                     child: Container( 
+                 width: double.infinity,
                 decoration: const BoxDecoration(
-                  color: AppTheme.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(40),
-                    topRight: Radius.circular(40),
+                    color: AppTheme.white,
+                      borderRadius: BorderRadius.only(
+                       topLeft: Radius.circular(40),
+                       topRight: Radius.circular(40),
+                         ),
+                        ),
+                 child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                   bottom: MediaQuery.of(context).viewInsets.bottom,
                   ),
-                ),
-                child: Column(
-                  children: [
+                   child: Column(
+             children: [
                     const SizedBox(height: 40),
 
                     // Phone number or OTP display
@@ -343,7 +348,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   ],
                 ),
               ),
-            ),
+            ),),
           ],
         ),
       ),

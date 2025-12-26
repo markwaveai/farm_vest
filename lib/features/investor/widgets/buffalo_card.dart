@@ -90,26 +90,19 @@ isDark                ? AppTheme.darkSurfaceVariant
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                AspectRatio(aspectRatio: 16/9,child: 
                 _buildImageSection(
                   imageUrl,
                   context,
                   isSmallPhone: isSmallPhone,
                   isMediumPhone: isMediumPhone,
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                 
-                  children: [
-                    Expanded(
-                      child: _buildInfoSection(
-                        context,
-                        isSmallPhone: isSmallPhone,
-                        isMediumPhone: isMediumPhone,
-                      ),
-                    ),
-                   
-                  ],
-                ),
+                ),),
+               
+              Expanded(child: _buildInfoSection( 
+                  context,
+                  isSmallPhone: isSmallPhone,
+                  isMediumPhone: isMediumPhone,
+                ),),
                 _buildFooter(
                   context: context,
                   isSmallPhone: isSmallPhone,

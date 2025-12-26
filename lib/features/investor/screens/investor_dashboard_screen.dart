@@ -1,6 +1,7 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/svg_utils.dart';
 import 'package:farm_vest/features/investor/models/unit_response.dart';
+import 'package:farm_vest/features/investor/widgets/floating_toast.dart';
 import 'package:farm_vest/features/investor/widgets/pdf_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -426,109 +427,97 @@ class _CustomerDashboardScreenState
       ],
     );
   }
+Widget _buildGridView(List<Animal> buffalos, BuildContext context) {
+  final screenWidth = MediaQuery.of(context).size.width;
 
-  Widget _buildGridView(List<Animal> buffalos, customContext) {
-    // final height = MediaQuery.of(customContext).size.height;
-    final screenWidth = MediaQuery.of(customContext).size.width;
-    //final screenHeight = MediaQuery.of(customContext).size.height;
+  return GridView.builder(
+    padding: const EdgeInsets.all(8),
 
+   
+    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: 220, 
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 8,
+      childAspectRatio: 0.72, 
+    ),
 
-    final isSmallPhone = screenWidth < 360;     
-    final isLargePhone = screenWidth >= 360 && screenWidth < 600;    
-    final isTablet = screenWidth >= 600;         
-     
-    // final childAspectRatio =
-    //  isSmallPhone
-    //     ? 0.71
-    //     : (isMediumPhone ? 0.71 : 1.5);
-    print(isTablet);
-    print(isLargePhone);
-    print(isSmallPhone);
+    itemCount: buffalos.length,
+    itemBuilder: (context, index) {
+      final buffalo = buffalos[index];
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(8),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 8,
-      
-        crossAxisSpacing: 8,
-        // childAspectRatio:  0.78,
-        childAspectRatio: isTablet ? 1.5 : isLargePhone ? 0.78 : 0.71,
+      final allAnimals = ref.read(rawBuffaloListProvider).value ?? [];
+      List<Animal> calves = buffalo.children ?? [];
+      if (calves.isEmpty) {
+        calves = allAnimals.where((a) => a.parentId == buffalo.id).toList();
+      }
 
-        //: (isMediumPhone? 0.78 : 0.71),
-      ),
-      itemCount: buffalos.length,
-      itemBuilder: (context, index) {
-        final buffalo = buffalos[index];
+      return BuffaloCard(
+        farmName: buffalo.farmName ?? 'FarmVest Unit',
+        location: buffalo.farmLocation ?? 'Kurnool',
+        id: buffalo.id ?? 'Unknown ID',
+        healthStatus: buffalo.healthStatus ?? 'Healthy',
+        lastMilking: 'Checked recently',
+        age: '${buffalo.ageYears ?? 0} years',
+        breed: buffalo.breedId ?? 'Unknown Breed',
+        isGridView: true,
 
-        // Check for calves
-        final allAnimals = ref.read(rawBuffaloListProvider).value ?? [];
-        List<Animal> calves = buffalo.children ?? [];
-        if (calves.isEmpty) {
-          calves = allAnimals.where((a) => a.parentId == buffalo.id).toList();
-        }
+        onTap: () {
+          context.go('/unit-details', extra: {'buffalo': buffalo});
+        },
 
-        return BuffaloCard(
-          farmName: buffalo.farmName ?? 'FarmVest Unit',
-          location: buffalo.farmLocation ?? 'Kurnool',
-          id: buffalo.id ?? 'Unknown ID',
-          healthStatus: buffalo.healthStatus ?? 'Healthy',
-          lastMilking: 'Checked recently',
-          age: '${buffalo.ageYears ?? 0} years',
-          breed: buffalo.breedId ?? 'Unknown Breed',
-          isGridView: true,
-          onTap: () {
-            // Navigate to buffalo details with full object
-            context.go('/unit-details', extra: {'buffalo': buffalo});
-          },
-          onInvoiceTap: ()async {
-            // Find relevant order
-            final unitResponse = ref.read(unitResponseProvider).value;
-            Order? order;
-            if (unitResponse?.orders != null) {
-              try {
-                order = unitResponse!.orders!.firstWhere(
-                  (o) => o.buffalos?.any((b) => b.id == buffalo.id) ?? false,
-                );
-              } catch (_) {}
-            }
+        onInvoiceTap: () async {
+          final unitResponse = ref.read(unitResponseProvider).value;
+          Order? order;
 
-            if (order != null) {
-              final path = await InvoiceGenerator.generateInvoice(order);
-              if (!context.mounted) return;
+          if (unitResponse?.orders != null) {
+            try {
+              order = unitResponse!.orders!.firstWhere(
+                (o) => o.buffalos?.any((b) => b.id == buffalo.id) ?? false,
+              );
+            } catch (_) {}
+          }
 
-              Navigator.of(context, rootNavigator: true).push(
-                MaterialPageRoute(builder: (_) => InvoicePdfView(
+          if (order != null) {
+            final path = await InvoiceGenerator.generateInvoice(order);
+            if (!context.mounted) return;
+
+            Navigator.of(context, rootNavigator: true).push(
+              MaterialPageRoute(
+                builder: (_) => InvoicePdfView(
                   order: order!,
                   filePath: path,
-                  )),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Invoice not found for this unit"),
                 ),
-              );
-            }
+              ),
+            );
+          } else {
+            FloatingToast.showSimpleToast(
+              "Invoice not found for this unit",
+            );
+          
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   const SnackBar(content: Text("Invoice not found for this unit")),
+            //);
+          }
+        },
 
-            
-          },
-          onCalvesTap: calves.isNotEmpty
-              ? () {
-                  context.push(
-                    '/buffalo-calves',
-                    extra: {
-                      'calves': calves,
-                      'parentId': buffalo.id ?? 'Unknown',
-                      'parent': buffalo,
-                    },
-                  );
-                }
-              : null,
-        );
-      },
-    );
-  }
+        onCalvesTap: calves.isNotEmpty
+            ? () {
+                context.push(
+                  '/buffalo-calves',
+                  extra: {
+                    'calves': calves,
+                    'parentId': buffalo.id ?? 'Unknown',
+                    'parent': buffalo,
+                  },
+                );
+              }
+            : null,
+      );
+    },
+  );
+}
+
+  
 
   Widget _buildListView(List<Animal> buffalos) {
     return ListView.builder(
