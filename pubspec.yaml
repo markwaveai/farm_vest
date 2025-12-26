@@ -83,8 +83,11 @@ dependencies:
   flutter_svg: ^2.2.3
   pdf: ^3.11.3
   printing: ^5.14.2
+<<<<<<< Updated upstream
   flutter_pdfview: ^1.4.3
   flutter_file_dialog: ^3.0.3
+=======
+>>>>>>> Stashed changes
 
 dependency_overrides:
   pinput: ^6.0.1
