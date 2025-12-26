@@ -8,10 +8,9 @@ class AppConstants {
   static const String visitApiUrl =
       'https://animalkart-farmvest-services-staging-jn6cma3vvq-el.a.run.app';
   static const String poweredBy = 'Powered by MarkWave';
-// responsive
-  static const double smallPhoneHeight = 600;
-  static const double mediumPhoneHeight = 800;
-  
+  static const double tabletMaxheight=900;
+  static const double smallphoneheight=600;
+  static const double mediumphoneheight=800;
 
   // Animation durations
   static const Duration shortAnimation = Duration(milliseconds: 300);

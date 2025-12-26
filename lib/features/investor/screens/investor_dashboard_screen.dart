@@ -60,9 +60,12 @@ class _CustomerDashboardScreenState
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallPhone = screenHeight < AppConstants.smallPhoneHeight;
-    final isMediumPhone = screenHeight >= AppConstants.smallPhoneHeight && screenHeight < AppConstants.mediumPhoneHeight;
+    final isSmallPhone = screenHeight < AppConstants.smallphoneheight;
+    final isMediumPhone = screenHeight >= AppConstants.smallphoneheight && screenHeight < AppConstants.mediumphoneheight;
+    final isTablet =
+     MediaQuery.of(context).size.height >= AppConstants.tabletMaxheight;
     final theme = Theme.of(context);
+    
     final buffalos = ref.watch(filteredBuffaloListProvider);
     final stats = ref.watch(dashboardStatsProvider);
 
@@ -247,7 +250,7 @@ class _CustomerDashboardScreenState
                 data: (data) => data.isEmpty
                     ? const Center(child: Text('No buffaloes found'))
                     : (_isGridView
-                          ? _buildGridView(data)
+                          ? _buildGridView(data, context)
                           : _buildListView(data)),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, stack) =>
@@ -424,21 +427,35 @@ class _CustomerDashboardScreenState
     );
   }
 
-  Widget _buildGridView(List<Animal> buffalos) {
-    final height = MediaQuery.of(context).size.height;
-    final isSmallPhone = height < 700;
-    final isMediumPhone = height >= 700 && height < 800;
-    final childAspectRatio = isSmallPhone
-        ? 0.71
-        : (isMediumPhone ? 0.82 : 0.75);
+  Widget _buildGridView(List<Animal> buffalos, customContext) {
+    // final height = MediaQuery.of(customContext).size.height;
+    final screenWidth = MediaQuery.of(customContext).size.width;
+    //final screenHeight = MediaQuery.of(customContext).size.height;
+
+
+    final isSmallPhone = screenWidth < 360;     
+    final isLargePhone = screenWidth >= 360 && screenWidth < 600;    
+    final isTablet = screenWidth >= 600;         
+     
+    // final childAspectRatio =
+    //  isSmallPhone
+    //     ? 0.71
+    //     : (isMediumPhone ? 0.71 : 1.5);
+    print(isTablet);
+    print(isLargePhone);
+    print(isSmallPhone);
 
     return GridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 8,
-        crossAxisSpacing: 0,
-        childAspectRatio: childAspectRatio,
+      
+        crossAxisSpacing: 8,
+        // childAspectRatio:  0.78,
+        childAspectRatio: isTablet ? 1.5 : isLargePhone ? 0.78 : 0.71,
+
+        //: (isMediumPhone? 0.78 : 0.71),
       ),
       itemCount: buffalos.length,
       itemBuilder: (context, index) {
@@ -493,6 +510,8 @@ class _CustomerDashboardScreenState
                 ),
               );
             }
+
+            
           },
           onCalvesTap: calves.isNotEmpty
               ? () {

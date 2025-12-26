@@ -51,11 +51,12 @@ class BuffaloCard extends StatelessWidget {
     final imageUrl = murrahImages[random.nextInt(murrahImages.length)];
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallPhone = AppConstants.smallPhoneHeight<600;
-    final isMediumPhone = AppConstants.mediumPhoneHeight >= AppConstants.smallPhoneHeight && screenHeight < 800;
+    final isSmallPhone = AppConstants.smallphoneheight<600;
+    final isMediumPhone = AppConstants.mediumphoneheight >= AppConstants.smallphoneheight && screenHeight < 800;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
+      
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),

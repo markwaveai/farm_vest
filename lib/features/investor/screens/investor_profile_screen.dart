@@ -90,10 +90,12 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    
     final authState = ref.watch(authProvider);
     final userData = authState.userData;
     final unitResponse = ref.watch(unitResponseProvider).value;
-
+ final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
@@ -124,12 +126,12 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
             const SizedBox(height: AppConstants.spacingL),
 
             // Profile Details
-            _buildProfileForm(userData, unitResponse),
+            _buildProfileForm(userData, unitResponse,isDark: isDark,theme: theme),
 
             const SizedBox(height: AppConstants.spacingL),
 
             // Account Actions
-            _buildAccountActions(),
+            _buildAccountActions(isDark: isDark,theme: theme),
           ],
         ),
       ),
@@ -175,7 +177,7 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     );
   }
 
-  Widget _buildProfileForm(UserModel? userData, UnitResponse? unitResponse) {
+  Widget _buildProfileForm(UserModel? userData, UnitResponse? unitResponse, {required bool isDark, required ThemeData theme}) {
     DateTime? membershipSince;
     if (unitResponse?.orders?.isNotEmpty ?? false) {
       final dates = unitResponse!.orders!
@@ -200,6 +202,8 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildFormField(
+            theme: theme,
+            isDark: isDark,
             label: 'Full Name',
             controller: _nameController,
             icon: Icons.person,
@@ -207,6 +211,8 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
           ),
           const SizedBox(height: AppConstants.spacingM),
           _buildFormField(
+            theme: theme,
+            isDark: isDark,
             label: 'Email',
             controller: _emailController,
             icon: Icons.email,
@@ -214,6 +220,8 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
           ),
           const SizedBox(height: AppConstants.spacingM),
           _buildFormField(
+            theme: theme,
+            isDark: isDark,
             label: 'Phone',
             controller: _phoneController,
             icon: Icons.phone,
@@ -221,6 +229,8 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
           ),
           const SizedBox(height: AppConstants.spacingM),
           _buildFormField(
+            theme: theme,
+            isDark: isDark,
             label: 'Address',
             controller: _addressController,
             icon: Icons.location_on,
@@ -230,7 +240,9 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
           const SizedBox(height: AppConstants.spacingL),
 
           // Read-only fields
-          _buildReadOnlyField(
+          _buildReadOnlyField( 
+            theme: theme,
+            isDark: isDark,
             label: 'Membership Since',
             value: formattedDate,
             icon: Icons.calendar_today,
@@ -246,18 +258,57 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     required IconData icon,
     int maxLines = 1,
     bool enabled = false,
+    required bool isDark,
+    required ThemeData theme
   }) {
+    
+ 
     return TextFormField(
       controller: controller,
       enabled: enabled,
+      style: TextStyle(color:theme.colorScheme.onSurface,
+      ),
       decoration: InputDecoration(
         labelText: label,
+        hintText: label,
+        labelStyle: TextStyle(
+          color: isDark?  Colors.white:Colors.black87,
+          //theme.colorScheme.onSurface.withValues(
+            //alpha:  0.7,
+          //),
+          
+        ),
+        hintStyle: TextStyle(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.6)
+            : Colors.grey.shade600,
+      ),
         prefixIcon: Icon(icon, color: AppTheme.primary),
-        border: const OutlineInputBorder(),
-        filled: !enabled,
+       border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: theme.dividerColor,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+       focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: AppTheme.primary,
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+        //border: const OutlineInputBorder(),
+        //filled: !enabled,
+        filled: true,
+        // fillColor: enabled
+        //     ? Colors.white
+        //     : AppTheme.lightGrey.withValues(alpha: 0.3),
         fillColor: enabled
-            ? Colors.white
-            : AppTheme.lightGrey.withValues(alpha: 0.3),
+        ? theme.colorScheme.surface
+        : theme.colorScheme.onSurface.withValues(alpha: 0.03),
       ),
       maxLines: maxLines,
       readOnly: !enabled,
@@ -274,27 +325,49 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     required String label,
     required String value,
     required IconData icon,
+    required ThemeData theme,
+    required bool isDark,
   }) {
+  
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: AppTheme.bodySmall.copyWith(color: AppTheme.mediumGrey),
+          
+           style: AppTheme.bodySmall.copyWith(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.7)
+              : AppTheme.mediumGrey,
+        ),
+          //  AppTheme.bodySmall.copyWith(
+          //   color: AppTheme.mediumGrey
+          //   ),
         ),
         const SizedBox(height: 4),
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppTheme.lightGrey.withValues(alpha: 0.3),
+            //color: AppTheme.lightGrey.withValues(alpha: 0.3),
+             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.grey.shade400),
+            border: Border.all(
+               color: isDark
+                ? Colors.white.withValues(alpha: 0.15)
+                : Colors.grey.shade400,
+             // color: Colors.grey.shade400
+              ),
           ),
           child: Row(
             children: [
               Icon(icon, color: AppTheme.primary, size: 20),
               const SizedBox(width: 12),
-              Text(value, style: AppTheme.bodyMedium),
+              Text(value, 
+              style: AppTheme.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+              //style: AppTheme.bodyMedium
+              ),
             ],
           ),
         ),
@@ -302,25 +375,34 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     );
   }
 
-  Widget _buildAccountActions() {
+  Widget _buildAccountActions(
+  { required bool isDark,
+     required ThemeData theme}) {
+    
+    
     return Column(
       children: [
         ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          tileColor: Colors.grey.shade50,
+         // tileColor: Colors.grey.shade50,
+         tileColor: theme.colorScheme.surface,
           leading: const Icon(Icons.help_outline, color: AppTheme.primary),
-          title: const Text('Help & Support'),
+          title: const Text('Help & Support'
+          ),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () => context.go('/support'),
         ),
         const SizedBox(height: 8),
         ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          tileColor: Colors.grey.shade50,
+          //tileColor: Colors.grey.shade50,
+          tileColor: theme.colorScheme.surface,
           leading: const Icon(Icons.logout, color: AppTheme.errorRed),
           title: const Text(
             'Logout',
-            style: TextStyle(color: AppTheme.errorRed),
+            style: TextStyle(
+              color: AppTheme.errorRed),
+          
           ),
           onTap: _showLogoutDialog,
         ),

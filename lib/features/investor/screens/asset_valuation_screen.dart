@@ -245,16 +245,26 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
     IconData icon,
     Color color,
   ) {
+     final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       constraints: const BoxConstraints(minHeight: 100),
       decoration: BoxDecoration(
-        color: Colors.white,
+        //color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(
+         // color: Colors.grey.shade200
+             color: theme.dividerColor,
+          ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.05),
+            //color: Colors.grey.withValues(alpha: 0.05),
+            color: isDark
+              ? AppTheme.black.withValues(alpha: 0.6)
+              : AppTheme.grey.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -275,16 +285,21 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
           const SizedBox(height: 12),
           Text(
             title,
-            style: TextStyle(
+            
+             style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            // TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade600,
+             // color: Colors.grey.shade600,
+             
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: TextStyle(
+            // style: TextStyle(
+             style: theme.textTheme.titleMedium?.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.grey.shade900,

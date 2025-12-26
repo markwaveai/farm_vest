@@ -225,7 +225,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
     return monthlyRevenue;
   }
 
-  Widget _buildTopStats(Map<String, dynamic> treeData, double totalRevenue) {
+  Widget _buildTopStats(Map<String, dynamic> treeData, double totalRevenue,bool isDark) {
     final duration = (treeData['years'] as int?) ?? 10;
     final avgMonthly = totalRevenue > 0 ? totalRevenue / (duration * 12) : 0;
 
@@ -235,6 +235,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
         children: [
           Expanded(
             child: _buildStatCard(
+              isDark,
               'Total Projected\nRevenue',
               _currencyFormat.format(totalRevenue),
               Icons.account_balance_wallet,
@@ -244,6 +245,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
           const SizedBox(width: AppConstants.spacingM),
           Expanded(
             child: _buildStatCard(
+              isDark,
               'Monthly\nAverage',
               _currencyFormat.format(avgMonthly),
               Icons.calendar_today,
@@ -256,21 +258,33 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
   }
 
   Widget _buildStatCard(
+    
+    bool isDark,
     String title,
     String value,
     IconData icon,
     Color color,
   ) {
+    // final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       constraints: const BoxConstraints(minHeight: 100),
       decoration: BoxDecoration(
-        color: Colors.white,
+       // color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        //border: Border.all(color: Colors.grey.shade200),
+        color: isDark ? const Color(0xFF1E1E1E) : AppTheme.white,
+        border: Border.all(
+        color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+         ),
+
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.05),
+           // color: Colors.grey.withValues(alpha: 0.05),
+           color: isDark
+    ? AppTheme.black.withValues(alpha: 0.6)
+    : AppTheme.grey.withValues(alpha: 0.05),
+
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -293,7 +307,8 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
             title,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade600,
+             // color: Colors.grey.shade600,
+              color:isDark?Colors.grey.shade400: Colors.grey.shade600,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -303,7 +318,8 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade900,
+              color: isDark? AppTheme.white : Colors.grey.shade900,
+              //color: Colors.grey.shade900,
             ),
           ),
         ],
@@ -314,6 +330,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
   @override
   Widget build(BuildContext context) {
     final simState = ref.watch(simulationProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Listen for data loading to sync units
     ref.listen(unitResponseProvider, (prev, next) {
@@ -341,7 +358,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
               padding: const EdgeInsets.all(AppConstants.spacingM),
               child: Column(
                 children: [
-                  _buildTopStats(simState.treeData!, totalRevenue),
+                  _buildTopStats(simState.treeData!, totalRevenue,isDark),
                   MonthlyRevenueBreakWidget(
                     treeData: simState.treeData!,
                     buffaloDetails: buffaloDetails,

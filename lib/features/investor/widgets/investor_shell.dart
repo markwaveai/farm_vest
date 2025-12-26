@@ -244,8 +244,11 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             leading: const Icon(Icons.calendar_today, color: AppTheme.primary),
             title: const Text('Monthly Visits'),
             onTap: () {
-              context.pop();
-              context.push('/monthly-visits');
+              context.pop(context);
+              Future.microtask((){
+                 context.go('/monthly-visits');
+              });
+             // context.push('/monthly-visits');
             },
           ),
 
@@ -273,10 +276,18 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
               color: AppTheme.primary,
             ),
             title: const Text('Asset Valuation'),
+            // onTap: () {
+            //   context.pop(context);
+            //   context.push('/asset-valuation');
+            // },
+
+
             onTap: () {
               context.pop();
               _onItemTapped(1);
             },
+
+            
           ),
 
           const Divider(),
@@ -286,8 +297,11 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             leading: const Icon(Icons.help_outline, color: AppTheme.primary),
             title: const Text('Help & Support'),
             onTap: () {
-              context.pop();
-              context.push('/support');
+              context.pop(context);
+              Future.microtask(() {
+                 context.go('/support');
+              });
+              //context.push('/support');
             },
           ),
 
@@ -311,7 +325,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
               style: TextStyle(color: AppTheme.errorRed),
             ),
             onTap: () {
-              context.pop(); // Close drawer
+              context.pop(context); // Close drawer
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(

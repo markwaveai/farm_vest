@@ -14,10 +14,17 @@ class AppTheme {
   static const Color lightPrimary = Color(0xFF4CAF50);
   static const Color darkSecondary = Color(0xFFE64A19);
   static const Color lightSecondary = Color(0xFFFF8A65);
+  
+  
 
   // Standard Colors
   static const Color white = Color(0xFFFFFFFF);
+ 
+  static const Color grey1 = Color(0xFF9E9E9E);
+  static const Color black = Color(0xFF000000);
+  static const Color black87 = Color(0xDD000000);
   static const Color lightGrey = Color(0xFFF5F5F5);
+  static const Color grey = Color(0xFFFAFAFA);
   static const Color mediumGrey = Color(0xFF9E9E9E);
   static const Color darkGrey = dark; // Mapped to brand dark
 
@@ -75,7 +82,7 @@ class AppTheme {
   );
 
   // Theme data
-  static ThemeData get lightTheme {
+  static ThemeData get lightTheme {   
     return ThemeData(
       primarySwatch: Colors.green,
       primaryColor: primary,

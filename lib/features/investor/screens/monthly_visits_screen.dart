@@ -29,6 +29,10 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+
     // 1. Availability Request
     final availabilityAsync = ref.watch(
       visitAvailabilityProvider(
@@ -86,7 +90,8 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
           _buildSlotSummaryCard(availabilityAsync, hasBookedThisMonth),
 
           // Date Strip
-          _buildDateStrip(),
+          _buildDateStrip(
+            theme,  isDark),
 
           const SizedBox(height: 24),
 
@@ -95,7 +100,8 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white,
+               // color: Colors.white,
+               color: theme.colorScheme.surface,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(30),
                 ),
@@ -112,15 +118,34 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                   
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Available Slots", style: AppTheme.headingMedium),
+                        Text("Available Slots",
+                         style: AppTheme.headingMedium.copyWith(
+                          color: theme.colorScheme.onSurface,
+                         )
+                         ),
                         if (hasBookedThisMonth && bookedVisit != null)
                           TextButton.icon(
-                            onPressed: () => _viewExistingPass(bookedVisit!),
-                            icon: const Icon(Icons.qr_code),
-                            label: const Text("View Pass"),
+                            onPressed: () => _viewExistingPass(bookedVisit!,
+                            ),
+                            icon: Icon(Icons.qr_code, size: 20,
+                        
+
+                           color: isDark? AppTheme.white : AppTheme.black87,
+                           
+                            ),
+                            label:  Text("View Pass",
+                             style: 
+                             TextStyle(
+                              color: isDark? AppTheme.white : AppTheme.black87,
+                              
+                              fontWeight: FontWeight.w600,
+                             )
+                            ),
                           ),
                       ],
                     ),
@@ -128,8 +153,11 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                     Expanded(
                       child: availabilityAsync.when(
                         data: (data) => _buildTimeGrid(
+                          
                           data?.availableSlots ?? <String>[],
                           hasBookedThisMonth,
+                          isDark,
+                          theme,
                         ),
                         error: (e, s) => Center(
                           child: Text(
@@ -268,7 +296,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.black.withOpacity(0.06)),
       ),
@@ -295,7 +323,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     );
   }
 
-  Widget _buildDateStrip() {
+  Widget _buildDateStrip(ThemeData theme,bool isDark) {
     final List<DateTime> dates = List.generate(
       30,
       (index) => DateTime.now().add(Duration(days: index)),
@@ -323,13 +351,17 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
             child: Container(
               width: 60,
               margin: const EdgeInsets.only(right: 12),
+
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  Text(  
                     DateFormat('E').format(date),
-                    style: TextStyle(
-                      color: isSelected ? Colors.black : Colors.grey,
+                    style: TextStyle( 
+                      color: isSelected 
+                       ? theme.colorScheme.onSurface
+                       : theme.colorScheme.onSurface.withOpacity(0.6),
+                      //Colors.black : Colors.grey,
                       fontWeight: isSelected
                           ? FontWeight.bold
                           : FontWeight.normal,
@@ -340,7 +372,11 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                   Text(
                     date.day.toString(),
                     style: TextStyle(
-                      color: isSelected ? Colors.black : Colors.black87,
+                       color: isSelected
+                      ? AppTheme.mediumGrey
+                      : (isDark ?AppTheme.white :AppTheme.black),
+                   
+
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                     ),
@@ -357,7 +393,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     );
   }
 
-  Widget _buildTimeGrid(List<String> availableSlots, bool hasBookedThisMonth) {
+  Widget _buildTimeGrid(List<String> availableSlots, bool hasBookedThisMonth, bool isDark,  ThemeData theme) {
     if (availableSlots.isEmpty) {
       return Center(
         child: Column(
@@ -424,18 +460,26 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
           // keep as is
         }
 
-        Color bgColor = Colors.transparent;
+        // Color bgColor = Colors.transparent;
+        // Color borderColor = AppTheme.successGreen.withOpacity(0.3);
+        // Color textColor = Colors.black87;
+        Color bgColor=isDark? Colors.grey.shade50 :  Colors.transparent;
         Color borderColor = AppTheme.successGreen.withOpacity(0.3);
-        Color textColor = Colors.black87;
-
+        Color textColor = isDark? AppTheme.white : AppTheme.black87;
         if (isExpired) {
-          bgColor = Colors.grey.shade100;
+          //bgColor = Colors.grey.shade100;
+          bgColor = isDark? Colors.grey.shade600 : Colors.grey.shade100;
           borderColor = Colors.transparent;
-          textColor = Colors.grey;
+          textColor =isDark? AppTheme.white : AppTheme.black87;
         } else if (isSelected) {
           bgColor = AppTheme.successGreen;
           borderColor = AppTheme.successGreen;
-          textColor = Colors.white;
+          textColor = AppTheme.white;
+        }
+        else{
+          bgColor = isDark?AppTheme.white: Colors.transparent;
+          borderColor = AppTheme.successGreen.withOpacity(0.3);
+          textColor=AppTheme.black;
         }
 
         return InkWell(
@@ -487,13 +531,13 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
         children: [
           _buildLegendItem(
             "Available",
-            Colors.white,
+            AppTheme.white,
             borderColor: AppTheme.successGreen.withOpacity(0.5),
           ),
           _buildLegendItem("Selected", AppTheme.successGreen),
           _buildLegendItem(
             "Expired",
-            Colors.grey.shade400,
+            Colors.grey.shade600,
             borderColor: Colors.transparent,
           ),
         ],
@@ -532,21 +576,35 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     }
 
     showModalBottomSheet(
+
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Padding(
+      //builder: (context) => Padding(
+      builder: (context) {
+        final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+
+        return Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Confirm Booking", style: AppTheme.headingMedium),
+            Text("Confirm Booking",
+            style: AppTheme.headingMedium.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+             //style: AppTheme.headingMedium,
+             ),
             const SizedBox(height: 16),
             Text(
               "You are booking a visit on:",
-              style: AppTheme.bodyMedium.copyWith(color: Colors.grey[600]),
+              style: AppTheme.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+             // style: AppTheme.bodyMedium.copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             Row(
@@ -560,6 +618,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 Text(
                   DateFormat('EEEE, d MMMM yyyy').format(_selectedDate),
                   style: AppTheme.bodyLarge.copyWith(
+                    color: isDark? AppTheme.white : AppTheme.black87,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -577,6 +636,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 Text(
                   displayTime,
                   style: AppTheme.bodyLarge.copyWith(
+                    color: isDark? AppTheme.white : AppTheme.black87,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -606,7 +666,8 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
             ),
           ],
         ),
-      ),
+      );
+      }
     );
   }
 
@@ -699,18 +760,27 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
       ),
     );
   }
+void _viewExistingPass(Visit visit) {
+  //print("visit id: ${visit.visitId}");
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
 
-  void _viewExistingPass(Visit visit) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  showDialog(
+    context: context,
+    builder: (context) => Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: SingleChildScrollView( // prevents clipping
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Your Entry Pass", style: AppTheme.headingMedium),
+              Text(
+                "Your Entry Pass",
+                style: AppTheme.headingMedium.copyWith(
+                  color: isDark ? AppTheme.white : AppTheme.black87,
+                ),
+              ),
               const SizedBox(height: 8),
               Text(
                 "${visit.visitDate} at ${visit.startTime}",
@@ -720,21 +790,47 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              // We can use visit ID or similar for QR
-              _buildQrCode(visit),
+              _buildQrCode(visit), // keep QR white
               const SizedBox(height: 24),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Close"),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Close"),
+                ),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildQrCode(Visit visit) {
+
+
+  //   final qrData = visit.visitId?.toString().trim();
+
+  // if (qrData == null || qrData.isEmpty) {
+  //   return const Text(
+  //     "QR code not available",
+  //     style: TextStyle(
+  //       color: Colors.red,
+  //       fontWeight: FontWeight.bold,
+  //     ),
+  //   );
+  // }
+
+  
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -745,12 +841,14 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
         ],
       ),
       child: QrImageView(
+       // data: visit.visitId,
         data: visit.visitId, // Encoded visit ID for scanning
         version: QrVersions.auto,
         size: 200.0,
       ),
     );
   }
+
 
   void _showBookingHistory() {
     showModalBottomSheet(
