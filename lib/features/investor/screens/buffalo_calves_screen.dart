@@ -146,6 +146,7 @@ class _RecursiveTreeBuilder extends StatelessWidget {
   }) {
     return Container(
       width: 200,
+      height: 260,
       decoration: isRoot
           ? BoxDecoration(
               boxShadow: [

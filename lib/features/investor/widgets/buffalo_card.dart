@@ -98,11 +98,20 @@ isDark                ? AppTheme.darkSurfaceVariant
                   isMediumPhone: isMediumPhone,
                 ),),
                
-              Expanded(child: _buildInfoSection( 
-                  context,
-                  isSmallPhone: isSmallPhone,
-                  isMediumPhone: isMediumPhone,
-                ),),
+                if (isGridView)
+                  Expanded(
+                    child: _buildInfoSection(
+                      context,
+                      isSmallPhone: isSmallPhone,
+                      isMediumPhone: isMediumPhone,
+                    ),
+                  )
+                else
+                  _buildInfoSection(
+                    context,
+                    isSmallPhone: isSmallPhone,
+                    isMediumPhone: isMediumPhone,
+                  ),
                 _buildFooter(
                   context: context,
                   isSmallPhone: isSmallPhone,
