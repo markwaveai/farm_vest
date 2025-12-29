@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/app_enums.dart';
@@ -57,6 +59,23 @@ class AuthController extends Notifier<AuthState> {
   @override
   AuthState build() {
     return AuthState();
+  }
+//upload profile image
+  Future<String?> uploadProfileImage({
+    required String userId,
+    required String filePath,
+  }) async {
+    try {
+      if (filePath.isEmpty) return null;
+      final url = await _repository.uploadProfileImage(
+        file: File(filePath),
+        userId: userId,
+      );
+      return url;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return null;
+    }
   }
 
   Future<WhatsappOtpResponse?> sendWhatsappOtp(String phone) async {

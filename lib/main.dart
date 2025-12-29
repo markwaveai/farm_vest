@@ -1,4 +1,5 @@
 import 'package:device_preview/device_preview.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +9,18 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+  options: const FirebaseOptions(
+    apiKey: "AIzaSyC88x_wjf5oBRmTxyXUwXV_UY2N73kl82c",
+    appId: "1:612299373064:android:5985b830becec8cd0eefbd",
+    messagingSenderId: "612299373064",
+    projectId: "markwave-481315",
+    storageBucket: "markwave-481315.firebasestorage.app",
+  ),
+);
+
   runApp(
     DevicePreview(
       enabled: !kReleaseMode,

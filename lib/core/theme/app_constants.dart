@@ -7,6 +7,7 @@ class AppConstants {
       'https://markwave-live-apis-couipk45fa-el.a.run.app';
   static const String visitApiUrl =
       'https://animalkart-farmvest-services-staging-jn6cma3vvq-el.a.run.app';
+       static String storageBucketName = 'gs://markwave-481315.firebasestorage.app';
   static const String poweredBy = 'Powered by MarkWave';
   static Duration kToastAnimDuration = Duration(milliseconds: 600);
   static Duration kToastDuration = Duration(milliseconds: 1800);

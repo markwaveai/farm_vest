@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -60,6 +63,28 @@ class AuthRepository {
       return {'mobile': mobile, 'role': role, 'userData': userData};
     }
     return null;
+  }
+//upload profile image
+  Future<String> uploadProfileImage({
+    required File file,
+    required String userId,
+  }) async {
+    final now = DateTime.now();
+    final dateFolder =
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    final fileName = '${now.millisecondsSinceEpoch}.jpg';
+
+    final storage = FirebaseStorage.instanceFor(
+      bucket: AppConstants.storageBucketName,
+    );
+
+    final ref = storage.ref().child('farmvestuserpics/$userId/$dateFolder/$fileName');
+    final snapshot = await ref.putFile(
+      file,
+      SettableMetadata(contentType: 'image/jpeg'),
+    );
+    final url = await snapshot.ref.getDownloadURL();
+    return url;
   }
 
   Future<void> clearSession() async {

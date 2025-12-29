@@ -1,4 +1,6 @@
 // lib/features/customer/screens/profile_screen.dart
+import 'dart:io';
+
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/auth/models/user_model.dart';
@@ -7,7 +9,9 @@ import 'package:farm_vest/features/investor/providers/buffalo_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/features/investor/models/unit_response.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 class InvestorProfileScreen extends ConsumerStatefulWidget {
   const InvestorProfileScreen({super.key});
@@ -20,6 +24,9 @@ class InvestorProfileScreen extends ConsumerStatefulWidget {
 class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
   bool _isEditing = false;
   final _formKey = GlobalKey<FormState>();
+
+  final ImagePicker _picker = ImagePicker();
+  File? _profileImage;
 
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
@@ -56,12 +63,21 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
         final user = ref.read(authProvider).userData;
 
         if (user != null) {
+          String? uploadedImageUrl;
+          if (_profileImage != null) {
+            uploadedImageUrl = await authNotifier.uploadProfileImage(
+              userId: user.mobile,
+              filePath: _profileImage!.path,
+            );
+          }
+
           final updatedUser = await authNotifier.updateUserdata(
             userId: user.mobile,
             extraFields: {
               'name': _nameController.text,
               'email': _emailController.text,
               'address': _addressController.text,
+              if (uploadedImageUrl != null) 'image_url': uploadedImageUrl,
             },
           );
 
@@ -69,15 +85,11 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
             authNotifier.updateLocalUserData(updatedUser);
             if (mounted) {
               setState(() => _isEditing = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Profile updated successfully')),
-              );
+             Fluttertoast.showToast(msg: "Profile updated successfully");
             }
           } else {
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Failed to update profile')),
-              );
+             Fluttertoast.showToast(msg: "Failed to update profile");
             }
           }
         }
@@ -139,14 +151,24 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
   }
 
   Widget _buildProfileHeader(UserModel? userData) {
+    final remoteImageUrl = userData?.imageUrl;
     return Column(
       children: [
         Stack(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 50,
               backgroundColor: AppTheme.primary,
-              child: Icon(Icons.person, size: 50, color: Colors.white),
+              backgroundImage:
+                  _profileImage != null
+                      ? FileImage(_profileImage!)
+                      : (remoteImageUrl != null && remoteImageUrl.isNotEmpty)
+                          ? NetworkImage(remoteImageUrl)
+                          : null,
+              child: (_profileImage == null) &&
+                      (remoteImageUrl == null || remoteImageUrl.isEmpty)
+                  ? const Icon(Icons.person, size: 50, color: Colors.white)
+                  : null,
             ),
             if (_isEditing)
               Positioned(
@@ -158,10 +180,15 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
                     color: AppTheme.secondary,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.camera_alt,
-                    size: 20,
-                    color: Colors.white,
+                  child: InkWell(
+                    onTap: () {
+                      _showImageSourceSheet();
+                    },
+                    child: const Icon(
+                      Icons.camera_alt,
+                      size: 20,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -174,6 +201,72 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
           style: AppTheme.bodyMedium.copyWith(color: AppTheme.mediumGrey),
         ),
       ],
+    );
+  }
+
+  Future<void> _pickFromGallery() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (image == null) return;
+      if (!mounted) return;
+      setState(() => _profileImage = File(image.path));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to pick image')),
+      );
+    }
+  }
+
+  Future<void> _pickFromCamera() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+      );
+      if (image == null) return;
+      if (!mounted) return;
+      setState(() => _profileImage = File(image.path));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to capture image')),
+      );
+    }
+  }
+
+  void _showImageSourceSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from gallery'),
+                onTap: () async {
+                  Navigator.of(ctx).pop();
+                  await _pickFromGallery();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Choose from camera'),
+                onTap: () async {
+                  Navigator.of(ctx).pop();
+                  await _pickFromCamera();
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -409,7 +502,6 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
       ],
     );
   }
-
   void _showLogoutDialog() {
     showDialog(
       context: context,

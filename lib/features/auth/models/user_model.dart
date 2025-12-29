@@ -19,6 +19,7 @@ class UserModel {
   final bool verified;
   final bool otpVerified;
   final bool isQuit;
+  final String? imageUrl;
 
   UserModel({
     required this.id,
@@ -41,6 +42,7 @@ class UserModel {
     this.verified = false,
     this.otpVerified = false,
     this.isQuit = false,
+    this.imageUrl,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -65,6 +67,7 @@ class UserModel {
       verified: json['verified'] ?? false,
       otpVerified: json['otp_verified'] ?? false,
       isQuit: json['isQuit'] ?? false,
+      imageUrl: json['image_url']?.toString(),
     );
   }
 
@@ -89,6 +92,8 @@ class UserModel {
       'isFormFilled': isFormFilled,
       'verified': verified,
       'otp_verified': otpVerified,
+      'isQuit': isQuit,
+      'image_url': imageUrl,
     };
   }
 
@@ -112,6 +117,7 @@ class UserModel {
     bool? isFormFilled,
     bool? verified,
     bool? otpVerified,
+    String? imageUrl,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -133,6 +139,7 @@ class UserModel {
       isFormFilled: isFormFilled ?? this.isFormFilled,
       verified: verified ?? this.verified,
       otpVerified: otpVerified ?? this.otpVerified,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }
