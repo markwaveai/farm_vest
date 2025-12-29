@@ -20,6 +20,15 @@ class InvestorShell extends ConsumerStatefulWidget {
 class _InvestorShellState extends ConsumerState<InvestorShell> {
   int _currentIndex = 0;
 
+  int? _indexForLocation(String location) {
+    if (location.startsWith('/customer-dashboard')) return 0;
+    if (location.startsWith('/asset-valuation')) return 1;
+    if (location.startsWith('/cctv-live')) return 2;
+    if (location.startsWith('/revenue')) return 3;
+    if (location.startsWith('/customer-profile')) return 4;
+    return null;
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -68,131 +77,159 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
     final authState = ref.watch(authProvider);
     final userData = authState.userData;
 
-    return Scaffold(
-      appBar: _currentIndex == 4
-          ? null
-          : AppBar(
-              title: Text(_getTitleForIndex(_currentIndex)),
-              actions: [
-                IconButton(
-                  icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                  onPressed: () {
-                    ref.read(themeProvider.notifier).toggleTheme();
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.notifications_outlined),
-                  onPressed: () => context.go(
-                    '/notifications',
-                    extra: {'fallbackRoute': '/customer-dashboard'},
+    final location = GoRouterState.of(context).uri.path;
+    final idx = _indexForLocation(location);
+    if (idx != null && idx != _currentIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _currentIndex = idx);
+      });
+    }
+
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+
+        final router = GoRouter.of(context);
+        if (router.canPop()) {
+          router.pop();
+          return;
+        }
+
+        if (_currentIndex != 0) {
+          _onItemTapped(0);
+          return;
+        }
+      },
+      child: Scaffold(
+        appBar: _currentIndex == 4
+            ? null
+            : AppBar(
+                title: Text(_getTitleForIndex(_currentIndex)),
+                actions: [
+                  IconButton(
+                    icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                    onPressed: () {
+                      ref.read(themeProvider.notifier).toggleTheme();
+                    },
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () => context.push(
+                      '/notifications',
+                      extra: {'fallbackRoute': '/customer-dashboard'},
+                    ),
+                  ),
+                ],
+              ),
+        drawer: _buildDrawer(userData),
+        body: widget.child,
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: ClipPath(
+            clipper: CurvedBottomNavClipper(),
+            child: BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: _onItemTapped,
+              type: BottomNavigationBarType.fixed,
+              selectedItemColor: isDark ? AppTheme.white : AppTheme.secondary,
+              unselectedItemColor: Colors.grey[600],
+              showSelectedLabels: true,
+              showUnselectedLabels: true,
+              backgroundColor: Theme.of(context).cardColor,
+              elevation: 0,
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_outlined),
+                  activeIcon: Icon(Icons.home),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.analytics_outlined),
+                  activeIcon: Icon(Icons.analytics),
+                  label: 'Assets',
+                ),
+                BottomNavigationBarItem(
+                  icon: Container(),
+                  activeIcon: Container(),
+                  label: 'Live',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.attach_money_outlined),
+                  activeIcon: Icon(Icons.attach_money),
+                  label: 'Revenue',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline),
+                  activeIcon: Icon(Icons.person),
+                  label: 'Profile',
                 ),
               ],
             ),
-      drawer: _buildDrawer(userData),
-      body: widget.child,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
+          ),
         ),
-        child: ClipPath(
-          clipper: CurvedBottomNavClipper(),
-          child: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: _onItemTapped,
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: isDark ? AppTheme.white : AppTheme.secondary,
-            unselectedItemColor: Colors.grey[600],
-            showSelectedLabels: true,
-            showUnselectedLabels: true,
-            backgroundColor: Theme.of(context).cardColor,
-            elevation: 0,
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
-                label: 'Home',
+        floatingActionButton: Container(
+          height: 65,
+          width: 65,
+          margin: const EdgeInsets.only(top: 8),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [
+                AppTheme.errorRed,
+                AppTheme.errorRed.withValues(alpha: 0.8),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.errorRed.withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.analytics_outlined),
-                activeIcon: Icon(Icons.analytics),
-                label: 'Assets',
-              ),
-              BottomNavigationBarItem(
-                icon: Container(),
-                activeIcon: Container(),
-                label: 'Live',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.attach_money_outlined),
-                activeIcon: Icon(Icons.attach_money),
-                label: 'Revenue',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
-                label: 'Profile',
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
-        ),
-      ),
-      floatingActionButton: Container(
-        height: 65,
-        width: 65,
-        margin: const EdgeInsets.only(top: 8),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            colors: [
-              AppTheme.errorRed,
-              AppTheme.errorRed.withValues(alpha: 0.8),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.errorRed.withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(32.5),
-            onTap: () => _onItemTapped(2),
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
-                  width: 2,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(32.5),
+              onTap: () => _onItemTapped(2),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  _currentIndex == 2
+                      ? Icons.videocam
+                      : Icons.videocam_outlined,
+                  color: Colors.white,
+                  size: 30,
                 ),
               ),
-              child: Icon(
-                _currentIndex == 2 ? Icons.videocam : Icons.videocam_outlined,
-                color: Colors.white,
-                size: 30,
-              ),
             ),
           ),
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
@@ -246,7 +283,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             onTap: () {
               context.pop(context);
               Future.microtask((){
-                 context.go('/monthly-visits');
+                 context.push('/monthly-visits');
               });
              // context.push('/monthly-visits');
             },
@@ -299,7 +336,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             onTap: () {
               context.pop(context);
               Future.microtask(() {
-                 context.go('/support');
+                 context.push('/support');
               });
               //context.push('/support');
             },

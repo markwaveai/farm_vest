@@ -85,7 +85,7 @@ isDark                ? AppTheme.darkSurfaceVariant
           child: InkWell(
             onTap:
                 onTap ??
-                () => context.go('/unit-details', extra: {'buffaloId': id}),
+                () => context.push('/unit-details', extra: {'buffaloId': id}),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,

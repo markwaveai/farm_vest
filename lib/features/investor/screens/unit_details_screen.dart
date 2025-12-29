@@ -8,22 +8,31 @@ class UnitDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Unit Details'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => NavigationHelper.safePopOrNavigate(
-            context,
-            fallbackRoute: '/customer-dashboard',
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        NavigationHelper.safePopOrNavigate(
+          context,
+          fallbackRoute: '/customer-dashboard',
+        );
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Unit Details'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => NavigationHelper.safePopOrNavigate(
+              context,
+              fallbackRoute: '/customer-dashboard',
+            ),
           ),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppConstants.spacingM),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Buffalo Image Card
             Card(
               elevation: 4,
@@ -233,6 +242,7 @@ class UnitDetailsScreen extends StatelessWidget {
             // ),
             // const SizedBox(height: AppConstants.spacingL),
           ],
+          ),
         ),
       ),
     );

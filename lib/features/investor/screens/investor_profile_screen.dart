@@ -13,6 +13,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/services/biometric_service.dart';
+import '../../../core/services/secure_storage_service.dart';
+
 class InvestorProfileScreen extends ConsumerStatefulWidget {
   const InvestorProfileScreen({super.key});
 
@@ -34,6 +37,7 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
   late final TextEditingController _phoneController;
 
   bool _isSaving = false;
+  bool _isBiometricEnabled = false;
 
   @override
   void initState() {
@@ -43,6 +47,59 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     _emailController = TextEditingController(text: user?.email ?? '');
     _addressController = TextEditingController(text: user?.address ?? '');
     _phoneController = TextEditingController(text: user?.mobile ?? '');
+
+    _loadBiometricPreference();
+  }
+
+  Future<void> _loadBiometricPreference() async {
+    final enabled = await SecureStorageService.isBiometricEnabled();
+    if (!mounted) return;
+    setState(() => _isBiometricEnabled = enabled);
+  }
+
+  Future<void> _toggleBiometric(bool newValue) async {
+    if (newValue) {
+      final success = await BiometricService.authenticate();
+      if (!mounted) return;
+
+      if (success) {
+        await SecureStorageService.enableBiometric(true);
+        setState(() => _isBiometricEnabled = true);
+      } else {
+        final reason = BiometricService.lastError;
+        Fluttertoast.showToast(
+          msg: reason == null || reason.isEmpty
+              ? 'Authentication failed'
+              : 'Authentication failed: $reason',
+        );
+      }
+    } else {
+      final shouldDisable = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Disable App Lock'),
+          content:
+              const Text('Are you sure you want to disable fingerprint lock?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Disable'),
+            ),
+          ],
+        ),
+      );
+
+      if (!mounted) return;
+      if (shouldDisable == true) {
+        await SecureStorageService.enableBiometric(false);
+        BiometricService.lock();
+        setState(() => _isBiometricEnabled = false);
+      }
+    }
   }
 
   @override
@@ -475,6 +532,18 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     
     return Column(
       children: [
+        ListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          tileColor: theme.colorScheme.surface,
+          leading: const Icon(Icons.fingerprint, color: AppTheme.primary),
+          title: const Text('App Lock'),
+          subtitle: const Text('Use biometric to unlock the app'),
+          trailing: Switch(
+            value: _isBiometricEnabled,
+            onChanged: _toggleBiometric,
+          ),
+        ),
+        const SizedBox(height: 8),
         ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
          // tileColor: Colors.grey.shade50,

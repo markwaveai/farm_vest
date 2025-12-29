@@ -18,30 +18,39 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text('Supervisor Dashboard'),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () => context.go(
-              '/notifications',
-              extra: {'fallbackRoute': '/supervisor-dashboard'},
-            ),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        final router = GoRouter.of(context);
+        if (router.canPop()) {
+          router.pop();
+        }
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: const Text('Supervisor Dashboard'),
+          leading: IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
-        ],
-      ),
-      drawer: _buildDrawer(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () => context.go(
+                '/notifications',
+                extra: {'fallbackRoute': '/supervisor-dashboard'},
+              ),
+            ),
+          ],
+        ),
+        drawer: _buildDrawer(),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppConstants.spacingM),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Welcome Section
             Container(
               width: double.infinity,
@@ -180,7 +189,8 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

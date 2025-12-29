@@ -438,7 +438,7 @@ Widget _buildGridView(List<Animal> buffalos, BuildContext context) {
       maxCrossAxisExtent: 220, 
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
-      childAspectRatio: 0.72, 
+      childAspectRatio: 0.78, 
     ),
 
     itemCount: buffalos.length,
@@ -462,7 +462,7 @@ Widget _buildGridView(List<Animal> buffalos, BuildContext context) {
         isGridView: true,
 
         onTap: () {
-          context.go('/unit-details', extra: {'buffalo': buffalo});
+          context.push('/unit-details', extra: {'buffalo': buffalo});
         },
 
         onInvoiceTap: () async {

@@ -45,45 +45,54 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final unreadNotifications = _notifications.where((n) => !n.isRead).toList();
     final readNotifications = _notifications.where((n) => n.isRead).toList();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        automaticallyImplyLeading: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => NavigationHelper.safePopOrNavigate(
-            context,
-            fallbackRoute: widget.fallbackRoute,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        NavigationHelper.safePopOrNavigate(
+          context,
+          fallbackRoute: widget.fallbackRoute,
+        );
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Notifications'),
+          automaticallyImplyLeading: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => NavigationHelper.safePopOrNavigate(
+              context,
+              fallbackRoute: widget.fallbackRoute,
+            ),
           ),
-        ),
-        actions: [
-          if (_notifications.isNotEmpty) ...[
-            IconButton(
-              icon: const Icon(Icons.done_all),
-              onPressed: () {
-                _notificationService.markAllAsRead();
-                ToastUtils.showInfo(
-                  context,
-                  'All notifications marked as read',
-                );
-              },
-              tooltip: 'Mark all as read',
-            ),
-            IconButton(
-              icon: const Icon(Icons.clear_all),
-              onPressed: () => _showClearAllDialog(),
-              tooltip: 'Clear all',
-            ),
+          actions: [
+            if (_notifications.isNotEmpty) ...[
+              IconButton(
+                icon: const Icon(Icons.done_all),
+                onPressed: () {
+                  _notificationService.markAllAsRead();
+                  ToastUtils.showInfo(
+                    context,
+                    'All notifications marked as read',
+                  );
+                },
+                tooltip: 'Mark all as read',
+              ),
+              IconButton(
+                icon: const Icon(Icons.clear_all),
+                onPressed: () => _showClearAllDialog(),
+                tooltip: 'Clear all',
+              ),
+            ],
           ],
-        ],
-      ),
-      body: _notifications.isEmpty
-          ? _buildEmptyState()
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(AppConstants.spacingM),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+        ),
+        body: _notifications.isEmpty
+            ? _buildEmptyState()
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(AppConstants.spacingM),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   // Summary
                   if (_notifications.isNotEmpty) ...[
                     Card(
@@ -142,9 +151,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           _buildNotificationCard(notification, isUnread: false),
                     ),
                   ],
-                ],
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 

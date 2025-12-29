@@ -10,20 +10,27 @@ class AdminDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.lightGrey,
-      appBar: AppBar(
-        title: const Text('Admin Dashboard - Buffalo Visualizer'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              // Handle logout logic if needed, or rely on drawer/profile
-            },
-          ),
-        ],
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.of(context).maybePop();
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.lightGrey,
+        appBar: AppBar(
+          title: const Text('Admin Dashboard - Buffalo Visualizer'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                // Handle logout logic if needed, or rely on drawer/profile
+              },
+            ),
+          ],
+        ),
+        body: const ControllerPage(),
       ),
-      body: const ControllerPage(),
     );
   }
 }

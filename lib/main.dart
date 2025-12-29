@@ -8,6 +8,7 @@ import 'package:screen_protector/screen_protector.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
+import 'core/widgets/biometric_lock_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,9 +24,10 @@ Future<void> main() async {
 
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context) => const ProviderScope(child: FarmVestApp()),
-    ),
+     enabled: !kReleaseMode,
+     builder: (context) => const 
+      ProviderScope(child: FarmVestApp()),
+   ),
   );
 }
 
@@ -62,7 +64,10 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
       locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
+      builder: (context, child) {
+        final built = DevicePreview.appBuilder(context, child);
+        return BiometricLockScreen(child: built);
+      },
     );
   }
 }
