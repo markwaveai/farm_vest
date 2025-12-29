@@ -3,6 +3,7 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/features/auth/models/user_model.dart';
 import 'package:farm_vest/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -101,6 +102,8 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
           _onItemTapped(0);
           return;
         }
+
+        SystemNavigator.pop();
       },
       child: Scaffold(
         appBar: _currentIndex == 4
