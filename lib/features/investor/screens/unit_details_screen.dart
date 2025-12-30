@@ -8,6 +8,7 @@ class UnitDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
@@ -117,7 +118,15 @@ class UnitDetailsScreen extends StatelessWidget {
             const SizedBox(height: AppConstants.spacingL),
 
             // Unit Information
-            const Text('Unit Information', style: AppTheme.headingMedium),
+          
+             Text(
+             'Unit Information',
+              style: AppTheme.headingMedium.copyWith(
+              color: isDark ? Colors.white : Colors.black,
+               ),
+               ),
+            //const Text('Unit Information', style: AppTheme.headingMedium),
+            
             const SizedBox(height: AppConstants.spacingM),
 
             _buildInfoCard([
@@ -130,7 +139,12 @@ class UnitDetailsScreen extends StatelessWidget {
             const SizedBox(height: AppConstants.spacingL),
 
             // Health Summary
-            const Text('Health Summary', style: AppTheme.headingMedium),
+            Text('Health Summary',
+                style: AppTheme.headingMedium.copyWith(
+                  color: isDark ? Colors.white : Colors.black,
+                  
+                )),
+          // const Text('Health Summary', style: AppTheme.headingMedium),
             const SizedBox(height: AppConstants.spacingM),
 
             Row(
@@ -139,8 +153,9 @@ class UnitDetailsScreen extends StatelessWidget {
                   child: _buildHealthIndicator(
                     'Temperature',
                     '101.2°F',
-                    AppTheme.successGreen,
-                    Icons.thermostat,
+                    isDark ? AppTheme.white : AppTheme.black,
+                    Icons.thermostat
+             
                   ),
                 ),
                 const SizedBox(width: AppConstants.spacingM),
@@ -148,8 +163,9 @@ class UnitDetailsScreen extends StatelessWidget {
                   child: _buildHealthIndicator(
                     'Milk Production',
                     '12L/day',
-                    AppTheme.primary,
-                    Icons.water_drop,
+                   isDark ? AppTheme.white : AppTheme.black,
+                    Icons.water_drop
+                  
                   ),
                 ),
               ],
@@ -162,17 +178,19 @@ class UnitDetailsScreen extends StatelessWidget {
                   child: _buildHealthIndicator(
                     'Appetite',
                     'Good',
-                    AppTheme.successGreen,
-                    Icons.restaurant,
+                   isDark ? AppTheme.white : AppTheme.black,
+                    Icons.restaurant
+                   
                   ),
                 ),
                 const SizedBox(width: AppConstants.spacingM),
                 Expanded(
                   child: _buildHealthIndicator(
                     'Activity',
-                    'Normal',
-                    AppTheme.successGreen,
-                    Icons.directions_walk,
+                    'Normal',isDark? AppTheme.white : AppTheme.black,
+                 
+                    Icons.directions_walk
+                   
                   ),
                 ),
               ],
@@ -266,7 +284,13 @@ class UnitDetailsScreen extends StatelessWidget {
         children: [
           Text(
             label,
-            style: AppTheme.bodyMedium.copyWith(color: AppTheme.mediumGrey),
+            style: AppTheme.bodyMedium.copyWith(
+            
+
+
+
+             color: AppTheme.mediumGrey
+              ),
           ),
           Text(
             value,
@@ -282,6 +306,7 @@ class UnitDetailsScreen extends StatelessWidget {
     String value,
     Color color,
     IconData icon,
+    
   ) {
     return Card(
       elevation: 2,
@@ -289,9 +314,11 @@ class UnitDetailsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           children: [
-            Icon(icon, color: color, size: AppConstants.iconL),
+            Icon(icon, color:  AppTheme.successGreen, size: AppConstants.iconL),
             const SizedBox(height: AppConstants.spacingS),
-            Text(label, style: AppTheme.bodySmall, textAlign: TextAlign.center),
+            Text(label, style: AppTheme.bodySmall.copyWith(
+               color: color,
+            ), textAlign: TextAlign.center),
             const SizedBox(height: AppConstants.spacingXS),
             Text(
               value,

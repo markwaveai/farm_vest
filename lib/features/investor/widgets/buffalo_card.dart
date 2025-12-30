@@ -43,12 +43,16 @@ class BuffaloCard extends StatelessWidget {
     this.onCalvesTap,
     this.onInvoiceTap,
   });
-
+static String getStableImage(String id) {
+    final index = id.hashCode.abs() % murrahImages.length;
+    return murrahImages[index];
+  }
   @override
   Widget build(BuildContext context) {
+    final imageUrl = getStableImage(id);
     // Use a random image for each buffalo
-    final random = Random();
-    final imageUrl = murrahImages[random.nextInt(murrahImages.length)];
+    //final random = Random();
+    //final imageUrl = murrahImages[random.nextInt(murrahImages.length)];
 
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmallPhone = AppConstants.smallphoneheight<600;
@@ -90,7 +94,8 @@ isDark                ? AppTheme.darkSurfaceVariant
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                AspectRatio(aspectRatio: 16/9,child: 
+                AspectRatio(aspectRatio: 16/9,
+                child: 
                 _buildImageSection(
                   imageUrl,
                   context,
@@ -153,8 +158,10 @@ isDark                ? AppTheme.darkSurfaceVariant
             ),
             child: Image.asset(
               imageUrl,
+              key: ValueKey(imageUrl),
               fit: BoxFit.cover,
               width: double.infinity,
+              gaplessPlayback: true,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   color: AppTheme.lightGrey,
@@ -232,7 +239,11 @@ isDark                ? AppTheme.darkSurfaceVariant
     final paddingH = isSmallPhone ? 8.0 : 10.0;
     final paddingV = isSmallPhone ? 6.0 : (isMediumPhone ? 7.0 : 8.0);
     final fontSize = isSmallPhone ? 10.0 : 11.0;
+    //final fontSize = isSmallPhone ? 14.0 : 16.0;
+//final fontSize = isSmallPhone ? 12.0 : 14.0;
+
     final rowGap = isSmallPhone ? 3.0 : 4.0;
+    //final rowGap = isSmallPhone ? 4.0 : 6.0;
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
@@ -277,7 +288,7 @@ isDark                ? AppTheme.darkSurfaceVariant
     String label,
     String value, {
     bool isDark = false,
-    double fontSize = 11,
+    double fontSize = 3,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.max,
@@ -290,7 +301,8 @@ isDark                ? AppTheme.darkSurfaceVariant
             fontWeight: FontWeight.w500,
           ),
         ),
-        Flexible(
+        //Flexible(
+        Expanded(
           child: Text(
             value,
             style: TextStyle(
@@ -417,6 +429,8 @@ isDark                ? AppTheme.darkSurfaceVariant
     }
 
     final fontSize = isSmallPhone ? 9.0 : 10.0;
+    //final fontSize = isSmallPhone ? 14.0 : 16.0;
+
     final paddingH = isSmallPhone ? 6.0 : 8.0;
     final paddingV = isSmallPhone ? 3.0 : (isMediumPhone ? 3.5 : 4.0);
 

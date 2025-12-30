@@ -721,7 +721,7 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 14,
                   ),
                 ),
               ),
