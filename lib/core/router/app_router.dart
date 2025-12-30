@@ -1,3 +1,4 @@
+import 'package:farm_vest/features/employee/new_supervisor/alert_screen.dart';
 import 'package:farm_vest/features/investor/screens/cctv_main_screen.dart';
 import 'package:farm_vest/features/investor/screens/investor_profile_screen.dart';
 import 'package:farm_vest/features/investor/widgets/investor_shell.dart';
@@ -52,7 +53,8 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/customer-dashboard',
-            builder: (context, state) => const InvestorDashboardScreen(),
+            builder: (context, state) => AlertScreen(),
+            // const InvestorDashboardScreen(),
           ),
           GoRoute(
             path: '/asset-valuation',

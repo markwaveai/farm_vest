@@ -385,9 +385,15 @@ class _CustomerDashboardScreenState
     final double gap = isCompact
         ? (isSmallPhone ? 2.0 : (isMediumPhone ? 3.0 : 4.0))
         : 8.0;
+    // final double valueFontSize = isCompact
+    //     ? (isSmallPhone ? 13.0 : (isMediumPhone ? 14.0 : 16.0))
+    //     : 18.0;
+    // final double valueFontSize = isCompact
+    //     ? (isSmallPhone ? 12.0 : (isMediumPhone ? 13.0 : 14.0))
+    //     : 16.0;
     final double valueFontSize = isCompact
-        ? (isSmallPhone ? 13.0 : (isMediumPhone ? 14.0 : 16.0))
-        : 18.0;
+        ? (isSmallPhone ? 11.0 : (isMediumPhone ? 12.0 : 13.0))
+        : 14.0;
     final double labelFontSize = isCompact
         ? (isSmallPhone ? 9.0 : (isMediumPhone ? 9.5 : 10.0))
         : 12.0;

@@ -107,26 +107,26 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: _currentIndex == 4
-            ? null
-            : AppBar(
-                title: Text(_getTitleForIndex(_currentIndex)),
-                actions: [
-                  IconButton(
-                    icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                    onPressed: () {
-                      ref.read(themeProvider.notifier).toggleTheme();
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () => context.push(
-                      '/notifications',
-                      extra: {'fallbackRoute': '/customer-dashboard'},
-                    ),
-                  ),
-                ],
-              ),
+        // appBar: _currentIndex == 4
+        //     ? null
+        //     : AppBar(
+        //         title: Text(_getTitleForIndex(_currentIndex)),
+        //         actions: [
+        //           IconButton(
+        //             icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+        //             onPressed: () {
+        //               ref.read(themeProvider.notifier).toggleTheme();
+        //             },
+        //           ),
+        //           // IconButton(
+        //           //   icon: const Icon(Icons.notifications_outlined),
+        //           //   onPressed: () => context.push(
+        //           //     '/notifications',
+        //           //     extra: {'fallbackRoute': '/customer-dashboard'},
+        //           //   ),
+        //           // ),
+        //         ],
+        //       ),
         drawer: _buildDrawer(userData),
         body: widget.child,
         bottomNavigationBar: Container(
@@ -141,97 +141,97 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
           ),
           child: ClipPath(
             clipper: CurvedBottomNavClipper(),
-            child: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: _onItemTapped,
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: isDark ? AppTheme.white : AppTheme.secondary,
-              unselectedItemColor: Colors.grey[600],
-              showSelectedLabels: true,
-              showUnselectedLabels: true,
-              backgroundColor: Theme.of(context).cardColor,
-              elevation: 0,
-              items: [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home_outlined),
-                  activeIcon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.analytics_outlined),
-                  activeIcon: Icon(Icons.analytics),
-                  label: 'Assets',
-                ),
-                BottomNavigationBarItem(
-                  icon: Container(),
-                  activeIcon: Container(),
-                  label: 'Live',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.attach_money_outlined),
-                  activeIcon: Icon(Icons.attach_money),
-                  label: 'Revenue',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person_outline),
-                  activeIcon: Icon(Icons.person),
-                  label: 'Profile',
-                ),
-              ],
-            ),
+            // child: BottomNavigationBar(
+            //   currentIndex: _currentIndex,
+            //   onTap: _onItemTapped,
+            //   type: BottomNavigationBarType.fixed,
+            //   selectedItemColor: isDark ? AppTheme.white : AppTheme.secondary,
+            //   unselectedItemColor: Colors.grey[600],
+            //   showSelectedLabels: true,
+            //   showUnselectedLabels: true,
+            //   backgroundColor: Theme.of(context).cardColor,
+            //   elevation: 0,
+            //   items: [
+            //     BottomNavigationBarItem(
+            //       icon: Icon(Icons.home_outlined),
+            //       activeIcon: Icon(Icons.home),
+            //       label: 'Home',
+            //     ),
+            //     BottomNavigationBarItem(
+            //       icon: Icon(Icons.analytics_outlined),
+            //       activeIcon: Icon(Icons.analytics),
+            //       label: 'Assets',
+            //     ),
+            //     BottomNavigationBarItem(
+            //       icon: Container(),
+            //       activeIcon: Container(),
+            //       label: 'Live',
+            //     ),
+            //     BottomNavigationBarItem(
+            //       icon: Icon(Icons.attach_money_outlined),
+            //       activeIcon: Icon(Icons.attach_money),
+            //       label: 'Revenue',
+            //     ),
+            //     BottomNavigationBarItem(
+            //       icon: Icon(Icons.person_outline),
+            //       activeIcon: Icon(Icons.person),
+            //       label: 'Profile',
+            //     ),
+            //   ],
+            // ),
           ),
         ),
-        floatingActionButton: Container(
-          height: 65,
-          width: 65,
-          margin: const EdgeInsets.only(top: 8),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [
-                AppTheme.errorRed,
-                AppTheme.errorRed.withValues(alpha: 0.8),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.errorRed.withOpacity(0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(32.5),
-              onTap: () => _onItemTapped(2),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 2,
-                  ),
-                ),
-                child: Icon(
-                  _currentIndex == 2
-                      ? Icons.videocam
-                      : Icons.videocam_outlined,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              ),
-            ),
-          ),
-        ),
+        // floatingActionButton: Container(
+        //   height: 65,
+        //   width: 65,
+        //   margin: const EdgeInsets.only(top: 8),
+        //   decoration: BoxDecoration(
+        //     shape: BoxShape.circle,
+        //     gradient: LinearGradient(
+        //       colors: [
+        //         AppTheme.errorRed,
+        //         AppTheme.errorRed.withValues(alpha: 0.8),
+        //       ],
+        //       begin: Alignment.topLeft,
+        //       end: Alignment.bottomRight,
+        //     ),
+        //     boxShadow: [
+        //       BoxShadow(
+        //         color: AppTheme.errorRed.withOpacity(0.3),
+        //         blurRadius: 15,
+        //         offset: const Offset(0, 5),
+        //       ),
+        //       BoxShadow(
+        //         color: Colors.black.withOpacity(0.2),
+        //         blurRadius: 10,
+        //         offset: const Offset(0, 3),
+        //       ),
+        //     ],
+        //   ),
+        //   child: Material(
+        //     color: Colors.transparent,
+        //     child: InkWell(
+        //       borderRadius: BorderRadius.circular(32.5),
+        //       onTap: () => _onItemTapped(2),
+        //       child: Container(
+        //         decoration: BoxDecoration(
+        //           shape: BoxShape.circle,
+        //           border: Border.all(
+        //             color: Colors.white.withOpacity(0.3),
+        //             width: 2,
+        //           ),
+        //         ),
+        //         child: Icon(
+        //           _currentIndex == 2
+        //               ? Icons.videocam
+        //               : Icons.videocam_outlined,
+        //           color: Colors.white,
+        //           size: 30,
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
