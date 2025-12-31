@@ -69,8 +69,10 @@ class _BiometricLockScreenState extends State<BiometricLockScreen>
     }
 
     if (state == AppLifecycleState.paused) {
-      BiometricService.lock();
-      setState(() {});
+      if (!BiometricService.isLockSuppressed) {
+        BiometricService.lock();
+        setState(() {});
+      }
     }
 
     if (state == AppLifecycleState.resumed) {
@@ -101,7 +103,8 @@ class _BiometricLockScreenState extends State<BiometricLockScreen>
     return Material(
       color: Theme.of(context).colorScheme.surface,
       child: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.center,
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -110,18 +113,18 @@ class _BiometricLockScreenState extends State<BiometricLockScreen>
                 const Icon(Icons.lock, size: 52),
                 const SizedBox(height: 12),
                 const Text(
-                  'App Locked',
+                  ' FarmVest App Locked',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Authenticate to continue',
-                  textAlign: TextAlign.center,
-                ),
+                // const SizedBox(height: 6),
+                // const Text(
+                //   'Authenticate to continue',
+                //   textAlign: TextAlign.center,
+                // ),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: _isAuthenticating ? null : _authenticate,
-                  child: Text(_isAuthenticating ? 'Unlocking...' : 'Unlock'),
+                  child: Text( 'unlock'),
                 ),
               ],
             ),

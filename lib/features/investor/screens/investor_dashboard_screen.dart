@@ -434,8 +434,6 @@ class _CustomerDashboardScreenState
     );
   }
 Widget _buildGridView(List<Animal> buffalos, BuildContext context) {
-  final screenWidth = MediaQuery.of(context).size.width;
-
   return GridView.builder(
     padding: const EdgeInsets.all(8),
 

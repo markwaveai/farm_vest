@@ -4,9 +4,21 @@ class BiometricService {
   static final LocalAuthentication _auth = LocalAuthentication();
   static bool _isUnlocked = false;
   static String? _lastError;
+  static int _lockSuppressionDepth = 0;
 
   static bool get isUnlocked => _isUnlocked;
   static String? get lastError => _lastError;
+  static bool get isLockSuppressed => _lockSuppressionDepth > 0;
+
+  static Future<T> runWithLockSuppressed<T>(Future<T> Function() action) async {
+    _lockSuppressionDepth++;
+    try {
+      return await action();
+    } finally {
+      _lockSuppressionDepth =
+          _lockSuppressionDepth > 0 ? _lockSuppressionDepth - 1 : 0;
+    }
+  }
 
   static void lock() {
     _isUnlocked = false;

@@ -67,7 +67,7 @@ class UserModel {
       verified: json['verified'] ?? false,
       otpVerified: json['otp_verified'] ?? false,
       isQuit: json['isQuit'] ?? false,
-      imageUrl: json['image_url']?.toString(),
+      imageUrl: (json['imageUrl'] ?? json['image_url'])?.toString(),
     );
   }
 
@@ -93,7 +93,7 @@ class UserModel {
       'verified': verified,
       'otp_verified': otpVerified,
       'isQuit': isQuit,
-      'image_url': imageUrl,
+      'imageUrl': imageUrl,
     };
   }
 

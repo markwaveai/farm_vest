@@ -30,6 +30,7 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
 
   final ImagePicker _picker = ImagePicker();
   File? _profileImage;
+  bool _removeProfileImage = false;
 
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
@@ -122,6 +123,7 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
         if (user != null) {
           String? uploadedImageUrl;
           if (_profileImage != null) {
+            
             uploadedImageUrl = await authNotifier.uploadProfileImage(
               userId: user.mobile,
               filePath: _profileImage!.path,
@@ -134,7 +136,10 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
               'name': _nameController.text,
               'email': _emailController.text,
               'address': _addressController.text,
-              if (uploadedImageUrl != null) 'image_url': uploadedImageUrl,
+              if (uploadedImageUrl != null)
+                'imageUrl': uploadedImageUrl
+              else if (_removeProfileImage)
+                'imageUrl': null,
             },
           );
 
@@ -191,7 +196,7 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
         child: Column(
           children: [
             // Profile Header
-            _buildProfileHeader(userData),
+            _buildProfileHeader(userData,isDark: isDark),
             const SizedBox(height: AppConstants.spacingL),
 
             // Profile Details
@@ -207,8 +212,10 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader(UserModel? userData) {
-    final remoteImageUrl = userData?.imageUrl;
+  Widget _buildProfileHeader(UserModel? userData,{required bool isDark}) {
+    final remoteImageUrl = _removeProfileImage ? null : userData?.imageUrl;
+    final hasImage =
+        _profileImage != null || (remoteImageUrl != null && remoteImageUrl.isNotEmpty);
     return Column(
       children: [
         Stack(
@@ -239,10 +246,17 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
                   ),
                   child: InkWell(
                     onTap: () {
-                      _showImageSourceSheet();
+                      if (hasImage) {
+                        setState(() {
+                          _profileImage = null;
+                          _removeProfileImage = true;
+                        });
+                      } else {
+                        _showImageSourceSheet();
+                      }
                     },
-                    child: const Icon(
-                      Icons.camera_alt,
+                    child: Icon(
+                      hasImage ? Icons.delete_outline : Icons.camera_alt,
                       size: 20,
                       color: Colors.white,
                     ),
@@ -252,7 +266,7 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
           ],
         ),
         const SizedBox(height: AppConstants.spacingM),
-        Text(userData?.name ?? '', style: AppTheme.headingMedium),
+        Text(userData?.name ?? '', style: AppTheme.headingMedium.copyWith(color: isDark ? AppTheme.white : AppTheme.secondary)),
         Text(
           userData?.email ?? '',
           style: AppTheme.bodyMedium.copyWith(color: AppTheme.mediumGrey),
@@ -263,13 +277,18 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
 
   Future<void> _pickFromGallery() async {
     try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
-      );
+      final XFile? image = await BiometricService.runWithLockSuppressed(() {
+        return _picker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 85,
+        );
+      });
       if (image == null) return;
       if (!mounted) return;
-      setState(() => _profileImage = File(image.path));
+      setState(() {
+        _profileImage = File(image.path);
+        _removeProfileImage = false;
+      });
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -280,13 +299,18 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
 
   Future<void> _pickFromCamera() async {
     try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 85,
-      );
+      final XFile? image = await BiometricService.runWithLockSuppressed(() {
+        return _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 85,
+        );
+      });
       if (image == null) return;
       if (!mounted) return;
-      setState(() => _profileImage = File(image.path));
+      setState(() {
+        _profileImage = File(image.path);
+        _removeProfileImage = false;
+      });
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -300,6 +324,10 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
       context: context,
       showDragHandle: true,
       builder: (ctx) {
+        final userData = ref.read(authProvider).userData;
+        final remoteImageUrl =
+            _removeProfileImage ? '' : (userData?.imageUrl ?? '');
+        final hasImage = _profileImage != null || remoteImageUrl.isNotEmpty;
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -320,6 +348,18 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
                   await _pickFromCamera();
                 },
               ),
+              // if (hasImage)
+              //   ListTile(
+              //     leading: const Icon(Icons.delete_outline),
+              //     title: const Text('Remove photo'),
+              //     onTap: () {
+              //       Navigator.of(ctx).pop();
+              //       setState(() {
+              //         _profileImage = null;
+              //         _removeProfileImage = true;
+              //       });
+              //     },
+              //   ),
             ],
           ),
         );
