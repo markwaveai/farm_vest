@@ -53,8 +53,8 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/customer-dashboard',
-            builder: (context, state) => AlertScreen(),
-            // const InvestorDashboardScreen(),
+            builder: (context, state) => 
+           const InvestorDashboardScreen(),
           ),
           GoRoute(
             path: '/asset-valuation',
