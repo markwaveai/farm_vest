@@ -75,3 +75,17 @@ enum NotificationType {
   final String value;
   const NotificationType(this.value);
 }
+enum MessageType { user, ai, system }
+
+class ChatMessage {
+  final String text;
+  final MessageType type;
+  final DateTime time;
+
+  ChatMessage({
+    required this.text,
+    required this.type,
+    required this.time,
+  });
+}
+

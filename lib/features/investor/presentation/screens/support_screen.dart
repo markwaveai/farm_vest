@@ -1,6 +1,7 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
+import 'package:farm_vest/features/investor/presentation/screens/live_chart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 
@@ -346,7 +347,7 @@ class _SupportScreenState extends State<SupportScreen> {
               title: const Text('Live Chat'),
               subtitle: const Text('Chat with our support team'),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatScreen()));
                 ToastUtils.showInfo(context, 'Opening live chat...');
               },
             ),

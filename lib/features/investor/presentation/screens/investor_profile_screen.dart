@@ -146,6 +146,12 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
           if (updatedUser != null) {
             authNotifier.updateLocalUserData(updatedUser);
             if (mounted) {
+              if (uploadedImageUrl != null) {
+                setState(() {
+                  _profileImage = null;
+                  _removeProfileImage = false;
+                });
+              }
               setState(() => _isEditing = false);
              Fluttertoast.showToast(msg: "Profile updated successfully");
             }
@@ -220,19 +226,53 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
       children: [
         Stack(
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: AppTheme.primary,
-              backgroundImage:
-                  _profileImage != null
-                      ? FileImage(_profileImage!)
+            SizedBox(
+              width: 100,
+              height: 100,
+              child: ClipOval(
+                child: Container(
+                  color: AppTheme.primary,
+                  child: _profileImage != null
+                      ? Image.file(
+                          _profileImage!,
+                          fit: BoxFit.cover,
+                        )
                       : (remoteImageUrl != null && remoteImageUrl.isNotEmpty)
-                          ? NetworkImage(remoteImageUrl)
-                          : null,
-              child: (_profileImage == null) &&
-                      (remoteImageUrl == null || remoteImageUrl.isEmpty)
-                  ? const Icon(Icons.person, size: 50, color: Colors.white)
-                  : null,
+                          ? Image.network(
+                              remoteImageUrl,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const Center(
+                                  child: SizedBox(
+                                    width: 26,
+                                    height: 26,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Center(
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Colors.white,
+                                  ),
+                                );
+                              },
+                            )
+                          : const Center(
+                              child: Icon(
+                                Icons.person,
+                                size: 50,
+                                color: Colors.white,
+                              ),
+                            ),
+                ),
+              ),
             ),
             if (_isEditing)
               Positioned(

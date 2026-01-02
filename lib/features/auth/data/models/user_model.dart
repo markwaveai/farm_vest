@@ -93,7 +93,7 @@ class UserModel {
       'verified': verified,
       'otp_verified': otpVerified,
       'isQuit': isQuit,
-      'imageUrl': imageUrl,
+      'image_url': imageUrl,
     };
   }
 
