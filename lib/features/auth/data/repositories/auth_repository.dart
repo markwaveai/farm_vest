@@ -5,10 +5,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../core/services/api_services.dart';
-import '../../../../core/utils/app_enums.dart';
-import '../../models/user_model.dart';
-import '../../models/whatsapp_otp_response.dart';
+import 'package:farm_vest/core/services/api_services.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
+import '../models/user_model.dart';
+import '../models/whatsapp_otp_response.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
@@ -64,7 +64,8 @@ class AuthRepository {
     }
     return null;
   }
-//upload profile image
+
+  //upload profile image
   Future<String> uploadProfileImage({
     required File file,
     required String userId,
@@ -78,7 +79,9 @@ class AuthRepository {
       bucket: AppConstants.storageBucketName,
     );
 
-    final ref = storage.ref().child('farmvestuserpics/$userId/$dateFolder/$fileName');
+    final ref = storage.ref().child(
+      'farmvestuserpics/$userId/$dateFolder/$fileName',
+    );
     final snapshot = await ref.putFile(
       file,
       SettableMetadata(contentType: 'image/jpeg'),

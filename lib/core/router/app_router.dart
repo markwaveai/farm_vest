@@ -1,29 +1,27 @@
-import 'package:farm_vest/features/employee/new_supervisor/alert_screen.dart';
-import 'package:farm_vest/features/investor/screens/cctv_main_screen.dart';
-import 'package:farm_vest/features/investor/screens/investor_profile_screen.dart';
-import 'package:farm_vest/features/investor/widgets/investor_shell.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/investor/screens/buffalo_calves_screen.dart';
-import '../../features/investor/models/unit_response.dart';
-import '../../features/auth/screens/new_login_screen.dart';
-import '../../features/auth/screens/onboarding_screen.dart';
-import '../../features/auth/screens/splash_screen.dart';
-
-import '../../features/common/screens/notifications_screen.dart';
-import '../../features/investor/screens/asset_valuation_screen.dart';
-import '../../features/investor/screens/investor_dashboard_screen.dart';
-import '../../features/investor/screens/monthly_visits_screen.dart';
-import '../../features/investor/screens/revenue_screen.dart';
-import '../../features/investor/screens/support_screen.dart';
-import '../../features/investor/screens/unit_details_screen.dart';
-import '../../features/employee/screens/assistant_dashboard_screen.dart';
-import '../../features/employee/screens/doctor_dashboard_screen.dart';
-import '../../features/employee/screens/health_issues_screen.dart';
-import '../../features/employee/screens/milk_production_screen.dart';
-import '../../features/employee/screens/profile_screen.dart';
-import '../../features/employee/screens/raise_ticket_screen.dart';
-import '../../features/employee/screens/supervisor_dashboard_screen.dart';
-import '../../features/admin/screens/admin_dashboard_screen.dart';
+import 'package:farm_vest/features/investor/presentation/screens/cctv_main_screen.dart';
+import 'package:farm_vest/features/investor/presentation/screens/investor_profile_screen.dart';
+import 'package:farm_vest/features/investor/presentation/widgets/investor_shell.dart';
+import '../../features/investor/presentation/screens/buffalo_calves_screen.dart';
+import '../../features/investor/data/models/unit_response.dart';
+import '../../features/auth/presentation/screens/new_login_screen.dart';
+import '../../features/auth/presentation/screens/onboarding_screen.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/common/presentation/screens/notifications_screen.dart';
+import '../../features/investor/presentation/screens/asset_valuation_screen.dart';
+import '../../features/investor/presentation/screens/investor_dashboard_screen.dart';
+import '../../features/investor/presentation/screens/monthly_visits_screen.dart';
+import '../../features/investor/presentation/screens/revenue_screen.dart';
+import '../../features/investor/presentation/screens/support_screen.dart';
+import '../../features/investor/presentation/screens/unit_details_screen.dart';
+import '../../features/employee/presentation/screens/assistant_dashboard_screen.dart';
+import '../../features/employee/presentation/screens/doctor_dashboard_screen.dart';
+import '../../features/employee/presentation/screens/health_issues_screen.dart';
+import '../../features/employee/presentation/screens/milk_production_screen.dart';
+import '../../features/employee/presentation/screens/profile_screen.dart';
+import '../../features/employee/presentation/screens/raise_ticket_screen.dart';
+import '../../features/supervisor/presentation/screens/supervisor_dashboard_screen.dart';
+import '../../features/admin/presentation/screens/admin_dashboard_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -53,8 +51,7 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/customer-dashboard',
-            builder: (context, state) => 
-           const InvestorDashboardScreen(),
+            builder: (context, state) => const InvestorDashboardScreen(),
           ),
           GoRoute(
             path: '/asset-valuation',
