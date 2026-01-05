@@ -1,8 +1,13 @@
 import 'dart:io';
 
+import 'package:farm_vest/core/services/biometric_service.dart';
+import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:farm_vest/core/utils/image_helper_compressor.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/models/user_model.dart';
 import '../../data/models/whatsapp_otp_response.dart';
@@ -55,7 +60,7 @@ class AuthState {
 
 class AuthController extends Notifier<AuthState> {
   AuthRepository get _repository => ref.read(authRepositoryProvider);
-
+final ImagePicker _picker = ImagePicker();
   @override
   AuthState build() {
     return AuthState();
@@ -78,6 +83,40 @@ class AuthController extends Notifier<AuthState> {
       return null;
     }
   }
+  //delete profile image
+  Future<bool> deleteProfileImage({
+    required String userId,
+    required String filePath,
+  }) async {
+    try {
+      return await _repository.deleteProfileImage(userId: userId, filePath: filePath);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
+  }
+  // In AuthController class
+Future<String?> getCurrentFirebaseImageUrl(String userId) async {
+  try {
+    final storage = FirebaseStorage.instanceFor(
+      bucket: AppConstants.storageBucketName,
+    );
+    
+    final ref = storage.ref().child('farmvestuserpics/$userId/profile.jpg');
+    
+    // Try to get the download URL
+    final url = await ref.getDownloadURL();
+    return url;
+  } on FirebaseException catch (e) {
+    if (e.code == 'object-not-found') {
+      // Image doesn't exist in Firebase
+      return '';
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
 
   Future<WhatsappOtpResponse?> sendWhatsappOtp(String phone) async {
     state = state.copyWith(isLoading: true, error: null);
@@ -96,6 +135,7 @@ class AuthController extends Notifier<AuthState> {
     if (state.otpResponse == null) return false;
     return state.otpResponse!.otp == enteredOtp;
   }
+  
 
   Future<void> checkLoginStatus() async {
     final session = await _repository.getSession();
@@ -106,6 +146,38 @@ class AuthController extends Notifier<AuthState> {
         role: session['role'],
         userData: session['userData'],
       );
+    }
+  }
+  Future<File?> pickProfileImage({
+    required ImageSource source,
+    bool compress = true,
+    bool isDocument = true,
+  }) async {
+    try {
+      final XFile? image = await BiometricService.runWithLockSuppressed(() {
+        return _picker.pickImage(
+          source: source,
+          imageQuality: 85,
+        );
+      });
+
+      if (image == null) return null;
+
+      File selectedFile = File(image.path);
+
+      if (compress) {
+        selectedFile =
+            await ImageCompressionHelper.getCompressedImageIfNeeded(
+          selectedFile,
+          maxSizeKB: 250,
+          isDocument: isDocument,
+        );
+      }
+
+      return selectedFile;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return null;
     }
   }
 

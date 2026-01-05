@@ -37,15 +37,27 @@ class ChatBubble extends StatelessWidget {
           ),
         ),
         child: Column(
-          crossAxisAlignment:
-              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isUser
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
-            Text(
-              message.text,
-              style: TextStyle(
-                color: isUser ? Colors.white : Colors.black87,
+            if (message.imageFile != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.file(
+                  message.imageFile!,
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
+              if (message.text.isNotEmpty) const SizedBox(height: 8),
+            ],
+            if (message.text.isNotEmpty)
+              Text(
+                message.text,
+                style: TextStyle(color: isUser ? Colors.white : Colors.black87),
+              ),
             const SizedBox(height: 4),
             Text(
               _formatTime(message.time),

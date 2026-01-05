@@ -248,10 +248,28 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppTheme.white,
-                  child: Icon(Icons.person, size: 30, color: AppTheme.primary),
+                SizedBox(
+                  height: 60,
+                  width: 60,
+                  child: ClipOval(
+                  child: Container(
+                    color: AppTheme.white,
+                    child:
+                     userData?.imageUrl!=""&&userData?.imageUrl!=null
+                        ? Image.network(userData!.imageUrl!, fit: BoxFit.cover,loadingBuilder: (context, child, loadingProgress) {
+                          if(loadingProgress==null)return child;
+                        return  Center(child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ));
+
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                         return Center(
+                          child: Text("image not supported",style: AppTheme.bodySmall,),
+                         ) ;
+                        },)
+                        
+                        :Icon(Icons.person, size: 30, color: AppTheme.primary))),
                 ),
                 const SizedBox(height: AppConstants.spacingM),
                 Text(

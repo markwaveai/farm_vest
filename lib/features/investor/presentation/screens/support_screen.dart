@@ -4,7 +4,6 @@ import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:farm_vest/features/investor/presentation/screens/live_chart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-
 class FAQ {
   final String question;
   final String answer;
@@ -111,7 +110,14 @@ class _SupportScreenState extends State<SupportScreen> {
                     'Report an issue',
                     Icons.report_problem,
                     AppTheme.warningOrange,
-                    () => _showRaiseTicketDialog(context),
+                    () => _openRaiseTicket(context),
+                  ),
+                  _buildActionCard(
+                    'Ticket History',
+                    'View past tickets',
+                    Icons.history,
+                    AppTheme.primary,
+                    () => _openTicketHistory(context),
                   ),
                   _buildActionCard(
                     'Call MarkWave',
@@ -354,7 +360,7 @@ class _SupportScreenState extends State<SupportScreen> {
             ListTile(
               leading: const Icon(Icons.phone, color: AppTheme.primary),
               title: const Text('Phone Call'),
-              subtitle: const Text('+91 98765 43210'),
+              subtitle: const Text('+91 77027 10290'),
               onTap: () {
                 Navigator.pop(context);
                 _makePhoneCall();
@@ -363,7 +369,7 @@ class _SupportScreenState extends State<SupportScreen> {
             ListTile(
               leading: const Icon(Icons.email, color: AppTheme.primary),
               title: const Text('Email'),
-              subtitle: const Text('support@markwave.com'),
+              subtitle: const Text('contact@markwave.ai'),
               onTap: () {
                 Navigator.pop(context);
                 ToastUtils.showInfo(context, 'Opening email app...');
@@ -375,12 +381,28 @@ class _SupportScreenState extends State<SupportScreen> {
     );
   }
 
-  void _showRaiseTicketDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const RaiseSupportTicketDialog(),
-    );
-  }
+void _openRaiseTicket(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (_) => const RaiseSupportTicketSheet(),
+  );
+}
+
+void _openTicketHistory(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (_) => const TicketHistorySheet(),
+  );
+}
+
 
   void _showAppGuide(BuildContext context) {
     showDialog(
@@ -440,17 +462,28 @@ class _SupportScreenState extends State<SupportScreen> {
   }
 }
 
-class RaiseSupportTicketDialog extends StatefulWidget {
-  const RaiseSupportTicketDialog({super.key});
+class RaiseSupportTicketSheet extends StatefulWidget {
+  const RaiseSupportTicketSheet({super.key});
 
   @override
-  State<RaiseSupportTicketDialog> createState() =>
-      _RaiseSupportTicketDialogState();
+  State<RaiseSupportTicketSheet> createState() =>
+      _RaiseSupportTicketSheetState();
 }
 
-class _RaiseSupportTicketDialogState extends State<RaiseSupportTicketDialog> {
+class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
   final TextEditingController _issueController = TextEditingController();
   String _selectedPriority = 'Medium';
+
+  final priorities = ['Low', 'Medium', 'High', 'Critical'];
+
+  @override
+  void initState() {
+    super.initState();
+    _issueController.addListener(() {
+      if (!mounted) return;
+      setState(() {});
+    });
+  }
 
   @override
   void dispose() {
@@ -460,53 +493,293 @@ class _RaiseSupportTicketDialogState extends State<RaiseSupportTicketDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Raise Support Ticket'),
-      content: Column(
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        AppConstants.spacingL,
+        AppConstants.spacingL,
+        AppConstants.spacingL,
+        bottomPadding + AppConstants.spacingL,
+      ),
+      child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DropdownButtonFormField<String>(
-            value: _selectedPriority,
-            decoration: const InputDecoration(labelText: 'Priority'),
-            items: ['Low', 'Medium', 'High', 'Critical']
-                .map(
-                  (priority) =>
-                      DropdownMenuItem(value: priority, child: Text(priority)),
-                )
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedPriority = value!;
-              });
-            },
+          // Handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade400,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
           ),
-          const SizedBox(height: AppConstants.spacingM),
+
+          // Title
+          const Text(
+            'Raise a Support Ticket',
+            style: AppTheme.headingMedium,
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Tell us what went wrong. Our team will get back to you shortly.',
+            style: AppTheme.bodySmall,
+          ),
+
+          const SizedBox(height: 24),
+
+          // Priority selector
+          const Text(
+            'Priority',
+            style: AppTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+
+          Wrap(
+            spacing: 8,
+            children: priorities.map((priority) {
+              final isSelected = _selectedPriority == priority;
+              return ChoiceChip(
+                label: Text(priority),
+                selected: isSelected,
+                onSelected: (_) {
+                  setState(() => _selectedPriority = priority);
+                },
+                checkmarkColor: Colors.black,
+                selectedColor: AppTheme.primary.withOpacity(0.15),
+                labelStyle: TextStyle(
+                  color: isSelected
+                      ? AppTheme.primary
+                      : Colors.grey.shade700,
+                  fontWeight: FontWeight.w600,
+                ),
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Issue description
+          const Text(
+            'Describe the issue',
+            style: AppTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+
           TextField(
             controller: _issueController,
-            decoration: const InputDecoration(
-              labelText: 'Describe your issue',
-              hintText: 'Please provide details about the problem...',
+            maxLines: 4,
+            maxLength: 300,
+            decoration: InputDecoration(
+              hintText: 'Please describe your issue in detail...',
+              filled: true,
+              fillColor: Colors.grey.shade100,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
             ),
-            maxLines: 3,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Submit button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _issueController.text.trim().isEmpty
+                  ? null
+                  : _submitTicket,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('Submit Ticket'),
+            ),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-            ToastUtils.showSuccess(
-              context,
-              'Ticket raised successfully! We\'ll contact you soon.',
-            );
+    );
+  }
+
+  void _submitTicket() {
+    Navigator.pop(context);
+
+    ToastUtils.showSuccess(
+      context,
+      'Ticket raised successfully! Our support team will contact you soon.',
+    );
+  }
+}
+class SupportTicket {
+  final String id;
+  final String issue;
+  final String priority;
+  final DateTime createdAt;
+  final bool isClosed;
+
+  SupportTicket({
+    required this.id,
+    required this.issue,
+    required this.priority,
+    required this.createdAt,
+    required this.isClosed,
+  });
+}
+class TicketHistorySheet extends StatefulWidget {
+  const TicketHistorySheet({super.key});
+
+  @override
+  State<TicketHistorySheet> createState() => _TicketHistorySheetState();
+}
+
+class _TicketHistorySheetState extends State<TicketHistorySheet>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  final List<SupportTicket> tickets = [
+    SupportTicket(
+      id: '1',
+      issue: 'Live CCTV not loading',
+      priority: 'High',
+      createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      isClosed: false,
+    ),
+    SupportTicket(
+      id: '2',
+      issue: 'Monthly visit booking issue',
+      priority: 'Medium',
+      createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      isClosed: true,
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Support Ticket History',
+            style: AppTheme.headingMedium,
+          ),
+          const SizedBox(height: 12),
+
+          TabBar(
+            controller: _tabController,
+            labelColor: AppTheme.primary,
+            tabs: const [
+              Tab(text: 'Active'),
+              Tab(text: 'Closed'),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          SizedBox(
+            height: 350,
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildTicketList(isClosed: false),
+                _buildTicketList(isClosed: true),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTicketList({required bool isClosed}) {
+    final filtered =
+        tickets.where((t) => t.isClosed == isClosed).toList();
+
+    if (filtered.isEmpty) {
+      return const Center(child: Text('No tickets found'));
+    }
+
+    return ListView.builder(
+      itemCount: filtered.length,
+      itemBuilder: (context, index) {
+        final ticket = filtered[index];
+        return _TicketCard(
+          ticket: ticket,
+          showDelete: isClosed,
+          onDelete: () {
+            setState(() => tickets.remove(ticket));
+            ToastUtils.showInfo(context, 'Ticket removed from history');
           },
-          child: const Text('Submit'),
+        );
+      },
+    );
+  }
+}
+class _TicketCard extends StatelessWidget {
+  final SupportTicket ticket;
+  final bool showDelete;
+  final VoidCallback? onDelete;
+
+  const _TicketCard({
+    required this.ticket,
+    this.showDelete = false,
+    this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    ticket.issue,
+                    style: AppTheme.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if (showDelete)
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline,
+                        color: AppTheme.errorRed),
+                    onPressed: onDelete,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Priority: ${ticket.priority}',
+              style: AppTheme.bodySmall,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Raised on: ${ticket.createdAt.day}/${ticket.createdAt.month}/${ticket.createdAt.year}',
+              style: AppTheme.bodySmall,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
