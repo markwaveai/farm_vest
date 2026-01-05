@@ -291,18 +291,21 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
         ],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
+
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(height: 12),
+          Row(
+           
+            children: [
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+               const SizedBox(width: 8),
           Text(
             title,
             style: TextStyle(
@@ -312,7 +315,10 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 4),
+            ],
+          ),
+         
+          const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
