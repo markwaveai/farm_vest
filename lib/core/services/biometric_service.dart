@@ -24,6 +24,19 @@ class BiometricService {
     _isUnlocked = false;
     _lastError = null;
   }
+static Future<bool> isBiometricAvailable() async {
+  try {
+    final isSupported = await _auth.isDeviceSupported();
+    final canCheck = await _auth.canCheckBiometrics;
+
+    if (!isSupported || !canCheck) return false;
+
+    final available = await _auth.getAvailableBiometrics();
+    return available.isNotEmpty;
+  } catch (_) {
+    return false;
+  }
+}
 
   static Future<bool> authenticate() async {
     try {

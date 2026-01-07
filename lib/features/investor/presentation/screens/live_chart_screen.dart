@@ -1,6 +1,13 @@
+import 'dart:io';
+
+import 'package:farm_vest/core/services/biometric_service.dart'
+    show BiometricService;
 import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:farm_vest/core/utils/image_helper_compressor.dart';
 import 'package:farm_vest/features/investor/presentation/widgets/chat_bubble.dart';
+import 'package:farm_vest/features/investor/presentation/widgets/typing_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -11,6 +18,10 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
+  bool _isTyping = false;
+  final ImagePicker _picker = ImagePicker();
+  File? _selectedImage;
+
   final List<ChatMessage> _messages = [
     ChatMessage(
       text:
@@ -26,26 +37,32 @@ class _ChatScreenState extends State<ChatScreen> {
   ];
 
   void _sendMessage() {
-    if (_controller.text.trim().isEmpty) return;
-
-    final userMsg = ChatMessage(
-      text: _controller.text,
-      type: MessageType.user,
-      time: DateTime.now(),
-    );
+    final text = _controller.text.trim();
+    if (text.isEmpty && _selectedImage == null) return;
 
     setState(() {
-      _messages.add(userMsg);
+      _messages.add(
+        ChatMessage(
+          text: text,
+          imageFile: _selectedImage,
+          type: MessageType.user,
+          time: DateTime.now(),
+        ),
+      );
+      _isTyping = true;
+      _selectedImage = null;
     });
 
     _controller.clear();
 
-    // Simulate AI reply (replace with API call)
+    // Simulate AI reply
     Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
       setState(() {
+        _isTyping = false;
         _messages.add(
           ChatMessage(
-            text: "I understand your concern. Let me check this for you.",
+            text: "Thanks for sharing. I’m checking this now.",
             type: MessageType.ai,
             time: DateTime.now(),
           ),
@@ -66,7 +83,7 @@ class _ChatScreenState extends State<ChatScreen> {
               "End Chat",
               style: TextStyle(color: Colors.orange),
             ),
-          )
+          ),
         ],
       ),
       body: Column(
@@ -74,8 +91,20 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(12),
-              itemCount: _messages.length,
+              itemCount: _messages.length + (_isTyping ? 1 : 0),
               itemBuilder: (context, index) {
+                if (index == _messages.length) {
+                  return const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 10,
+                      ),
+                      child: TypingIndicator(),
+                    ),
+                  );
+                }
                 return ChatBubble(message: _messages[index]);
               },
             ),
@@ -93,36 +122,95 @@ class _ChatScreenState extends State<ChatScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-            )
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8),
           ],
         ),
         child: Row(
           children: [
+            // 🔹 IMAGE THUMBNAIL INSIDE INPUT
+            if (_selectedImage != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundImage: FileImage(_selectedImage!),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() => _selectedImage = null);
+                      },
+                      child: const CircleAvatar(
+                        radius: 8,
+                        backgroundColor: Colors.black54,
+                        child: Icon(Icons.close, size: 10, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            // 🔹 TEXT FIELD
             Expanded(
               child: TextField(
                 controller: _controller,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: "Start typing your message",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(30)),
-                  ),
+                  border: InputBorder.none,
                   isDense: true,
-                  suffixIcon: const Icon(Icons.photo_sharp)
                 ),
-                
               ),
             ),
-            const SizedBox(width: 8),
+
+            // 🔹 IMAGE PICKER
+            IconButton(
+              icon: const Icon(Icons.photo_sharp),
+              onPressed: () {
+                _pickFromGallery(compress: true, isDocument: true);
+              },
+            ),
+
+            // 🔹 SEND BUTTON
             IconButton(
               icon: const Icon(Icons.send, color: Colors.deepPurple),
               onPressed: _sendMessage,
-            )
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _pickFromGallery({
+    bool compress = true,
+    bool isDocument = true,
+  }) async {
+    try {
+      final XFile? image = await BiometricService.runWithLockSuppressed(() {
+        return _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+      });
+      if (image == null) return;
+      File selectedFile = File(image.path);
+      if (compress) {
+        final compressedFile =
+            await ImageCompressionHelper.getCompressedImageIfNeeded(
+              selectedFile,
+              maxSizeKB: 250,
+              isDocument: isDocument,
+            );
+        selectedFile = compressedFile;
+      }
+      if (!mounted) return;
+      setState(() {
+        _selectedImage = selectedFile;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to pick image')));
+    }
   }
 }

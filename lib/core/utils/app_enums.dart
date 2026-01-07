@@ -1,5 +1,7 @@
 // Enums for the FarmVest application
 
+import 'dart:io';
+
 /// Defines the different types of users in the application
 enum UserType {
   customer('customer'),
@@ -75,17 +77,33 @@ enum NotificationType {
   final String value;
   const NotificationType(this.value);
 }
-enum MessageType { user, ai, system }
+enum MessageType { user, ai, system,typing }
 
 class ChatMessage {
   final String text;
   final MessageType type;
   final DateTime time;
+  final File? imageFile;
 
   ChatMessage({
     required this.text,
     required this.type,
     required this.time,
+    this.imageFile,
   });
 }
+
+enum CompressFormat {
+  jpeg,
+  png,
+
+  /// - iOS: Supported from iOS11+.
+  /// - Android: Supported from API 28+ which require hardware encoder supports,
+  ///   Use [HeifWriter](https://developer.android.com/reference/androidx/heifwriter/HeifWriter.html)
+  heic,
+
+  /// Only supported on Android.
+  webp,
+}
+
 
