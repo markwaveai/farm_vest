@@ -1,3 +1,4 @@
+import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/investor/presentation/screens/cctv_main_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/investor_profile_screen.dart';
@@ -35,7 +36,7 @@ class AppRouter {
 
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        builder: (context, state) => const DoctorDashboardNewscreen(),
       ),
 
       GoRoute(
@@ -51,7 +52,7 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/customer-dashboard',
-            builder: (context, state) => const InvestorDashboardScreen(),
+            builder: (context, state) => const DoctorDashboardNewscreen(),
           ),
           GoRoute(
             path: '/asset-valuation',
@@ -103,7 +104,8 @@ class AppRouter {
       ),
       GoRoute(
         path: '/doctor-dashboard',
-        builder: (context, state) => const DoctorDashboardScreen(),
+        builder: (context, state) => DoctorDashboardNewscreen(),
+        //const DoctorDashboardScreen(),
       ),
       GoRoute(
         path: '/assistant-dashboard',
