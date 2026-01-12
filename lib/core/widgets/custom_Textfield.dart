@@ -20,7 +20,8 @@ class CustomTextField extends StatelessWidget {
     this.controller,
     this.keyboardType = TextInputType.text,
     this.validator,
-    this.prefixIcon,this.style,
+    this.prefixIcon,
+    this.style,
   });
 
   @override
