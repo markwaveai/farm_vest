@@ -1,4 +1,8 @@
+
 import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
+
+import 'package:farm_vest/features/employee/new_supervisor/screens/new_supervisor_dashboard.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/investor/presentation/screens/cctv_main_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/investor_profile_screen.dart';
@@ -21,7 +25,7 @@ import '../../features/employee/presentation/screens/health_issues_screen.dart';
 import '../../features/employee/presentation/screens/milk_production_screen.dart';
 import '../../features/employee/presentation/screens/profile_screen.dart';
 import '../../features/employee/presentation/screens/raise_ticket_screen.dart';
-import '../../features/supervisor/presentation/screens/supervisor_dashboard_screen.dart';
+//import '../../features/supervisor/presentation/screens/supervisor_dashboard_screen.dart';
 import '../../features/admin/presentation/screens/admin_dashboard_screen.dart';
 
 class AppRouter {
@@ -36,7 +40,7 @@ class AppRouter {
 
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => const DoctorDashboardNewscreen(),
+        builder: (context, state) => const OnboardingScreen(),
       ),
 
       GoRoute(
@@ -100,7 +104,7 @@ class AppRouter {
       // Employee Routes
       GoRoute(
         path: '/supervisor-dashboard',
-        builder: (context, state) => const SupervisorDashboardScreen(),
+        builder: (context, state) => const NewSupervisorDashboard(),
       ),
       GoRoute(
         path: '/doctor-dashboard',
@@ -133,6 +137,7 @@ class AppRouter {
         path: '/admin-dashboard',
         builder: (context, state) => const AdminDashboardScreen(),
       ),
+      
 
       // Common Routes
       GoRoute(
