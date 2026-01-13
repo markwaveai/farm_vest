@@ -1,5 +1,3 @@
-import 'package:buffalo_visualizer/providers/simulation_provider.dart';
-import 'package:buffalo_visualizer/widgets/monthly_revenue_break.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/features/investor/data/models/unit_response.dart';
 import 'package:farm_vest/features/investor/presentation/providers/buffalo_provider.dart';
@@ -7,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+
+import '../providers/asset_valuation_provider.dart';
 
 class RevenueScreen extends ConsumerStatefulWidget {
   const RevenueScreen({super.key});
@@ -258,7 +258,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
   }
 
   Widget _buildStatCard(
-    
+
     bool isDark,
     String title,
     String value,
@@ -295,7 +295,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Row(
-           
+
             children: [
               Container(
                 padding: const EdgeInsets.all(2),
@@ -317,7 +317,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
           ),
             ],
           ),
-         
+
           const SizedBox(height: 8),
           Text(
             value,
@@ -365,27 +365,27 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
               child: Column(
                 children: [
                   _buildTopStats(simState.treeData!, totalRevenue,isDark),
-                  MonthlyRevenueBreakWidget(
-                    treeData: simState.treeData!,
-                    buffaloDetails: buffaloDetails,
-                    monthlyRevenue: monthlyRevenue,
-                    calculateAgeInMonths: _calculateAgeInMonths,
-                    formatCurrency: (amount) => _currencyFormat.format(amount),
-                    monthNames: const [
-                      "January",
-                      "February",
-                      "March",
-                      "April",
-                      "May",
-                      "June",
-                      "July",
-                      "August",
-                      "September",
-                      "October",
-                      "November",
-                      "December",
-                    ],
-                  ),
+                  // MonthlyRevenueBreakWidget(
+                  //   treeData: simState.treeData!,
+                  //   buffaloDetails: buffaloDetails,
+                  //   monthlyRevenue: monthlyRevenue,
+                  //   calculateAgeInMonths: _calculateAgeInMonths,
+                  //   formatCurrency: (amount) => _currencyFormat.format(amount),
+                  //   monthNames: const [
+                  //     "January",
+                  //     "February",
+                  //     "March",
+                  //     "April",
+                  //     "May",
+                  //     "June",
+                  //     "July",
+                  //     "August",
+                  //     "September",
+                  //     "October",
+                  //     "November",
+                  //     "December",
+                  //   ],
+                  // ),
                 ],
               ),
             ),

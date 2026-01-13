@@ -217,6 +217,8 @@ Future<String?> getCurrentFirebaseImageUrl(String userId) async {
         detectedRole = UserType.doctor;
       } else if (mobileNumber.endsWith('3')) {
         detectedRole = UserType.assistant;
+      } else if (mobileNumber.endsWith('4')) {
+        detectedRole = UserType.farmManager;
       } else if (mobileNumber.endsWith('9')) {
         detectedRole = UserType.admin;
       }

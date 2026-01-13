@@ -8,6 +8,7 @@ enum UserType {
   supervisor('supervisor'),
   doctor('doctor'),
   assistant('assistant'),
+  farmManager('farmManager'),
   admin('admin');
 
   final String value;
@@ -37,6 +38,7 @@ enum AppRoutes {
   supervisorDashboard('/supervisor-dashboard'),
   doctorDashboard('/doctor-dashboard'),
   assistantDashboard('/assistant-dashboard'),
+  farmManagerDashboard('/farm-manager-dashboard'),
   milkProduction('/milk-production'),
   healthIssues('/health-issues'),
   raiseTicket('/raise-ticket'),

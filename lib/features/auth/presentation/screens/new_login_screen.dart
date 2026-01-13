@@ -44,46 +44,50 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     });
   }
 
+  // 1. Centralized navigation logic to prevent errors and duplication
+  void _navigateToDashboard(UserType role) {
+    if (role == UserType.customer) {
+      ref.invalidate(unitResponseProvider);
+    }
+
+    if (!mounted) return;
+
+    switch (role) {
+      case UserType.customer:
+        context.go('/customer-dashboard');
+        break;
+      case UserType.supervisor:
+        context.go('/supervisor-dashboard');
+        break;
+      case UserType.doctor:
+        context.go('/doctor-dashboard');
+        break;
+      case UserType.assistant:
+        context.go('/assistant-dashboard');
+        break;
+      case UserType.farmManager: // The missing case is now correctly handled
+        context.go('/farm-manager-dashboard');
+        break;
+      case UserType.admin:
+        context.go('/admin-dashboard');
+        break;
+      default:
+        context.go('/customer-dashboard');
+    }
+  }
+
   Future<void> _handleContinue() async {
+    // 2. DEBUG-ONLY PATH (OTP SKIP)
     if (kDebugMode && !_isOtpSent && _phoneNumber.length == 10) {
       final loginData = await ref
           .read(authProvider.notifier)
           .completeLoginWithData(_phoneNumber);
-
-      if (!mounted) return;
-
-      final role = loginData['role'] as UserType;
-
-      if (role == UserType.customer) {
-        ref.invalidate(unitResponseProvider);
-      }
-
-      if (!mounted) return;
-
-      switch (role) {
-        case UserType.customer:
-          context.go('/customer-dashboard');
-          break;
-        case UserType.supervisor:
-          context.go('/supervisor-dashboard');
-          break;
-        case UserType.doctor:
-          context.go('/doctor-dashboard');
-          break;
-        case UserType.assistant:
-          context.go('/assistant-dashboard');
-          break;
-        case UserType.admin:
-          context.go('/admin-dashboard');
-          break;
-        default:
-          context.go('/customer-dashboard');
-      }
+      _navigateToDashboard(loginData['role'] as UserType);
       return;
     }
 
+    // 3. STANDARD OTP PATH
     if (!_isOtpSent) {
-      // Send OTP
       if (_phoneNumber.length == 10) {
         final response = await ref
             .read(authProvider.notifier)
@@ -119,36 +123,8 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           final loginData = await ref
               .read(authProvider.notifier)
               .completeLoginWithData(_phoneNumber);
-
-          if (!mounted) return;
-
-          final role = loginData['role'] as UserType;
-
-          if (role == UserType.customer) {
-            ref.invalidate(unitResponseProvider);
-          }
-
-          if (!mounted) return;
-
-          switch (role) {
-            case UserType.customer:
-              context.go('/customer-dashboard');
-              break;
-            case UserType.supervisor:
-              context.go('/supervisor-dashboard');
-              break;
-            case UserType.doctor:
-              context.go('/doctor-dashboard');
-              break;
-            case UserType.assistant:
-              context.go('/assistant-dashboard');
-              break;
-            case UserType.admin:
-              context.go('/admin-dashboard');
-              break;
-            default:
-              context.go('/customer-dashboard');
-          }
+          // Using the centralized function here too
+          _navigateToDashboard(loginData['role'] as UserType);
         } else {
           if (mounted) {
             ToastUtils.showError(context, 'Invalid OTP');
