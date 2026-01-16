@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 enum ButtonVariant { filled, outlined }
 
 class CustomActionButton extends StatelessWidget {
-  final String label;
+  final String? label;
   final VoidCallback? onPressed;
 
   final ButtonVariant variant;
@@ -16,10 +16,10 @@ class CustomActionButton extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final double height;
   final double? width;
-
+final Widget? child;
   const CustomActionButton({
     super.key,
-    required this.label,
+    this.label,
     required this.onPressed,
     this.variant = ButtonVariant.filled,
     this.color = Colors.green,
@@ -30,6 +30,7 @@ class CustomActionButton extends StatelessWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 16),
     this.height = 40,
     this.width,
+    this.child,
   });
 
   @override
@@ -49,14 +50,8 @@ class CustomActionButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           border: Border.all(color: color, width: 1.5),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-            color: isOutlined ? color : textColor,
-          ),
-        ),
+        child: child,
+        
       ),
     );
   }

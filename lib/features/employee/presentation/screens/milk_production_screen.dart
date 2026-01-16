@@ -5,17 +5,17 @@ import 'package:intl/intl.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 
+// 1. Updated model to be more flexible
 class MilkProductionEntry {
   final DateTime date;
-  final double morningLitres;
-  final double eveningLitres;
-  final double totalLitres;
+  final String timing; // Morning, Afternoon, Evening
+  final double litres;
 
   MilkProductionEntry({
     required this.date,
-    required this.morningLitres,
-    required this.eveningLitres,
-  }) : totalLitres = morningLitres + eveningLitres;
+    required this.timing,
+    required this.litres,
+  });
 }
 
 class MilkProductionScreen extends StatefulWidget {
@@ -27,41 +27,52 @@ class MilkProductionScreen extends StatefulWidget {
 
 class _MilkProductionScreenState extends State<MilkProductionScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _morningController = TextEditingController();
-  final _eveningController = TextEditingController();
+  final _litresController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  List<MilkProductionEntry> _pastEntries = [];
+  String _selectedTiming = 'Morning'; // Default timing
+
+  // Using a map to store entries by date for easier lookup
+  Map<String, List<MilkProductionEntry>> _pastEntries = {};
 
   @override
   void initState() {
     super.initState();
     _generatePastEntries();
+    // Add listener to recalculate total when text changes
+    _litresController.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _morningController.dispose();
-    _eveningController.dispose();
+    _litresController.dispose();
     super.dispose();
   }
 
   void _generatePastEntries() {
-    _pastEntries = List.generate(7, (index) {
-      final date = DateTime.now().subtract(Duration(days: index + 1));
-      return MilkProductionEntry(
-        date: date,
-        morningLitres: 80 + (index * 2.5),
-        eveningLitres: 75 + (index * 2.0),
-      );
-    });
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    _pastEntries = {
+      today: [
+        MilkProductionEntry(date: DateTime.now(), timing: 'Morning', litres: 85),
+        MilkProductionEntry(date: DateTime.now(), timing: 'Evening', litres: 78),
+      ],
+      DateFormat('yyyy-MM-dd').format(DateTime.now().subtract(const Duration(days: 1))): [
+        MilkProductionEntry(
+            date: DateTime.now().subtract(const Duration(days: 1)),
+            timing: 'Morning',
+            litres: 82),
+      ],
+    };
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final dateKey = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    final entriesForSelectedDate = _pastEntries[dateKey] ?? [];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Milk Production Entry'),
-        automaticallyImplyLeading: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => NavigationHelper.safePopOrNavigate(
@@ -75,7 +86,6 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Entry Form
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(AppConstants.spacingL),
@@ -84,125 +94,52 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Add New Entry',
-                        style: AppTheme.headingMedium,
-                      ),
+                      const Text('Add New Entry', style: AppTheme.headingMedium),
                       const SizedBox(height: AppConstants.spacingL),
-
-                      // Date Picker
-                      InkWell(
-                        onTap: _selectDate,
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(AppConstants.spacingM),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppTheme.mediumGrey),
-                            borderRadius: BorderRadius.circular(
-                              AppConstants.radiusM,
+                      _buildDatePicker(),
+                      const SizedBox(height: AppConstants.spacingL),
+                      // 2. Refactored to a single entry form with timings
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _litresController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Litres',
+                                suffixText: 'L',
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Enter litres';
+                                }
+                                if (double.tryParse(value) == null) {
+                                  return 'Invalid number';
+                                }
+                                return null;
+                              },
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.calendar_today,
-                                color: AppTheme.primary,
-                              ),
-                              const SizedBox(width: AppConstants.spacingM),
-                              Text(
-                                DateFormat(
-                                  'MMM dd, yyyy',
-                                ).format(_selectedDate),
-                                style: AppTheme.bodyMedium.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const Spacer(),
-                              const Icon(
-                                Icons.arrow_drop_down,
-                                color: AppTheme.mediumGrey,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppConstants.spacingL),
-
-                      // Morning Litres
-                      TextFormField(
-                        controller: _morningController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Morning Litres',
-                          prefixIcon: Icon(Icons.wb_sunny),
-                          suffixText: 'L',
-                          hintText: 'Enter morning milk production',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter morning litres';
-                          }
-                          if (double.tryParse(value) == null) {
-                            return 'Please enter a valid number';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: AppConstants.spacingM),
-
-                      // Evening Litres
-                      TextFormField(
-                        controller: _eveningController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Evening Litres',
-                          prefixIcon: Icon(Icons.nights_stay),
-                          suffixText: 'L',
-                          hintText: 'Enter evening milk production',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter evening litres';
-                          }
-                          if (double.tryParse(value) == null) {
-                            return 'Please enter a valid number';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: AppConstants.spacingL),
-
-                      // Total Display
-                      if (_morningController.text.isNotEmpty &&
-                          _eveningController.text.isNotEmpty)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(AppConstants.spacingM),
-                          decoration: BoxDecoration(
-                            color: AppTheme.secondary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(
-                              AppConstants.radiusM,
+                          const SizedBox(width: AppConstants.spacingM),
+                          // 3. The new timings dropdown
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _selectedTiming,
+                              decoration: const InputDecoration(labelText: 'Timing'),
+                              items: ['Morning', 'Afternoon', 'Evening']
+                                  .map((timing) => DropdownMenuItem(
+                                      value: timing, child: Text(timing)))
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() => _selectedTiming = value);
+                                }
+                              },
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Total Production:',
-                                style: AppTheme.bodyMedium,
-                              ),
-                              Text(
-                                '${_calculateTotal()}L',
-                                style: AppTheme.headingSmall.copyWith(
-                                  color: AppTheme.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ],
+                      ),
                       const SizedBox(height: AppConstants.spacingL),
-
-                      // Submit Button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -217,81 +154,46 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
               ),
             ),
             const SizedBox(height: AppConstants.spacingL),
-
-            // Past Entries
-            const Text('Recent Entries', style: AppTheme.headingMedium),
+            const Text('Today\'s Entries', style: AppTheme.headingMedium),
             const SizedBox(height: AppConstants.spacingM),
-
-            // Summary Stats
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    'Today\'s Total',
-                    '163L',
-                    Icons.today,
-                    AppTheme.primary,
+            // 4. Updated list to show flexible entries
+            entriesForSelectedDate.isEmpty
+                ? const Center(child: Text('No entries for this date.'))
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: entriesForSelectedDate.length,
+                    itemBuilder: (context, index) {
+                      final entry = entriesForSelectedDate[index];
+                      return _buildEntryCard(entry);
+                    },
                   ),
-                ),
-                const SizedBox(width: AppConstants.spacingM),
-                Expanded(
-                  child: _buildStatCard(
-                    'Weekly Avg',
-                    '158L',
-                    Icons.bar_chart,
-                    AppTheme.secondary,
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacingM),
-                Expanded(
-                  child: _buildStatCard(
-                    'Monthly Total',
-                    '4,740L',
-                    Icons.calendar_month,
-                    AppTheme.darkSecondary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppConstants.spacingM),
-
-            // Past Entries List
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _pastEntries.length,
-              itemBuilder: (context, index) {
-                final entry = _pastEntries[index];
-                return _buildEntryCard(entry);
-              },
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      child: Padding(
+  Widget _buildDatePicker() {
+    return InkWell(
+      onTap: _selectDate,
+      child: Container(
+        width: double.infinity,
         padding: const EdgeInsets.all(AppConstants.spacingM),
-        child: Column(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppTheme.mediumGrey),
+          borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        ),
+        child: Row(
           children: [
-            Icon(icon, color: color, size: AppConstants.iconM),
-            const SizedBox(height: AppConstants.spacingS),
+            const Icon(Icons.calendar_today, color: AppTheme.primary),
+            const SizedBox(width: AppConstants.spacingM),
             Text(
-              value,
-              style: AppTheme.bodyMedium.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+              DateFormat('MMM dd, yyyy').format(_selectedDate),
+              style: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
             ),
-            Text(title, style: AppTheme.bodySmall, textAlign: TextAlign.center),
+            const Spacer(),
+            const Icon(Icons.arrow_drop_down, color: AppTheme.mediumGrey),
           ],
         ),
       ),
@@ -299,98 +201,29 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
   }
 
   Widget _buildEntryCard(MilkProductionEntry entry) {
+    IconData icon;
+    Color color;
+    switch (entry.timing) {
+      case 'Morning':
+        icon = Icons.wb_sunny;
+        color = AppTheme.warningOrange;
+        break;
+      case 'Afternoon':
+        icon = Icons.brightness_5;
+        color = AppTheme.secondary;
+        break;
+      default:
+        icon = Icons.nights_stay;
+        color = AppTheme.darkGrey;
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
-        child: Row(
-          children: [
-            // Date
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: AppTheme.secondary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    DateFormat('dd').format(entry.date),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primary,
-                    ),
-                  ),
-                  Text(
-                    DateFormat('MMM').format(entry.date),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: AppConstants.spacingM),
-
-            // Production Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    DateFormat('EEEE').format(entry.date),
-                    style: AppTheme.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingS),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.wb_sunny,
-                        size: AppConstants.iconS,
-                        color: AppTheme.warningOrange,
-                      ),
-                      const SizedBox(width: AppConstants.spacingXS),
-                      Text(
-                        '${entry.morningLitres}L',
-                        style: AppTheme.bodySmall,
-                      ),
-                      const SizedBox(width: AppConstants.spacingM),
-                      const Icon(
-                        Icons.nights_stay,
-                        size: AppConstants.iconS,
-                        color: AppTheme.darkGrey,
-                      ),
-                      const SizedBox(width: AppConstants.spacingXS),
-                      Text(
-                        '${entry.eveningLitres}L',
-                        style: AppTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Total
-            Column(
-              children: [
-                Text(
-                  '${entry.totalLitres}L',
-                  style: AppTheme.headingSmall.copyWith(
-                    color: AppTheme.primary,
-                  ),
-                ),
-                const Text('Total', style: AppTheme.bodySmall),
-              ],
-            ),
-          ],
-        ),
+      child: ListTile(
+        leading: CircleAvatar(child: Icon(icon, color: color)),
+        title: Text('${entry.litres} Litres', style: AppTheme.headingSmall),
+        subtitle: Text(entry.timing),
+        trailing: Text(DateFormat('hh:mm a').format(entry.date)),
       ),
     );
   }
@@ -403,43 +236,34 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
+      setState(() => _selectedDate = picked);
     }
-  }
-
-  double _calculateTotal() {
-    final morning = double.tryParse(_morningController.text) ?? 0;
-    final evening = double.tryParse(_eveningController.text) ?? 0;
-    return morning + evening;
   }
 
   void _submitEntry() {
     if (_formKey.currentState!.validate()) {
-      final morning = double.parse(_morningController.text);
-      final evening = double.parse(_eveningController.text);
+      final litres = double.parse(_litresController.text);
+      final newEntry = MilkProductionEntry(
+        date: _selectedDate,
+        timing: _selectedTiming,
+        litres: litres,
+      );
 
-      // Add to past entries
+      final dateKey = DateFormat('yyyy-MM-dd').format(_selectedDate);
+
       setState(() {
-        _pastEntries.insert(
-          0,
-          MilkProductionEntry(
-            date: _selectedDate,
-            morningLitres: morning,
-            eveningLitres: evening,
-          ),
-        );
+        if (_pastEntries.containsKey(dateKey)) {
+          _pastEntries[dateKey]!.add(newEntry);
+        } else {
+          _pastEntries[dateKey] = [newEntry];
+        }
 
-        // Clear form
-        _morningController.clear();
-        _eveningController.clear();
-        _selectedDate = DateTime.now();
+        _litresController.clear();
       });
 
       ToastUtils.showSuccess(
         context,
-        'Milk production entry submitted successfully!',
+        'Entry for $_selectedTiming submitted successfully!',
       );
     }
   }
