@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// 1. Data Models
+// 1. Data Models (unchanged)
 class SupervisorTask {
   final String title;
   final String subtitle;
@@ -27,18 +27,28 @@ class SupervisorDashboardStats {
   });
 }
 
-// 2. State Class
+// 2. State Class - Now includes checklist state
 class SupervisorDashboardState {
   final SupervisorDashboardStats stats;
   final List<SupervisorTask> tasks;
   final List<HealthConcern> healthConcerns;
   final bool isLoading;
 
+  // Checklist state
+  final bool morningFeed;
+  final bool waterCleaning;
+  final bool shedWash;
+  final bool eveningMilking;
+
   SupervisorDashboardState({
     required this.stats,
     this.tasks = const [],
     this.healthConcerns = const [],
     this.isLoading = false,
+    this.morningFeed = true,
+    this.waterCleaning = true,
+    this.shedWash = false,
+    this.eveningMilking = false,
   });
 
   SupervisorDashboardState copyWith({
@@ -46,17 +56,25 @@ class SupervisorDashboardState {
     List<SupervisorTask>? tasks,
     List<HealthConcern>? healthConcerns,
     bool? isLoading,
+    bool? morningFeed,
+    bool? waterCleaning,
+    bool? shedWash,
+    bool? eveningMilking,
   }) {
     return SupervisorDashboardState(
       stats: stats ?? this.stats,
       tasks: tasks ?? this.tasks,
       healthConcerns: healthConcerns ?? this.healthConcerns,
       isLoading: isLoading ?? this.isLoading,
+      morningFeed: morningFeed ?? this.morningFeed,
+      waterCleaning: waterCleaning ?? this.waterCleaning,
+      shedWash: shedWash ?? this.shedWash,
+      eveningMilking: eveningMilking ?? this.eveningMilking,
     );
   }
 }
 
-// 3. Notifier
+// 3. Notifier - Now with methods to toggle checklist items
 class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
   @override
   SupervisorDashboardState build() {
@@ -73,37 +91,24 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
   }
 
   Future<void> _fetchData() async {
-    // Simulate network delay
     await Future.delayed(const Duration(seconds: 1));
-
-    // Mock data, replace with API calls
     final newStats = SupervisorDashboardStats(
       totalAnimals: '142',
       milkToday: '0L',
       activeIssues: '5',
       transfers: '1',
     );
-
-    final newTasks = [
-      SupervisorTask('Morning Feed Check', 'Pending'),
-      SupervisorTask('Water Troughs Cleaning', 'Completed'),
-    ];
-
-    final newHealthConcerns = [
-      HealthConcern('#BUF-889', 'High Temperature'),
-      HealthConcern('#BUF-123', 'Not Eating'),
-    ];
-
-    state = state.copyWith(
-      stats: newStats,
-      tasks: newTasks,
-      healthConcerns: newHealthConcerns,
-      isLoading: false,
-    );
+    state = state.copyWith(stats: newStats, isLoading: false);
   }
+
+  // Methods to update checklist state
+  void toggleMorningFeed(bool value) => state = state.copyWith(morningFeed: value);
+  void toggleWaterCleaning(bool value) => state = state.copyWith(waterCleaning: value);
+  void toggleShedWash(bool value) => state = state.copyWith(shedWash: value);
+  void toggleEveningMilking(bool value) => state = state.copyWith(eveningMilking: value);
 }
 
-// 4. Provider
+// 4. Provider (unchanged)
 final supervisorDashboardProvider = NotifierProvider<
     SupervisorDashboardNotifier,
     SupervisorDashboardState>(
