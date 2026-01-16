@@ -126,18 +126,27 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         context.go('/onboarding');
       } else if (authState.mobileNumber != null) {
         // User is logged in, navigate to role-based dashboard
-        if (authState.role == UserType.customer) {
-          context.go('/customer-dashboard');
-        } else if (authState.role == UserType.supervisor) {
-          context.go('/supervisor-dashboard');
-        } else if (authState.role == UserType.doctor) {
-          context.go('/doctor-dashboard');
-        } else if (authState.role == UserType.assistant) {
-          context.go('/assistant-dashboard');
-        } else if (authState.role == UserType.admin) {
-          context.go('/admin-dashboard');
-        } else {
-          context.go('/customer-dashboard');
+        switch (authState.role) {
+          case UserType.customer:
+            context.go('/customer-dashboard');
+            break;
+          case UserType.supervisor:
+            context.go('/supervisor-dashboard');
+            break;
+          case UserType.doctor:
+            context.go('/doctor-dashboard');
+            break;
+          case UserType.assistant:
+            context.go('/assistant-dashboard');
+            break;
+          case UserType.farmManager:
+            context.go('/farm-manager-dashboard');
+            break;
+          case UserType.admin:
+            context.go('/admin-dashboard');
+            break;
+          default:
+            context.go('/customer-dashboard');
         }
       } else {
         // Not logged in - show login
@@ -181,7 +190,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.primary.withValues(alpha: 0.3),
+                              color: AppTheme.primary.withOpacity(0.3),
                               blurRadius: 20,
                               spreadRadius: 5,
                             ),
@@ -241,7 +250,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           width: 200,
                           height: 200,
                           decoration: BoxDecoration(
-                            color: AppTheme.white.withValues(alpha: 0.15),
+                            color: AppTheme.white.withOpacity(0.15),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(

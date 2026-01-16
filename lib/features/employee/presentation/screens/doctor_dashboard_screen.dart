@@ -694,7 +694,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              context.go('/user-type-selection');
+              context.go('/login');
             },
             child: const Text('Logout'),
           ),

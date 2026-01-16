@@ -1,7 +1,6 @@
-import 'package:buffalo_visualizer/providers/simulation_provider.dart';
-import 'package:buffalo_visualizer/widgets/asset_market_value.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/features/investor/data/models/unit_response.dart';
+import 'package:farm_vest/features/investor/presentation/providers/asset_valuation_provider.dart';
 import 'package:farm_vest/features/investor/presentation/providers/buffalo_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -285,13 +284,13 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
           const SizedBox(height: 12),
           Text(
             title,
-            
+
              style: theme.textTheme.labelSmall?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             // TextStyle(
               fontSize: 12,
              // color: Colors.grey.shade600,
-             
+
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -327,17 +326,17 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
               child: Column(
                 children: [
                   _buildTopStats(simState.treeData!, simState.revenueData),
-                  AssetMarketValueWidget(
-                    treeData: simState.treeData!,
-                    yearlyData:
-                        (simState.revenueData?['yearlyData'] as List<dynamic>?)
-                            ?.cast<Map<String, dynamic>>() ??
-                        [],
-                    formatCurrency: (d) => _currencyFormat.format(d),
-                    formatNumber: (n) => _numberFormat.format(n),
-                    calculateAgeInMonths: _calculateAgeInMonths,
-                    buffaloDetails: _processBuffaloDetails(simState.treeData!),
-                  ),
+                  // AssetMarketValueWidget(
+                  //   treeData: simState.treeData!,
+                  //   yearlyData:
+                  //       (simState.revenueData?['yearlyData'] as List<dynamic>?)
+                  //           ?.cast<Map<String, dynamic>>() ??
+                  //       [],
+                  //   formatCurrency: (d) => _currencyFormat.format(d),
+                  //   formatNumber: (n) => _numberFormat.format(n),
+                  //   calculateAgeInMonths: _calculateAgeInMonths,
+                  //   buffaloDetails: _processBuffaloDetails(simState.treeData!),
+                  // ),
                 ],
               ),
             ),

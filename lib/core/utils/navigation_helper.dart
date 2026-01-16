@@ -26,7 +26,7 @@ class NavigationHelper {
         path.contains('assistant')) {
       context.go('/supervisor-dashboard');
     } else {
-      context.go('/user-type-selection');
+      context.go('/login');
     }
   }
 
