@@ -8,7 +8,7 @@ enum UserType {
   supervisor('supervisor'),
   doctor('doctor'),
   assistant('assistant'),
-  farmManager('farmManager'),
+  farmManager('farm_manager'),
   admin('admin');
 
   final String value;
@@ -16,7 +16,7 @@ enum UserType {
 
   static UserType fromString(String value) {
     return UserType.values.firstWhere(
-      (type) => type.value == value.toLowerCase(),
+      (type) => type.value == value.toLowerCase().replaceAll(' ', '_'),
       orElse: () => UserType.customer, // Default to customer if not found
     );
   }
@@ -107,5 +107,3 @@ enum CompressFormat {
   /// Only supported on Android.
   webp,
 }
-
-

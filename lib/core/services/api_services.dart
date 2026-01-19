@@ -69,7 +69,8 @@ class ApiServices {
           "otp": otp,
         }),
       );
-
+      print('this is the response===========> ${response.statusCode}');
+      print('this is the responsebody===========> ${response.body}');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return LoginResponse.fromMap(data);
