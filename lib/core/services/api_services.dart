@@ -227,4 +227,32 @@ class ApiServices {
       return null;
     }
   }
+
+  static Future<bool> onboardAnimal(Map<String, dynamic> body) async {
+    try {
+     // final uri = Uri.parse("${AppConstants.apiUrl}/animals/onboard");
+        final uri = Uri.parse("/animals/onboard");
+      debugPrint("Calling POST: $uri");
+      debugPrint("Body: ${jsonEncode(body)}");
+
+      final response = await http.post(
+        uri,
+        headers: {
+          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+          HttpHeaders.acceptHeader: AppConstants.applicationJson,
+        },
+        body: jsonEncode(body),
+      );
+
+      debugPrint("Response: ${response.statusCode} - ${response.body}");
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Exception: $e");
+      return false;
+    }
+  }
 }

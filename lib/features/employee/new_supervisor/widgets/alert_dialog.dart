@@ -1,11 +1,12 @@
-import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:farm_vest/core/widgets/custom_Textfield.dart';
 import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:farm_vest/core/widgets/custom_dialog.dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/new_supervisor_dashboard.dart';
+import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_dashboard_provider.dart';
+
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 enum QuickActionType {
@@ -34,6 +35,7 @@ const Map<QuickActionType, Color> buttonBackgroundColors = {
 Future<void> showQuickActionDialog({
   required BuildContext context,
   required QuickActionType type,
+  required WidgetRef ref,
 }) async {
   String selectedShed = '';
   Map<String, dynamic>? locateResult;
@@ -41,7 +43,7 @@ Future<void> showQuickActionDialog({
   String selectedTiming = 'Morning';
   int selectedSlot = 5;
   List<XFile> selectedImages = [];
-  final picker = ImagePicker();
+  //final picker = ImagePicker();
 
   final rfidController = TextEditingController();
   final shedController = TextEditingController();
@@ -59,14 +61,14 @@ Future<void> showQuickActionDialog({
       'row': 'Row-04',
       'slot': 'Slot-12',
       'health': 'Healthy',
-      'investor': 'aparna'
+      'investor': 'aparna',
     },
     'A': {
       'shed': 'Shed B',
       'row': 'Row-01',
       'slot': 'Slot-03',
       'health': 'Sick',
-      'investor': 'pradeep'
+      'investor': 'pradeep',
     },
   };
 
@@ -83,11 +85,7 @@ Future<void> showQuickActionDialog({
       showImagePicker = true;
       successMessage = 'Animal onboarded successfully!';
 
-      controllers = [
-        shedController,
-        breedController,
-        rowController,
-      ];
+      controllers = [shedController, breedController, rowController];
       fields = [
         helperTextField(
           helperText: 'Please enter shed number',
@@ -155,7 +153,10 @@ Future<void> showQuickActionDialog({
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
               ),
             ),
           ],
@@ -168,10 +169,7 @@ Future<void> showQuickActionDialog({
       dialogTitle = 'Report Health Ticket';
       successMessage = 'Health ticket raised successfully!';
 
-      controllers = [
-        reasonController,
-        buffaloIdController,
-      ];
+      controllers = [reasonController, buffaloIdController];
 
       fields = [
         helperTextField(
@@ -217,7 +215,10 @@ Future<void> showQuickActionDialog({
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
               ),
             ),
           ],
@@ -258,19 +259,55 @@ Future<void> showQuickActionDialog({
     context: context,
     barrierDismissible: false,
     builder: (_) {
-      return StatefulBuilder(
-        builder: (context, setStateDialog) {
-          Future<void> pickImages() async {
-            final List<XFile> pickedFiles = await picker.pickMultiImage();
-            if (pickedFiles.isNotEmpty) {
-              setStateDialog(() {
-                selectedImages.addAll(pickedFiles);
-              });
-            }
+      return Consumer(
+        builder: (context, ref, child) {
+          final dashboardState = ref.watch(supervisorDashboardProvider);
+
+          void showImageSourceDialog() {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return CustomDialog(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Select Image Source',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Divider(color: AppTheme.grey1.withValues(alpha: 0.5)),
+                      ListTile(
+                        leading: const Icon(Icons.camera_alt),
+                        title: const Text('Camera'),
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await ref
+                              .read(supervisorDashboardProvider.notifier)
+                              .pickFromCamera();
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.photo_library),
+                        title: const Text('Gallery'),
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await ref
+                              .read(supervisorDashboardProvider.notifier)
+                              .pickFromGallery();
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
           }
 
           final screenWidth = MediaQuery.of(context).size.width;
-          final screenHeight = MediaQuery.of(context).size.height;
           return CustomDialog(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -303,23 +340,34 @@ Future<void> showQuickActionDialog({
                         ),
                       if (showImagePicker) ...[
                         const SizedBox(height: 12),
+
+                        /// Upload button
                         DottedBorder(
-                          radius: const Radius.circular(8),
+                          radius: const Radius.circular(10),
                           color: AppTheme.lightPrimary,
                           dashPattern: const [6, 4],
+                          strokeWidth: 1,
                           child: InkWell(
-                            onTap: pickImages,
-                            child: const SizedBox(
+                            // onTap: pickImages,
+                            onTap: showImageSourceDialog,
+                            child: SizedBox(
                               height: 60,
                               child: Center(
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.upload_file, color: AppTheme.lightPrimary),
+                                  children: const [
+                                    Icon(
+                                      Icons.upload_file,
+                                      color: AppTheme.lightPrimary,
+                                    ),
                                     SizedBox(width: 8),
                                     Text(
                                       'Upload Buffalo Image',
-                                      style: TextStyle(color: AppTheme.lightPrimary, fontSize: 14),
+                                      style: TextStyle(
+                                        color: AppTheme.lightPrimary,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -327,55 +375,247 @@ Future<void> showQuickActionDialog({
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        if (selectedImages.isNotEmpty)
-                          SizedBox(
-                            height: 100,
-                            child: ListView.builder(
+                        SizedBox(height: 12),
+                        if (dashboardState.images.isNotEmpty)
+                          Container(
+                            height: 110,
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: AppTheme.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppTheme.grey1.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: ListView.separated(
                               scrollDirection: Axis.horizontal,
-                              itemCount: selectedImages.length,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              itemCount: dashboardState.images.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: 8),
                               itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 8.0),
-                                  child: Stack(
-                                    alignment: Alignment.topRight,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.file(
-                                          File(selectedImages[index].path),
-                                          width: 100,
-                                          height: 100,
-                                          fit: BoxFit.cover,
+                                final image = dashboardState.images[index];
+
+                                return Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: _buildImage(image),
+                                    ),
+                                    if (image.isUploading)
+                                      Positioned.fill(
+                                        child: Container(
+                                          color: Colors.black26,
+                                          child: const Center(
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                      IconButton(
-                                        icon: const CircleAvatar(
-                                          radius: 12,
-                                          backgroundColor: Colors.white,
-                                          child: Icon(Icons.close, color: Colors.red, size: 16),
+                                    if (image.hasError)
+                                      Positioned.fill(
+                                        child: Container(
+                                          color: Colors.black26,
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.error,
+                                              color: Colors.red,
+                                            ),
+                                          ),
                                         ),
-                                        onPressed: () {
-                                          setStateDialog(() {
-                                            selectedImages.removeAt(index);
-                                          });
+                                      ),
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          ref
+                                              .read(
+                                                supervisorDashboardProvider
+                                                    .notifier,
+                                              )
+                                              .removeImageAt(index);
                                         },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.close,
+                                            size: 16,
+                                            color: Colors.red,
+                                          ),
+                                        ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 );
                               },
                             ),
                           ),
+
+                        // if (imageNotifier.selectedImages.isNotEmpty)
+                        // Container(
+                        //   height: 110,
+                        //   padding: const EdgeInsets.symmetric(vertical: 8),
+                        //   decoration: BoxDecoration(
+                        //     color: AppTheme.white,
+                        //     borderRadius: BorderRadius.circular(12),
+                        //     border: Border.all(
+                        //       color: AppTheme.grey1.withOpacity(0.3),
+                        //     ),
+                        //   ),
+                        //   child: ListView.separated(
+                        //     scrollDirection: Axis.horizontal,
+                        //     padding: const EdgeInsets.symmetric(horizontal: 8),
+                        //     itemCount: imageNotifier.selectedImages.length,
+                        //     separatorBuilder: (_, __) => const SizedBox(width: 8),
+                        //     itemBuilder: (context, index) {
+                        //       final image = imageNotifier.selectedImages[index];
+
+                        //       return Stack(
+                        //         children: [
+                        //           FutureBuilder<Uint8List>(
+                        //             future: image.readAsBytes(),
+                        //             builder: (context, snapshot) {
+                        //               if (!snapshot.hasData) {
+                        //                 return const SizedBox(
+                        //                   width: 90,
+                        //                   height: 90,
+                        //                   child: Center(
+                        //                     child: CircularProgressIndicator(strokeWidth: 2),
+                        //                   ),
+                        //                 );
+                        //               }
+
+                        //               return ClipRRect(
+                        //                 borderRadius: BorderRadius.circular(10),
+                        //                 child: Image.memory(
+                        //                   snapshot.data!,
+                        //                   width: 90,
+                        //                   height: 90,
+                        //                   fit: BoxFit.cover,
+                        //                 ),
+                        //               );
+                        //             },
+                        //           ),
+                        //           Positioned(
+                        //             top: 4,
+                        //             right: 4,
+                        //             child: GestureDetector(
+                        //               onTap: () {
+                        //                 ref.read(imagePickerProvider).removeAt(index);
+                        //               },
+                        //               child: Container(
+                        //                 padding: const EdgeInsets.all(2),
+                        //                 decoration: const BoxDecoration(
+                        //                   color: Colors.white,
+                        //                   shape: BoxShape.circle,
+                        //                 ),
+                        //                 child: const Icon(
+                        //                   Icons.close,
+                        //                   size: 16,
+                        //                   color: Colors.red,
+                        //                 ),
+                        //               ),
+                        //             ),
+                        //           ),
+                        //         ],
+                        //       );
+                        //     },
+                        //   ),
+                        // ),
+
+                        //  if (selectedImages.isNotEmpty)
+                        // Container(
+                        //   height: 110,
+                        //   padding: const EdgeInsets.symmetric(vertical: 8),
+                        //   decoration: BoxDecoration(
+                        //     color: AppTheme.white,
+                        //     borderRadius: BorderRadius.circular(12),
+                        //     border: Border.all(
+                        //       color: AppTheme.grey1.withOpacity(0.3),
+                        //     ),
+                        //   ),
+                        //   child: ListView.separated(
+                        //     scrollDirection: Axis.horizontal,
+                        //     padding: const EdgeInsets.symmetric(horizontal: 8),
+                        //     itemCount: selectedImages.length,
+                        //     separatorBuilder: (_, __) => const SizedBox(width: 8),
+                        //     itemBuilder: (context, index) {
+                        //       return Stack(
+                        //         children: [
+                        //           FutureBuilder<Uint8List>(
+                        //             future: selectedImages[index].readAsBytes(),
+                        //             builder: (context, snapshot) {
+                        //               if (!snapshot.hasData) {
+                        //                 return const SizedBox(
+                        //                   width: 90,
+                        //                   height: 90,
+                        //                   child: Center(
+                        //                     child: CircularProgressIndicator(strokeWidth: 2),
+                        //                   ),
+                        //                 );
+                        //               }
+
+                        //               return ClipRRect(
+                        //                 borderRadius: BorderRadius.circular(10),
+                        //                 child: Image.memory(
+                        //                   snapshot.data!,
+                        //                   width: 90,
+                        //                   height: 90,
+                        //                   fit: BoxFit.cover,
+                        //                 ),
+                        //               );
+                        //             },
+                        //           ),
+                        //           Positioned(
+                        //             top: 4,
+                        //             right: 4,
+                        //             child: GestureDetector(
+                        //               onTap: (){
+                        //                 ref.read(imagePickerProvider).removeAt(index);
+                        //               },
+                        //               // onTap: () {
+                        //               //   setStateDialog(() {
+                        //               //     selectedImages.removeAt(index);
+                        //               //   });
+                        //               // },
+                        //               child: Container(
+                        //                 padding: const EdgeInsets.all(2),
+                        //                 decoration: const BoxDecoration(
+                        //                   color: Colors.white,
+                        //                   shape: BoxShape.circle,
+                        //                 ),
+                        //                 child: const Icon(
+                        //                   Icons.close,
+                        //                   size: 16,
+                        //                   color: Colors.red,
+                        //                 ),
+                        //               ),
+                        //             ),
+                        //           ),
+                        //         ],
+                        //       );
+                        //     },
+                        //   ),
+                        // ),
                       ],
                       if (showShedButtons) ...[
                         const SizedBox(height: 12),
                         Text(
                           'Select Target Shed:',
                           style: TextStyle(
-                              fontSize: screenWidth * 0.04,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.grey1),
+                            fontSize: screenWidth * 0.04,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.grey1,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -383,13 +623,20 @@ Future<void> showQuickActionDialog({
                             final selected = selectedShed == shed;
                             return Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
                                 child: CustomActionButton(
                                   child: Text(shed),
                                   height: 40,
-                                  variant: selected ? ButtonVariant.filled : ButtonVariant.outlined,
+                                  variant: selected
+                                      ? ButtonVariant.filled
+                                      : ButtonVariant.outlined,
                                   color: AppTheme.darkSecondary,
-                                  onPressed: () => setStateDialog(() => selectedShed = shed),
+                                  onPressed: () {
+                                    selectedShed = shed;
+                                    ref.refresh(supervisorDashboardProvider);
+                                  },
                                 ),
                               ),
                             );
@@ -413,19 +660,23 @@ Future<void> showQuickActionDialog({
                               color: AppTheme.lightPrimary,
                               onPressed: () {
                                 final key = idController.text.trim();
-                                if (key.isEmpty || !animalData.containsKey(key)) {
+                                if (key.isEmpty ||
+                                    !animalData.containsKey(key)) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Buffalo not found')),
+                                    const SnackBar(
+                                      content: Text('Buffalo not found'),
+                                    ),
                                   );
                                   return;
                                 }
-                                setStateDialog(() {
-                                  locateResult = animalData[key];
-
-                                  selectedSlot = int.parse(
-                                    locateResult!['row'].toString().replaceAll('Row-', ''),
-                                  );
-                                });
+                                locateResult = animalData[key];
+                                selectedSlot = int.parse(
+                                  locateResult!['row'].toString().replaceAll(
+                                    'Row-',
+                                    '',
+                                  ),
+                                );
+                                ref.refresh(supervisorDashboardProvider);
                               },
                               child: const Center(
                                 child: Icon(
@@ -433,7 +684,7 @@ Future<void> showQuickActionDialog({
                                   color: AppTheme.white,
                                 ),
                               ),
-                            )
+                            ),
                           ],
                         ),
                         const SizedBox(height: 16),
@@ -454,26 +705,36 @@ Future<void> showQuickActionDialog({
                                     children: [
                                       const CircleAvatar(
                                         backgroundColor: AppTheme.lightPrimary,
-                                        child: Icon(Icons.pets, color: AppTheme.white),
+                                        child: Icon(
+                                          Icons.pets,
+                                          color: AppTheme.white,
+                                        ),
                                       ),
                                       const SizedBox(width: 8),
                                       const Text(
                                         '#BUF-889',
-                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                       const Spacer(),
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
                                         children: [
                                           const Text(
                                             'Investor',
                                             style: TextStyle(
-                                                fontSize: 12, color: AppTheme.grey1),
+                                              fontSize: 12,
+                                              color: AppTheme.grey1,
+                                            ),
                                           ),
                                           Text(
                                             locateResult!['investor'] ?? '',
                                             style: const TextStyle(
-                                                fontSize: 14, color: AppTheme.grey1),
+                                              fontSize: 14,
+                                              color: AppTheme.grey1,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -482,7 +743,9 @@ Future<void> showQuickActionDialog({
                                   const SizedBox(height: 12),
                                   Text(
                                     'Current Location: ${locateResult!['shed']}',
-                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   const SizedBox(height: 12),
                                   Container(
@@ -496,7 +759,9 @@ Future<void> showQuickActionDialog({
                                       children: [
                                         Text(
                                           locateResult!['row'],
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                         const SizedBox(height: 8),
                                         Wrap(
@@ -505,7 +770,8 @@ Future<void> showQuickActionDialog({
                                           runSpacing: 8,
                                           children: List.generate(6, (index) {
                                             final boxNumber = index + 1;
-                                            final isRowBox = boxNumber == selectedSlot;
+                                            final isRowBox =
+                                                boxNumber == selectedSlot;
 
                                             return Container(
                                               width: 36,
@@ -515,14 +781,21 @@ Future<void> showQuickActionDialog({
                                                 color: isRowBox
                                                     ? AppTheme.lightPrimary
                                                     : Colors.transparent,
-                                                borderRadius: BorderRadius.circular(8),
-                                                border: Border.all(color: AppTheme.grey1),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: AppTheme.grey1,
+                                                ),
                                               ),
                                               child: Text(
                                                 '$boxNumber',
                                                 style: TextStyle(
-                                                  color: isRowBox ? AppTheme.white : AppTheme.dark,
-                                                  fontWeight: isRowBox ? FontWeight.bold : FontWeight.normal,
+                                                  color: isRowBox
+                                                      ? AppTheme.white
+                                                      : AppTheme.dark,
+                                                  fontWeight: isRowBox
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
                                                 ),
                                               ),
                                             );
@@ -541,15 +814,35 @@ Future<void> showQuickActionDialog({
                 ),
                 const SizedBox(height: 16),
                 CustomActionButton(
-                  child: Text(buttonLabels[type] ?? 'Submit', style: TextStyle(color: Colors.white),),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(successMessage)),
-                    );
+                  onPressed: () async {
+                    if (type == QuickActionType.onboardAnimal) {
+                      final success = await ref
+                          .read(supervisorDashboardProvider.notifier)
+                          .onboardAnimal(
+                            shed: shedController.text,
+                            breed: breedController.text,
+                            row: rowController.text,
+                          );
+
+                      if (success && context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(successMessage)));
+                      }
+                    } else {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(successMessage)));
+                    }
                   },
                   color: buttonBackgroundColors[type] ?? AppTheme.lightPrimary,
                   width: double.infinity,
+                  child: Text(
+                    buttonLabels[type] ?? 'Submit',
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
@@ -557,6 +850,49 @@ Future<void> showQuickActionDialog({
         },
       );
     },
+  );
+}
+
+Widget _buildImage(DashboardImage image) {
+  if (image.localFile != null) {
+    return Image.file(
+      image.localFile!,
+      width: 90,
+      height: 90,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _buildErrorPlaceholder(),
+    );
+  } else if (image.networkUrl != null) {
+    return Image.network(
+      image.networkUrl!,
+      width: 90,
+      height: 90,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _buildErrorPlaceholder(),
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return _buildShimmerPlaceholder();
+      },
+    );
+  }
+  return _buildErrorPlaceholder();
+}
+
+Widget _buildErrorPlaceholder() {
+  return Container(
+    width: 90,
+    height: 90,
+    color: Colors.grey[200],
+    child: const Icon(Icons.error_outline),
+  );
+}
+
+Widget _buildShimmerPlaceholder() {
+  return Container(
+    width: 90,
+    height: 90,
+    color: Colors.grey[200],
+    child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
   );
 }
 

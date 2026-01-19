@@ -107,27 +107,27 @@ class NewSupervisorDashboard extends ConsumerWidget {
                     children: [
                       CustomCard(
                         type: DashboardCardType.stats,
-                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.onboardAnimal),
+                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.onboardAnimal, ref: ref),
                         child: _buildQuickActionContent(context, Icons.add, 'Onboard Animal', AppTheme.darkPrimary),
                       ),
                       CustomCard(
                         type: DashboardCardType.stats,
-                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.milkEntry),
+                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.milkEntry, ref: ref),
                         child: _buildQuickActionContent(context, Icons.water_drop, 'Milk Entry', AppTheme.darkSecondary),
                       ),
                       CustomCard(
                         type: DashboardCardType.stats,
-                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.healthTicket),
+                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.healthTicket, ref: ref),
                         child: _buildQuickActionContent(context, Icons.medical_services, 'Health ticket', AppTheme.darkSecondary),
                       ),
                       CustomCard(
                         type: DashboardCardType.stats,
-                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.transferRequest),
+                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.transferRequest, ref: ref),
                         child: _buildQuickActionContent(context, Icons.compare_arrows, 'Transfer Tickets', AppTheme.slate),
                       ),
                       CustomCard(
                         type: DashboardCardType.stats,
-                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.locateAnimal),
+                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.locateAnimal, ref: ref),
                         child: _buildQuickActionContent(context, Icons.search, 'Locate Animal', AppTheme.darkSecondary),
                       ),
                     ],

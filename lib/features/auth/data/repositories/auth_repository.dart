@@ -73,75 +73,96 @@ class AuthRepository {
     required File file,
     required String userId,
   }) async {
-  
-    
-    
     final storage = FirebaseStorage.instanceFor(
       bucket: AppConstants.storageBucketName,
     );
 
-    final ref = storage.ref().child(
-      'farmvestuserpics/$userId/profile.jpg',
-    );
+    final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
+
     final snapshot = await ref.putFile(
       file,
 
-      SettableMetadata(contentType: 'image/jpeg',
-      cacheControl: "no-cache"),
+      SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
     );
     final url = await snapshot.ref.getDownloadURL();
     return url;
   }
-  Future<String?> getCurrentFirebaseImageUrl(String userId) async {
-  try {
-    final storage = FirebaseStorage.instanceFor(
-      bucket: AppConstants.storageBucketName,
-    );
-    
-    final ref = storage.ref().child('farmvestuserpics/$userId/profile.jpg');
-    
-    // Try to get download URL - this will throw if file doesn't exist
-    final url = await ref.getDownloadURL();
-    return url;
-  } on FirebaseException catch (e) {
-    if (e.code == 'object-not-found') {
-      // File doesn't exist in Firebase
-      return '';
-    }
-    debugPrint('Firebase error: ${e.code} ${e.message}');
-    return null;
-  } catch (e) {
-    debugPrint('Error getting Firebase image URL: $e');
-    return null;
-  }
-}
-  // Delete profile image from Firebase
-  Future<bool> deleteProfileImage({required String userId, required String filePath}) async {
-    try {
-     
 
+  Future<String?> getCurrentFirebaseImageUrl(String userId) async {
+    try {
       final storage = FirebaseStorage.instanceFor(
         bucket: AppConstants.storageBucketName,
       );
 
-      final ref = storage.ref().child('farmvestuserpics/$userId/profile.jpg');
+      final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
+
+      // Try to get download URL - this will throw if file doesn't exist
+      final url = await ref.getDownloadURL();
+      return url;
+    } on FirebaseException catch (e) {
+      if (e.code == 'object-not-found') {
+        // File doesn't exist in Firebase
+        return '';
+      }
+      debugPrint('Firebase error: ${e.code} ${e.message}');
+      return null;
+    } catch (e) {
+      debugPrint('Error getting Firebase image URL: $e');
+      return null;
+    }
+  }
+
+  // Delete profile image from Firebase
+  Future<bool> deleteProfileImage({
+    required String userId,
+    required String filePath,
+  }) async {
+    try {
+      final storage = FirebaseStorage.instanceFor(
+        bucket: AppConstants.storageBucketName,
+      );
+
+      final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
       await ref.delete();
-      
+
       FloatingToast.showSimpleToast('Front image deleted successfully');
       return true;
     } on FirebaseException catch (e) {
       if (e.code == 'object-not-found') {
         // Already deleted or never uploaded.
-        SnackBar(content:Text('Profile image already deleted'));
+        SnackBar(content: Text('Profile image already deleted'));
         return true;
       }
       debugPrint('Error deleting front image: ${e.code} ${e.message}');
-      SnackBar(content:  Text('Failed to delete front image'));
+      SnackBar(content: Text('Failed to delete front image'));
       return false;
     } catch (e) {
       debugPrint('Error deleting front image: $e');
-      SnackBar(content: Text( 'Failed to delete front image'));
+      SnackBar(content: Text('Failed to delete front image'));
       return false;
+    }
+  }
+
+  static Future<String?> uploadImage(File file) async {
+    try {
+      final storage = FirebaseStorage.instanceFor(
+        bucket: AppConstants.storageBucketName,
+      );
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final ref = storage.ref().child(
+        'farmvest/buffaloesonboarding/image_$timestamp.jpg',
+      );
+
+      final snapshot = await ref.putFile(
+        file,
+        SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
+      );
+      final url = await snapshot.ref.getDownloadURL();
+      return url;
+    } catch (e) {
+      debugPrint('Error uploading image: $e');
+      FloatingToast.showSimpleToast('Failed to upload image');
+      return null;
     }
   }
 
