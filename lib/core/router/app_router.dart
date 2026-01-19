@@ -1,6 +1,8 @@
- import 'package:farm_vest/features/farm_manager/presentation/screen/farm_manager_dashboard.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/farm_manager_dashboard.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/staff_list_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/widgets/investor_details.dart';
+import 'package:farm_vest/features/supervisor/presentation/screens/buffalo_details_screen.dart';
+import 'package:farm_vest/features/supervisor/presentation/screens/buffalo_grid_screen.dart';
 
 import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
 
@@ -111,6 +113,17 @@ class AppRouter {
         builder: (context, state) => const NewSupervisorDashboard(),
       ),
       GoRoute(
+        path: '/buffalo-grid',
+        builder: (context, state) => const BuffaloGridScreen(),
+      ),
+      GoRoute(
+        path: '/buffalo-details/:location',
+        builder: (context, state) {
+          final location = state.pathParameters['location']!;
+          return BuffaloDetailsScreen(location: location);
+        },
+      ),
+      GoRoute(
         path: '/farm-manager-dashboard',
         builder: (context, state) => const FarmManagerDashboard(),
       ),
@@ -153,7 +166,7 @@ class AppRouter {
         path: '/admin-dashboard',
         builder: (context, state) => const AdminDashboardScreen(),
       ),
-      
+
 
       // Common Routes
       GoRoute(

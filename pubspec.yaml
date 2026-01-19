@@ -35,28 +35,29 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   dotted_border: ^2.1.0
-  
+
   # Navigation
   go_router: ^14.2.7
-  
+
   # State Management
   # provider removed
-  
+
   # UI Components
   # flutter_svg removed
   # cached_network_image removed
-  
+
   # Charts
   # fl_chart removed
-  
+
   # Animations
   # lottie removed
-  
+  shimmer: ^3.0.0
+
   # Camera & Video
   # camera removed
   video_player: ^2.8.6
   # flutter_vlc_player removed
-  
+
   # Utilities
   intl: ^0.20.0
   shared_preferences: ^2.2.3
@@ -70,7 +71,7 @@ dependencies:
   firebase_auth: ^5.3.1
   firebase_storage: ^12.3.0
   # webview_flutter removed
-  
+
   # Visualizer Dependencies
 #  buffalo_visualizer:
 #    path: ../bufallo_visualizer
