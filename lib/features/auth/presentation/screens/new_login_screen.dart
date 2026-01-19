@@ -46,6 +46,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
   // 1. Centralized navigation logic to prevent errors and duplication
   void _navigateToDashboard(UserType role) {
+    print('this is the role based access $role');
     if (role == UserType.customer) {
       ref.invalidate(unitResponseProvider);
     }
@@ -78,56 +79,40 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
   Future<void> _handleContinue() async {
     // 2. DEBUG-ONLY PATH (OTP SKIP)
-    if (kDebugMode && !_isOtpSent && _phoneNumber.length == 10) {
-      final loginData = await ref
-          .read(authProvider.notifier)
-          .completeLoginWithData(_phoneNumber);
-      _navigateToDashboard(loginData['role'] as UserType);
-      return;
-    }
+    // if (kDebugMode && !_isOtpSent && _phoneNumber.length == 10) {
+    //   final loginData = await ref
+    //       .read(authProvider.notifier)
+    //       .completeLoginWithData(_phoneNumber);
+    //   _navigateToDashboard(loginData['role'] as UserType);
+    //   return;
+    // }
 
     // 3. STANDARD OTP PATH
     if (!_isOtpSent) {
       if (_phoneNumber.length == 10) {
-        final response = await ref
-            .read(authProvider.notifier)
-            .sendWhatsappOtp(_phoneNumber);
-
-        if (mounted) {
-          if (response != null && response.status) {
-            setState(() {
-              _isOtpSent = true;
-              _otp = '';
-            });
-            _startTimer();
-            ToastUtils.showSuccess(
-              context,
-              response.message ?? 'OTP sent successfully',
-            );
-          } else {
-            ToastUtils.showError(
-              context,
-              response?.message ?? 'Failed to send OTP',
-            );
-          }
-        }
+        // As requested, just navigate to the OTP screen without sending OTP yet.
+        setState(() {
+          _isOtpSent = true;
+          _otp = '';
+        });
+        _startTimer();
       }
     } else {
-      // Verify OTP
+      // Verify OTP with the new secure API
       if (_otp.length == 6) {
-        final isValid = ref
-            .read(authProvider.notifier)
-            .verifyWhatsappOtpLocal(_otp);
+        final loginData =
+            await ref.read(authProvider.notifier).loginWithOtp(_phoneNumber, _otp);
 
-        if (isValid) {
-          final loginData = await ref
-              .read(authProvider.notifier)
-              .completeLoginWithData(_phoneNumber);
-          // Using the centralized function here too
+        if (loginData != null) {
+          // On success, navigate to the correct dashboard
           _navigateToDashboard(loginData['role'] as UserType);
         } else {
+          // On failure, show an error toast.
+          // The error message is set in the authProvider.
           if (mounted) {
-            ToastUtils.showError(context, 'Invalid OTP');
+            final error = ref.read(authProvider).error;
+            ToastUtils.showError(
+                context, error ?? 'Invalid OTP or failed to login.');
           }
         }
       }
@@ -157,7 +142,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-     resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: true,
       backgroundColor: AppTheme.primary,
       body: SafeArea(
         child: Column(
@@ -240,91 +225,91 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
             const SizedBox(height: 32),
 
-              
-                  Expanded(
-                     child: Container( 
-                 width: double.infinity,
+            Expanded(
+              child: Container(
+                width: double.infinity,
                 decoration: const BoxDecoration(
-                    color: AppTheme.white,
-                      borderRadius: BorderRadius.only(
-                       topLeft: Radius.circular(40),
-                       topRight: Radius.circular(40),
-                         ),
-                        ),
-                 child: SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                   bottom: MediaQuery.of(context).viewInsets.bottom,
+                  color: AppTheme.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
                   ),
-                   child: Column(
-             children: [
-                    const SizedBox(height: 40),
+                ),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
 
-                    // Phone number or OTP display
-                    if (!_isOtpSent)
-                      _buildPhoneNumberDisplay()
-                    else
-                      _buildOtpDisplay(),
+                      // Phone number or OTP display
+                      if (!_isOtpSent)
+                        _buildPhoneNumberDisplay()
+                      else
+                        _buildOtpDisplay(),
 
-                    const SizedBox(height: 32),
+                      const SizedBox(height: 32),
 
-                    // Timer and resend (OTP screen only)
-                    if (_isOtpSent) ...[
-                      Text(
-                        '00:${_remainingSeconds.toString().padLeft(2, '0')}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.slate,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Didn't receive the code? ",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: AppTheme.mediumGrey,
-                            ),
+                      // Timer and resend (OTP screen only)
+                      if (_isOtpSent) ...[
+                        Text(
+                          '00:${_remainingSeconds.toString().padLeft(2, '0')}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.slate,
                           ),
-                          GestureDetector(
-                            onTap: _handleResend,
-                            child: Text(
-                              'Resend',
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Didn't receive the code? ",
                               style: TextStyle(
                                 fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: _remainingSeconds == 0
-                                    ? AppTheme.primary
-                                    : AppTheme.mediumGrey,
+                                color: AppTheme.mediumGrey,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                    ],
+                            GestureDetector(
+                              onTap: _handleResend,
+                              child: Text(
+                                'Resend',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: _remainingSeconds == 0
+                                      ? AppTheme.primary
+                                      : AppTheme.mediumGrey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                      ],
 
-                    // Continue/Verify button
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: PrimaryButton(
-                        text: _isOtpSent ? 'Verify' : 'Continue',
-                        isLoading: authState.isLoading,
-                        onPressed: (_isOtpSent
-                            ? (_otp.length == 6 ? _handleContinue : null)
-                            : (_phoneNumber.length == 10
+                      // Continue/Verify button
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: PrimaryButton(
+                          text: _isOtpSent ? 'Verify' : 'Continue',
+                          isLoading: authState.isLoading,
+                          onPressed: (_isOtpSent
+                              ? (_otp.length == 6 ? _handleContinue : null)
+                              : (_phoneNumber.length == 10
                                   ? _handleContinue
                                   : null)),
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: 24),
-                  ],
+                      const SizedBox(height: 24),
+                    ],
+                  ),
                 ),
               ),
-            ),),
+            ),
           ],
         ),
       ),

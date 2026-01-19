@@ -5,6 +5,8 @@ class AppConstants {
   static const String appName = 'FarmVest';
   static const String apiUrl =
       'https://markwave-live-apis-couipk45fa-el.a.run.app';
+  static const String authApiUrl = 'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app';
+  static const String authApiKey = 'bWFya3dhdmUtZmFybXZlc3QtdGVzdHRpbmctYXBpa2V5';
   static const String visitApiUrl =
       'https://animalkart-farmvest-services-staging-jn6cma3vvq-el.a.run.app';
        static String storageBucketName = 'gs://markwave-481315.firebasestorage.app';
