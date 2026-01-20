@@ -1,8 +1,9 @@
 import 'package:farm_vest/features/farm_manager/presentation/screen/farm_manager_dashboard.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/onboard_animal_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/staff_list_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/widgets/investor_details.dart';
-import 'package:farm_vest/features/supervisor/presentation/screens/buffalo_details_screen.dart';
-import 'package:farm_vest/features/supervisor/presentation/screens/buffalo_grid_screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_details_screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_grid_screen.dart';
 
 import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
 
@@ -126,6 +127,10 @@ class AppRouter {
       GoRoute(
         path: '/farm-manager-dashboard',
         builder: (context, state) => const FarmManagerDashboard(),
+      ),
+      GoRoute(
+        path: '/onboard-animal',
+        builder: (context, state) => const OnboardAnimalScreen(),
       ),
       GoRoute(
         path: '/investor-details',

@@ -20,4 +20,24 @@ class SupervisorRepository {
     }
     return await ApiServices.getTotalAnimals(token);
   }
+
+  Future<Map<String, dynamic>> createMilkEntry({
+    required String timing,
+    required String quantity,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token == null) {
+      throw AuthException('Authentication token not found');
+    }
+    final body = {
+      'entry_frequency': 'DAILY',
+      'quantity': double.tryParse(quantity) ?? 0.0,
+      'timing': timing.toUpperCase(),
+    };
+    return await ApiServices.createMilkEntry(
+      token: token,
+      body: body,
+    );
+  }
 }

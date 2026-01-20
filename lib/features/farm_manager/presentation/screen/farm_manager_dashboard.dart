@@ -183,8 +183,9 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                             _consoleItem(context, Icons.people, "Staff",
                                 () => context.go('/staff-list')),
                             _consoleItem(context, Icons.inventory, "Stock", () => _stockDialog(context)),
-                            _consoleItem(context, Icons.settings, "Settings",
-                                () => _settingsDialog(context)),
+                            _consoleItem(context, Icons.add, "Onboard Buffalo", () {
+                              context.go('/onboard-animal');
+                            }),
                           ],
                         ),
                         const SizedBox(height: 100),

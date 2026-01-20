@@ -14,17 +14,19 @@ class ApiServices {
   static Future<Map<String, dynamic>> getMilkEntries(String token) async {
     try {
       final response = await http.get(
-        Uri.parse(
-            "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api/supervisor/milk_entries"),
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $token',
-        },
+        Uri.parse("${AppConstants.authApiUrl}/supervisor/milk_entries"),
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
-
+      print(
+        'this is the statusCode getMilkEnteries===========> ${response.statusCode} this response ${response.body}',
+      );
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw ServerException('Failed to load milk entries', statusCode: response.statusCode);
+        throw ServerException(
+          'Failed to load milk entries',
+          statusCode: response.statusCode,
+        );
       }
     } on SocketException {
       throw NetworkException('No Internet connection');
@@ -32,21 +34,71 @@ class ApiServices {
       throw AppException(e.toString());
     }
   }
+
   static Future<int> getTotalAnimals(String token) async {
     try {
       final response = await http.get(
         Uri.parse(
-            "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api/supervisor/get_total_animals"),
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $token',
-        },
+          "${AppConstants.authApiUrl}/supervisor/get_total_animals",
+        ),
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
-
+      print(
+        'this is the statusCode getTotalAnimals===========> ${response.statusCode}',
+      );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['animals_count'] ?? 0;
       } else {
-        throw ServerException('Failed to load total animals', statusCode: response.statusCode);
+        throw ServerException(
+          'Failed to load total animals',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw NetworkException('No Internet connection');
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  static Future<Map<String, dynamic>> createMilkEntry({
+    required String token,
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      final uri =
+          Uri.parse("${AppConstants.authApiUrl}/supervisor/create_milk_entry");
+
+      print('Sending request to: $uri');
+      print('Request Body: ${jsonEncode(body)}');
+
+      final response = await http.post(
+        uri,
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.contentTypeHeader: 'application/json',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 409) {
+        final errorBody = jsonDecode(response.body);
+        throw ServerException(
+          errorBody['detail'] ?? 'An unknown conflict occurred.',
+          statusCode: response.statusCode,
+        );
+      } else {
+        throw ServerException(
+          'Failed to create milk entry',
+          statusCode: response.statusCode,
+        );
       }
     } on SocketException {
       throw NetworkException('No Internet connection');
@@ -56,7 +108,9 @@ class ApiServices {
   }
 
   static Future<LoginResponse> loginWithOtp(
-      String mobileNumber, String otp) async {
+    String mobileNumber,
+    String otp,
+  ) async {
     try {
       final response = await http.post(
         Uri.parse("${AppConstants.authApiUrl}/auth/token"),
@@ -64,10 +118,7 @@ class ApiServices {
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
           HttpHeaders.authorizationHeader: AppConstants.authApiKey,
         },
-        body: jsonEncode({
-          "mobile_number": mobileNumber,
-          "otp": otp,
-        }),
+        body: jsonEncode({"mobile_number": mobileNumber, "otp": otp}),
       );
       print('this is the response===========> ${response.statusCode}');
       print('this is the responsebody===========> ${response.body}');
@@ -75,7 +126,10 @@ class ApiServices {
         final data = jsonDecode(response.body);
         return LoginResponse.fromMap(data);
       } else {
-        throw ServerException('Failed to login', statusCode: response.statusCode);
+        throw ServerException(
+          'Failed to login',
+          statusCode: response.statusCode,
+        );
       }
     } on SocketException {
       throw NetworkException('No Internet connection');
@@ -96,7 +150,10 @@ class ApiServices {
         final data = jsonDecode(response.body);
         return WhatsappOtpResponse.fromJson(data);
       }
-      throw ServerException('Failed to send OTP', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to send OTP',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -116,7 +173,10 @@ class ApiServices {
           return UserModel.fromJson(data['user']);
         }
       }
-      throw ServerException('Failed to get user data', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get user data',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -128,14 +188,18 @@ class ApiServices {
     try {
       final response = await http.get(
         Uri.parse(
-            "${AppConstants.apiUrl}/purchases/units/$userId?paymentStatus=PAID"),
+          "${AppConstants.apiUrl}/purchases/units/$userId?paymentStatus=PAID",
+        ),
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body);
         return UnitResponse.fromJson(data);
       }
-      throw ServerException('Failed to get units', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get units',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -163,7 +227,10 @@ class ApiServices {
           return UserModel.fromJson(data["user"]);
         }
       }
-      throw ServerException('Failed to update user profile', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to update user profile',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -195,7 +262,10 @@ class ApiServices {
         return VisitAvailability.fromJson(data);
       }
       debugPrint("Error: ${response.statusCode} - ${response.body}");
-      throw ServerException('Failed to get visit availability', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get visit availability',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -224,7 +294,10 @@ class ApiServices {
         final data = jsonDecode(response.body);
         return Visit.fromJson(data);
       }
-      throw ServerException('Failed to book visit', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to book visit',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -252,7 +325,10 @@ class ApiServices {
         return data.map((e) => Visit.fromJson(e)).toList();
       }
       debugPrint("Error: ${response.statusCode} - ${response.body}");
-      throw ServerException('Failed to get visits', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get visits',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -287,7 +363,10 @@ class ApiServices {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((e) => Visit.fromJson(e)).toList();
       }
-      throw ServerException('Failed to get visit schedule', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get visit schedule',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -311,7 +390,10 @@ class ApiServices {
         final data = jsonDecode(response.body);
         return Visit.fromJson(data);
       }
-      throw ServerException('Failed to get visit by id', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get visit by id',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -319,16 +401,16 @@ class ApiServices {
     }
   }
 
-  static Future<bool> onboardAnimal(Map<String, dynamic> body) async {
+  static Future<bool> onboardAnimal(Map<String, dynamic> body, String token) async {
     try {
-     // final uri = Uri.parse("${AppConstants.apiUrl}/animals/onboard");
-        final uri = Uri.parse("/animals/onboard");
+      final uri = Uri.parse("${AppConstants.authApiUrl}/farm-manager/on-board-animal");
       debugPrint("Calling POST: $uri");
       debugPrint("Body: ${jsonEncode(body)}");
 
       final response = await http.post(
         uri,
         headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
           HttpHeaders.acceptHeader: AppConstants.applicationJson,
         },
