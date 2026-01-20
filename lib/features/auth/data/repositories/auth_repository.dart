@@ -102,7 +102,7 @@ class AuthRepository {
       file,
 
       SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
-      SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
+      // SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
     );
     final url = await snapshot.ref.getDownloadURL();
     return url;

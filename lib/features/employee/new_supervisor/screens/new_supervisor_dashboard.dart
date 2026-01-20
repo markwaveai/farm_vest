@@ -131,7 +131,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                         type: DashboardCardType.stats,
                         onTap: () => showQuickActionDialog(
                           context: context,
-                          type: QuickActionType.onboardAnimal,
+                          type: QuickActionType.onboardAnimal, ref: ref,
                         ),
                         child: _buildQuickActionContent(
                           context,
@@ -145,6 +145,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                         onTap: () => showQuickActionDialog(
                           context: context,
                           type: QuickActionType.milkEntry,
+                          ref:  ref,
                         ),
                         child: _buildQuickActionContent(
                           context,
@@ -158,6 +159,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                         onTap: () => showQuickActionDialog(
                           context: context,
                           type: QuickActionType.healthTicket,
+                          ref: ref,
                         ),
                         child: _buildQuickActionContent(
                           context,
@@ -171,6 +173,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                         onTap: () => showQuickActionDialog(
                           context: context,
                           type: QuickActionType.transferRequest,
+                          ref:ref,
                         ),
                         child: _buildQuickActionContent(
                           context,
@@ -184,6 +187,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                         onTap: () => showQuickActionDialog(
                           context: context,
                           type: QuickActionType.locateAnimal,
+                          ref:ref,
                         ),
                         child: _buildQuickActionContent(
                           context,
