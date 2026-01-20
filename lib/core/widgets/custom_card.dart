@@ -11,17 +11,13 @@ class CustomCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? child;
 
- 
-
-
   const CustomCard({
     super.key,
     this.type = DashboardCardType.stats,
-   
+
     this.color,
     this.onTap,
     this.child,
-   
   });
 
   @override
@@ -35,11 +31,10 @@ class CustomCard extends StatelessWidget {
   }
 
   Widget _buildStatsCard() {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: Stack(
         children: [
-         
           Positioned.fill(
             bottom: 4,
             child: Align(
@@ -72,8 +67,8 @@ class CustomCard extends StatelessWidget {
                 ),
               ],
             ),
-                        child: SizedBox.expand(child: child),
-          
+            child: SizedBox(child: child),
+
             // ??
             // Column(
             //   mainAxisSize: MainAxisSize.min,
@@ -119,8 +114,8 @@ class CustomCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Container(
               width: 50,
-              decoration:  BoxDecoration(
-               color: color,
+              decoration: BoxDecoration(
+                color: color,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(26),
                   bottomLeft: Radius.circular(26),
@@ -144,10 +139,7 @@ class CustomCard extends StatelessWidget {
           ),
           padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
           //child: child,
-          child:SizedBox.expand(
-            child: child,
-          )
-           
+          child: SizedBox(child: child),
 
           //  ??
           // Column(
@@ -216,7 +208,7 @@ class CustomCard extends StatelessWidget {
   }
 
   Widget _buildQuickActionCard() {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(12),
