@@ -13,21 +13,20 @@ import 'core/widgets/biometric_lock_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-  options: const FirebaseOptions(
-    apiKey: "AIzaSyC88x_wjf5oBRmTxyXUwXV_UY2N73kl82c",
-    appId: "1:612299373064:android:5985b830becec8cd0eefbd",
-    messagingSenderId: "612299373064",
-    projectId: "markwave-481315",
-    storageBucket: "markwave-481315.firebasestorage.app",
-  ),
-);
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyC88x_wjf5oBRmTxyXUwXV_UY2N73kl82c",
+      appId: "1:612299373064:android:5985b830becec8cd0eefbd",
+      messagingSenderId: "612299373064",
+      projectId: "markwave-481315",
+      storageBucket: "markwave-481315.firebasestorage.app",
+    ),
+  );
 
   runApp(
     DevicePreview(
-     enabled: !kReleaseMode,
-     builder: (context) => const 
-      ProviderScope(child: FarmVestApp()),
-   ),
+      enabled: !kReleaseMode,
+      builder: (context) => const ProviderScope(child: FarmVestApp()),
+    ),
   );
 }
 
@@ -57,7 +56,7 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
     final themeMode = ref.watch(themeProvider);
 
     return MaterialApp.router(
-      title: 'FarmVest - Smart Dairy Management',
+      title: 'FarmVest - Smart Dairy Farm Management',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,

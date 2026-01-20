@@ -3,8 +3,11 @@ import 'package:farm_vest/core/widgets/custom_card.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_dashboard_provider.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/alert_dialog.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/check_list.dart';
+import 'package:farm_vest/features/employee/new_supervisor/widgets/shimmer_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 
 class NewSupervisorDashboard extends ConsumerWidget {
   const NewSupervisorDashboard({super.key});
@@ -40,15 +43,10 @@ class NewSupervisorDashboard extends ConsumerWidget {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.logout),
-          ),
-        ],
+        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.logout))],
       ),
       body: dashboardState.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? _buildLoadingShimmer(context)
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -66,25 +64,49 @@ class NewSupervisorDashboard extends ConsumerWidget {
                         color: AppTheme.primary,
                         type: DashboardCardType.priority,
                         onTap: () {},
-                        child: _buildStatContent(context, Icons.pets, dashboardState.stats.totalAnimals, 'Total Animals', AppTheme.primary),
+                        child: _buildStatContent(
+                          context,
+                          Icons.pets,
+                          dashboardState.stats.totalAnimals,
+                          'Total Animals',
+                          AppTheme.primary,
+                        ),
                       ),
                       CustomCard(
                         color: AppTheme.errorRed,
                         type: DashboardCardType.priority,
                         onTap: () {},
-                        child: _buildStatContent(context, Icons.water_drop, dashboardState.stats.milkToday, 'Milk Today', AppTheme.lightSecondary),
+                        child: _buildStatContent(
+                          context,
+                          Icons.water_drop,
+                          dashboardState.stats.milkToday,
+                          'Milk Today',
+                          AppTheme.lightSecondary,
+                        ),
                       ),
                       CustomCard(
                         color: AppTheme.errorRed,
                         type: DashboardCardType.priority,
                         onTap: () {},
-                        child: _buildStatContent(context, Icons.warning, dashboardState.stats.activeIssues, 'Active Issues', AppTheme.warningOrange),
+                        child: _buildStatContent(
+                          context,
+                          Icons.warning,
+                          dashboardState.stats.activeIssues,
+                          'Active Issues',
+                          AppTheme.warningOrange,
+                        ),
                       ),
                       CustomCard(
                         color: AppTheme.successGreen,
                         type: DashboardCardType.priority,
                         onTap: () {},
-                        child: _buildStatContent(context, Icons.move_down, dashboardState.stats.transfers, 'Transfers', AppTheme.darkGrey),
+                        child: _buildStatContent(
+                          context,
+                          Icons.move_down,
+                          dashboardState.stats.transfers,
+                          'Transfers',
+                          AppTheme.darkGrey,
+                        ),
                       ),
                     ],
                   ),
@@ -107,28 +129,78 @@ class NewSupervisorDashboard extends ConsumerWidget {
                     children: [
                       CustomCard(
                         type: DashboardCardType.stats,
-                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.onboardAnimal, ref: ref),
-                        child: _buildQuickActionContent(context, Icons.add, 'Onboard Animal', AppTheme.darkPrimary),
+                        onTap: () => showQuickActionDialog(
+                          context: context,
+                          type: QuickActionType.onboardAnimal,
+                        ),
+                        child: _buildQuickActionContent(
+                          context,
+                          Icons.add,
+                          'Onboard Animal',
+                          AppTheme.darkPrimary,
+                        ),
                       ),
                       CustomCard(
                         type: DashboardCardType.stats,
-                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.milkEntry, ref: ref),
-                        child: _buildQuickActionContent(context, Icons.water_drop, 'Milk Entry', AppTheme.darkSecondary),
+                        onTap: () => showQuickActionDialog(
+                          context: context,
+                          type: QuickActionType.milkEntry,
+                        ),
+                        child: _buildQuickActionContent(
+                          context,
+                          Icons.water_drop,
+                          'Milk Entry',
+                          AppTheme.darkSecondary,
+                        ),
                       ),
                       CustomCard(
                         type: DashboardCardType.stats,
-                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.healthTicket, ref: ref),
-                        child: _buildQuickActionContent(context, Icons.medical_services, 'Health ticket', AppTheme.darkSecondary),
+                        onTap: () => showQuickActionDialog(
+                          context: context,
+                          type: QuickActionType.healthTicket,
+                        ),
+                        child: _buildQuickActionContent(
+                          context,
+                          Icons.medical_services,
+                          'Health ticket',
+                          AppTheme.darkSecondary,
+                        ),
                       ),
                       CustomCard(
                         type: DashboardCardType.stats,
-                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.transferRequest, ref: ref),
-                        child: _buildQuickActionContent(context, Icons.compare_arrows, 'Transfer Tickets', AppTheme.slate),
+                        onTap: () => showQuickActionDialog(
+                          context: context,
+                          type: QuickActionType.transferRequest,
+                        ),
+                        child: _buildQuickActionContent(
+                          context,
+                          Icons.compare_arrows,
+                          'Transfer Tickets',
+                          AppTheme.slate,
+                        ),
                       ),
                       CustomCard(
                         type: DashboardCardType.stats,
-                        onTap: () => showQuickActionDialog(context: context, type: QuickActionType.locateAnimal, ref: ref),
-                        child: _buildQuickActionContent(context, Icons.search, 'Locate Animal', AppTheme.darkSecondary),
+                        onTap: () => showQuickActionDialog(
+                          context: context,
+                          type: QuickActionType.locateAnimal,
+                        ),
+                        child: _buildQuickActionContent(
+                          context,
+                          Icons.search,
+                          'Locate Animal',
+                          AppTheme.darkSecondary,
+                        ),
+                      ),
+                      CustomCard(
+                        type: DashboardCardType.stats,
+                        onTap: () => context.go('/buffalo-grid'),
+                        child: _buildQuickActionContent(
+                          context,
+                          Icons.grid_view,
+                          'View Buffalo Shed',
+                          AppTheme.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -161,33 +233,83 @@ class NewSupervisorDashboard extends ConsumerWidget {
                         CustomCheckboxTile(
                           title: 'Morning Feed Check',
                           value: dashboardState.morningFeed,
-                          onChanged: (val) => dashboardNotifier.toggleMorningFeed(val!),
+                          onChanged: (val) =>
+                              dashboardNotifier.toggleMorningFeed(val!),
                         ),
                         CustomCheckboxTile(
                           title: 'Water Troughs Cleaning',
                           value: dashboardState.waterCleaning,
-                          onChanged: (val) => dashboardNotifier.toggleWaterCleaning(val!),
+                          onChanged: (val) =>
+                              dashboardNotifier.toggleWaterCleaning(val!),
                         ),
                         CustomCheckboxTile(
                           title: 'Afternoon Shed Wash',
                           value: dashboardState.shedWash,
-                          onChanged: (val) => dashboardNotifier.toggleShedWash(val!),
+                          onChanged: (val) =>
+                              dashboardNotifier.toggleShedWash(val!),
                         ),
                         CustomCheckboxTile(
                           title: 'Evening Milking Count',
                           value: dashboardState.eveningMilking,
-                          onChanged: (val) => dashboardNotifier.toggleEveningMilking(val!),
+                          onChanged: (val) =>
+                              dashboardNotifier.toggleEveningMilking(val!),
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
     );
   }
 
-  Widget _buildStatContent(BuildContext context, IconData icon, String subtitle, String title, Color iconColor) {
+  Widget _buildLoadingShimmer(BuildContext context) {
+    return Column(
+      children: [
+        GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          children: List.generate(4, (index) => const ShimmerCard()),
+        ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.03,),
+        Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+            height: 10,
+            width: MediaQuery.of(context).size.width -10,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+        GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          children: List.generate(4, (index) => const ShimmerCard()),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatContent(
+    BuildContext context,
+    IconData icon,
+    String subtitle,
+    String title,
+    Color iconColor,
+  ) {
     final screenWidth = MediaQuery.of(context).size.width;
     final iconSize = screenWidth * 0.08;
     final subtitleFontSize = screenWidth * 0.040;
@@ -209,16 +331,18 @@ class NewSupervisorDashboard extends ConsumerWidget {
         ),
         Text(
           title,
-          style: TextStyle(
-            fontSize: titleFontSize,
-            color: Colors.grey,
-          ),
+          style: TextStyle(fontSize: titleFontSize, color: Colors.grey),
         ),
       ],
     );
   }
 
-  Widget _buildQuickActionContent(BuildContext context, IconData icon, String label, Color iconColor) {
+  Widget _buildQuickActionContent(
+    BuildContext context,
+    IconData icon,
+    String label,
+    Color iconColor,
+  ) {
     final screenWidth = MediaQuery.of(context).size.width;
     final iconSize = screenWidth * 0.08;
     final textSize = screenWidth * 0.035;
@@ -232,11 +356,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
             color: iconColor.withOpacity(0.2),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: iconSize,
-          ),
+          child: Icon(icon, color: iconColor, size: iconSize),
         ),
         const SizedBox(height: 12),
         Text(

@@ -1,3 +1,8 @@
+import 'package:farm_vest/features/farm_manager/presentation/screen/farm_manager_dashboard.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/staff_list_screen.dart';
+import 'package:farm_vest/features/farm_manager/presentation/widgets/investor_details.dart';
+import 'package:farm_vest/features/supervisor/presentation/screens/buffalo_details_screen.dart';
+import 'package:farm_vest/features/supervisor/presentation/screens/buffalo_grid_screen.dart';
 
 import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
 
@@ -7,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/investor/presentation/screens/cctv_main_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/investor_profile_screen.dart';
 import 'package:farm_vest/features/investor/presentation/widgets/investor_shell.dart';
+import '../../features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
 import '../../features/investor/presentation/screens/buffalo_calves_screen.dart';
 import '../../features/investor/data/models/unit_response.dart';
 import '../../features/auth/presentation/screens/new_login_screen.dart';
@@ -56,7 +62,7 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/customer-dashboard',
-            builder: (context, state) => const DoctorDashboardNewscreen(),
+            builder: (context, state) => const InvestorDashboardScreen(),
           ),
           GoRoute(
             path: '/asset-valuation',
@@ -107,6 +113,29 @@ class AppRouter {
         builder: (context, state) => const NewSupervisorDashboard(),
       ),
       GoRoute(
+        path: '/buffalo-grid',
+        builder: (context, state) => const BuffaloGridScreen(),
+      ),
+      GoRoute(
+        path: '/buffalo-details/:location',
+        builder: (context, state) {
+          final location = state.pathParameters['location']!;
+          return BuffaloDetailsScreen(location: location);
+        },
+      ),
+      GoRoute(
+        path: '/farm-manager-dashboard',
+        builder: (context, state) => const FarmManagerDashboard(),
+      ),
+      GoRoute(
+        path: '/investor-details',
+        builder: (context, state) => const InvestorDetails(),
+      ),
+       GoRoute(
+        path: '/staff-list',
+        builder: (context, state) => const StaffListScreen(),
+      ),
+      GoRoute(
         path: '/doctor-dashboard',
         builder: (context, state) => DoctorDashboardNewscreen(),
         //const DoctorDashboardScreen(),
@@ -137,7 +166,7 @@ class AppRouter {
         path: '/admin-dashboard',
         builder: (context, state) => const AdminDashboardScreen(),
       ),
-      
+
 
       // Common Routes
       GoRoute(

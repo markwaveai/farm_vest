@@ -8,6 +8,7 @@ enum UserType {
   supervisor('supervisor'),
   doctor('doctor'),
   assistant('assistant'),
+  farmManager('farm_manager'),
   admin('admin');
 
   final String value;
@@ -15,7 +16,7 @@ enum UserType {
 
   static UserType fromString(String value) {
     return UserType.values.firstWhere(
-      (type) => type.value == value.toLowerCase(),
+      (type) => type.value == value.toLowerCase().replaceAll(' ', '_'),
       orElse: () => UserType.customer, // Default to customer if not found
     );
   }
@@ -37,6 +38,7 @@ enum AppRoutes {
   supervisorDashboard('/supervisor-dashboard'),
   doctorDashboard('/doctor-dashboard'),
   assistantDashboard('/assistant-dashboard'),
+  farmManagerDashboard('/farm-manager-dashboard'),
   milkProduction('/milk-production'),
   healthIssues('/health-issues'),
   raiseTicket('/raise-ticket'),
@@ -105,5 +107,3 @@ enum CompressFormat {
   /// Only supported on Android.
   webp,
 }
-
-

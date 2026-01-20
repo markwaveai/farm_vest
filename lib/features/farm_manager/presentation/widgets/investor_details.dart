@@ -1,0 +1,129 @@
+import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/features/farm_manager/presentation/providers/investor_list_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import 'investor_card_widget.dart';
+
+class InvestorDetails extends ConsumerStatefulWidget {
+  const InvestorDetails({super.key});
+
+  @override
+  ConsumerState<InvestorDetails> createState() => _InvestorDetailsState();
+}
+
+class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
+  bool _isSearching = false;
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _showFilterDialog() {
+    final notifier = ref.read(investorListProvider.notifier);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: const Text('Filter by Status'),
+          children: [
+            SimpleDialogOption(
+              onPressed: () {
+                notifier.setStatusFilter('all');
+                Navigator.pop(context);
+              },
+              child: const Text('All'),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                notifier.setStatusFilter('active');
+                Navigator.pop(context);
+              },
+              child: const Text('Active'),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                notifier.setStatusFilter('exited');
+                Navigator.pop(context);
+              },
+              child: const Text('Exited'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      // Use GoRouter for consistent navigation
+      leading: IconButton(onPressed: () => context.go('/farm-manager-dashboard'), icon: const Icon(Icons.arrow_back, color: Colors.white,)),
+      backgroundColor: Colors.green,
+      title: _isSearching
+          ? TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration:  InputDecoration(
+                hintText: 'Search Investors...',
+                hintStyle: TextStyle(color: AppTheme.grey1),
+                border: InputBorder.none,
+              ),
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+              onChanged: (query) {
+                ref.read(investorListProvider.notifier).setSearchQuery(query);
+              },
+            )
+          : const Text("Investors Data"),
+      titleTextStyle: const TextStyle(
+          fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
+      actions: [
+        IconButton(
+          icon: Icon(_isSearching ? Icons.close : Icons.search, color: Colors.white),
+          onPressed: () {
+            setState(() {
+              _isSearching = !_isSearching;
+              if (!_isSearching) {
+                _searchController.clear();
+                ref.read(investorListProvider.notifier).setSearchQuery('');
+              }
+            });
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.filter_list, color: Colors.white),
+          onPressed: _showFilterDialog,
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final investorState = ref.watch(investorListProvider);
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F8),
+      appBar: _buildAppBar(),
+      body: investorState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: investorState.investors.length,
+              itemBuilder: (context, index) {
+                final investor = investorState.investors[index];
+                return InvestorCard(
+                  name: investor.name,
+                  location: investor.location,
+                  amount: investor.amount,
+                  date: investor.date,
+                  status: investor.status,
+                );
+              },
+            ),
+    );
+  }
+}

@@ -426,7 +426,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              context.go('/user-type-selection');
+              context.go('/login');
             },
             child: const Text('Logout'),
           ),

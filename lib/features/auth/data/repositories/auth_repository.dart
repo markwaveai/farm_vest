@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/widgets/floating_toast.dart';
+import 'package:farm_vest/features/auth/data/models/login_response.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,24 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 class AuthRepository {
+  Future<LoginResponse> loginWithOtp(String mobile, String otp) async {
+    final response = await ApiServices.loginWithOtp(mobile, otp);
+    if (response == null) {
+      throw Exception('Failed to login');
+    }
+    return response;
+  }
+
+  Future<void> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('access_token', token);
+  }
+
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token');
+  }
+
   Future<WhatsappOtpResponse?> sendOtp(String mobile) async {
     return await ApiServices.sendWhatsappOtp(mobile);
   }
@@ -83,6 +102,7 @@ class AuthRepository {
       file,
 
       SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
+      SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
     );
     final url = await snapshot.ref.getDownloadURL();
     return url;
@@ -118,6 +138,8 @@ class AuthRepository {
     required String filePath,
   }) async {
     try {
+     
+
       final storage = FirebaseStorage.instanceFor(
         bucket: AppConstants.storageBucketName,
       );

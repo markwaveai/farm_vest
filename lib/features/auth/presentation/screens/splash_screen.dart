@@ -6,6 +6,9 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 
+import 'dart:ui';
+// import 'package:shimmer/shimmer.dart';
+
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -15,271 +18,283 @@ class SplashScreen extends ConsumerStatefulWidget {
 
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with TickerProviderStateMixin {
-  // Animation controllers for different stages
-  late AnimationController _dropController;
-  late AnimationController _zoomController;
-  late AnimationController _expandController;
-  late AnimationController _finalController;
-
-  // Animations
-  late Animation<double> _dropAnimation;
-  late Animation<double> _iconScaleAnimation;
-  late Animation<double> _circleScaleAnimation;
-  late Animation<double> _finalIconScaleAnimation;
-
-  // Stage tracking
-  int _currentStage = 0; // 0: white, 1: drop, 2: zoom, 3: expand, 4: final
+  late AnimationController _backgroundController;
+  late AnimationController _contentController;
+  late Animation<double> _bgScale;
+  late Animation<double> _bgBlur;
+  late Animation<double> _logoOpacity;
+  late Animation<double> _logoScale;
+  late Animation<double> _textReveal;
 
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
-    _startAnimationSequence();
+    _startSequence();
   }
 
   void _initializeAnimations() {
-    // Stage 1: Drop animation (icon drops from top)
-    _dropController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+    // 1. Background slow zoom
+    _backgroundController = AnimationController(
+      duration: const Duration(seconds: 10),
       vsync: this,
     );
-    _dropAnimation = Tween<double>(begin: -200.0, end: 0.0).animate(
-      CurvedAnimation(parent: _dropController, curve: Curves.bounceOut),
+    _bgScale = Tween<double>(begin: 1.0, end: 1.3).animate(
+      CurvedAnimation(parent: _backgroundController, curve: Curves.linear),
+    );
+    _bgBlur = Tween<double>(begin: 0.0, end: 5.0).animate(
+      CurvedAnimation(
+        parent: _backgroundController,
+        curve: const Interval(0.0, 0.2, curve: Curves.easeIn),
+      ),
     );
 
-    // Stage 2: Zoom animation (icon grows)
-    _zoomController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+    // 2. Content (Logo, Text) reveal
+    _contentController = AnimationController(
+      duration: const Duration(milliseconds: 3000),
       vsync: this,
-    );
-    _iconScaleAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
-      CurvedAnimation(parent: _zoomController, curve: Curves.easeInOut),
     );
 
-    // Stage 3: Circle expansion
-    _expandController = AnimationController(
-      duration: const Duration(milliseconds: 700),
-      vsync: this,
-    );
-    _circleScaleAnimation = Tween<double>(begin: 1.0, end: 11.0).animate(
-      CurvedAnimation(parent: _expandController, curve: Curves.easeInOut),
+    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _contentController,
+        curve: const Interval(0.1, 0.4, curve: Curves.easeIn),
+      ),
     );
 
-    // Stage 4: Final icon scale
-    _finalController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
+    _logoScale = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _contentController,
+        curve: const Interval(0.1, 0.5, curve: Curves.elasticOut),
+      ),
     );
-    _finalIconScaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _finalController, curve: Curves.elasticOut),
+
+    _textReveal = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _contentController,
+        curve: const Interval(0.5, 0.8, curve: Curves.easeOutCubic),
+      ),
     );
   }
 
-  void _startAnimationSequence() async {
-    // Stage 0: White screen (500ms)
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
-
-    // Stage 1: Icon drops from top
-    setState(() => _currentStage = 1);
-    await _dropController.forward();
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-
-    // Stage 2: Icon zooms in
-    setState(() => _currentStage = 2);
-    await _zoomController.forward();
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-
-    // Stage 3: Circle expands to fill screen
-    setState(() => _currentStage = 3);
-    await _expandController.forward();
-    // Removed delay here to prevent blank green screen
-    if (!mounted) return;
-
-    // Stage 4: Final green screen with large icon (appears immediately)
-    setState(() => _currentStage = 4);
-    await _finalController.forward();
-
-    // Check login status and navigate
+  void _startSequence() async {
+    _backgroundController.forward();
+    await _contentController.forward();
     await _checkAuthAndNavigate();
   }
 
   Future<void> _checkAuthAndNavigate() async {
-    // Check login status
     await ref.read(authProvider.notifier).checkLoginStatus();
+    // Keep the splash visible for a minimum time for the "premium" feel
+    await Future.delayed(const Duration(milliseconds: 500));
 
-    // Additional delay for visual effect
-    await Future.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
 
-    if (mounted) {
-      final authState = ref.read(authProvider);
+    final authState = ref.read(authProvider);
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
 
-      // Check if onboarding has been completed
-      final prefs = await SharedPreferences.getInstance();
-      final onboardingCompleted =
-          prefs.getBool('onboarding_completed') ?? false;
+    if (!onboardingCompleted) {
+      context.go('/onboarding');
+    } else if (authState.mobileNumber != null) {
+      _navigateBasedOnRole(authState.role ?? UserType.customer);
+    } else {
+      context.go('/login');
+    }
+  }
 
-      if (!onboardingCompleted) {
-        // First time user - show onboarding
-        context.go('/onboarding');
-      } else if (authState.mobileNumber != null) {
-        // User is logged in, navigate to role-based dashboard
-        if (authState.role == UserType.customer) {
-          context.go('/customer-dashboard');
-        } else if (authState.role == UserType.supervisor) {
-          context.go('/supervisor-dashboard');
-        } else if (authState.role == UserType.doctor) {
-          context.go('/doctor-dashboard');
-        } else if (authState.role == UserType.assistant) {
-          context.go('/assistant-dashboard');
-        } else if (authState.role == UserType.admin) {
-          context.go('/admin-dashboard');
-        } else {
-          context.go('/customer-dashboard');
-        }
-      } else {
-        // Not logged in - show login
-        context.go('/login');
-      }
+  void _navigateBasedOnRole(UserType role) {
+    switch (role) {
+      case UserType.customer:
+        context.go('/customer-dashboard');
+        break;
+      case UserType.supervisor:
+        context.go('/supervisor-dashboard');
+        break;
+      case UserType.doctor:
+        context.go('/doctor-dashboard');
+        break;
+      case UserType.assistant:
+        context.go('/assistant-dashboard');
+        break;
+      case UserType.farmManager:
+        context.go('/farm-manager-dashboard');
+        break;
+      case UserType.admin:
+        context.go('/admin-dashboard');
+        break;
     }
   }
 
   @override
   void dispose() {
-    _dropController.dispose();
-    _zoomController.dispose();
-    _expandController.dispose();
-    _finalController.dispose();
+    _backgroundController.dispose();
+    _contentController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _currentStage >= 3 ? AppTheme.primary : AppTheme.white,
+      backgroundColor: Colors.black,
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          // Stage 0-2: White background with animated icon
-          if (_currentStage > 0 && _currentStage < 3)
-            Center(
-              child: AnimatedBuilder(
-                animation: Listenable.merge([_dropController, _zoomController]),
-                builder: (context, child) {
-                  return Transform.translate(
-                    offset: Offset(0, _dropAnimation.value),
-                    child: Transform.scale(
-                      scale: _currentStage >= 2
-                          ? _iconScaleAnimation.value
-                          : 1.0,
-                      child: Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.primary.withValues(alpha: 0.3),
-                              blurRadius: 20,
-                              spreadRadius: 5,
+          // 1. Background Cinematic Image
+          AnimatedBuilder(
+            animation: _backgroundController,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _bgScale.value,
+                child: Image.asset(
+                  'assets/images/splash_bg.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Container(color: AppTheme.primary),
+                ),
+              );
+            },
+          ),
+
+          // 2. Dark Overlay & Blur
+          AnimatedBuilder(
+            animation: _bgBlur,
+            builder: (context, child) {
+              return BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: _bgBlur.value,
+                  sigmaY: _bgBlur.value,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.4),
+                        AppTheme.primary.withOpacity(0.85),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+
+          // 3. Main Content
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Premium Horizontal Logo Reveal
+                AnimatedBuilder(
+                  animation: _contentController,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _logoOpacity.value,
+                      child: Transform.scale(
+                        scale: _logoScale.value,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: Image.asset(
+                            'assets/images/farmvest_logo.png',
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Column(
+                                  children: [
+                                    const Icon(
+                                      Icons.agriculture,
+                                      size: 100,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(height: 24),
+                                    Text(
+                                      'FarmVest',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .displayMedium
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 24),
+
+                // Subtitle/Motto Reveal
+                AnimatedBuilder(
+                  animation: _contentController,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _textReveal.value,
+                      child: Transform.translate(
+                        offset: Offset(0, 20 * (1 - _textReveal.value)),
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 1.5,
+                              width: 60 * _textReveal.value,
+                              decoration: BoxDecoration(
+                                color: Colors.white38,
+                                borderRadius: BorderRadius.circular(1),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              'SMART DAIRY FARM MANAGEMENT',
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(
+                                    color: Colors.white.withOpacity(0.85),
+                                    letterSpacing: 4 * _textReveal.value,
+                                    fontWeight: FontWeight.w400,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black.withOpacity(0.5),
+                                        offset: const Offset(0, 2),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.agriculture,
-                          color: AppTheme.white,
-                          size: 40,
-                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // 4. Subtle Bottom Glow
+          Positioned(
+            bottom: -50,
+            left: 0,
+            right: 0,
+            child: FadeTransition(
+              opacity: _textReveal,
+              child: Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    radius: 1.5,
+                    colors: [
+                      AppTheme.white.withOpacity(0.1),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
               ),
             ),
-
-          // Stage 3: Circle expansion animation
-          if (_currentStage == 3)
-            Center(
-              child: AnimatedBuilder(
-                animation: _expandController,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _circleScaleAnimation.value,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.agriculture,
-                        color: AppTheme.white,
-                        size: 40,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-          // Stage 4: Final green screen with large icon
-          if (_currentStage == 4)
-            Center(
-              child: AnimatedBuilder(
-                animation: _finalController,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _finalIconScaleAnimation.value,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Large tractor/farm icon
-                        Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            color: AppTheme.white.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.agriculture,
-                            color: AppTheme.white,
-                            size: 120,
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-
-                        // App Name
-                        const Text(
-                          'FarmVest',
-                          style: TextStyle(
-                            fontSize: 42,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.white,
-                            letterSpacing: 3,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Subtitle
-                        const Text(
-                          'Smart Dairy Farm Management',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: AppTheme.white,
-                            letterSpacing: 1.5,
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+          ),
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:farm_vest/core/services/biometric_service.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/image_helper_compressor.dart';
@@ -60,7 +61,7 @@ class AuthState {
 
 class AuthController extends Notifier<AuthState> {
   AuthRepository get _repository => ref.read(authRepositoryProvider);
-final ImagePicker _picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker();
   @override
   AuthState build() {
     return AuthState();
@@ -78,64 +79,105 @@ final ImagePicker _picker = ImagePicker();
         userId: userId,
       );
       return url;
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
+    } on AppException catch (e) {
+      state = state.copyWith(error: e.message);
       return null;
     }
   }
+
   //delete profile image
   Future<bool> deleteProfileImage({
     required String userId,
     required String filePath,
   }) async {
     try {
-      return await _repository.deleteProfileImage(userId: userId, filePath: filePath);
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
+      return await _repository.deleteProfileImage(
+          userId: userId, filePath: filePath);
+    } on AppException catch (e) {
+      state = state.copyWith(error: e.message);
       return false;
     }
   }
+
   // In AuthController class
-Future<String?> getCurrentFirebaseImageUrl(String userId) async {
-  try {
-    final storage = FirebaseStorage.instanceFor(
-      bucket: AppConstants.storageBucketName,
-    );
-    
-    final ref = storage.ref().child('farmvestuserpics/$userId/profile.jpg');
-    
-    // Try to get the download URL
-    final url = await ref.getDownloadURL();
-    return url;
-  } on FirebaseException catch (e) {
-    if (e.code == 'object-not-found') {
-      // Image doesn't exist in Firebase
-      return '';
+  Future<String?> getCurrentFirebaseImageUrl(String userId) async {
+    try {
+      final storage = FirebaseStorage.instanceFor(
+        bucket: AppConstants.storageBucketName,
+      );
+
+      final ref = storage.ref().child('farmvestuserpics/$userId/profile.jpg');
+
+      // Try to get the download URL
+      final url = await ref.getDownloadURL();
+      return url;
+    } on FirebaseException catch (e) {
+      if (e.code == 'object-not-found') {
+        // Image doesn't exist in Firebase
+        return '';
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
-    return null;
-  } catch (e) {
-    return null;
   }
-}
 
   Future<WhatsappOtpResponse?> sendWhatsappOtp(String phone) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, error: null, mobileNumber: phone);
 
     try {
       final response = await _repository.sendOtp(phone);
       state = state.copyWith(isLoading: false, otpResponse: response);
       return response;
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: "Failed to send OTP");
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
       return null;
     }
   }
 
-  bool verifyWhatsappOtpLocal(String enteredOtp) {
-    if (state.otpResponse == null) return false;
-    return state.otpResponse!.otp == enteredOtp;
+  Future<Map<String, dynamic>?> loginWithOtp(
+      String mobileNumber, String otp) async {
+    state = state.copyWith(isLoading: true, error: null, mobileNumber: mobileNumber);
+
+    try {
+      final loginResponse = await _repository.loginWithOtp(mobileNumber, otp);
+      await _repository.saveToken(loginResponse.accessToken);
+
+      final role = (loginResponse.roles.isNotEmpty)
+          ? UserType.fromString(loginResponse.roles.first)
+          : UserType.customer;
+
+      state = state.copyWith(
+        isLoading: false,
+        role: role,
+      );
+      await _repository.saveUserSession(
+        mobile: mobileNumber,
+        role: role,
+        userData: null, // User data can be fetched later if needed
+      );
+
+      return {'role': role, 'userData': null};
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+      return null;
+    }
   }
-  
+
+  Future<Map<String, dynamic>?> verifyWhatsappOtpLocal(String otp) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    // Check if OTP matches the one from the API response
+    if (state.otpResponse != null && state.otpResponse!.otp == otp) {
+      return await completeLoginWithData(state.mobileNumber!);
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        error: "Invalid OTP. Please try again.",
+      );
+      return null;
+    }
+  }
 
   Future<void> checkLoginStatus() async {
     final session = await _repository.getSession();
@@ -148,6 +190,7 @@ Future<String?> getCurrentFirebaseImageUrl(String userId) async {
       );
     }
   }
+
   Future<File?> pickProfileImage({
     required ImageSource source,
     bool compress = true,
@@ -175,8 +218,8 @@ Future<String?> getCurrentFirebaseImageUrl(String userId) async {
       }
 
       return selectedFile;
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
+    } on AppException catch (e) {
+      state = state.copyWith(error: e.message);
       return null;
     }
   }
@@ -191,9 +234,10 @@ Future<String?> getCurrentFirebaseImageUrl(String userId) async {
     // Fetch user data from Repository
     UserModel? userData;
     try {
-      userData = await _repository.getUserData(mobileNumber);
-    } catch (e) {
-      // Continue if fetch fails
+      userData = await _repository.getUserData("");
+      print('this is the user data ===========> $userData');
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
     }
 
     // Determine Role
@@ -201,7 +245,7 @@ Future<String?> getCurrentFirebaseImageUrl(String userId) async {
     if (apiRole == null && state.otpResponse?.user != null) {
       apiRole = state.otpResponse!.user!['role']?.toString();
     }
-
+    print('this is the role: $apiRole');
     UserType detectedRole = UserType.customer;
 
     if (apiRole != null) {
@@ -217,6 +261,8 @@ Future<String?> getCurrentFirebaseImageUrl(String userId) async {
         detectedRole = UserType.doctor;
       } else if (mobileNumber.endsWith('3')) {
         detectedRole = UserType.assistant;
+      } else if (mobileNumber.endsWith('4')) {
+        detectedRole = UserType.farmManager;
       } else if (mobileNumber.endsWith('9')) {
         detectedRole = UserType.admin;
       }
@@ -235,7 +281,7 @@ Future<String?> getCurrentFirebaseImageUrl(String userId) async {
       userData: userData,
     );
 
-    return {'role': detectedRole, 'userData': userData};
+    return {'role': UserType.supervisor, 'userData': userData};
   }
 
   Future<void> logout() async {
@@ -260,10 +306,10 @@ Future<String?> getCurrentFirebaseImageUrl(String userId) async {
       } else {
         state = state.copyWith(isLoading: false);
       }
-    } catch (e) {
+    } on AppException catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: "Failed to refresh user data",
+        error: e.message,
       );
     }
   }
@@ -290,8 +336,8 @@ Future<String?> getCurrentFirebaseImageUrl(String userId) async {
       );
 
       return user;
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
       return null;
     } finally {
       state = state.copyWith(isLoading: false);

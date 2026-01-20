@@ -646,32 +646,28 @@ class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
-          padding: const EdgeInsets.all(AppConstants.spacingL),
-          child: Column(
-            children: [
-              const Text('Assigned Tasks', style: AppTheme.headingMedium),
-              const SizedBox(height: AppConstants.spacingL),
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: _assignedTasks.length,
-                  itemBuilder: (context, index) {
-                    final task = _assignedTasks[index];
-                    return _buildTaskCard(task);
-                  },
-                ),
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        padding: const EdgeInsets.all(AppConstants.spacingL),
+        child: Column(
+          children: [
+            const Text('Assigned Tasks', style: AppTheme.headingMedium),
+            const SizedBox(height: AppConstants.spacingL),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _assignedTasks.length,
+                itemBuilder: (context, index) {
+                  final task = _assignedTasks[index];
+                  return _buildTaskCard(task);
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
+
 
   void _showDailyMonitoring() {
     showDialog(
@@ -830,7 +826,7 @@ class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              context.go('/user-type-selection');
+              context.go('/login');
             },
             child: const Text('Logout'),
           ),
