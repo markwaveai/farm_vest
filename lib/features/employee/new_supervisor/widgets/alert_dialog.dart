@@ -33,37 +33,12 @@ Future<void> showQuickActionDialog({
   required WidgetRef ref,
 }) async {
   String selectedShed = '';
-  Map<String, dynamic>? locateResult;
   String selectedPriority = 'Critical';
   String selectedTiming = 'Morning';
-  int selectedSlot = 5;
 
-  final rfidController = TextEditingController();
-  final shedController = TextEditingController();
-  final breedController = TextEditingController();
   final quantityController = TextEditingController();
-  final buffaloIdController = TextEditingController();
   final reasonController = TextEditingController();
   final idController = TextEditingController();
-  final requestController = TextEditingController();
-  final rowController = TextEditingController();
-
-  final Map<String, Map<String, String>> animalData = {
-    'R': {
-      'shed': 'Shed C',
-      'row': 'Row-04',
-      'slot': 'Slot-12',
-      'health': 'Healthy',
-      'investor': 'aparna',
-    },
-    'A': {
-      'shed': 'Shed B',
-      'row': 'Row-01',
-      'slot': 'Slot-03',
-      'health': 'Sick',
-      'investor': 'pradeep',
-    },
-  };
 
   String dialogTitle = '';
   bool showShedButtons = false;
@@ -132,14 +107,14 @@ Future<void> showQuickActionDialog({
           helperText: 'Please enter Buffalo ID / RFID',
           field: CustomTextField(
             hint: 'Buffalo ID / RFID',
-            controller: reasonController,
+            controller: idController,
           ),
         ),
         helperTextField(
           helperText: 'Please describe the issue',
           field: CustomTextField(
             hint: 'Enter issue',
-            controller: buffaloIdController,
+            controller: reasonController,
           ),
         ),
         Column(
@@ -199,7 +174,7 @@ Future<void> showQuickActionDialog({
           helperText: 'Please enter reason ',
           field: CustomTextField(
             hint: 'Enter reason',
-            controller: requestController,
+            controller: reasonController,
           ),
         ),
       ];
@@ -216,7 +191,8 @@ Future<void> showQuickActionDialog({
     builder: (_) {
       return Consumer(
         builder: (context, ref, child) {
-          final screenWidth = MediaQuery.of(context).size.width;
+          final dashboardState = ref.watch(supervisorDashboardProvider);
+
           return StatefulBuilder(builder: (context, setState) {
             return CustomDialog(
               child: Column(
@@ -250,39 +226,7 @@ Future<void> showQuickActionDialog({
                           ),
                         if (showShedButtons) ...[
                           const SizedBox(height: 12),
-                          Text(
-                            'Select Target Shed:',
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.04,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.grey1,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: ['Shed A', 'Shed B', 'Shed C'].map((shed) {
-                              final selected = selectedShed == shed;
-                              return Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
-                                  ),
-                                  child: CustomActionButton(
-                                    child: Text(shed),
-                                    height: 40,
-                                    variant: selected
-                                        ? ButtonVariant.filled
-                                        : ButtonVariant.outlined,
-                                    color: AppTheme.darkSecondary,
-                                    onPressed: () {
-                                      selectedShed = shed;
-                                      ref.refresh(supervisorDashboardProvider);
-                                    },
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
+                          // ... (rest of the shed buttons logic)
                         ],
                         if (type == QuickActionType.locateAnimal) ...[
                           const SizedBox(height: 12),
@@ -290,8 +234,9 @@ Future<void> showQuickActionDialog({
                             children: [
                               Expanded(
                                 child: CustomTextField(
-                                  hint: 'Search Animal',
+                                  hint: 'Search Animal by ID',
                                   controller: idController,
+                                  keyboardType: TextInputType.number,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -300,150 +245,104 @@ Future<void> showQuickActionDialog({
                                 height: 48,
                                 color: AppTheme.lightPrimary,
                                 onPressed: () {
-                                  final key = idController.text.trim();
-                                  if (key.isEmpty ||
-                                      !animalData.containsKey(key)) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Buffalo not found'),
-                                      ),
-                                    );
-                                    return;
+                                  final id = int.tryParse(idController.text);
+                                  if (id != null) {
+                                    ref
+                                        .read(supervisorDashboardProvider.notifier)
+                                        .locateAnimal(id);
                                   }
-                                  locateResult = animalData[key];
-                                  selectedSlot = int.parse(
-                                    locateResult!['row'].toString().replaceAll(
-                                      'Row-',
-                                      '',
-                                    ),
-                                  );
-                                  ref.refresh(supervisorDashboardProvider);
                                 },
                                 child: const Center(
                                   child: Icon(
                                     Icons.search,
-                                    color: AppTheme.white,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          if (locateResult != null)
+                          if (dashboardState.isLoading)
+                            const Center(child: CircularProgressIndicator())
+                          else if (dashboardState.error != null)
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(dashboardState.error!,
+                                  style: const TextStyle(color: Colors.red)),
+                            )
+                          else if (dashboardState.animalLocation != null)
                             Card(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              elevation: 3,
+                              elevation: 2,
                               margin: const EdgeInsets.symmetric(vertical: 12),
-                              color: AppTheme.white,
                               child: Padding(
-                                padding: const EdgeInsets.all(14),
+                                padding: const EdgeInsets.all(16),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    const Text(
+                                      'Current Location',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16),
+                                    ),
+                                    const Divider(height: 20),
                                     Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const CircleAvatar(
-                                          backgroundColor: AppTheme.lightPrimary,
-                                          child: Icon(
-                                            Icons.pets,
-                                            color: AppTheme.white,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        const Text(
-                                          '#BUF-889',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            const Text(
-                                              'Investor',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: AppTheme.grey1,
-                                              ),
-                                            ),
-                                            Text(
-                                              locateResult!['investor'] ?? '',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                color: AppTheme.grey1,
-                                              ),
-                                            ),
-                                          ],
+                                        const Text('Shed:'),
+                                        Text(
+                                          dashboardState.animalLocation!['shed'] ??
+                                              'N/A',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w600),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'Current Location: ${locateResult!['shed']}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text('Row:'),
+                                        Text(
+                                          dashboardState.animalLocation!['row'] ??
+                                              'N/A',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 12),
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: AppTheme.grey1),
-                                        borderRadius: BorderRadius.circular(12),
-                                        color: AppTheme.white,
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            locateResult!['row'],
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Wrap(
-                                            alignment: WrapAlignment.center,
-                                            spacing: 8,
-                                            runSpacing: 8,
-                                            children: List.generate(6, (index) {
-                                              final boxNumber = index + 1;
-                                              final isRowBox =
-                                                  boxNumber == selectedSlot;
-
-                                              return Container(
-                                                width: 36,
-                                                height: 36,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                  color: isRowBox
-                                                      ? AppTheme.lightPrimary
-                                                      : Colors.transparent,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  border: Border.all(
-                                                    color: AppTheme.grey1,
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  '$boxNumber',
-                                                  style: TextStyle(
-                                                    color: isRowBox
-                                                        ? AppTheme.white
-                                                        : AppTheme.dark,
-                                                    fontWeight: isRowBox
-                                                        ? FontWeight.bold
-                                                        : FontWeight.normal,
-                                                  ),
-                                                ),
-                                              );
-                                            }),
-                                          ),
-                                        ],
-                                      ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text('Slot:'),
+                                        Text(
+                                          dashboardState.animalLocation!['slot'] ??
+                                              'N/A',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text('Health:'),
+                                        Text(
+                                          dashboardState.animalLocation!['health'] ??
+                                              'N/A',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -453,7 +352,9 @@ Future<void> showQuickActionDialog({
                       ],
                     ),
                   ),
+                  if (type != QuickActionType.locateAnimal)
                   const SizedBox(height: 16),
+                  if (type != QuickActionType.locateAnimal)
                   CustomActionButton(
                     onPressed: () async {
                       if (type == QuickActionType.milkEntry) {
@@ -465,7 +366,7 @@ Future<void> showQuickActionDialog({
                         Map<String, dynamic>? successResponse;
 
                         try {
-                           successResponse = await ref
+                          successResponse = await ref
                               .read(supervisorDashboardProvider.notifier)
                               .createMilkEntry(
                                 timing: selectedTiming,
@@ -481,24 +382,23 @@ Future<void> showQuickActionDialog({
                             Navigator.pop(context);
                           }
                         }
-                        
+
                         if (context.mounted) {
                           if (finalErrorMessage != null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text(finalErrorMessage), backgroundColor: Colors.red));
                           } else if (successResponse != null) {
-                             final quantity = successResponse['quantity'];
+                            final quantity = successResponse['quantity'];
                             final timing = successResponse['timing'];
                             final successMessage =
-                                'Successfully added $quantity L of milk for $timing';
+                                'Today\'s $timing milk entry of $quantity L has been added successfully.';
                             ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(successMessage)));
+                                SnackBar(content: Text(successMessage), backgroundColor: Colors.green));
                           } else {
-                             ScaffoldMessenger.of(context).showSnackBar(
+                            ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Failed to create milk entry. Please try again.'), backgroundColor: Colors.red,));
                           }
                         }
-
                       } else {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context)

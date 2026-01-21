@@ -123,7 +123,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
       if (!mounted) return;
 
       if (success) {
-        context.go('/farm-manager');
+        context.go('/farm-manager-dashboard');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Animal onboarded successfully!')),
         );
@@ -151,6 +151,10 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Onboard Animal'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/farm-manager-dashboard'),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

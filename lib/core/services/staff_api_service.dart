@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class StaffApiService {
   static const String url =
-      "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/farm_manager/get_total_staff";
+      "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api/farm_manager/get_total_staff";
 
 
   static Future<List<Staff>> fetchStaff() async {

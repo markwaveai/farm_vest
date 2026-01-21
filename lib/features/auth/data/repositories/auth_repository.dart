@@ -100,6 +100,7 @@ class AuthRepository {
 
     final snapshot = await ref.putFile(
       file,
+      // SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
       SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
     );
     final url = await snapshot.ref.getDownloadURL();
@@ -136,7 +137,7 @@ class AuthRepository {
     required String filePath,
   }) async {
     try {
-     
+
 
       final storage = FirebaseStorage.instanceFor(
         bucket: AppConstants.storageBucketName,

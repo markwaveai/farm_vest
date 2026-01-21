@@ -37,6 +37,7 @@ class SupervisorDashboardState {
   final List<HealthConcern> healthConcerns;
   final bool isLoading;
   final String? error;
+  final Map<String, dynamic>? animalLocation;
 
   // Checklist state
   final bool morningFeed;
@@ -55,6 +56,7 @@ class SupervisorDashboardState {
     this.shedWash = false,
     this.eveningMilking = false,
     this.error,
+    this.animalLocation,
   });
 
   SupervisorDashboardState copyWith({
@@ -67,6 +69,7 @@ class SupervisorDashboardState {
     bool? shedWash,
     bool? eveningMilking,
     String? error,
+    Map<String, dynamic>? animalLocation,
   }) {
     return SupervisorDashboardState(
       stats: stats ?? this.stats,
@@ -78,6 +81,7 @@ class SupervisorDashboardState {
       shedWash: shedWash ?? this.shedWash,
       eveningMilking: eveningMilking ?? this.eveningMilking,
       error: error ?? this.error,
+      animalLocation: animalLocation ?? this.animalLocation,
     );
   }
 }
@@ -108,11 +112,20 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
       final totalAnimals = await supervisorRepo.getTotalAnimals();
       final milkEntries = await supervisorRepo.getMilkEntries();
 
-      final milkToday = milkEntries['total_milk_quantity'] ?? 0;
+      // Sum milk quantity for entries that match today's date
+      final milkData = milkEntries['data'] as List<dynamic>? ?? [];
+      final todayDate = DateTime.now();
+      final todayDateString =
+          "${todayDate.year}-${todayDate.month.toString().padLeft(2, '0')}-${todayDate.day.toString().padLeft(2, '0')}";
+
+      final milkToday = milkData
+          .where((entry) => entry['entry_date'] == todayDateString)
+          .fold<double>(
+              0.0, (previous, current) => previous + (current['quantity'] ?? 0));
 
       final newStats = SupervisorDashboardStats(
         totalAnimals: totalAnimals.toString(),
-        milkToday: '${milkToday.toString()}L',
+        milkToday: '${milkToday.toStringAsFixed(2)}L',
         activeIssues: '0', // Placeholder until API is available
         transfers: '0', // Placeholder until API is available
       );
@@ -142,6 +155,17 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
       return null;
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<void> locateAnimal(int id) async {
+    final supervisorRepo = ref.read(supervisorRepositoryProvider);
+    state = state.copyWith(isLoading: true, animalLocation: null, error: null);
+    try {
+      final response = await supervisorRepo.getAnimalLocation(id);
+      state = state.copyWith(animalLocation: response['data'], isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 

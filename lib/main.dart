@@ -4,13 +4,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screen_protector/screen_protector.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:farm_vest/core/services/api_services.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/widgets/biometric_lock_screen.dart';
 
 Future<void> main() async {
+  ApiServices.onUnauthorized = () async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clear all user data
+    print('here we logout unauthorised');
+
+    // Use the GoRouter instance directly to navigate.
+    // This is the correct way to navigate with go_router.
+    AppRouter.router.go('/login');
+  };
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: const FirebaseOptions(

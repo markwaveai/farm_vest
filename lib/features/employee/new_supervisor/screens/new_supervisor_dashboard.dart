@@ -43,9 +43,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
             ),
           ],
         ),
-        actions: [IconButton(onPressed: () {
-          context.go('/login');
-        }, icon: const Icon(Icons.logout))],
+        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.logout))],
       ),
       body: dashboardState.isLoading
           ? _buildLoadingShimmer(context)
@@ -194,6 +192,16 @@ class NewSupervisorDashboard extends ConsumerWidget {
                               context,
                               Icons.grid_view,
                               'View Buffalo Shed',
+                              AppTheme.primary,
+                            ),
+                          ),
+                           CustomCard(
+                            type: DashboardCardType.stats,
+                            onTap: () => context.go('/leave-requests'),
+                            child: _buildQuickActionContent(
+                              context,
+                              Icons.time_to_leave,
+                              'Leave Request',
                               AppTheme.primary,
                             ),
                           ),

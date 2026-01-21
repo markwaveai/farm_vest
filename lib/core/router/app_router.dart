@@ -4,16 +4,15 @@ import 'package:farm_vest/features/farm_manager/presentation/screen/staff_list_s
 import 'package:farm_vest/features/farm_manager/presentation/widgets/investor_details.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_details_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_grid_screen.dart';
-
+import 'package:farm_vest/features/employee/new_supervisor/screens/leave_requests_screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/create_leave_request_screen.dart';
 import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
-
 import 'package:farm_vest/features/employee/new_supervisor/screens/new_supervisor_dashboard.dart';
-
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/investor/presentation/screens/cctv_main_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/investor_profile_screen.dart';
 import 'package:farm_vest/features/investor/presentation/widgets/investor_shell.dart';
-import '../../features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
 import '../../features/investor/presentation/screens/buffalo_calves_screen.dart';
 import '../../features/investor/data/models/unit_response.dart';
 import '../../features/auth/presentation/screens/new_login_screen.dart';
@@ -32,11 +31,15 @@ import '../../features/employee/presentation/screens/health_issues_screen.dart';
 import '../../features/employee/presentation/screens/milk_production_screen.dart';
 import '../../features/employee/presentation/screens/profile_screen.dart';
 import '../../features/employee/presentation/screens/raise_ticket_screen.dart';
-//import '../../features/supervisor/presentation/screens/supervisor_dashboard_screen.dart';
 import '../../features/admin/presentation/screens/admin_dashboard_screen.dart';
+
+// 1. Define the GlobalKey for the navigator.
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class AppRouter {
   static final GoRouter router = GoRouter(
+    // 2. Assign the key to the router.
+    navigatorKey: navigatorKey,
     initialLocation: '/splash',
     routes: [
       // Auth Routes
@@ -131,6 +134,14 @@ class AppRouter {
       GoRoute(
         path: '/onboard-animal',
         builder: (context, state) => const OnboardAnimalScreen(),
+      ),
+      GoRoute(
+        path: '/leave-requests',
+        builder: (context, state) => const LeaveRequestsScreen(),
+      ),
+      GoRoute(
+        path: '/create-leave-request',
+        builder: (context, state) => const CreateLeaveRequestScreen(),
       ),
       GoRoute(
         path: '/investor-details',
