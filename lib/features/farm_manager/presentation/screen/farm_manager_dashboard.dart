@@ -192,8 +192,11 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            // _consoleItem(context, Icons.bar_chart, "Reports",
+                            //     () => _reportsDialog(context)),
                             _consoleItem(context, Icons.bar_chart, "Reports",
-                                () => _reportsDialog(context)),
+                            ()=>context.go('/reports')
+                            ),
                             // _consoleItem(context, Icons.people, "Staff",
                             //     () => context.go('/staff-list')),
                             _consoleItem(context, Icons.people, "Staff",
@@ -475,39 +478,39 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     );
   }
 
-  void _reportsDialog(BuildContext context) {
-    _baseDialog(
-      context,
-      title: "Farm Reports",
-      child: Column(
-        children: const [
-          ListTile(
-            leading: Icon(Icons.description, color: Colors.green),
-            title: Text("Daily Milk Report"),
-            trailing: Icon(Icons.download),
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.description, color: Colors.green),
-            title: Text("Health Summary"),
-            trailing: Icon(Icons.download),
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.description, color: Colors.green),
-            title: Text("Financial Audit"),
-            trailing: Icon(Icons.download),
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.description, color: Colors.green),
-            title: Text("Staff Attendance"),
-            trailing: Icon(Icons.download),
-          ),
-        ],
-      ),
-    );
-  }
+  // void _reportsDialog(BuildContext context) {
+  //   _baseDialog(
+  //     context,
+  //     title: "Farm Reports",
+  //     child: Column(
+  //       children: const [
+  //         ListTile(
+  //           leading: Icon(Icons.description, color: Colors.green),
+  //           title: Text("Daily Milk Report"),
+  //           trailing: Icon(Icons.download),
+  //         ),
+  //         Divider(),
+  //         ListTile(
+  //           leading: Icon(Icons.description, color: Colors.green),
+  //           title: Text("Health Summary"),
+  //           trailing: Icon(Icons.download),
+  //         ),
+  //         Divider(),
+  //         ListTile(
+  //           leading: Icon(Icons.description, color: Colors.green),
+  //           title: Text("Financial Audit"),
+  //           trailing: Icon(Icons.download),
+  //         ),
+  //         Divider(),
+  //         ListTile(
+  //           leading: Icon(Icons.description, color: Colors.green),
+  //           title: Text("Staff Attendance"),
+  //           trailing: Icon(Icons.download),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   void _staffDialog(BuildContext context, StaffListState staffState) {
     _baseDialog(

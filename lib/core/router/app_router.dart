@@ -1,5 +1,6 @@
 import 'package:farm_vest/features/farm_manager/presentation/screen/farm_manager_dashboard.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/onboard_animal_screen.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/reports_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/staff_list_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/widgets/investor_details.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_details_screen.dart';
@@ -150,6 +151,9 @@ class AppRouter {
        GoRoute(
         path: '/staff-list',
         builder: (context, state) => const StaffListScreen(),
+      ),
+      GoRoute(path: '/reports',
+      builder: (context,state)=>const ReportsScreen(),
       ),
       GoRoute(
         path: '/doctor-dashboard',
