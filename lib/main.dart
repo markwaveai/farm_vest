@@ -12,15 +12,54 @@ import 'core/widgets/biometric_lock_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: "AIzaSyC88x_wjf5oBRmTxyXUwXV_UY2N73kl82c",
-      appId: "1:612299373064:android:5985b830becec8cd0eefbd",
-      messagingSenderId: "612299373064",
-      projectId: "markwave-481315",
-      storageBucket: "markwave-481315.firebasestorage.app",
-    ),
-  );
+
+  try {
+    if (kIsWeb) {
+      // Add web-specific options here if needed
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: "AIzaSyC88x_wjf5oBRmTxyXUwXV_UY2N73kl82c",
+          appId:
+              "1:612299373064:android:5985b830becec8cd0eefbd", // Replace with Web App ID
+          messagingSenderId: "612299373064",
+          projectId: "markwave-481315",
+          storageBucket: "markwave-481315.firebasestorage.app",
+        ),
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.android) {
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: "AIzaSyC88x_wjf5oBRmTxyXUwXV_UY2N73kl82c",
+          appId: "1:612299373064:android:5985b830becec8cd0eefbd",
+          messagingSenderId: "612299373064",
+          projectId: "markwave-481315",
+          storageBucket: "markwave-481315.firebasestorage.app",
+        ),
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // TODO: Add your iOS App ID from Firebase Console
+      // Using an Android App ID on iOS causes a native crash (NSException).
+      /*
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: "AIzaSyC88x_wjf5oBRmTxyXUwXV_UY2N73kl82c",
+          appId: "YOUR_IOS_APP_ID", 
+          messagingSenderId: "612299373064",
+          projectId: "markwave-481315",
+          storageBucket: "markwave-481315.firebasestorage.app",
+          iosBundleId: "com.example.farmVest",
+        ),
+      );
+      */
+      debugPrint(
+        "Firebase initialization skipped for iOS. Please provide a valid iOS App ID.",
+      );
+    } else {
+      await Firebase.initializeApp();
+    }
+  } catch (e) {
+    debugPrint("Firebase initialization failed: $e");
+  }
 
   runApp(
     DevicePreview(

@@ -14,7 +14,7 @@ class ApiServices {
   static Future<Map<String, dynamic>> getMilkEntries(String token) async {
     try {
       final response = await http.get(
-        Uri.parse("${AppConstants.authApiUrl}/supervisor/milk_entries"),
+        Uri.parse("${AppConstants.appLiveUrl}/supervisor/milk_entries"),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
       print(
@@ -38,9 +38,7 @@ class ApiServices {
   static Future<int> getTotalAnimals(String token) async {
     try {
       final response = await http.get(
-        Uri.parse(
-          "${AppConstants.authApiUrl}/supervisor/get_total_animals",
-        ),
+        Uri.parse("${AppConstants.appLiveUrl}/supervisor/get_total_animals"),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
       print(
@@ -67,8 +65,9 @@ class ApiServices {
     required Map<String, dynamic> body,
   }) async {
     try {
-      final uri =
-          Uri.parse("${AppConstants.authApiUrl}/supervisor/create_milk_entry");
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/supervisor/create_milk_entry",
+      );
 
       print('Sending request to: $uri');
       print('Request Body: ${jsonEncode(body)}');
@@ -113,7 +112,7 @@ class ApiServices {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse("${AppConstants.authApiUrl}/auth/token"),
+        Uri.parse("${AppConstants.appLiveUrl}/auth/token"),
         headers: {
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
           HttpHeaders.authorizationHeader: AppConstants.authApiKey,
@@ -401,9 +400,14 @@ class ApiServices {
     }
   }
 
-  static Future<bool> onboardAnimal(Map<String, dynamic> body, String token) async {
+  static Future<bool> onboardAnimal(
+    Map<String, dynamic> body,
+    String token,
+  ) async {
     try {
-      final uri = Uri.parse("${AppConstants.authApiUrl}/farm-manager/on-board-animal");
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/farm-manager/on-board-animal",
+      );
       debugPrint("Calling POST: $uri");
       debugPrint("Body: ${jsonEncode(body)}");
 
