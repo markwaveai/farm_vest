@@ -118,7 +118,7 @@ class ApiServices {
     required Map<String, dynamic> body,
   }) async {
     try {
-      final uri = Uri.parse("${AppConstants.authApiUrl}/api/supervisor/leave-requests");
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/supervisor/leave-requests");
 
       final response = await http.post(
         uri,
@@ -153,7 +153,7 @@ class ApiServices {
 
   static Future<Map<String, dynamic>> getLeaveRequests(String token) async {
     try {
-      final uri = Uri.parse("${AppConstants.authApiUrl}/api/supervisor/leave-requests");
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/supervisor/leave-requests");
 
       final response = await http.get(
         uri,
@@ -185,7 +185,7 @@ class ApiServices {
 
   static Future<void> cancelLeaveRequest(String token, int id) async {
     try {
-      final uri = Uri.parse("${AppConstants.authApiUrl}/api/supervisor/leave-requests/$id");
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/supervisor/leave-requests/$id");
 
       final response = await http.delete(
         uri,
@@ -216,7 +216,7 @@ class ApiServices {
 
   static Future<Map<String, dynamic>> getAnimalLocation(String token, int id) async {
     try {
-      final uri = Uri.parse("${AppConstants.authApiUrl}/api/supervisor/animals/$id/location");
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/supervisor/animals/$id/location");
 
       final response = await http.get(
         uri,
@@ -284,7 +284,7 @@ class ApiServices {
 
   static Future<bool> onboardAnimal(Map<String, dynamic> body, String token) async {
     try {
-      final uri = Uri.parse("${AppConstants.authApiUrl}/farm-manager/on-board-animal");
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/farm-manager/on-board-animal");
       final response = await http.post(
         uri,
         headers: {

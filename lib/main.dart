@@ -16,9 +16,6 @@ Future<void> main() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Clear all user data
     print('here we logout unauthorised');
-
-    // Use the GoRouter instance directly to navigate.
-    // This is the correct way to navigate with go_router.
     AppRouter.router.go('/login');
   };
   WidgetsFlutterBinding.ensureInitialized();
