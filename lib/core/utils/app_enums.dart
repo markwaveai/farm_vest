@@ -63,6 +63,7 @@ enum TicketStatus {
   open('Open'),
   inProgress('In Progress'),
   resolved('Resolved'),
+  rejected('Rejected'),
   closed('Closed');
 
   final String displayName;
@@ -79,7 +80,8 @@ enum NotificationType {
   final String value;
   const NotificationType(this.value);
 }
-enum MessageType { user, ai, system,typing }
+
+enum MessageType { user, ai, system, typing }
 
 class ChatMessage {
   final String text;

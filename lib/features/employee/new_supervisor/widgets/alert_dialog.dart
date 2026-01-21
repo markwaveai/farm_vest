@@ -7,6 +7,7 @@ import 'package:farm_vest/features/employee/new_supervisor/screens/new_superviso
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:farm_vest/features/supervisor/data/repositories/supervisor_repository.dart';
 
 enum QuickActionType {
   onboardAnimal,
@@ -42,7 +43,7 @@ Future<void> showQuickActionDialog({
   int selectedSlot = 5;
   List<XFile> selectedImages = [];
   final picker = ImagePicker();
-
+  bool isLoading = false;
   final rfidController = TextEditingController();
   final shedController = TextEditingController();
   final breedController = TextEditingController();
@@ -52,6 +53,47 @@ Future<void> showQuickActionDialog({
   final idController = TextEditingController();
   final requestController = TextEditingController();
   final rowController = TextEditingController();
+  final List<String> diseaseOptions = [
+    'ANESTRUS',
+    'REPEAT_BREEDING_SYNDROME',
+    'METRITIS',
+    'ENDOMETRITIS',
+    'RETAINED_PLACENTA',
+    'OVARIAN_CYSTS',
+    'ABORTION',
+    'CLINICAL_MASTITIS',
+    'SUBCLINICAL_MASTITIS',
+    'TEAT_INJURY',
+    'UDDER_EDEMA',
+    'MILK_FEVER',
+    'KETOSIS',
+    'ACIDOSIS',
+    'MINERAL_DEFICIENCY',
+    'ANEMIA',
+    'FOOT_AND_MOUTH_DISEASE',
+    'HEMORRHAGIC_SEPTICEMIA',
+    'BLACK_QUARTER',
+    'BRUCELLOSIS',
+    'TUBERCULOSIS',
+    'JOHNES_DISEASE',
+    'INTERNAL_PARASITES',
+    'EXTERNAL_PARASITES',
+    'TRYPANOSOMIASIS',
+    'BLOAT',
+    'INDIGESTION',
+    'DIARRHEA',
+    'RUMEN_IMPACTION',
+    'FOOT_ROT',
+    'LAMINITIS',
+    'OVERGROWN_HOOVES',
+    'LAMENESS',
+    'FEVER',
+    'RESPIRATORY_INFECTION',
+    'HEAT_STRESS',
+  ];
+
+  List<String> selectedDiseases = [];
+  final customDiseaseController = TextEditingController();
 
   final Map<String, Map<String, String>> animalData = {
     'R': {
@@ -59,14 +101,14 @@ Future<void> showQuickActionDialog({
       'row': 'Row-04',
       'slot': 'Slot-12',
       'health': 'Healthy',
-      'investor': 'aparna'
+      'investor': 'aparna',
     },
     'A': {
       'shed': 'Shed B',
       'row': 'Row-01',
       'slot': 'Slot-03',
       'health': 'Sick',
-      'investor': 'pradeep'
+      'investor': 'pradeep',
     },
   };
 
@@ -83,11 +125,7 @@ Future<void> showQuickActionDialog({
       showImagePicker = true;
       successMessage = 'Animal onboarded successfully!';
 
-      controllers = [
-        shedController,
-        breedController,
-        rowController,
-      ];
+      controllers = [shedController, breedController, rowController];
       fields = [
         helperTextField(
           helperText: 'Please enter shed number',
@@ -155,7 +193,10 @@ Future<void> showQuickActionDialog({
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
               ),
             ),
           ],
@@ -168,10 +209,7 @@ Future<void> showQuickActionDialog({
       dialogTitle = 'Report Health Ticket';
       successMessage = 'Health ticket raised successfully!';
 
-      controllers = [
-        reasonController,
-        buffaloIdController,
-      ];
+      controllers = [reasonController, buffaloIdController];
 
       fields = [
         helperTextField(
@@ -188,39 +226,98 @@ Future<void> showQuickActionDialog({
             controller: buffaloIdController,
           ),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Select Priority',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.grey1,
-              ),
-            ),
-            const SizedBox(height: 6),
-            DropdownButtonFormField<String>(
-              value: selectedPriority,
-              items: const [
-                DropdownMenuItem(value: 'Critical', child: Text('Critical')),
-                DropdownMenuItem(value: 'High', child: Text('High')),
-                DropdownMenuItem(value: 'Medium', child: Text('Medium')),
-                DropdownMenuItem(value: 'Low', child: Text('Low')),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  selectedPriority = value;
-                }
-              },
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+        StatefulBuilder(
+          builder: (context, setStateField) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Select Disease(s)',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.grey1,
+                  ),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              ),
-            ),
-          ],
+                const SizedBox(height: 6),
+                InkWell(
+                  onTap: () async {
+                    await showDialog(
+                      context: context,
+                      builder: (context) {
+                        return StatefulBuilder(
+                          builder: (context, setStateDialog) {
+                            return AlertDialog(
+                              title: const Text('Select Diseases'),
+                              content: SingleChildScrollView(
+                                child: ListBody(
+                                  children: diseaseOptions.map((disease) {
+                                    return CheckboxListTile(
+                                      value: selectedDiseases.contains(disease),
+                                      title: Text(disease),
+                                      onChanged: (bool? checked) {
+                                        setStateDialog(() {
+                                          if (checked == true) {
+                                            selectedDiseases.add(disease);
+                                          } else {
+                                            selectedDiseases.remove(disease);
+                                          }
+                                        });
+                                        // Update the field display
+                                        setStateField(() {});
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Done'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            selectedDiseases.isEmpty
+                                ? 'Select Diseases'
+                                : selectedDiseases.join(', '),
+                            style: TextStyle(
+                              color: selectedDiseases.isEmpty
+                                  ? Colors.grey
+                                  : Colors.black,
+                              fontSize: 16,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ];
       break;
@@ -315,11 +412,17 @@ Future<void> showQuickActionDialog({
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.upload_file, color: AppTheme.lightPrimary),
+                                    Icon(
+                                      Icons.upload_file,
+                                      color: AppTheme.lightPrimary,
+                                    ),
                                     SizedBox(width: 8),
                                     Text(
                                       'Upload Buffalo Image',
-                                      style: TextStyle(color: AppTheme.lightPrimary, fontSize: 14),
+                                      style: TextStyle(
+                                        color: AppTheme.lightPrimary,
+                                        fontSize: 14,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -353,7 +456,11 @@ Future<void> showQuickActionDialog({
                                         icon: const CircleAvatar(
                                           radius: 12,
                                           backgroundColor: Colors.white,
-                                          child: Icon(Icons.close, color: Colors.red, size: 16),
+                                          child: Icon(
+                                            Icons.close,
+                                            color: Colors.red,
+                                            size: 16,
+                                          ),
                                         ),
                                         onPressed: () {
                                           setStateDialog(() {
@@ -373,9 +480,10 @@ Future<void> showQuickActionDialog({
                         Text(
                           'Select Target Shed:',
                           style: TextStyle(
-                              fontSize: screenWidth * 0.04,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.grey1),
+                            fontSize: screenWidth * 0.04,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.grey1,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -383,13 +491,18 @@ Future<void> showQuickActionDialog({
                             final selected = selectedShed == shed;
                             return Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
                                 child: CustomActionButton(
                                   child: Text(shed),
                                   height: 40,
-                                  variant: selected ? ButtonVariant.filled : ButtonVariant.outlined,
+                                  variant: selected
+                                      ? ButtonVariant.filled
+                                      : ButtonVariant.outlined,
                                   color: AppTheme.darkSecondary,
-                                  onPressed: () => setStateDialog(() => selectedShed = shed),
+                                  onPressed: () =>
+                                      setStateDialog(() => selectedShed = shed),
                                 ),
                               ),
                             );
@@ -413,9 +526,12 @@ Future<void> showQuickActionDialog({
                               color: AppTheme.lightPrimary,
                               onPressed: () {
                                 final key = idController.text.trim();
-                                if (key.isEmpty || !animalData.containsKey(key)) {
+                                if (key.isEmpty ||
+                                    !animalData.containsKey(key)) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Buffalo not found')),
+                                    const SnackBar(
+                                      content: Text('Buffalo not found'),
+                                    ),
                                   );
                                   return;
                                 }
@@ -423,7 +539,10 @@ Future<void> showQuickActionDialog({
                                   locateResult = animalData[key];
 
                                   selectedSlot = int.parse(
-                                    locateResult!['row'].toString().replaceAll('Row-', ''),
+                                    locateResult!['row'].toString().replaceAll(
+                                      'Row-',
+                                      '',
+                                    ),
                                   );
                                 });
                               },
@@ -433,7 +552,7 @@ Future<void> showQuickActionDialog({
                                   color: AppTheme.white,
                                 ),
                               ),
-                            )
+                            ),
                           ],
                         ),
                         const SizedBox(height: 16),
@@ -454,26 +573,36 @@ Future<void> showQuickActionDialog({
                                     children: [
                                       const CircleAvatar(
                                         backgroundColor: AppTheme.lightPrimary,
-                                        child: Icon(Icons.pets, color: AppTheme.white),
+                                        child: Icon(
+                                          Icons.pets,
+                                          color: AppTheme.white,
+                                        ),
                                       ),
                                       const SizedBox(width: 8),
                                       const Text(
                                         '#BUF-889',
-                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                       const Spacer(),
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
                                         children: [
                                           const Text(
                                             'Investor',
                                             style: TextStyle(
-                                                fontSize: 12, color: AppTheme.grey1),
+                                              fontSize: 12,
+                                              color: AppTheme.grey1,
+                                            ),
                                           ),
                                           Text(
                                             locateResult!['investor'] ?? '',
                                             style: const TextStyle(
-                                                fontSize: 14, color: AppTheme.grey1),
+                                              fontSize: 14,
+                                              color: AppTheme.grey1,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -482,7 +611,9 @@ Future<void> showQuickActionDialog({
                                   const SizedBox(height: 12),
                                   Text(
                                     'Current Location: ${locateResult!['shed']}',
-                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   const SizedBox(height: 12),
                                   Container(
@@ -496,7 +627,9 @@ Future<void> showQuickActionDialog({
                                       children: [
                                         Text(
                                           locateResult!['row'],
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                         const SizedBox(height: 8),
                                         Wrap(
@@ -505,7 +638,8 @@ Future<void> showQuickActionDialog({
                                           runSpacing: 8,
                                           children: List.generate(6, (index) {
                                             final boxNumber = index + 1;
-                                            final isRowBox = boxNumber == selectedSlot;
+                                            final isRowBox =
+                                                boxNumber == selectedSlot;
 
                                             return Container(
                                               width: 36,
@@ -515,14 +649,21 @@ Future<void> showQuickActionDialog({
                                                 color: isRowBox
                                                     ? AppTheme.lightPrimary
                                                     : Colors.transparent,
-                                                borderRadius: BorderRadius.circular(8),
-                                                border: Border.all(color: AppTheme.grey1),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: AppTheme.grey1,
+                                                ),
                                               ),
                                               child: Text(
                                                 '$boxNumber',
                                                 style: TextStyle(
-                                                  color: isRowBox ? AppTheme.white : AppTheme.dark,
-                                                  fontWeight: isRowBox ? FontWeight.bold : FontWeight.normal,
+                                                  color: isRowBox
+                                                      ? AppTheme.white
+                                                      : AppTheme.dark,
+                                                  fontWeight: isRowBox
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
                                                 ),
                                               ),
                                             );
@@ -541,13 +682,83 @@ Future<void> showQuickActionDialog({
                 ),
                 const SizedBox(height: 16),
                 CustomActionButton(
-                  child: Text(buttonLabels[type] ?? 'Submit', style: TextStyle(color: Colors.white),),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(successMessage)),
-                    );
-                  },
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          buttonLabels[type] ?? 'Submit',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          if (type == QuickActionType.healthTicket) {
+                            final buffaloIdText = reasonController.text;
+                            final description = buffaloIdController.text;
+
+                            if (buffaloIdText.isEmpty || description.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please fill all fields'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            final int? animalId = int.tryParse(buffaloIdText);
+                            if (animalId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Invalid Buffalo ID'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            final body = {
+                              "animal_id": animalId,
+                              "description": description,
+                              "disease": selectedDiseases,
+                              "ticket_type": "HEALTH",
+                            };
+
+                            setStateDialog(() => isLoading = true);
+
+                            try {
+                              await SupervisorRepository().createTicket(body);
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(successMessage)),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(e.toString()),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            } finally {
+                              if (context.mounted) {
+                                setStateDialog(() => isLoading = false);
+                              }
+                            }
+                          } else {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(successMessage)),
+                            );
+                          }
+                        },
                   color: buttonBackgroundColors[type] ?? AppTheme.lightPrimary,
                   width: double.infinity,
                 ),

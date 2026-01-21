@@ -1,4 +1,5 @@
 import 'package:farm_vest/features/farm_manager/presentation/screen/farm_manager_dashboard.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/health_and_transfers_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/staff_list_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/widgets/investor_details.dart';
 import 'package:farm_vest/features/supervisor/presentation/screens/buffalo_details_screen.dart';
@@ -128,10 +129,14 @@ class AppRouter {
         builder: (context, state) => const FarmManagerDashboard(),
       ),
       GoRoute(
+        path: '/health-transfers-dashboard',
+        builder: (context, state) => const HealthAndTransfersScreen(),
+      ),
+      GoRoute(
         path: '/investor-details',
         builder: (context, state) => const InvestorDetails(),
       ),
-       GoRoute(
+      GoRoute(
         path: '/staff-list',
         builder: (context, state) => const StaffListScreen(),
       ),
@@ -166,7 +171,6 @@ class AppRouter {
         path: '/admin-dashboard',
         builder: (context, state) => const AdminDashboardScreen(),
       ),
-
 
       // Common Routes
       GoRoute(

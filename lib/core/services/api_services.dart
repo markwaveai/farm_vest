@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:farm_vest/features/auth/data/models/login_response.dart';
+import 'package:farm_vest/features/farm_manager/data/models/health_transfer_ticket_model.dart';
+
 import 'package:http/http.dart' as http;
 import '../../features/auth/data/models/whatsapp_otp_response.dart';
 import '../../features/auth/data/models/user_model.dart';
@@ -9,22 +11,25 @@ import 'package:farm_vest/features/investor/data/models/unit_response.dart';
 import 'package:flutter/foundation.dart';
 import '../../features/investor/data/models/visit_model.dart';
 import '../theme/app_constants.dart';
+import 'package:farm_vest/features/supervisor/data/model/ticket_model.dart';
 
 class ApiServices {
   static Future<Map<String, dynamic>> getMilkEntries(String token) async {
     try {
       final response = await http.get(
         Uri.parse(
-            "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api/supervisor/milk_entries"),
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $token',
-        },
+          "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api/supervisor/milk_entries",
+        ),
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw ServerException('Failed to load milk entries', statusCode: response.statusCode);
+        throw ServerException(
+          'Failed to load milk entries',
+          statusCode: response.statusCode,
+        );
       }
     } on SocketException {
       throw NetworkException('No Internet connection');
@@ -32,21 +37,24 @@ class ApiServices {
       throw AppException(e.toString());
     }
   }
+
   static Future<int> getTotalAnimals(String token) async {
     try {
       final response = await http.get(
         Uri.parse(
-            "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api/supervisor/get_total_animals"),
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $token',
-        },
+          "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api/supervisor/get_total_animals",
+        ),
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['animals_count'] ?? 0;
       } else {
-        throw ServerException('Failed to load total animals', statusCode: response.statusCode);
+        throw ServerException(
+          'Failed to load total animals',
+          statusCode: response.statusCode,
+        );
       }
     } on SocketException {
       throw NetworkException('No Internet connection');
@@ -56,7 +64,9 @@ class ApiServices {
   }
 
   static Future<LoginResponse> loginWithOtp(
-      String mobileNumber, String otp) async {
+    String mobileNumber,
+    String otp,
+  ) async {
     try {
       final response = await http.post(
         Uri.parse("${AppConstants.authApiUrl}/auth/token"),
@@ -64,10 +74,7 @@ class ApiServices {
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
           HttpHeaders.authorizationHeader: AppConstants.authApiKey,
         },
-        body: jsonEncode({
-          "mobile_number": mobileNumber,
-          "otp": otp,
-        }),
+        body: jsonEncode({"mobile_number": mobileNumber, "otp": otp}),
       );
       print('this is the response===========> ${response.statusCode}');
       print('this is the responsebody===========> ${response.body}');
@@ -75,7 +82,10 @@ class ApiServices {
         final data = jsonDecode(response.body);
         return LoginResponse.fromMap(data);
       } else {
-        throw ServerException('Failed to login', statusCode: response.statusCode);
+        throw ServerException(
+          'Failed to login',
+          statusCode: response.statusCode,
+        );
       }
     } on SocketException {
       throw NetworkException('No Internet connection');
@@ -96,7 +106,10 @@ class ApiServices {
         final data = jsonDecode(response.body);
         return WhatsappOtpResponse.fromJson(data);
       }
-      throw ServerException('Failed to send OTP', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to send OTP',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -116,7 +129,10 @@ class ApiServices {
           return UserModel.fromJson(data['user']);
         }
       }
-      throw ServerException('Failed to get user data', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get user data',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -128,14 +144,18 @@ class ApiServices {
     try {
       final response = await http.get(
         Uri.parse(
-            "${AppConstants.apiUrl}/purchases/units/$userId?paymentStatus=PAID"),
+          "${AppConstants.apiUrl}/purchases/units/$userId?paymentStatus=PAID",
+        ),
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body);
         return UnitResponse.fromJson(data);
       }
-      throw ServerException('Failed to get units', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get units',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -163,7 +183,10 @@ class ApiServices {
           return UserModel.fromJson(data["user"]);
         }
       }
-      throw ServerException('Failed to update user profile', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to update user profile',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -195,7 +218,10 @@ class ApiServices {
         return VisitAvailability.fromJson(data);
       }
       debugPrint("Error: ${response.statusCode} - ${response.body}");
-      throw ServerException('Failed to get visit availability', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get visit availability',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -224,7 +250,10 @@ class ApiServices {
         final data = jsonDecode(response.body);
         return Visit.fromJson(data);
       }
-      throw ServerException('Failed to book visit', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to book visit',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -252,7 +281,10 @@ class ApiServices {
         return data.map((e) => Visit.fromJson(e)).toList();
       }
       debugPrint("Error: ${response.statusCode} - ${response.body}");
-      throw ServerException('Failed to get visits', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get visits',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -287,7 +319,10 @@ class ApiServices {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((e) => Visit.fromJson(e)).toList();
       }
-      throw ServerException('Failed to get visit schedule', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get visit schedule',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
@@ -311,9 +346,118 @@ class ApiServices {
         final data = jsonDecode(response.body);
         return Visit.fromJson(data);
       }
-      throw ServerException('Failed to get visit by id', statusCode: response.statusCode);
+      throw ServerException(
+        'Failed to get visit by id',
+        statusCode: response.statusCode,
+      );
     } on SocketException {
       throw NetworkException('No Internet connection');
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  static Future<void> createTicket(
+    Map<String, dynamic> body,
+    String token,
+  ) async {
+    try {
+      final uri = Uri.parse(
+        "${AppConstants.authApiUrl}/supervisor/create_ticket",
+      );
+      debugPrint("Calling: $uri");
+      debugPrint("Body: ${jsonEncode(body)}");
+
+      final response = await http.post(
+        uri,
+        headers: {
+          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+          HttpHeaders.authorizationHeader: "Bearer $token",
+        },
+        body: jsonEncode(body),
+      );
+
+      debugPrint("Status: ${response.statusCode}");
+      debugPrint("Response: ${response.body}");
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return;
+      }
+
+      throw ServerException(response.body, statusCode: response.statusCode);
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  static Future<List<HealthTransferTicketModel>> getHealthAndTransferTickets(
+    String ticketType,
+    String token,
+  ) async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          "${AppConstants.authApiUrl}/farm_manager/get_all_tickets?ticket_type=$ticketType",
+        ),
+        headers: {
+          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+          HttpHeaders.authorizationHeader: "Bearer $token",
+        },
+      );
+      if (response.statusCode >= 200) {
+        final data = jsonDecode(response.body);
+        // Assuming response structure is {"data": [ ... ]}
+        if (data['data'] != null && data['data'] is List) {
+          return (data['data'] as List)
+              .map((e) => HealthTransferTicketModel.fromJson(e))
+              .toList();
+        } else {
+          return [];
+        }
+      } else {
+        throw ServerException(
+          'failed to load tickets',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw NetworkException('No Internet connection');
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  static Future<void> updateTicketStatus(
+    String ticketId,
+    String status,
+    String token,
+  ) async {
+    try {
+      final uri = Uri.parse(
+        "${AppConstants.authApiUrl}/farm_manager/update_ticket_status/$ticketId",
+      );
+      debugPrint("Calling: $uri");
+      debugPrint(
+        "Body: ${jsonEncode({"ticket_id": ticketId, "status": status})}",
+      );
+
+      final response = await http.put(
+        uri,
+        headers: {
+          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+          HttpHeaders.authorizationHeader: "Bearer $token",
+        },
+        body: jsonEncode({"ticket_id": ticketId, "status": status}),
+      );
+
+      debugPrint("Status: ${response.statusCode}");
+      debugPrint("Response: ${response.body}");
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return;
+      }
+
+      throw ServerException(response.body, statusCode: response.statusCode);
     } catch (e) {
       throw AppException(e.toString());
     }

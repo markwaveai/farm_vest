@@ -9,7 +9,8 @@ class FarmManagerDashboard extends ConsumerStatefulWidget {
   const FarmManagerDashboard({super.key});
 
   @override
-  ConsumerState<FarmManagerDashboard> createState() => _FarmManagerDashboardState();
+  ConsumerState<FarmManagerDashboard> createState() =>
+      _FarmManagerDashboardState();
 }
 
 class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
@@ -26,6 +27,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight + 10),
         child: AppBar(
+          automaticallyImplyActions: true,
           backgroundColor: AppTheme.grey,
           elevation: 0,
           automaticallyImplyLeading: false,
@@ -43,10 +45,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
               SizedBox(height: 3),
               Text(
                 "Kurnool Main Branch",
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppTheme.grey1,
-                ),
+                style: TextStyle(fontSize: 13, color: AppTheme.grey1),
               ),
             ],
           ),
@@ -66,132 +65,232 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       body: dashboardState.isLoading
           ? const Center(child: CircularProgressIndicator())
           : dashboardState.error != null
-              ? Center(child: Text('Error: ${dashboardState.error}'))
-              : RefreshIndicator(
-                  onRefresh: () async {
-                    ref.read(farmManagerProvider.notifier).refreshDashboard();
-                  },
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _mainStatCard(context, dashboardState.investorCount),
-                        const SizedBox(height: 16),
-                        InkWell(
-                          onTap: () => context.go('/staff-list'),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                top: 0,
-                                left: 0,
-                                bottom: 0,
-                                right: 3,
-                                child: Container(
-                                  width: 10,
-                                  decoration: BoxDecoration(
-                                    color: Colors.green,
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
+          ? Center(child: Text('Error: ${dashboardState.error}'))
+          : RefreshIndicator(
+              onRefresh: () async {
+                ref.read(farmManagerProvider.notifier).refreshDashboard();
+              },
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _mainStatCard(context, dashboardState.investorCount),
+                    const SizedBox(height: 16),
+                    InkWell(
+                      onTap: () => context.go('/staff-list'),
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            bottom: 0,
+                            right: 3,
+                            child: Container(
+                              width: 10,
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 90,
+                            margin: const EdgeInsets.only(left: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ListTile(
+                              leading: const CircleAvatar(
+                                backgroundColor: Color(0xFFF2F2F2),
+                                child: Icon(
+                                  Icons.people,
+                                  color: AppTheme.lightSecondary,
                                 ),
                               ),
-                              Container(
-                                height: 90,
-                                margin: const EdgeInsets.only(left: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 10,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
+                              title: Text(
+                                dashboardState.totalStaff.toString(),
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E2A78),
                                 ),
-                                child: ListTile(
-                                  leading: const CircleAvatar(
-                                    backgroundColor: Color(0xFFF2F2F2),
-                                    child: Icon(Icons.people, color: AppTheme.lightSecondary),
+                              ),
+                              subtitle: const Text(
+                                "Total Staff",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    _sectionHeader(
+                      "Pending Approvals",
+                      count: dashboardState.pendingApprovals,
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF0F9B0F), Color(0xFF00C853)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () =>
+                              context.push('/health-transfers-dashboard'),
+
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  title: Text(
-                                    dashboardState.totalStaff.toString(),
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1E2A78),
-                                    ),
-                                  ),
-                                  subtitle: const Text(
-                                    "Total Staff",
-                                    style: TextStyle(color: Colors.grey),
+                                  child: const Icon(
+                                    Icons.playlist_add_check_circle,
+                                    color: Colors.white,
+                                    size: 28,
                                   ),
                                 ),
-                              )
-                            ],
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: const [
+                                      Text(
+                                        "View All Requests",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        "Health & Transfer Requests",
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.white70,
+                                  size: 16,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 28),
-                        _sectionHeader("Pending Approvals", count: dashboardState.pendingApprovals),
-                        const SizedBox(height: 16),
-                        _approvalTile(
+                      ),
+                    ),
+                    _approvalTile(
+                      context,
+                      title: "Transfer Request",
+                      subtitle: "Supervisor Raj",
+                      onTap: () => _reviewDialog(
+                        context,
+                        id: "REQ-01",
+                        type: "Transfer",
+                        by: "Supervisor Raj",
+                        details: "Buffalo #89 needs isolation",
+                      ),
+                      icon: Icons.sync_lock_sharp,
+                    ),
+                    _approvalTile(
+                      context,
+                      title: "Expense Request",
+                      subtitle: "Admin Assistant",
+                      onTap: () => _reviewDialog(
+                        context,
+                        id: "REQ-02",
+                        type: "Expense",
+                        by: "Admin Assistant",
+                        details: "₹12,000 - Fodder purchase urgent",
+                      ),
+                      icon: Icons.account_balance_wallet,
+                    ),
+                    _approvalTile(
+                      context,
+                      title: "Leave Request",
+                      subtitle: "Dr. Sharma",
+                      onTap: () => _reviewDialog(
+                        context,
+                        id: "REQ-03",
+                        type: "Leave",
+                        by: "Dr. Sharma",
+                        details: "Sick Leave (2 Days)",
+                      ),
+                      icon: Icons.person_off_sharp,
+                    ),
+                    const SizedBox(height: 28),
+                    _sectionHeader("Management Console"),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _consoleItem(
                           context,
-                          title: "Transfer Request",
-                          subtitle: "Supervisor Raj",
-                          onTap: () => _reviewDialog(
-                            context,
-                            id: "REQ-01",
-                            type: "Transfer",
-                            by: "Supervisor Raj",
-                            details: "Buffalo #89 needs isolation",
-                          ),
-                          icon: Icons.sync_lock_sharp,
+                          Icons.bar_chart,
+                          "Reports",
+                          () => _reportsDialog(context),
                         ),
-                        _approvalTile(
+                        _consoleItem(
                           context,
-                          title: "Expense Request",
-                          subtitle: "Admin Assistant",
-                          onTap: () => _reviewDialog(
-                            context,
-                            id: "REQ-02",
-                            type: "Expense",
-                            by: "Admin Assistant",
-                            details: "₹12,000 - Fodder purchase urgent",
-                          ),
-                          icon: Icons.account_balance_wallet,
+                          Icons.people,
+                          "Staff",
+                          () => context.go('/staff-list'),
                         ),
-                        _approvalTile(
-                            context,
-                            title: "Leave Request",
-                            subtitle: "Dr. Sharma",
-                            onTap: () => _reviewDialog(
-                                  context,
-                                  id: "REQ-03",
-                                  type: "Leave",
-                                  by: "Dr. Sharma",
-                                  details: "Sick Leave (2 Days)",
-                                ),
-                            icon: Icons.person_off_sharp),
-                        const SizedBox(height: 28),
-                        _sectionHeader("Management Console"),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _consoleItem(context, Icons.bar_chart, "Reports",
-                                () => _reportsDialog(context)),
-                            _consoleItem(context, Icons.people, "Staff",
-                                () => context.go('/staff-list')),
-                            _consoleItem(context, Icons.inventory, "Stock", () => _stockDialog(context)),
-                            _consoleItem(context, Icons.settings, "Settings",
-                                () => _settingsDialog(context)),
-                          ],
+                        _consoleItem(
+                          context,
+                          Icons.inventory,
+                          "Stock",
+                          () => _stockDialog(context),
                         ),
-                        const SizedBox(height: 100),
+                        _consoleItem(
+                          context,
+                          Icons.settings,
+                          "Settings",
+                          () => _settingsDialog(context),
+                        ),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 100),
+                  ],
                 ),
+              ),
+            ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
         child: ElevatedButton.icon(
@@ -202,8 +301,9 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             backgroundColor: AppTheme.lightPrimary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
         ),
       ),
@@ -248,7 +348,10 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             child: ListTile(
               leading: CircleAvatar(
                 backgroundColor: AppTheme.grey,
-                child: const Icon(Icons.trending_up, color: AppTheme.lightSecondary),
+                child: const Icon(
+                  Icons.trending_up,
+                  color: AppTheme.lightSecondary,
+                ),
               ),
               title: const Text(
                 "Investors",
@@ -272,23 +375,27 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
   Widget _sectionHeader(String title, {int? count}) {
     return Row(
       children: [
-        Text(title,
-            style:
-                const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
         if (count != null) ...[
           const SizedBox(width: 8),
           CircleAvatar(
             radius: 10,
             backgroundColor: Colors.red,
-            child: Text("$count",
-                style: const TextStyle(color: Colors.white, fontSize: 12)),
+            child: Text(
+              "$count",
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
           ),
         ],
       ],
     );
   }
 
-  Widget _approvalTile(BuildContext context, {
+  Widget _approvalTile(
+    BuildContext context, {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
@@ -303,23 +410,22 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: const Color(0xFFF2F2F2),
-          child: Icon(
-            icon,
-            color: AppTheme.lightSecondary,
-          ),
+          child: Icon(icon, color: AppTheme.lightSecondary),
         ),
-        title:
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         subtitle: Text(subtitle),
-        trailing:
-            const Text("Review", style: TextStyle(color: Colors.green)),
+        trailing: const Text("Review", style: TextStyle(color: Colors.green)),
         onTap: onTap,
       ),
     );
   }
 
-  Widget _consoleItem(BuildContext context, IconData icon, String label,
-      [VoidCallback? onTap]) {
+  Widget _consoleItem(
+    BuildContext context,
+    IconData icon,
+    String label, [
+    VoidCallback? onTap,
+  ]) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -341,8 +447,11 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     );
   }
 
-  void _baseDialog(BuildContext context,
-      {required String title, required Widget child}) {
+  void _baseDialog(
+    BuildContext context, {
+    required String title,
+    required Widget child,
+  }) {
     showDialog(
       context: context,
       builder: (_) => Center(
@@ -361,9 +470,13 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: () => Navigator.pop(context),
@@ -380,11 +493,13 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     );
   }
 
-  void _reviewDialog(BuildContext context,
-      {required String id,
-      required String type,
-      required String by,
-      required String details}) {
+  void _reviewDialog(
+    BuildContext context, {
+    required String id,
+    required String type,
+    required String by,
+    required String details,
+  }) {
     _baseDialog(
       context,
       title: "Review Request",
@@ -407,13 +522,15 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
                   onPressed: () => Navigator.pop(context),
                   child: const Text("Approve"),
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -449,7 +566,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.search, color: Colors.white),
-              )
+              ),
             ],
           ),
         ],
@@ -501,22 +618,18 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             leading: const CircleAvatar(child: Text("D")),
             title: const Text("Dr. Sharma"),
             subtitle: RichText(
-              text: const TextSpan(children: [
-                TextSpan(
-                  text: "Veterinarian • ",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
+              text: const TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Veterinarian • ",
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
-                ),
-                TextSpan(
-                  text: "On Duty",
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 14,
+                  TextSpan(
+                    text: "On Duty",
+                    style: TextStyle(color: Colors.green, fontSize: 14),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ),
             trailing: const Icon(Icons.call, color: Colors.green),
           ),
@@ -525,22 +638,18 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             leading: const CircleAvatar(child: Text("R")),
             title: const Text("Raj Kumar"),
             subtitle: RichText(
-              text: const TextSpan(children: [
-                TextSpan(
-                  text: "Supervisor • ",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
+              text: const TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Supervisor • ",
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
-                ),
-                TextSpan(
-                  text: "On Duty",
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 14,
+                  TextSpan(
+                    text: "On Duty",
+                    style: TextStyle(color: Colors.green, fontSize: 14),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ),
             trailing: const Icon(Icons.call, color: Colors.green),
           ),
@@ -549,22 +658,18 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             leading: const CircleAvatar(child: Text("A")),
             title: const Text("Anita Singh"),
             subtitle: RichText(
-              text: const TextSpan(children: [
-                TextSpan(
-                  text: "Admin • ",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
+              text: const TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Admin • ",
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
-                ),
-                TextSpan(
-                  text: "Leave",
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 14,
+                  TextSpan(
+                    text: "Leave",
+                    style: TextStyle(color: Colors.red, fontSize: 14),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ),
             trailing: const Icon(Icons.call, color: Colors.green),
           ),
@@ -589,11 +694,12 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
           const SizedBox(height: 12),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                minimumSize: const Size.fromHeight(44)),
+              backgroundColor: Colors.green,
+              minimumSize: const Size.fromHeight(44),
+            ),
             onPressed: () {},
             child: const Text("Place New Order"),
-          )
+          ),
         ],
       ),
     );
@@ -606,15 +712,28 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       child: Column(
         children: const [
           SwitchListTile(
-              value: true, onChanged: null, title: Text("Push Notifications")),
+            value: true,
+            onChanged: null,
+            title: Text("Push Notifications"),
+          ),
           Divider(),
           SwitchListTile(
-              value: true, onChanged: null, title: Text("Email Alerts")),
-          Divider(),
-          SwitchListTile(value: false, onChanged: null, title: Text("Dark Mode")),
+            value: true,
+            onChanged: null,
+            title: Text("Email Alerts"),
+          ),
           Divider(),
           SwitchListTile(
-              value: true, onChanged: null, title: Text("Biometric Login")),
+            value: false,
+            onChanged: null,
+            title: Text("Dark Mode"),
+          ),
+          Divider(),
+          SwitchListTile(
+            value: true,
+            onChanged: null,
+            title: Text("Biometric Login"),
+          ),
         ],
       ),
     );
@@ -627,8 +746,8 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
         children: [
           Expanded(child: Text("$k :")),
           Expanded(
-              child: Text(v,
-                  style: const TextStyle(fontWeight: FontWeight.w600))),
+            child: Text(v, style: const TextStyle(fontWeight: FontWeight.w600)),
+          ),
         ],
       ),
     );
@@ -640,13 +759,20 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(name),
-            Text("Available: $qty",
-                style: const TextStyle(color: Colors.grey)),
-          ]),
-          Text(status,
-              style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(name),
+              Text(
+                "Available: $qty",
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+          Text(
+            status,
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );

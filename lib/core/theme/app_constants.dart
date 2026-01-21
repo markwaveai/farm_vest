@@ -6,7 +6,7 @@ class AppConstants {
   static const String apiUrl =
       'https://markwave-live-apis-couipk45fa-el.a.run.app';
   static const String authApiUrl =
-      'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app';
+      'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
   static const String authApiKey =
       'bWFya3dhdmUtZmFybXZlc3QtdGVzdHRpbmctYXBpa2V5';
   static const String visitApiUrl =
