@@ -1,16 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:farm_vest/core/services/api_services.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/core/widgets/floating_toast.dart';
 import 'package:farm_vest/features/auth/data/models/login_response.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:farm_vest/core/services/api_services.dart';
-import 'package:farm_vest/core/utils/app_enums.dart';
 import '../models/user_model.dart';
 import '../models/whatsapp_otp_response.dart';
 
@@ -100,7 +99,6 @@ class AuthRepository {
 
     final snapshot = await ref.putFile(
       file,
-      // SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
       SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
     );
     final url = await snapshot.ref.getDownloadURL();
@@ -137,8 +135,6 @@ class AuthRepository {
     required String filePath,
   }) async {
     try {
-
-
       final storage = FirebaseStorage.instanceFor(
         bucket: AppConstants.storageBucketName,
       );

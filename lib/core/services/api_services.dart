@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:farm_vest/core/error/exceptions.dart';
@@ -18,7 +17,7 @@ class ApiServices {
   static Future<Map<String, dynamic>> getMilkEntries(String token) async {
     try {
       final response = await http.get(
-        Uri.parse("${AppConstants.authApiUrl}/supervisor/milk_entries"),
+        Uri.parse("${AppConstants.appLiveUrl}/supervisor/milk_entries"),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
       if (response.statusCode == 401) {
@@ -43,9 +42,7 @@ class ApiServices {
   static Future<int> getTotalAnimals(String token) async {
     try {
       final response = await http.get(
-        Uri.parse(
-          "${AppConstants.authApiUrl}/supervisor/get_total_animals",
-        ),
+        Uri.parse("${AppConstants.appLiveUrl}/supervisor/get_total_animals"),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
       if (response.statusCode == 401) {
@@ -73,8 +70,12 @@ class ApiServices {
     required Map<String, dynamic> body,
   }) async {
     try {
-      final uri =
-          Uri.parse("${AppConstants.authApiUrl}/supervisor/create_milk_entry");
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/supervisor/create_milk_entry",
+      );
+
+      print('Sending request to: $uri');
+      print('Request Body: ${jsonEncode(body)}');
 
       final response = await http.post(
         uri,
@@ -252,7 +253,7 @@ class ApiServices {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse("${AppConstants.authApiUrl}/auth/token"),
+        Uri.parse("${AppConstants.appLiveUrl}/auth/token"),
         headers: {
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
           HttpHeaders.authorizationHeader: AppConstants.authApiKey,
@@ -264,7 +265,7 @@ class ApiServices {
         onUnauthorized?.call();
         throw ServerException('Unauthorized', statusCode: 401);
       }
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return LoginResponse.fromMap(data);

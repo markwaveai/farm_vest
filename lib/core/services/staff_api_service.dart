@@ -1,15 +1,14 @@
 import 'dart:convert';
+import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/features/farm_manager/presentation/models/staff_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StaffApiService {
   static const String url =
-      "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api/farm_manager/get_total_staff";
-
+      "${AppConstants.appLiveUrl}/farm_manager/get_total_staff";
 
   static Future<List<Staff>> fetchStaff() async {
-   
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
 
@@ -17,11 +16,10 @@ class StaffApiService {
       throw Exception("Access token not found. Please login again.");
     }
 
-    
     final response = await http.get(
       Uri.parse(url),
       headers: {
-        'Authorization': 'Bearer $token', 
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
     );
@@ -30,7 +28,8 @@ class StaffApiService {
 
     if (response.statusCode != 200) {
       throw Exception(
-          "Failed to load staff. Status code: ${response.statusCode}");
+        "Failed to load staff. Status code: ${response.statusCode}",
+      );
     }
 
     final decoded = json.decode(response.body);
@@ -43,7 +42,6 @@ class StaffApiService {
 
     List<Staff> staff = [];
 
-    
     if (data['supervisors'] != null) {
       for (final s in data['supervisors']) {
         staff.add(Staff.fromJson(s, "Supervisor"));
@@ -56,7 +54,6 @@ class StaffApiService {
       }
     }
 
-    
     if (data['assistant_doctors'] != null) {
       for (final a in data['assistant_doctors']) {
         staff.add(Staff.fromJson(a, "Assistant Doctor"));
@@ -66,4 +63,3 @@ class StaffApiService {
     return staff;
   }
 }
-
