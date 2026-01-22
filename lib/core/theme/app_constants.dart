@@ -1,11 +1,15 @@
 // App constants
 import 'package:intl/intl.dart';
 
+const String kHyphen = '--';
+
 class AppConstants {
   static const String appName = 'FarmVest';
+  //app live url
   static const String apiUrl =
       'https://markwave-live-apis-couipk45fa-el.a.run.app';
-  static const String authApiUrl =
+
+  static const String appLiveUrl =
       'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
   static const String authApiKey =
       'bWFya3dhdmUtZmFybXZlc3QtdGVzdHRpbmctYXBpa2V5';

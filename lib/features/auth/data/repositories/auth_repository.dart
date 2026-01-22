@@ -1,16 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:farm_vest/core/services/api_services.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/core/widgets/floating_toast.dart';
 import 'package:farm_vest/features/auth/data/models/login_response.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:farm_vest/core/services/api_services.dart';
-import 'package:farm_vest/core/utils/app_enums.dart';
 import '../models/user_model.dart';
 import '../models/whatsapp_otp_response.dart';
 
@@ -96,9 +95,8 @@ class AuthRepository {
       bucket: AppConstants.storageBucketName,
     );
 
-    final ref = storage.ref().child(
-      'farmvestuserpics/$userId/profile.jpg',
-    );
+    final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
+
     final snapshot = await ref.putFile(
       file,
       SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
@@ -113,7 +111,7 @@ class AuthRepository {
         bucket: AppConstants.storageBucketName,
       );
 
-      final ref = storage.ref().child('farmvestuserpics/$userId/profile.jpg');
+      final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
 
       // Try to get download URL - this will throw if file doesn't exist
       final url = await ref.getDownloadURL();
@@ -132,14 +130,16 @@ class AuthRepository {
   }
 
   // Delete profile image from Firebase
-  Future<bool> deleteProfileImage(
-      {required String userId, required String filePath}) async {
+  Future<bool> deleteProfileImage({
+    required String userId,
+    required String filePath,
+  }) async {
     try {
       final storage = FirebaseStorage.instanceFor(
         bucket: AppConstants.storageBucketName,
       );
 
-      final ref = storage.ref().child('farmvestuserpics/$userId/profile.jpg');
+      final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
       await ref.delete();
 
       FloatingToast.showSimpleToast('Front image deleted successfully');
@@ -157,6 +157,29 @@ class AuthRepository {
       debugPrint('Error deleting front image: $e');
       SnackBar(content: Text('Failed to delete front image'));
       return false;
+    }
+  }
+
+  static Future<String?> uploadImage(File file) async {
+    try {
+      final storage = FirebaseStorage.instanceFor(
+        bucket: AppConstants.storageBucketName,
+      );
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final ref = storage.ref().child(
+        'farmvest/buffaloesonboarding/image_$timestamp.jpg',
+      );
+
+      final snapshot = await ref.putFile(
+        file,
+        SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
+      );
+      final url = await snapshot.ref.getDownloadURL();
+      return url;
+    } catch (e) {
+      debugPrint('Error uploading image: $e');
+      FloatingToast.showSimpleToast('Failed to upload image');
+      return null;
     }
   }
 

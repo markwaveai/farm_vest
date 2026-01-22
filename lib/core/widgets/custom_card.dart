@@ -67,8 +67,13 @@ class CustomCard extends StatelessWidget {
                 ),
               ],
             ),
-            child: SizedBox(child: child),
-
+            // child: SizedBox.expand(
+            //   child: child),
+child:SizedBox(
+  width: double.infinity,
+  height: double.infinity,
+  child: child,
+)
             // ??
             // Column(
             //   mainAxisSize: MainAxisSize.min,
@@ -139,7 +144,16 @@ class CustomCard extends StatelessWidget {
           ),
           padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
           //child: child,
-          child: SizedBox(child: child),
+          child:SizedBox(
+  width: double.infinity,
+  height: double.infinity,
+  child: child,
+)
+
+          // child: SizedBox.expand(
+          //   child:
+         
+          // child),
 
           //  ??
           // Column(
@@ -224,7 +238,15 @@ class CustomCard extends StatelessWidget {
             ),
           ],
         ),
-        child: child,
+        // child: SizedBox.expand(child:
+         
+        //   child),
+        child:SizedBox(
+  width: double.infinity,
+  height: double.infinity,
+  child: child,
+)
+       // child: child,
         //??
         // Column(
         //   mainAxisSize: MainAxisSize.min,

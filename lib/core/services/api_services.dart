@@ -14,15 +14,19 @@ import '../theme/app_constants.dart';
 import 'package:farm_vest/features/supervisor/data/model/ticket_model.dart';
 
 class ApiServices {
+  // Global callback for handling unauthorized access
+  static VoidCallback? onUnauthorized;
+
   static Future<Map<String, dynamic>> getMilkEntries(String token) async {
     try {
       final response = await http.get(
-        Uri.parse(
-          "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api/supervisor/milk_entries",
-        ),
+        Uri.parse("${AppConstants.appLiveUrl}/supervisor/milk_entries"),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
-
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
@@ -41,12 +45,13 @@ class ApiServices {
   static Future<int> getTotalAnimals(String token) async {
     try {
       final response = await http.get(
-        Uri.parse(
-          "https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api/supervisor/get_total_animals",
-        ),
+        Uri.parse("${AppConstants.appLiveUrl}/supervisor/get_total_animals"),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
-
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['animals_count'] ?? 0;
@@ -63,21 +68,207 @@ class ApiServices {
     }
   }
 
+  static Future<Map<String, dynamic>> createMilkEntry({
+    required String token,
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/supervisor/create_milk_entry",
+      );
+
+      print('Sending request to: $uri');
+      print('Request Body: ${jsonEncode(body)}');
+
+      final response = await http.post(
+        uri,
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.contentTypeHeader: 'application/json',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 409) {
+        final errorBody = jsonDecode(response.body);
+        throw ServerException(
+          errorBody['detail'] ?? 'An unknown conflict occurred.',
+          statusCode: response.statusCode,
+        );
+      } else {
+        throw ServerException(
+          'Failed to create milk entry',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw NetworkException('No Internet connection');
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  static Future<Map<String, dynamic>> createLeaveRequest({
+    required String token,
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/supervisor/leave-requests");
+
+      final response = await http.post(
+        uri,
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.contentTypeHeader: 'application/json',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        final errorBody = jsonDecode(response.body);
+        throw ServerException(
+          errorBody['detail'] ?? 'Failed to create leave request.',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw NetworkException('No Internet connection');
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  static Future<Map<String, dynamic>> getLeaveRequests(String token) async {
+    try {
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/supervisor/leave-requests");
+
+      final response = await http.get(
+        uri,
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
+      );
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        final errorBody = jsonDecode(response.body);
+        throw ServerException(
+          errorBody['detail'] ?? 'Failed to get leave requests.',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw NetworkException('No Internet connection');
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  static Future<void> cancelLeaveRequest(String token, int id) async {
+    try {
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/supervisor/leave-requests/$id");
+
+      final response = await http.delete(
+        uri,
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
+      );
+
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
+      if (response.statusCode != 204) {
+        final errorBody = jsonDecode(response.body);
+        throw ServerException(
+          errorBody['detail'] ?? 'Failed to cancel leave request.',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw NetworkException('No Internet connection');
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  static Future<Map<String, dynamic>> getAnimalLocation(String token, int id) async {
+    try {
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/supervisor/animals/$id/location");
+
+      final response = await http.get(
+        uri,
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
+      );
+
+       if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        final errorBody = jsonDecode(response.body);
+        throw ServerException(
+          errorBody['detail'] ?? 'Failed to get animal location.',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw NetworkException('No Internet connection');
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
   static Future<LoginResponse> loginWithOtp(
     String mobileNumber,
     String otp,
   ) async {
     try {
       final response = await http.post(
-        Uri.parse("${AppConstants.authApiUrl}/auth/token"),
+        Uri.parse("${AppConstants.appLiveUrl}/auth/token"),
         headers: {
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
           HttpHeaders.authorizationHeader: AppConstants.authApiKey,
         },
         body: jsonEncode({"mobile_number": mobileNumber, "otp": otp}),
       );
-      print('this is the response===========> ${response.statusCode}');
-      print('this is the responsebody===========> ${response.body}');
+
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return LoginResponse.fromMap(data);
@@ -94,6 +285,37 @@ class ApiServices {
     }
   }
 
+  static Future<bool> onboardAnimal(Map<String, dynamic> body, String token) async {
+    try {
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/farm-manager/on-board-animal");
+      final response = await http.post(
+        uri,
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+          HttpHeaders.acceptHeader: AppConstants.applicationJson,
+        },
+        body: jsonEncode(body),
+      );
+
+       if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Exception: $e");
+      return false;
+    }
+  }
+
+
+
+  //keep this apis as it is
   static Future<WhatsappOtpResponse> sendWhatsappOtp(String phone) async {
     try {
       final response = await http.post(
@@ -363,7 +585,7 @@ class ApiServices {
   ) async {
     try {
       final uri = Uri.parse(
-        "${AppConstants.authApiUrl}/supervisor/create_ticket",
+        "${AppConstants.appLiveUrl}/supervisor/create_ticket",
       );
       debugPrint("Calling: $uri");
       debugPrint("Body: ${jsonEncode(body)}");
@@ -397,7 +619,7 @@ class ApiServices {
     try {
       final response = await http.get(
         Uri.parse(
-          "${AppConstants.authApiUrl}/farm_manager/get_all_tickets?ticket_type=$ticketType",
+          "${AppConstants.appLiveUrl}/farm_manager/get_all_tickets?ticket_type=$ticketType",
         ),
         headers: {
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
@@ -434,7 +656,7 @@ class ApiServices {
   ) async {
     try {
       final uri = Uri.parse(
-        "${AppConstants.authApiUrl}/farm_manager/update_ticket_status/$ticketId",
+        "${AppConstants.appLiveUrl}/farm_manager/update_ticket_status/$ticketId",
       );
       debugPrint("Calling: $uri");
       debugPrint(

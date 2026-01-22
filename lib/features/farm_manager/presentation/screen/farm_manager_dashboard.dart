@@ -1,6 +1,7 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/farm_manager_provider.dart';
+import 'package:farm_vest/features/farm_manager/presentation/providers/staff_list_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,6 +22,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
   @override
   Widget build(BuildContext context) {
     final dashboardState = ref.watch(farmManagerProvider);
+    final staffState=ref.watch(staffListProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
@@ -173,11 +175,30 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                                     color: Colors.white.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Icon(
-                                    Icons.playlist_add_check_circle,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
+//                                   title: Text(
+//   staffState.isLoading
+//       ? "..."
+//       : staffState.staff.length.toString(),
+//   style: const TextStyle(
+//     fontSize: 20,
+//     fontWeight: FontWeight.bold,
+//     color: Color(0xFF1E2A78),
+//   ),
+// ),
+
+                                  // title: Text(
+                                  //    dashboardState.totalStaff.toString(),
+                                  // //  staffState.staff.length.toString(),
+                                  //   style: const TextStyle(
+                                  //     fontSize: 20,
+                                  //     fontWeight: FontWeight.bold,
+                                  //     color: Color(0xFF1E2A78),
+                                  //   ),
+                                  // ),
+                                  // subtitle: const Text(
+                                  //   "Total Staff",
+                                  //   style: TextStyle(color: Colors.grey),
+                                  // ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
@@ -260,29 +281,51 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _consoleItem(
-                          context,
-                          Icons.bar_chart,
-                          "Reports",
-                          () => _reportsDialog(context),
-                        ),
+                        // _consoleItem(
+                        //   context,
+                        //   Icons.bar_chart,
+                        //   "Reports",
+                        //   () => _reportsDialog(context),
+                        // ),
                         _consoleItem(
                           context,
                           Icons.people,
                           "Staff",
                           () => context.go('/staff-list'),
                         ),
-                        _consoleItem(
-                          context,
-                          Icons.inventory,
-                          "Stock",
-                          () => _stockDialog(context),
-                        ),
-                        _consoleItem(
-                          context,
-                          Icons.settings,
-                          "Settings",
-                          () => _settingsDialog(context),
+                        _approvalTile(
+                            context,
+                            title: "Leave Request",
+                            subtitle: "Dr. Sharma",
+                            onTap: () => _reviewDialog(
+                                  context,
+                                  id: "REQ-03",
+                                  type: "Leave",
+                                  by: "Dr. Sharma",
+                                  details: "Sick Leave (2 Days)",
+                                ),
+                            icon: Icons.person_off_sharp),
+                        const SizedBox(height: 28),
+                        _sectionHeader("Management Console"),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // _consoleItem(context, Icons.bar_chart, "Reports",
+                            //     () => _reportsDialog(context)),
+                            _consoleItem(context, Icons.bar_chart, "Reports",
+                            ()=>context.go('/reports')
+                            ),
+                            // _consoleItem(context, Icons.people, "Staff",
+                            //     () => context.go('/staff-list')),
+                            _consoleItem(context, Icons.people, "Staff",
+                            () => _staffDialog(context, staffState)), // pass the staffState here
+
+                            _consoleItem(context, Icons.inventory, "Stock", () => _stockDialog(context)),
+                            _consoleItem(context, Icons.add, "Onboard Buffalo", () {
+                              context.go('/onboard-animal');
+                            }),
+                          ],
                         ),
                       ],
                     ),
@@ -574,107 +617,146 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     );
   }
 
-  void _reportsDialog(BuildContext context) {
-    _baseDialog(
-      context,
-      title: "Farm Reports",
-      child: Column(
-        children: const [
-          ListTile(
-            leading: Icon(Icons.description, color: Colors.green),
-            title: Text("Daily Milk Report"),
-            trailing: Icon(Icons.download),
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.description, color: Colors.green),
-            title: Text("Health Summary"),
-            trailing: Icon(Icons.download),
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.description, color: Colors.green),
-            title: Text("Financial Audit"),
-            trailing: Icon(Icons.download),
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.description, color: Colors.green),
-            title: Text("Staff Attendance"),
-            trailing: Icon(Icons.download),
-          ),
-        ],
-      ),
-    );
-  }
+  // void _reportsDialog(BuildContext context) {
+  //   _baseDialog(
+  //     context,
+  //     title: "Farm Reports",
+  //     child: Column(
+  //       children: const [
+  //         ListTile(
+  //           leading: Icon(Icons.description, color: Colors.green),
+  //           title: Text("Daily Milk Report"),
+  //           trailing: Icon(Icons.download),
+  //         ),
+  //         Divider(),
+  //         ListTile(
+  //           leading: Icon(Icons.description, color: Colors.green),
+  //           title: Text("Health Summary"),
+  //           trailing: Icon(Icons.download),
+  //         ),
+  //         Divider(),
+  //         ListTile(
+  //           leading: Icon(Icons.description, color: Colors.green),
+  //           title: Text("Financial Audit"),
+  //           trailing: Icon(Icons.download),
+  //         ),
+  //         Divider(),
+  //         ListTile(
+  //           leading: Icon(Icons.description, color: Colors.green),
+  //           title: Text("Staff Attendance"),
+  //           trailing: Icon(Icons.download),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  void _staffDialog(BuildContext context) {
+  void _staffDialog(BuildContext context, StaffListState staffState) {
     _baseDialog(
       context,
       title: "Staff Directory",
-      child: Column(
-        children: [
-          ListTile(
-            leading: const CircleAvatar(child: Text("D")),
-            title: const Text("Dr. Sharma"),
-            subtitle: RichText(
-              text: const TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Veterinarian • ",
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                  TextSpan(
-                    text: "On Duty",
-                    style: TextStyle(color: Colors.green, fontSize: 14),
-                  ),
-                ],
+       child:Column(
+  children: staffState.isLoading
+      ? [const CircularProgressIndicator()]
+      : staffState.staff.map((staff) {
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.green.withOpacity(0.1),
+              child: Text(
+                (staff.name?.isNotEmpty ?? false) ? staff.name![0] : '?',
+                style: const TextStyle(
+                    color: Colors.green, fontWeight: FontWeight.bold),
               ),
             ),
-            trailing: const Icon(Icons.call, color: Colors.green),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const CircleAvatar(child: Text("R")),
-            title: const Text("Raj Kumar"),
-            subtitle: RichText(
-              text: const TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Supervisor • ",
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                  TextSpan(
-                    text: "On Duty",
-                    style: TextStyle(color: Colors.green, fontSize: 14),
-                  ),
-                ],
-              ),
+            title: Text(staff.name ?? 'Unknown Staff'),
+            subtitle: Text('${staff.role} • ${staff.status}'),
+            trailing: IconButton(
+              icon: const Icon(Icons.call_outlined, color: Colors.green),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Calling ${staff.name ?? 'staff'}...')),
+                );
+              },
             ),
-            trailing: const Icon(Icons.call, color: Colors.green),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const CircleAvatar(child: Text("A")),
-            title: const Text("Anita Singh"),
-            subtitle: RichText(
-              text: const TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Admin • ",
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                  TextSpan(
-                    text: "Leave",
-                    style: TextStyle(color: Colors.red, fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-            trailing: const Icon(Icons.call, color: Colors.green),
-          ),
-        ],
-      ),
+          );
+        }).toList(),
+)
+
+      // Column(
+      //   children: [
+      //     ListTile(
+      //       leading: const CircleAvatar(child: Text("D")),
+      //       title: const Text("Dr. Sharma"),
+      //       subtitle: RichText(
+      //         text: const TextSpan(children: [
+      //           TextSpan(
+      //             text: "Veterinarian • ",
+      //             style: TextStyle(
+      //               color: Colors.grey,
+      //               fontSize: 14,
+      //             ),
+      //           ),
+      //           TextSpan(
+      //             text: "On Duty",
+      //             style: TextStyle(
+      //               color: Colors.green,
+      //               fontSize: 14,
+      //             ),
+      //           ),
+      //         ]),
+      //       ),
+      //       trailing: const Icon(Icons.call, color: Colors.green),
+      //     ),
+      //     const Divider(),
+      //     ListTile(
+      //       leading: const CircleAvatar(child: Text("R")),
+      //       title: const Text("Raj Kumar"),
+      //       subtitle: RichText(
+      //         text: const TextSpan(children: [
+      //           TextSpan(
+      //             text: "Supervisor • ",
+      //             style: TextStyle(
+      //               color: Colors.grey,
+      //               fontSize: 14,
+      //             ),
+      //           ),
+      //           TextSpan(
+      //             text: "On Duty",
+      //             style: TextStyle(
+      //               color: Colors.green,
+      //               fontSize: 14,
+      //             ),
+      //           ),
+      //         ]),
+      //       ),
+      //       trailing: const Icon(Icons.call, color: Colors.green),
+      //     ),
+      //     const Divider(),
+      //     ListTile(
+      //       leading: const CircleAvatar(child: Text("A")),
+      //       title: const Text("Anita Singh"),
+      //       subtitle: RichText(
+      //         text: const TextSpan(children: [
+      //           TextSpan(
+      //             text: "Admin • ",
+      //             style: TextStyle(
+      //               color: Colors.grey,
+      //               fontSize: 14,
+      //             ),
+      //           ),
+      //           TextSpan(
+      //             text: "Leave",
+      //             style: TextStyle(
+      //               color: Colors.red,
+      //               fontSize: 14,
+      //             ),
+      //           ),
+      //         ]),
+      //       ),
+      //       trailing: const Icon(Icons.call, color: Colors.green),
+      //     ),
+      //   ],
+      // ),
     );
   }
 
