@@ -1,5 +1,6 @@
 // lib/features/customer/screens/profile_screen.dart
 import 'dart:io';
+import 'package:farm_vest/features/auth/data/models/user_model.dart';
 
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
@@ -170,18 +171,84 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
       }
     });
 
+    ref.listen(investorSummaryProvider, (previous, next) {
+      next.whenData((summary) {
+        if (!_isEditing && summary != null) {
+          final details = summary.data.profileDetails;
+          if (details.fullName.isNotEmpty) {
+            _nameController.text = details.fullName;
+          }
+          if (details.phoneNumber.isNotEmpty) {
+            _phoneController.text = details.phoneNumber;
+          }
+          if (details.email != null && details.email!.isNotEmpty) {
+            _emailController.text = details.email!;
+          }
+          if (details.address != null && details.address!.isNotEmpty) {
+            _addressController.text = details.address!;
+          }
+        }
+      });
+    });
+
     final summaryAsync = ref.watch(investorSummaryProvider);
     DateTime? membershipSince;
 
     // Extract membership date from summary provider (instead of unitResponse)
+    // Extract membership date and construct effective user from summary
+    UserModel? summaryUser;
+
     summaryAsync.whenData((summary) {
-      if (summary?.data.profileDetails.memberSince != null &&
-          summary!.data.profileDetails.memberSince.isNotEmpty) {
-        membershipSince = DateTime.tryParse(
-          summary.data.profileDetails.memberSince,
-        );
+      if (summary != null) {
+        final details = summary.data.profileDetails;
+
+        if (details.memberSince.isNotEmpty) {
+          membershipSince = DateTime.tryParse(details.memberSince);
+        }
+
+        if (userData != null) {
+          summaryUser = userData.copyWith(
+            firstName: details.firstName.isNotEmpty ? details.firstName : null,
+            lastName: details.lastName.isNotEmpty ? details.lastName : null,
+            name: details.fullName.isNotEmpty ? details.fullName : null,
+            mobile: details.phoneNumber.isNotEmpty ? details.phoneNumber : null,
+            email: details
+                .email, // Allow null to fallback to userData in copyWith? No, copyWith takes nullable args to override?
+            // UserModel.copyWith usually takes nullable to replace, but if I pass null it keeps old value.
+            // If I want to clear it, I might have trouble. But here I want to usage summary if present.
+            address: details.address,
+          );
+          // Manually handle fields that might be null in details but we want to overwrite even if null?
+          // Usually profile details from API should be authoritative.
+          // However, if details.email is null, we might want to keep userData.email if it exists?
+          // The user experience suggests summary is "data coming", so use it.
+          // Let's refine copyWith usage.
+
+          summaryUser = userData.copyWith(
+            firstName: details.firstName.isNotEmpty
+                ? details.firstName
+                : userData.firstName,
+            lastName: details.lastName.isNotEmpty
+                ? details.lastName
+                : userData.lastName,
+            name: details.fullName.isNotEmpty
+                ? details.fullName
+                : userData.name,
+            mobile: details.phoneNumber.isNotEmpty
+                ? details.phoneNumber
+                : userData.mobile,
+            email: (details.email != null && details.email!.isNotEmpty)
+                ? details.email
+                : userData.email,
+            address: (details.address != null && details.address!.isNotEmpty)
+                ? details.address
+                : userData.address,
+          );
+        }
       }
     });
+
+    final effectiveUser = summaryUser ?? userData;
 
     final formattedDate = membershipSince != null
         ? '${membershipSince!.day}/${membershipSince!.month}/${membershipSince!.year}'
@@ -209,7 +276,7 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
               children: [
                 // Profile Header
                 ProfileHeader(
-                  user: userData,
+                  user: effectiveUser,
                   isEditing: _isEditing,
                   isDark: isDark,
                   currentImageFile: _profileImage,
@@ -232,7 +299,7 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
                 // Profile Details
                 ProfileInfoCard(
                   formKey: _formKey,
-                  user: userData,
+                  user: effectiveUser,
                   nameController: _nameController,
                   emailController: _emailController,
                   phoneController: _phoneController,
