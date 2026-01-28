@@ -132,16 +132,13 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
   }
 
   int _getBuffaloValueByAge(int ageInMonths) {
-    if (ageInMonths >= 60) return 175000;
-    if (ageInMonths >= 48) return 150000;
-    if (ageInMonths >= 40) return 100000;
-    if (ageInMonths >= 36) return 50000;
-    if (ageInMonths >= 30) return 50000;
-    if (ageInMonths >= 24) return 35000;
-    if (ageInMonths >= 18) return 25000;
-    if (ageInMonths >= 12) return 12000;
-    if (ageInMonths >= 6) return 6000;
-    return 3000;
+    // Updated pricing based on new asset value structure
+    if (ageInMonths >= 41) return 175000; // Peak/Proven (41+m)
+    if (ageInMonths >= 35) return 150000; // Prime (35-40m)
+    if (ageInMonths >= 25) return 100000; // Mature (25-34m)
+    if (ageInMonths >= 19) return 40000; // Heifer (19-24m)
+    if (ageInMonths >= 13) return 25000; // Growing (13-18m)
+    return 10000; // Calf (0-12m)
   }
 
   Widget _buildTopStats(
@@ -244,8 +241,8 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
     IconData icon,
     Color color,
   ) {
-     final theme = Theme.of(context);
-  final isDark = theme.brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -255,15 +252,15 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-         // color: Colors.grey.shade200
-             color: theme.dividerColor,
-          ),
+          // color: Colors.grey.shade200
+          color: theme.dividerColor,
+        ),
         boxShadow: [
           BoxShadow(
             //color: Colors.grey.withValues(alpha: 0.05),
             color: isDark
-              ? AppTheme.black.withValues(alpha: 0.6)
-              : AppTheme.grey.withValues(alpha: 0.05),
+                ? AppTheme.black.withValues(alpha: 0.6)
+                : AppTheme.grey.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -285,12 +282,12 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
           Text(
             title,
 
-             style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            // TextStyle(
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              // TextStyle(
               fontSize: 12,
-             // color: Colors.grey.shade600,
 
+              // color: Colors.grey.shade600,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -298,7 +295,7 @@ class _AssetValuationScreenState extends ConsumerState<AssetValuationScreen> {
           Text(
             value,
             // style: TextStyle(
-             style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleMedium?.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.grey.shade900,

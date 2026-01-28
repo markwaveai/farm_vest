@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:farm_vest/core/services/biometric_service.dart';
@@ -26,6 +27,7 @@ final authProvider = NotifierProvider<AuthController, AuthState>(
 class AuthState {
   final bool isLoading;
   final UserType? role;
+  final List<UserType> availableRoles;
   final String? error;
   final WhatsappOtpResponse? otpResponse;
   final String? mobileNumber;
@@ -34,6 +36,7 @@ class AuthState {
   AuthState({
     this.isLoading = false,
     this.role,
+    this.availableRoles = const [],
     this.error,
     this.otpResponse,
     this.mobileNumber,
@@ -43,6 +46,7 @@ class AuthState {
   AuthState copyWith({
     bool? isLoading,
     UserType? role,
+    List<UserType>? availableRoles,
     String? error,
     WhatsappOtpResponse? otpResponse,
     String? mobileNumber,
@@ -51,6 +55,7 @@ class AuthState {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
       role: role ?? this.role,
+      availableRoles: availableRoles ?? this.availableRoles,
       error: error ?? this.error,
       otpResponse: otpResponse ?? this.otpResponse,
       mobileNumber: mobileNumber ?? this.mobileNumber,
@@ -61,6 +66,8 @@ class AuthState {
 
 class AuthController extends Notifier<AuthState> {
   AuthRepository get _repository => ref.read(authRepositoryProvider);
+
+  Future<String?> getToken() => _repository.getToken();
   final ImagePicker _picker = ImagePicker();
   @override
   AuthState build() {
@@ -92,7 +99,9 @@ class AuthController extends Notifier<AuthState> {
   }) async {
     try {
       return await _repository.deleteProfileImage(
-          userId: userId, filePath: filePath);
+        userId: userId,
+        filePath: filePath,
+      );
     } on AppException catch (e) {
       state = state.copyWith(error: e.message);
       return false;
@@ -136,32 +145,57 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<Map<String, dynamic>?> loginWithOtp(
-      String mobileNumber, String otp) async {
-    state = state.copyWith(isLoading: true, error: null, mobileNumber: mobileNumber);
+    String mobileNumber,
+    String otp,
+  ) async {
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      mobileNumber: mobileNumber,
+    );
 
     try {
       final loginResponse = await _repository.loginWithOtp(mobileNumber, otp);
       await _repository.saveToken(loginResponse.accessToken);
 
-      final role = (loginResponse.roles.isNotEmpty)
-          ? UserType.fromString(loginResponse.roles.first)
+      final availableRoles = loginResponse.roles
+          .map((r) => UserType.fromString(r))
+          .toList();
+
+      final role = availableRoles.isNotEmpty
+          ? availableRoles.first
           : UserType.customer;
 
       state = state.copyWith(
         isLoading: false,
         role: role,
-      );
-      await _repository.saveUserSession(
-        mobile: mobileNumber,
-        role: role,
-        userData: null, // User data can be fetched later if needed
+        availableRoles: availableRoles,
       );
 
-      return {'role': role, 'userData': null};
+      await _repository.saveUserSession(
+        mobile: mobileNumber,
+        roles: availableRoles,
+        activeRole: role,
+        userData: null,
+      );
+
+      return {'roles': availableRoles, 'userData': null};
     } on AppException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
       return null;
     }
+  }
+
+  Future<void> selectRole(UserType role) async {
+    if (state.mobileNumber == null) return;
+
+    state = state.copyWith(role: role);
+    await _repository.saveUserSession(
+      mobile: state.mobileNumber!,
+      roles: state.availableRoles,
+      activeRole: role,
+      userData: state.userData,
+    );
   }
 
   Future<Map<String, dynamic>?> verifyWhatsappOtpLocal(String otp) async {
@@ -185,7 +219,8 @@ class AuthController extends Notifier<AuthState> {
     if (session != null) {
       state = state.copyWith(
         mobileNumber: session['mobile'],
-        role: session['role'],
+        availableRoles: session['roles'],
+        role: session['activeRole'],
         userData: session['userData'],
       );
     }
@@ -198,10 +233,7 @@ class AuthController extends Notifier<AuthState> {
   }) async {
     try {
       final XFile? image = await BiometricService.runWithLockSuppressed(() {
-        return _picker.pickImage(
-          source: source,
-          imageQuality: 85,
-        );
+        return _picker.pickImage(source: source, imageQuality: 85);
       });
 
       if (image == null) return null;
@@ -209,8 +241,7 @@ class AuthController extends Notifier<AuthState> {
       File selectedFile = File(image.path);
 
       if (compress) {
-        selectedFile =
-            await ImageCompressionHelper.getCompressedImageIfNeeded(
+        selectedFile = await ImageCompressionHelper.getCompressedImageIfNeeded(
           selectedFile,
           maxSizeKB: 250,
           isDocument: isDocument,
@@ -234,54 +265,72 @@ class AuthController extends Notifier<AuthState> {
     // Fetch user data from Repository
     UserModel? userData;
     try {
-      userData = await _repository.getUserData("");
-      print('this is the user data ===========> $userData');
+      debugPrint('Fetching user data for $mobileNumber during login...');
+      userData = await _repository.getUserData(mobileNumber);
+      debugPrint('User data result: ${userData?.name}, ${userData?.email}');
     } on AppException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
     }
 
-    // Determine Role
-    String? apiRole = userData?.role;
-    if (apiRole == null && state.otpResponse?.user != null) {
-      apiRole = state.otpResponse!.user!['role']?.toString();
-    }
-    print('this is the role: $apiRole');
-    UserType detectedRole = UserType.customer;
+    // Determine Roles
+    List<UserType> availableRoles = [];
 
-    if (apiRole != null) {
-      // Using UserType.fromString which handles casing and default
-      detectedRole = UserType.fromString(apiRole);
-    } else {
-      // Fallback Mock logic
-      if (mobileNumber.endsWith('0')) {
-        detectedRole = UserType.customer;
-      } else if (mobileNumber.endsWith('1')) {
-        detectedRole = UserType.supervisor;
-      } else if (mobileNumber.endsWith('2')) {
-        detectedRole = UserType.doctor;
-      } else if (mobileNumber.endsWith('3')) {
-        detectedRole = UserType.assistant;
-      } else if (mobileNumber.endsWith('4')) {
-        detectedRole = UserType.farmManager;
-      } else if (mobileNumber.endsWith('9')) {
-        detectedRole = UserType.admin;
+    // Check if the OTP response already gave us a list of roles (most reliable during login)
+    final userMap = state.otpResponse?.user;
+    if (userMap != null) {
+      final apiRoles = userMap['roles'] ?? userMap['role'];
+      if (apiRoles is List) {
+        availableRoles = apiRoles
+            .map((r) => UserType.fromString(r.toString()))
+            .toList();
+      } else if (apiRoles != null) {
+        availableRoles = [UserType.fromString(apiRoles.toString())];
       }
     }
 
+    // Fallback or complement with userData role if list is still empty
+    final localData = userData;
+    if (availableRoles.isEmpty && localData != null) {
+      availableRoles = [UserType.fromString(localData.role)];
+    }
+
+    if (availableRoles.isEmpty) {
+      // Fallback Mock logic
+      if (mobileNumber.endsWith('0')) {
+        availableRoles = [UserType.customer];
+      } else if (mobileNumber.endsWith('1')) {
+        availableRoles = [UserType.supervisor];
+      } else if (mobileNumber.endsWith('2')) {
+        availableRoles = [UserType.doctor];
+      } else if (mobileNumber.endsWith('3')) {
+        availableRoles = [UserType.assistant];
+      } else if (mobileNumber.endsWith('4')) {
+        availableRoles = [UserType.farmManager];
+      } else if (mobileNumber.endsWith('9')) {
+        availableRoles = [UserType.admin];
+      } else {
+        availableRoles = [UserType.customer];
+      }
+    }
+
+    UserType selectedRole = availableRoles.first;
+
     state = state.copyWith(
       mobileNumber: mobileNumber,
-      role: detectedRole,
+      role: selectedRole,
+      availableRoles: availableRoles,
       userData: userData,
       isLoading: false,
     );
 
     await _repository.saveUserSession(
       mobile: mobileNumber,
-      role: detectedRole,
+      roles: availableRoles,
+      activeRole: selectedRole,
       userData: userData,
     );
 
-    return {'role': UserType.supervisor, 'userData': userData};
+    return {'roles': availableRoles, 'userData': userData};
   }
 
   Future<void> logout() async {
@@ -295,22 +344,24 @@ class AuthController extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true);
 
     try {
+      debugPrint('Refreshing user data for ${state.mobileNumber}...');
       final userData = await _repository.getUserData(state.mobileNumber!);
       if (userData != null) {
+        debugPrint('Refresh success: ${userData.name}');
         state = state.copyWith(userData: userData, isLoading: false);
         await _repository.saveUserSession(
           mobile: state.mobileNumber!,
-          role: state.role ?? UserType.customer,
+          roles: state.availableRoles,
+          activeRole: state.role ?? UserType.customer,
           userData: userData,
         );
       } else {
+        debugPrint('Refresh returned null user data');
         state = state.copyWith(isLoading: false);
       }
     } on AppException catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.message,
-      );
+      debugPrint('Refresh error: $e');
+      state = state.copyWith(isLoading: false, error: e.message);
     }
   }
 

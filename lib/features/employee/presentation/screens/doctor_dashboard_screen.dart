@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/employee_dashboard_card.dart';
 
 class HighPriorityCase {
@@ -24,14 +27,15 @@ class HighPriorityCase {
   });
 }
 
-class DoctorDashboardScreen extends StatefulWidget {
+class DoctorDashboardScreen extends ConsumerStatefulWidget {
   const DoctorDashboardScreen({super.key});
 
   @override
-  State<DoctorDashboardScreen> createState() => _DoctorDashboardScreenState();
+  ConsumerState<DoctorDashboardScreen> createState() =>
+      _DoctorDashboardScreenState();
 }
 
-class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
+class _DoctorDashboardScreenState extends ConsumerState<DoctorDashboardScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<HighPriorityCase> _highPriorityCases = [];
 
@@ -90,6 +94,12 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           actions: [
+            if (ref.watch(authProvider).availableRoles.length > 1)
+              IconButton(
+                icon: const Icon(Icons.swap_horiz),
+                onPressed: _showSwitchRoleBottomSheet,
+                tooltip: 'Switch Role',
+              ),
             IconButton(
               icon: const Icon(Icons.notifications),
               onPressed: () => context.push(
@@ -105,162 +115,162 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            // Welcome Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppConstants.spacingL),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppTheme.primary, AppTheme.secondary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(AppConstants.radiusL),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Welcome, Dr. Patel!',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.white,
-                    ),
+              // Welcome Section
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppConstants.spacingL),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppTheme.primary, AppTheme.secondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  const SizedBox(height: AppConstants.spacingS),
-                  const Text(
-                    'Providing quality healthcare for farm animals',
-                    style: TextStyle(fontSize: 16, color: AppTheme.white),
-                  ),
-                  const SizedBox(height: AppConstants.spacingM),
-                  Row(
-                    children: [
-                      _buildQuickStat('Active Cases', '12'),
-                      const SizedBox(width: AppConstants.spacingL),
-                      _buildQuickStat('Critical', '3'),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-
-            // Quick Actions
-            const Text('Quick Actions', style: AppTheme.headingMedium),
-            const SizedBox(height: AppConstants.spacingM),
-
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: AppConstants.spacingM,
-              mainAxisSpacing: AppConstants.spacingM,
-              childAspectRatio: 1.1,
-              children: [
-                EmployeeDashboardCard(
-                  title: 'High Priority',
-                  subtitle: 'Critical cases',
-                  icon: Icons.priority_high,
-                  color: AppTheme.errorRed,
-                  onTap: () => _showHighPriorityCases(),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusL),
                 ),
-                EmployeeDashboardCard(
-                  title: 'Assign Tasks',
-                  subtitle: 'Delegate to assistants',
-                  icon: Icons.assignment,
-                  color: AppTheme.primary,
-                  onTap: () => _showAssignTasksDialog(),
-                ),
-                EmployeeDashboardCard(
-                  title: 'Treatment Plans',
-                  subtitle: 'Medical instructions',
-                  icon: Icons.medication,
-                  color: AppTheme.secondary,
-                  onTap: () => _showTreatmentPlans(),
-                ),
-                EmployeeDashboardCard(
-                  title: 'Health Analytics',
-                  subtitle: 'View reports',
-                  icon: Icons.analytics,
-                  color: AppTheme.darkSecondary,
-                  onTap: () => _showHealthAnalytics(),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-
-            // High Priority Cases
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'High Priority Cases',
-                  style: AppTheme.headingMedium,
-                ),
-                TextButton(
-                  onPressed: () => _showHighPriorityCases(),
-                  child: const Text('View All'),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppConstants.spacingM),
-
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _highPriorityCases.take(3).length,
-              itemBuilder: (context, index) {
-                final priorityCase = _highPriorityCases[index];
-                return _buildPriorityCaseCard(priorityCase);
-              },
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-
-            // Today's Schedule
-            const Text('Today\'s Schedule', style: AppTheme.headingMedium),
-            const SizedBox(height: AppConstants.spacingM),
-
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.spacingM),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildScheduleItem(
-                      '09:00 AM',
-                      'Health Checkup',
-                      'BUF-001, BUF-002, BUF-003',
-                      Icons.medical_services,
-                      AppTheme.primary,
+                    const Text(
+                      'Welcome, Dr. Patel!',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.white,
+                      ),
                     ),
-                    const Divider(),
-                    _buildScheduleItem(
-                      '11:30 AM',
-                      'Vaccination Round',
-                      'Section A - 5 animals',
-                      Icons.vaccines,
-                      AppTheme.secondary,
+                    const SizedBox(height: AppConstants.spacingS),
+                    const Text(
+                      'Providing quality healthcare for farm animals',
+                      style: TextStyle(fontSize: 16, color: AppTheme.white),
                     ),
-                    const Divider(),
-                    _buildScheduleItem(
-                      '02:00 PM',
-                      'Treatment Follow-up',
-                      'BUF-007 - Infection treatment',
-                      Icons.healing,
-                      AppTheme.warningOrange,
-                    ),
-                    const Divider(),
-                    _buildScheduleItem(
-                      '04:30 PM',
-                      'Emergency Consultation',
-                      'Available for urgent cases',
-                      Icons.emergency,
-                      AppTheme.errorRed,
+                    const SizedBox(height: AppConstants.spacingM),
+                    Row(
+                      children: [
+                        _buildQuickStat('Active Cases', '12'),
+                        const SizedBox(width: AppConstants.spacingL),
+                        _buildQuickStat('Critical', '3'),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ),
+              const SizedBox(height: AppConstants.spacingL),
+
+              // Quick Actions
+              const Text('Quick Actions', style: AppTheme.headingMedium),
+              const SizedBox(height: AppConstants.spacingM),
+
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: AppConstants.spacingM,
+                mainAxisSpacing: AppConstants.spacingM,
+                childAspectRatio: 1.1,
+                children: [
+                  EmployeeDashboardCard(
+                    title: 'High Priority',
+                    subtitle: 'Critical cases',
+                    icon: Icons.priority_high,
+                    color: AppTheme.errorRed,
+                    onTap: () => _showHighPriorityCases(),
+                  ),
+                  EmployeeDashboardCard(
+                    title: 'Assign Tasks',
+                    subtitle: 'Delegate to assistants',
+                    icon: Icons.assignment,
+                    color: AppTheme.primary,
+                    onTap: () => _showAssignTasksDialog(),
+                  ),
+                  EmployeeDashboardCard(
+                    title: 'Treatment Plans',
+                    subtitle: 'Medical instructions',
+                    icon: Icons.medication,
+                    color: AppTheme.secondary,
+                    onTap: () => _showTreatmentPlans(),
+                  ),
+                  EmployeeDashboardCard(
+                    title: 'Health Analytics',
+                    subtitle: 'View reports',
+                    icon: Icons.analytics,
+                    color: AppTheme.darkSecondary,
+                    onTap: () => _showHealthAnalytics(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.spacingL),
+
+              // High Priority Cases
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'High Priority Cases',
+                    style: AppTheme.headingMedium,
+                  ),
+                  TextButton(
+                    onPressed: () => _showHighPriorityCases(),
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.spacingM),
+
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _highPriorityCases.take(3).length,
+                itemBuilder: (context, index) {
+                  final priorityCase = _highPriorityCases[index];
+                  return _buildPriorityCaseCard(priorityCase);
+                },
+              ),
+              const SizedBox(height: AppConstants.spacingL),
+
+              // Today's Schedule
+              const Text('Today\'s Schedule', style: AppTheme.headingMedium),
+              const SizedBox(height: AppConstants.spacingM),
+
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppConstants.spacingM),
+                  child: Column(
+                    children: [
+                      _buildScheduleItem(
+                        '09:00 AM',
+                        'Health Checkup',
+                        'BUF-001, BUF-002, BUF-003',
+                        Icons.medical_services,
+                        AppTheme.primary,
+                      ),
+                      const Divider(),
+                      _buildScheduleItem(
+                        '11:30 AM',
+                        'Vaccination Round',
+                        'Section A - 5 animals',
+                        Icons.vaccines,
+                        AppTheme.secondary,
+                      ),
+                      const Divider(),
+                      _buildScheduleItem(
+                        '02:00 PM',
+                        'Treatment Follow-up',
+                        'BUF-007 - Infection treatment',
+                        Icons.healing,
+                        AppTheme.warningOrange,
+                      ),
+                      const Divider(),
+                      _buildScheduleItem(
+                        '04:30 PM',
+                        'Emergency Consultation',
+                        'Available for urgent cases',
+                        Icons.emergency,
+                        AppTheme.errorRed,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -348,6 +358,15 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
               context.go('/profile');
             },
           ),
+          if (ref.watch(authProvider).availableRoles.length > 1)
+            ListTile(
+              leading: const Icon(Icons.swap_horiz),
+              title: const Text('Switch Role'),
+              onTap: () {
+                Navigator.pop(context);
+                _showSwitchRoleBottomSheet();
+              },
+            ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
@@ -355,6 +374,157 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
             onTap: () => _showLogoutDialog(),
           ),
         ],
+      ),
+    );
+  }
+
+  Map<String, dynamic> _getRoleInfo(UserType role) {
+    switch (role) {
+      case UserType.admin:
+        return {
+          'label': 'Administrator',
+          'icon': Icons.admin_panel_settings,
+          'color': Colors.blue,
+        };
+      case UserType.farmManager:
+        return {
+          'label': 'Farm Manager',
+          'icon': Icons.agriculture,
+          'color': Colors.green,
+        };
+      case UserType.supervisor:
+        return {
+          'label': 'Supervisor',
+          'icon': Icons.assignment_ind,
+          'color': Colors.orange,
+        };
+      case UserType.doctor:
+        return {
+          'label': 'Doctor',
+          'icon': Icons.medical_services,
+          'color': Colors.red,
+        };
+      case UserType.assistant:
+        return {
+          'label': 'Assistant Doctor',
+          'icon': Icons.health_and_safety,
+          'color': Colors.teal,
+        };
+      case UserType.customer:
+        return {
+          'label': 'Investor',
+          'icon': Icons.trending_up,
+          'color': Colors.indigo,
+        };
+    }
+  }
+
+  void _showSwitchRoleBottomSheet() {
+    final authState = ref.read(authProvider);
+    final availableRoles = authState.availableRoles;
+    final currentRole = authState.role;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Switch Active Role',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose which portal you want to access',
+                style: TextStyle(color: AppTheme.mediumGrey),
+              ),
+              const SizedBox(height: 24),
+              ...availableRoles.map((role) {
+                final info = _getRoleInfo(role);
+                final isSelected = role == currentRole;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    onTap: isSelected
+                        ? null
+                        : () async {
+                            Navigator.pop(context);
+                            await ref
+                                .read(authProvider.notifier)
+                                .selectRole(role);
+
+                            if (!mounted) return;
+                            switch (role) {
+                              case UserType.admin:
+                                context.go('/admin-dashboard');
+                                break;
+                              case UserType.farmManager:
+                                context.go('/farm-manager-dashboard');
+                                break;
+                              case UserType.supervisor:
+                                context.go('/supervisor-dashboard');
+                                break;
+                              case UserType.doctor:
+                                context.go('/doctor-dashboard');
+                                break;
+                              case UserType.assistant:
+                                context.go('/assistant-dashboard');
+                                break;
+                              case UserType.customer:
+                                context.go('/customer-dashboard');
+                                break;
+                            }
+                          },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isSelected
+                            ? info['color']
+                            : Colors.grey.shade200,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    tileColor: isSelected
+                        ? (info['color'] as Color).withOpacity(0.05)
+                        : null,
+                    leading: CircleAvatar(
+                      backgroundColor: (info['color'] as Color).withOpacity(
+                        0.1,
+                      ),
+                      child: Icon(
+                        info['icon'] as IconData,
+                        color: info['color'] as Color,
+                      ),
+                    ),
+                    title: Text(
+                      info['label'] as String,
+                      style: TextStyle(
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_circle,
+                            color: info['color'] as Color,
+                          )
+                        : const Icon(Icons.arrow_forward_ios, size: 14),
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
       ),
     );
   }

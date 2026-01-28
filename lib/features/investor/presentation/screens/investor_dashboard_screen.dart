@@ -6,8 +6,11 @@ import 'package:farm_vest/features/investor/presentation/widgets/pdf_viewer.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:farm_vest/core/services/api_services.dart';
+import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart'; // Added import
+import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import '../providers/buffalo_provider.dart';
 import '../providers/dashboard_stats_provider.dart';
 import '../widgets/buffalo_card.dart';
@@ -62,11 +65,11 @@ class _CustomerDashboardScreenState
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmallPhone = screenHeight < AppConstants.smallphoneheight;
-    final isMediumPhone = screenHeight >= AppConstants.smallphoneheight && screenHeight < AppConstants.mediumphoneheight;
-    final isTablet =
-     MediaQuery.of(context).size.height >= AppConstants.tabletMaxheight;
+    final isMediumPhone =
+        screenHeight >= AppConstants.smallphoneheight &&
+        screenHeight < AppConstants.mediumphoneheight;
     final theme = Theme.of(context);
-    
+
     final buffalos = ref.watch(filteredBuffaloListProvider);
     final stats = ref.watch(dashboardStatsProvider);
 
@@ -88,177 +91,261 @@ class _CustomerDashboardScreenState
 
     return Scaffold(
       key: _scaffoldKey,
-      body: RefreshIndicator(
-        onRefresh: () {
-          // Add your refresh logic here. With Riverpod, this might trigger a provider refresh.
-          return Future.delayed(const Duration(seconds: 1));
-        },
-        child: Column(
-          children: [
-            // Consolidated Stats & Financial Overview
-            stats.when(
-              data: (data) => Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(
-                  horizontal: isSmallPhone ? 0 : (isMediumPhone ? 2 : 12),
-                  vertical: isSmallPhone ? 12 : (isMediumPhone ? 14 : 16),
-                ),
-                margin: EdgeInsets.fromLTRB(
-                  isSmallPhone ? 10 : 16,
-                  8,
-                  isSmallPhone ? 10 : 16,
-                  8,
-                ),
-                decoration: BoxDecoration(
-                  color: theme.cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                  border: Border.all(
-                    color: theme.brightness == Brightness.dark
-                        ? Colors.grey.withValues(alpha: 0.2)
-                        : Colors.grey.withValues(alpha: 0.1),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () {
+            // Add your refresh logic here. With Riverpod, this might trigger a provider refresh.
+            return Future.delayed(const Duration(seconds: 1));
+          },
+          child: Column(
+            children: [
+              // Consolidated Stats & Financial Overview
+              stats.when(
+                data: (data) => Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallPhone ? 0 : (isMediumPhone ? 2 : 12),
+                    vertical: isSmallPhone ? 12 : (isMediumPhone ? 14 : 16),
                   ),
+                  margin: EdgeInsets.fromLTRB(
+                    isSmallPhone ? 10 : 16,
+                    8,
+                    isSmallPhone ? 10 : 16,
+                    8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.grey.withOpacity(0.2)
+                          : Colors.grey.withOpacity(0.1),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: _buildStatItem(
+                          context,
+                          value: data['buffaloes'] ?? '0',
+                          label: 'Buffaloes',
+                          icon: Icons.pets,
+                          isSmallPhone: isSmallPhone,
+                          isMediumPhone: isMediumPhone,
+                          isCompact: true,
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildStatItem(
+                          context,
+                          value: data['calves'] ?? '0',
+                          label: 'Calves',
+                          icon: SvgPicture.string(
+                            height: 26,
+                            width: 26,
+                            SvgUtils.calvesSvg,
+                            fit: BoxFit.contain,
+                            color: AppTheme.secondary,
+                            colorFilter: ColorFilter.mode(
+                              Colors.red,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          isSmallPhone: isSmallPhone,
+                          isMediumPhone: isMediumPhone,
+                          isCompact: true,
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildStatItem(
+                          context,
+                          value: AppConstants.formatIndianCurrencyShort(
+                            num.tryParse(data['assetValue'] ?? '0') ?? 0,
+                          ),
+                          label: 'Asset Value',
+                          icon: Icons.account_balance,
+                          isSmallPhone: isSmallPhone,
+                          isMediumPhone: isMediumPhone,
+                          isCompact: true,
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildStatItem(
+                          context,
+                          value: data['revenue']?.toString() ?? '₹0',
+                          label: 'Revenue',
+                          icon: Icons.trending_up,
+                          isSmallPhone: isSmallPhone,
+                          isMediumPhone: isMediumPhone,
+                          isCompact: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+                error: (err, stack) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Error: $err',
+                      style: const TextStyle(fontSize: 12, color: Colors.red),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Monthly Visits Card
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.grey.withOpacity(0.1),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => context.push('/monthly-visits'),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            // Leading Icon Container
+                            Container(
+                              height: 48,
+                              width: 48,
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.calendar_today,
+                                color: AppTheme.primary,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // Text Content
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Book Farm Visit',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Schedule your monthly visit',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Colors.grey,
+                                          fontSize: 14,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Trailing Icon
+                            Icon(
+                              Icons.chevron_right,
+                              color: Colors.grey.shade400,
+                              size: 28,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              _buildSearchAndFilterBar(),
+
+              // Buffalo List Header
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: _buildStatItem(
-                        context,
-                        value: data['count'] ?? '0',
-                        label: 'Total Units',
-                        icon: Icons.grid_view,
-                        isSmallPhone: isSmallPhone,
-                        isMediumPhone: isMediumPhone,
-                        isCompact: true,
+                    Text(
+                      'My Buffaloes',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Expanded(
-                      child: _buildStatItem(
-                        context,
-                        value: data['buffaloes'] ?? '0',
-                        label: 'Buffaloes',
-                        icon: Icons.pets,
-                        isSmallPhone: isSmallPhone,
-                        isMediumPhone: isMediumPhone,
-                        isCompact: true,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildStatItem(
-                        context,
-                        value: data['calves'] ?? '0',
-                        label: 'Calves',
-                        icon: SvgPicture.string(
-                          height: 26,
-                          width: 26,
-                          SvgUtils.calvesSvg,
-                          fit: BoxFit.contain,
-                          color: AppTheme.secondary,
-                          colorFilter: ColorFilter.mode(
-                            Colors.red,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        isSmallPhone: isSmallPhone,
-                        isMediumPhone: isMediumPhone,
-                        isCompact: true,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildStatItem(
-                        context,
-                        value: AppConstants.formatIndianCurrencyShort(
-                          data['assetValue'],
-                        ),
-
-                        label: 'Asset Value',
-                        icon: Icons.account_balance,
-                        isSmallPhone: isSmallPhone,
-                        isMediumPhone: isMediumPhone,
-                        isCompact: true,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildStatItem(
-                        context,
-                        value: data['revenue']?.toString() ?? '₹0',
-                        label: 'Revenue',
-                        icon: Icons.trending_up,
-                        isSmallPhone: isSmallPhone,
-                        isMediumPhone: isMediumPhone,
-                        isCompact: true,
-                      ),
+                    IconButton(
+                      icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
+                      onPressed: () {
+                        setState(() {
+                          _isGridView = !_isGridView;
+                        });
+                      },
+                      tooltip: _isGridView
+                          ? 'Switch to List View'
+                          : 'Switch to Grid View',
                     ),
                   ],
                 ),
               ),
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: CircularProgressIndicator(strokeWidth: 2),
+
+              // Buffalo List/Grid View
+              Expanded(
+                child: buffalos.when(
+                  data: (data) => data.isEmpty
+                      ? const Center(child: Text('No buffaloes found'))
+                      : (_isGridView
+                            ? _buildGridView(data, context)
+                            : _buildListView(data)),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (err, stack) =>
+                      Center(child: Text('Error: ${err.toString()}')),
                 ),
               ),
-              error: (err, stack) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Error: $err',
-                    style: const TextStyle(fontSize: 12, color: Colors.red),
-                  ),
-                ),
-              ),
-            ),
-
-            _buildSearchAndFilterBar(),
-
-            // Buffalo List Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'My Buffaloes',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
-                    onPressed: () {
-                      setState(() {
-                        _isGridView = !_isGridView;
-                      });
-                    },
-                    tooltip: _isGridView
-                        ? 'Switch to List View'
-                        : 'Switch to Grid View',
-                  ),
-                ],
-              ),
-            ),
-
-            // Buffalo List/Grid View
-            Expanded(
-              child: buffalos.when(
-                data: (data) => data.isEmpty
-                    ? const Center(child: Text('No buffaloes found'))
-                    : (_isGridView
-                          ? _buildGridView(data, context)
-                          : _buildListView(data)),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) =>
-                    Center(child: Text('Error: ${err.toString()}')),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -433,95 +520,110 @@ class _CustomerDashboardScreenState
       ],
     );
   }
-Widget _buildGridView(List<Animal> buffalos, BuildContext context) {
-  return GridView.builder(
-    padding: const EdgeInsets.all(8),
 
-   
-    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-      maxCrossAxisExtent: 220, 
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      childAspectRatio: 0.78, 
-    ),
+  Widget _buildGridView(List<Animal> buffalos, BuildContext context) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(8),
 
-    itemCount: buffalos.length,
-    itemBuilder: (context, index) {
-      final buffalo = buffalos[index];
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 220,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        childAspectRatio: 0.78,
+      ),
 
-      final allAnimals = ref.read(rawBuffaloListProvider).value ?? [];
-      List<Animal> calves = buffalo.children ?? [];
-      if (calves.isEmpty) {
-        calves = allAnimals.where((a) => a.parentId == buffalo.id).toList();
-      }
+      itemCount: buffalos.length,
+      itemBuilder: (context, index) {
+        final buffalo = buffalos[index];
 
-      return BuffaloCard(
-        farmName: buffalo.farmName ?? 'FarmVest Unit',
-        location: buffalo.farmLocation ?? 'Kurnool',
-        id: buffalo.id ?? 'Unknown ID',
-        healthStatus: buffalo.healthStatus ?? 'Healthy',
-        lastMilking: 'Checked recently',
-        age: '${buffalo.ageYears ?? 0} years',
-        breed: buffalo.breedId ?? 'Unknown Breed',
-        isGridView: true,
+        final allAnimals = ref.read(rawBuffaloListProvider).value ?? [];
+        List<Animal> calves = buffalo.children ?? [];
+        if (calves.isEmpty) {
+          calves = allAnimals.where((a) => a.parentId == buffalo.id).toList();
+        }
 
-        onTap: () {
-          context.push('/unit-details', extra: {'buffalo': buffalo});
-        },
+        return BuffaloCard(
+          farmName: buffalo.farmName ?? 'FarmVest Unit',
+          location: buffalo.farmLocation ?? 'Kurnool',
+          id: buffalo.id ?? 'Unknown ID',
+          healthStatus: buffalo.healthStatus ?? 'Healthy',
+          lastMilking: 'Checked recently',
+          age: '${buffalo.ageMonths ?? 0} Months',
+          breed: buffalo.breedId ?? 'Unknown Breed',
+          imageUrl: buffalo.imageUrl, // Added imageUrl
+          isGridView: true,
 
-        onInvoiceTap: () async {
-          final unitResponse = ref.read(unitResponseProvider).value;
-          Order? order;
+          onTap: () {
+            context.push('/unit-details', extra: {'buffalo': buffalo});
+          },
 
-          if (unitResponse?.orders != null) {
-            try {
-              order = unitResponse!.orders!.firstWhere(
-                (o) => o.buffalos?.any((b) => b.id == buffalo.id) ?? false,
+          onInvoiceTap: () async {
+            final unitResponse = ref.read(unitResponseProvider).value;
+            Order? order;
+
+            if (unitResponse?.orders != null) {
+              try {
+                order = unitResponse!.orders!.firstWhere(
+                  (o) => o.buffalos?.any((b) => b.id == buffalo.id) ?? false,
+                );
+              } catch (_) {}
+            }
+
+            if (order != null) {
+              final path = await InvoiceGenerator.generateInvoice(order);
+              if (!context.mounted) return;
+
+              Navigator.of(context, rootNavigator: true).push(
+                MaterialPageRoute(
+                  builder: (_) => InvoicePdfView(order: order!, filePath: path),
+                ),
               );
-            } catch (_) {}
-          }
+            } else {
+              FloatingToast.showSimpleToast("Invoice not found for this unit");
 
-          if (order != null) {
-            final path = await InvoiceGenerator.generateInvoice(order);
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   const SnackBar(content: Text("Invoice not found for this unit")),
+              //);
+            }
+          },
+
+          onCalvesTap: () async {
+            // Fetch calves dynamically on tap
+            final prefs = await SharedPreferences.getInstance();
+            final token = prefs.getString('access_token');
+            if (token == null) {
+              ToastUtils.showError(context, "Authentication error");
+              return;
+            }
+
+            ToastUtils.showInfo(context, "Fetching calves...");
+
+            // // Allow matching by ID or RFID (breedId maps to RFID)
+            // final fetchedCalves = await ApiServices.getCalvesByParentId(
+            //   token,
+            //   buffalo.id ?? '',
+            //   parentRfid: buffalo.breedId ?? '',
+            // );
+
             if (!context.mounted) return;
 
-            Navigator.of(context, rootNavigator: true).push(
-              MaterialPageRoute(
-                builder: (_) => InvoicePdfView(
-                  order: order!,
-                  filePath: path,
-                ),
-              ),
-            );
-          } else {
-            FloatingToast.showSimpleToast(
-              "Invoice not found for this unit",
-            );
-          
-            // ScaffoldMessenger.of(context).showSnackBar(
-            //   const SnackBar(content: Text("Invoice not found for this unit")),
-            //);
-          }
-        },
-
-        onCalvesTap: calves.isNotEmpty
-            ? () {
-                context.push(
-                  '/buffalo-calves',
-                  extra: {
-                    'calves': calves,
-                    'parentId': buffalo.id ?? 'Unknown',
-                    'parent': buffalo,
-                  },
-                );
-              }
-            : null,
-      );
-    },
-  );
-}
-
-  
+            // if (fetchedCalves.isNotEmpty) {
+            //   context.push(
+            //     '/buffalo-calves',
+            //     extra: {
+            //       'calves': fetchedCalves,
+            //       'parentId': buffalo.id ?? 'Unknown',
+            //       'parent': buffalo,
+            //     },
+            //   );
+            // } else {
+            //   ToastUtils.showInfo(context, "No calves found for this buffalo");
+            // }
+          },
+        );
+      },
+    );
+  }
 
   Widget _buildListView(List<Animal> buffalos) {
     return ListView.builder(
@@ -543,14 +645,15 @@ Widget _buildGridView(List<Animal> buffalos, BuildContext context) {
           id: buffalo.id ?? 'Unknown ID',
           healthStatus: buffalo.healthStatus ?? 'Healthy',
           lastMilking: 'Checked recently',
-          age: '${buffalo.ageYears ?? 0} years',
+          age: '${buffalo.ageMonths ?? 0} Months',
           breed: buffalo.breedId ?? 'Unknown Breed',
+          imageUrl: buffalo.imageUrl, // Added
           isGridView: false,
           onTap: () {
             // Navigate to buffalo details
             context.go('/unit-details', extra: {'buffalo': buffalo});
           },
-          onInvoiceTap: ()async {
+          onInvoiceTap: () async {
             // Find relevant order
             final unitResponse = ref.read(unitResponseProvider).value;
             Order? order;
@@ -567,7 +670,10 @@ Widget _buildGridView(List<Animal> buffalos, BuildContext context) {
               if (!context.mounted) return;
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => InvoicePdfView(order: order!, filePath: filePath)),
+                MaterialPageRoute(
+                  builder: (_) =>
+                      InvoicePdfView(order: order!, filePath: filePath),
+                ),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -577,18 +683,38 @@ Widget _buildGridView(List<Animal> buffalos, BuildContext context) {
               );
             }
           },
-          onCalvesTap: calves.isNotEmpty
-              ? () {
-                  context.push(
-                    '/buffalo-calves',
-                    extra: {
-                      'calves': calves,
-                      'parentId': buffalo.id ?? 'Unknown',
-                      'parent': buffalo,
-                    },
-                  );
-                }
-              : null,
+          onCalvesTap: () async {
+            // Fetch calves dynamically on tap
+            final prefs = await SharedPreferences.getInstance();
+            final token = prefs.getString('access_token');
+            if (token == null) {
+              ToastUtils.showError(context, "Authentication error");
+              return;
+            }
+
+            ToastUtils.showInfo(context, "Fetching calves...");
+
+            // final fetchedCalves = await ApiServices.getCalvesByParentId(
+            //   token,
+            //   buffalo.id ?? '',
+            //   parentRfid: buffalo.breedId ?? '',
+            // );
+
+            // if (!context.mounted) return;
+
+            // if (fetchedCalves.isNotEmpty) {
+            //   context.push(
+            //     '/buffalo-calves',
+            //     extra: {
+            //       'calves': fetchedCalves,
+            //       'parentId': buffalo.id ?? 'Unknown',
+            //       'parent': buffalo,
+            //     },
+            //   );
+            // } else {
+            //   ToastUtils.showInfo(context, "No calves found for this buffalo");
+            // }
+          },
         );
       },
     );

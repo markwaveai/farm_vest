@@ -15,8 +15,22 @@ enum UserType {
   const UserType(this.value);
 
   static UserType fromString(String value) {
+    final normalized = value.toLowerCase().trim().replaceAll(' ', '_');
+
+    // Explicit mapping for known backend roles
+    if (normalized == 'investor' || normalized == 'customer')
+      return UserType.customer;
+    if (normalized == 'supervisor') return UserType.supervisor;
+    if (normalized == 'doctor') return UserType.doctor;
+    if (normalized == 'farm_manager' || normalized == 'manager')
+      return UserType.farmManager;
+    if (normalized == 'admin' || normalized == 'administrator')
+      return UserType.admin;
+    if (normalized == 'assistant' || normalized == 'assistant_doctor')
+      return UserType.assistant;
+
     return UserType.values.firstWhere(
-      (type) => type.value == value.toLowerCase().replaceAll(' ', '_'),
+      (type) => type.value == normalized,
       orElse: () => UserType.customer, // Default to customer if not found
     );
   }
@@ -79,7 +93,8 @@ enum NotificationType {
   final String value;
   const NotificationType(this.value);
 }
-enum MessageType { user, ai, system,typing }
+
+enum MessageType { user, ai, system, typing }
 
 class ChatMessage {
   final String text;

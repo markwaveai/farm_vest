@@ -1,5 +1,7 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/investor_list_provider.dart';
+import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,13 +63,29 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
   AppBar _buildAppBar() {
     return AppBar(
       // Use GoRouter for consistent navigation
-      leading: IconButton(onPressed: () => context.go('/farm-manager-dashboard'), icon: const Icon(Icons.arrow_back, color: Colors.white,)),
+      leading: IconButton(
+        onPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            final userRole = ref.read(authProvider).role;
+            if (userRole == UserType.admin) {
+              context.go('/admin-dashboard');
+            } else if (userRole == UserType.supervisor) {
+              context.go('/supervisor-dashboard');
+            } else {
+              context.go('/farm-manager-dashboard');
+            }
+          }
+        },
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
+      ),
       backgroundColor: Colors.green,
       title: _isSearching
           ? TextField(
               controller: _searchController,
               autofocus: true,
-              decoration:  InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Search Investors...',
                 hintStyle: TextStyle(color: AppTheme.grey1),
                 border: InputBorder.none,
@@ -79,10 +97,16 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
             )
           : const Text("Investors Data"),
       titleTextStyle: const TextStyle(
-          fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
+        fontSize: 22,
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
       actions: [
         IconButton(
-          icon: Icon(_isSearching ? Icons.close : Icons.search, color: Colors.white),
+          icon: Icon(
+            _isSearching ? Icons.close : Icons.search,
+            color: Colors.white,
+          ),
           onPressed: () {
             setState(() {
               _isSearching = !_isSearching;

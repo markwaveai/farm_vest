@@ -1,13 +1,11 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
-import 'package:farm_vest/core/theme/app_constants.dart';
-import 'package:farm_vest/features/auth/data/models/user_model.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:farm_vest/core/theme/theme_provider.dart';
 
 class InvestorShell extends ConsumerStatefulWidget {
   final Widget child;
@@ -54,27 +52,8 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
     }
   }
 
-  String _getTitleForIndex(int index) {
-    switch (index) {
-      case 0:
-        return 'My Buffaloes';
-      case 1:
-        return 'Asset Valuation';
-      case 2:
-        return 'Live CCTV';
-      case 3:
-        return 'Revenue';
-      case 4:
-        return 'My Profile';
-      default:
-        return 'Dashboard';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(themeProvider);
-    final isDark = themeMode == ThemeMode.dark;
     final authState = ref.watch(authProvider);
     final userData = authState.userData;
 
@@ -110,14 +89,22 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
         appBar: _currentIndex == 4
             ? null
             : AppBar(
-                title: Text(_getTitleForIndex(_currentIndex)),
+                elevation: 4,
+                shadowColor: Colors.black.withOpacity(0.1),
+                centerTitle: false, // Move logo to corner (left)
+                titleSpacing: 16,
+                title: Image.asset(
+                  'assets/images/farmvest_logo.png',
+                  height: 50,
+                  fit: BoxFit.contain,
+                ),
                 actions: [
-                  IconButton(
-                    icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                    onPressed: () {
-                      ref.read(themeProvider.notifier).toggleTheme();
-                    },
-                  ),
+                  if (ref.watch(authProvider).availableRoles.length > 1)
+                    IconButton(
+                      icon: const Icon(Icons.swap_horiz_rounded),
+                      onPressed: _showSwitchRoleBottomSheet,
+                      tooltip: 'Switch Role',
+                    ),
                   IconButton(
                     icon: const Icon(Icons.notifications_outlined),
                     onPressed: () => context.push(
@@ -125,292 +112,195 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
                       extra: {'fallbackRoute': '/customer-dashboard'},
                     ),
                   ),
+                  // Profile icon in top right
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: GestureDetector(
+                      onTap: () => context.push('/customer-profile'),
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: AppTheme.primary.withOpacity(0.1),
+                        child:
+                            userData?.imageUrl != "" &&
+                                userData?.imageUrl != null
+                            ? ClipOval(
+                                child: Image.network(
+                                  userData!.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  width: 40,
+                                  height: 40,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.person,
+                                      size: 24,
+                                      color: AppTheme.primary,
+                                    );
+                                  },
+                                ),
+                              )
+                            : Icon(
+                                Icons.person,
+                                size: 24,
+                                color: AppTheme.primary,
+                              ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-        drawer: _buildDrawer(userData),
+        // drawer: _buildDrawer(userData), // Removed side menu
         body: widget.child,
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: ClipPath(
-            clipper: CurvedBottomNavClipper(),
-            child: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: _onItemTapped,
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: isDark ? AppTheme.white : AppTheme.secondary,
-              unselectedItemColor: Colors.grey[600],
-              showSelectedLabels: true,
-              showUnselectedLabels: true,
-              backgroundColor: Theme.of(context).cardColor,
-              elevation: 0,
-              items: [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home_outlined),
-                  activeIcon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.analytics_outlined),
-                  activeIcon: Icon(Icons.analytics),
-                  label: 'Assets',
-                ),
-                BottomNavigationBarItem(
-                  icon: Container(),
-                  activeIcon: Container(),
-                  label: 'Live',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.attach_money_outlined),
-                  activeIcon: Icon(Icons.attach_money),
-                  label: 'Revenue',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person_outline),
-                  activeIcon: Icon(Icons.person),
-                  label: 'Profile',
-                ),
-              ],
-            ),
-          ),
-        ),
-        floatingActionButton: Container(
-          height: 65,
-          width: 65,
-          margin: const EdgeInsets.only(top: 8),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [
-                AppTheme.errorRed,
-                AppTheme.errorRed.withValues(alpha: 0.8),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.errorRed.withOpacity(0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(32.5),
-              onTap: () => _onItemTapped(2),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 2,
-                  ),
-                ),
-                child: Icon(
-                  _currentIndex == 2
-                      ? Icons.videocam
-                      : Icons.videocam_outlined,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              ),
-            ),
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
   }
 
-  Widget _buildDrawer(UserModel? userData) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          // Drawer Header
-          DrawerHeader(
-            decoration: const BoxDecoration(color: AppTheme.primary),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 60,
-                  width: 60,
-                  child: ClipOval(
-                  child: Container(
-                    color: AppTheme.white,
-                    child:
-                     userData?.imageUrl!=""&&userData?.imageUrl!=null
-                        ? Image.network(userData!.imageUrl!, fit: BoxFit.cover,loadingBuilder: (context, child, loadingProgress) {
-                          if(loadingProgress==null)return child;
-                        return  Center(child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ));
+  Map<String, dynamic> _getRoleInfo(UserType role) {
+    switch (role) {
+      case UserType.admin:
+        return {
+          'label': 'Administrator',
+          'icon': Icons.admin_panel_settings,
+          'color': Colors.blue,
+        };
+      case UserType.farmManager:
+        return {
+          'label': 'Farm Manager',
+          'icon': Icons.agriculture,
+          'color': Colors.green,
+        };
+      case UserType.supervisor:
+        return {
+          'label': 'Supervisor',
+          'icon': Icons.assignment_ind,
+          'color': Colors.orange,
+        };
+      case UserType.doctor:
+        return {
+          'label': 'Doctor',
+          'icon': Icons.medical_services,
+          'color': Colors.red,
+        };
+      case UserType.assistant:
+        return {
+          'label': 'Assistant Doctor',
+          'icon': Icons.health_and_safety,
+          'color': Colors.teal,
+        };
+      case UserType.customer:
+        return {
+          'label': 'Investor',
+          'icon': Icons.trending_up,
+          'color': Colors.indigo,
+        };
+    }
+  }
 
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                         return Center(
-                          child: Text("image not supported",style: AppTheme.bodySmall,),
-                         ) ;
-                        },)
-                        
-                        :Icon(Icons.person, size: 30, color: AppTheme.primary))),
-                ),
-                const SizedBox(height: AppConstants.spacingM),
-                Text(
-                  userData?.name ?? '',
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  userData?.email??'',
-                  style: AppTheme.bodySmall.copyWith(
-                    color: AppTheme.white.withOpacity(0.8),
-                  ),
-                ),
-              ],
-            ),
-          ),
+  void _showSwitchRoleBottomSheet() {
+    final authState = ref.read(authProvider);
+    final availableRoles = authState.availableRoles;
+    final currentRole = authState.role;
 
-          // Menu Items
-          ListTile(
-            leading: const Icon(Icons.home, color: AppTheme.primary),
-            title: const Text('Dashboard'),
-            onTap: () {
-              context.pop(); // Close drawer
-              _onItemTapped(0);
-            },
-          ),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Switch Active Role',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Choose which portal you want to access',
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 24),
+              ...availableRoles.map((role) {
+                final info = _getRoleInfo(role);
+                final isSelected = role == currentRole;
 
-          ListTile(
-            leading: const Icon(Icons.calendar_today, color: AppTheme.primary),
-            title: const Text('Monthly Visits'),
-            onTap: () {
-              context.pop(context);
-              Future.microtask((){
-                 context.push('/monthly-visits');
-              });
-             // context.push('/monthly-visits');
-            },
-          ),
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    onTap: isSelected
+                        ? null
+                        : () async {
+                            Navigator.pop(context);
+                            await ref
+                                .read(authProvider.notifier)
+                                .selectRole(role);
 
-          ListTile(
-            leading: const Icon(Icons.videocam, color: AppTheme.primary),
-            title: const Text('Live CCTV'),
-            onTap: () {
-              context.pop();
-              _onItemTapped(2);
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.assessment, color: AppTheme.primary),
-            title: const Text('Revenue'),
-            onTap: () {
-              context.pop();
-              _onItemTapped(3);
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(
-              Icons.account_balance_wallet,
-              color: AppTheme.primary,
-            ),
-            title: const Text('Asset Valuation'),
-            // onTap: () {
-            //   context.pop(context);
-            //   context.push('/asset-valuation');
-            // },
-
-
-            onTap: () {
-              context.pop();
-              _onItemTapped(1);
-            },
-
-            
-          ),
-
-          const Divider(),
-
-          // Support Section
-          ListTile(
-            leading: const Icon(Icons.help_outline, color: AppTheme.primary),
-            title: const Text('Help & Support'),
-            onTap: () {
-              context.pop(context);
-              Future.microtask(() {
-                 context.push('/support');
-              });
-              //context.push('/support');
-            },
-          ),
-
-          // Profile Section
-          ListTile(
-            leading: const Icon(Icons.person, color: AppTheme.primary),
-            title: const Text('My Profile'),
-            onTap: () {
-              context.pop();
-              _onItemTapped(4);
-            },
-          ),
-
-          const Divider(),
-
-          // Logout
-          ListTile(
-            leading: const Icon(Icons.logout, color: AppTheme.errorRed),
-            title: const Text(
-              'Logout',
-              style: TextStyle(color: AppTheme.errorRed),
-            ),
-            onTap: () {
-              context.pop(context); // Close drawer
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Logout'),
-                  content: const Text('Are you sure you want to logout?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => context.pop(),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.pop(); // Close dialog
-                        context.go('/login'); // Navigate to login
-                      },
-                      child: const Text(
-                        'Logout',
-                        style: TextStyle(color: AppTheme.errorRed),
+                            if (!mounted) return;
+                            switch (role) {
+                              case UserType.admin:
+                                context.go('/admin-dashboard');
+                                break;
+                              case UserType.farmManager:
+                                context.go('/farm-manager-dashboard');
+                                break;
+                              case UserType.supervisor:
+                                context.go('/supervisor-dashboard');
+                                break;
+                              case UserType.doctor:
+                                context.go('/doctor-dashboard');
+                                break;
+                              case UserType.assistant:
+                                context.go('/assistant-dashboard');
+                                break;
+                              case UserType.customer:
+                                context.go('/customer-dashboard');
+                                break;
+                            }
+                          },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isSelected
+                            ? info['color']
+                            : Colors.grey.shade200,
+                        width: isSelected ? 2 : 1,
                       ),
                     ),
-                  ],
-                ),
-              );
-            },
+                    tileColor: isSelected
+                        ? (info['color'] as Color).withOpacity(0.05)
+                        : null,
+                    leading: CircleAvatar(
+                      backgroundColor: (info['color'] as Color).withOpacity(
+                        0.1,
+                      ),
+                      child: Icon(
+                        info['icon'] as IconData,
+                        color: info['color'] as Color,
+                      ),
+                    ),
+                    title: Text(
+                      info['label'] as String,
+                      style: TextStyle(
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_circle,
+                            color: info['color'] as Color,
+                          )
+                        : const Icon(Icons.arrow_forward_ios, size: 14),
+                  ),
+                );
+              }).toList(),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

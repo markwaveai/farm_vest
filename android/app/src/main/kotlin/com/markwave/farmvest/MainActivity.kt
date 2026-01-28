@@ -1,4 +1,4 @@
-package com.example.farm_vest
+package com.markwave.farmvest
 
 import android.view.WindowManager.LayoutParams
 import io.flutter.embedding.android.FlutterFragmentActivity

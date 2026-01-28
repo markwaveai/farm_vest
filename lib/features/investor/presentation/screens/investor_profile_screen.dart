@@ -15,6 +15,8 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:farm_vest/core/services/biometric_service.dart';
 import 'package:farm_vest/core/services/secure_storage_service.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:farm_vest/core/theme/theme_provider.dart';
 
 class InvestorProfileScreen extends ConsumerStatefulWidget {
   const InvestorProfileScreen({super.key});
@@ -49,6 +51,11 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     _phoneController = TextEditingController(text: user?.mobile ?? '');
 
     _loadBiometricPreference();
+
+    // Refresh user data when screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authProvider.notifier).refreshUserData();
+    });
   }
 
   Future<void> _loadBiometricPreference() async {
@@ -198,6 +205,36 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final userData = authState.userData;
+
+    // Aggressive sync for initial load or when userData arrives
+    if (userData != null && !_isEditing) {
+      if (_nameController.text.isEmpty && userData.name.isNotEmpty) {
+        _nameController.text = userData.name;
+      }
+      if (_emailController.text.isEmpty && userData.email.isNotEmpty) {
+        _emailController.text = userData.email;
+      }
+      if (_addressController.text.isEmpty &&
+          (userData.address?.isNotEmpty ?? false)) {
+        _addressController.text = userData.address!;
+      }
+      if (_phoneController.text.isEmpty && userData.mobile.isNotEmpty) {
+        _phoneController.text = userData.mobile;
+      }
+    }
+
+    // Listen for future updates
+    ref.listen(authProvider, (previous, next) {
+      if (next.userData != null && next.userData != previous?.userData) {
+        if (!_isEditing) {
+          _nameController.text = next.userData?.name ?? '';
+          _emailController.text = next.userData?.email ?? '';
+          _addressController.text = next.userData?.address ?? '';
+          _phoneController.text = next.userData?.mobile ?? '';
+        }
+      }
+    });
+
     final unitResponse = ref.watch(unitResponseProvider).value;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -366,58 +403,59 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
         ),
       ],
     );
-  }  
-void _showImageSourceSheet() {
-  showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    builder: (ctx) {
-      return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from gallery'),
-              onTap: () async {
-                Navigator.pop(ctx);
+  }
 
-                final file = await ref
-                    .read(authProvider.notifier)
-                    .pickProfileImage(source: ImageSource.gallery);
+  void _showImageSourceSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from gallery'),
+                onTap: () async {
+                  Navigator.pop(ctx);
 
-                if (file != null && mounted) {
-                  setState(() {
-                    _profileImage = file;
-                    _removeProfileImage = false;
-                  });
-                }
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Choose from camera'),
-              onTap: () async {
-                Navigator.pop(ctx);
+                  final file = await ref
+                      .read(authProvider.notifier)
+                      .pickProfileImage(source: ImageSource.gallery);
 
-                final file = await ref
-                    .read(authProvider.notifier)
-                    .pickProfileImage(source: ImageSource.camera);
+                  if (file != null && mounted) {
+                    setState(() {
+                      _profileImage = file;
+                      _removeProfileImage = false;
+                    });
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Choose from camera'),
+                onTap: () async {
+                  Navigator.pop(ctx);
 
-                if (file != null && mounted) {
-                  setState(() {
-                    _profileImage = file;
-                    _removeProfileImage = false;
-                  });
-                }
-              },
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
+                  final file = await ref
+                      .read(authProvider.notifier)
+                      .pickProfileImage(source: ImageSource.camera);
+
+                  if (file != null && mounted) {
+                    setState(() {
+                      _profileImage = file;
+                      _removeProfileImage = false;
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Widget _buildProfileForm(
     UserModel? userData,
@@ -426,18 +464,10 @@ void _showImageSourceSheet() {
     required ThemeData theme,
   }) {
     DateTime? membershipSince;
-    if (unitResponse?.orders?.isNotEmpty ?? false) {
-      final dates = unitResponse!.orders!
-          .where((o) => o.placedAt != null)
-          .map(
-            (o) => o.placedAt != null && o.placedAt!.isNotEmpty
-                ? DateTime.parse(o.placedAt!)
-                : DateTime.now(),
-          )
-          .toList();
-      if (dates.isNotEmpty) {
-        membershipSince = dates.reduce((a, b) => a.isBefore(b) ? a : b);
-      }
+    if (unitResponse?.overallStats?.memberSince != null) {
+      membershipSince = DateTime.tryParse(
+        unitResponse!.overallStats!.memberSince!,
+      );
     }
 
     final formattedDate = membershipSince != null
@@ -612,12 +642,180 @@ void _showImageSourceSheet() {
     );
   }
 
+  Map<String, dynamic> _getRoleInfo(UserType role) {
+    switch (role) {
+      case UserType.admin:
+        return {
+          'label': 'Administrator',
+          'icon': Icons.admin_panel_settings,
+          'color': Colors.blue,
+        };
+      case UserType.farmManager:
+        return {
+          'label': 'Farm Manager',
+          'icon': Icons.agriculture,
+          'color': Colors.green,
+        };
+      case UserType.supervisor:
+        return {
+          'label': 'Supervisor',
+          'icon': Icons.assignment_ind,
+          'color': Colors.orange,
+        };
+      case UserType.doctor:
+        return {
+          'label': 'Doctor',
+          'icon': Icons.medical_services,
+          'color': Colors.red,
+        };
+      case UserType.assistant:
+        return {
+          'label': 'Assistant Doctor',
+          'icon': Icons.health_and_safety,
+          'color': Colors.teal,
+        };
+      case UserType.customer:
+        return {
+          'label': 'Investor',
+          'icon': Icons.trending_up,
+          'color': Colors.indigo,
+        };
+    }
+  }
+
+  void _showSwitchRoleBottomSheet() {
+    final availableRoles = ref.read(authProvider).availableRoles;
+    final currentRole = ref.read(authProvider).role;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Switch Active Role',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose which portal you want to access',
+                style: TextStyle(color: AppTheme.mediumGrey),
+              ),
+              const SizedBox(height: 24),
+              ...availableRoles.map((role) {
+                final info = _getRoleInfo(role);
+                final isSelected = role == currentRole;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    onTap: isSelected
+                        ? null
+                        : () async {
+                            Navigator.pop(context);
+                            await ref
+                                .read(authProvider.notifier)
+                                .selectRole(role);
+
+                            // Navigate to appropriate dashboard
+                            if (!mounted) return;
+                            switch (role) {
+                              case UserType.admin:
+                                context.go('/admin-dashboard');
+                                break;
+                              case UserType.farmManager:
+                                context.go('/farm-manager-dashboard');
+                                break;
+                              case UserType.supervisor:
+                                context.go('/supervisor-dashboard');
+                                break;
+                              case UserType.doctor:
+                                context.go('/doctor-dashboard');
+                                break;
+                              case UserType.assistant:
+                                context.go('/assistant-dashboard');
+                                break;
+                              case UserType.customer:
+                                context.go('/customer-dashboard');
+                                break;
+                            }
+                          },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isSelected
+                            ? info['color']
+                            : Colors.grey.shade200,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    tileColor: isSelected
+                        ? (info['color'] as Color).withOpacity(0.05)
+                        : null,
+                    leading: CircleAvatar(
+                      backgroundColor: (info['color'] as Color).withOpacity(
+                        0.1,
+                      ),
+                      child: Icon(
+                        info['icon'] as IconData,
+                        color: info['color'] as Color,
+                      ),
+                    ),
+                    title: Text(
+                      info['label'] as String,
+                      style: TextStyle(
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_circle,
+                            color: info['color'] as Color,
+                          )
+                        : const Icon(Icons.arrow_forward_ios, size: 14),
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildAccountActions({
     required bool isDark,
     required ThemeData theme,
   }) {
+    final authState = ref.watch(authProvider);
     return Column(
       children: [
+        if (authState.availableRoles.length > 1) ...[
+          ListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            tileColor: theme.colorScheme.surface,
+            leading: const Icon(Icons.swap_horiz, color: AppTheme.primary),
+            title: const Text('Switch Role'),
+            subtitle: Text(
+              'Currently as ${_getRoleInfo(authState.role ?? UserType.customer)['label']}',
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: _showSwitchRoleBottomSheet,
+          ),
+          const SizedBox(height: 8),
+        ],
         if (_isBiometricSupported)
           ListTile(
             shape: RoundedRectangleBorder(
@@ -632,6 +830,27 @@ void _showImageSourceSheet() {
               onChanged: _toggleBiometric,
             ),
           ),
+        const SizedBox(height: 8),
+        ListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          tileColor: theme.colorScheme.surface,
+          leading: Icon(
+            theme.brightness == Brightness.dark
+                ? Icons.light_mode
+                : Icons.dark_mode,
+            color: AppTheme.primary,
+          ),
+          title: const Text('Dark Mode'),
+          subtitle: Text(
+            theme.brightness == Brightness.dark ? 'Enabled' : 'Disabled',
+          ),
+          trailing: Switch(
+            value: theme.brightness == Brightness.dark,
+            onChanged: (value) {
+              ref.read(themeProvider.notifier).toggleTheme();
+            },
+          ),
+        ),
         const SizedBox(height: 8),
         ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

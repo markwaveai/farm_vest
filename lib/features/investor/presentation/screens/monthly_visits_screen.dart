@@ -2,6 +2,7 @@ import 'package:farm_vest/core/services/api_services.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
+import 'package:farm_vest/features/auth/data/repositories/auth_repository.dart';
 import 'package:farm_vest/features/investor/data/models/visit_model.dart';
 import 'package:farm_vest/features/investor/data/models/visit_params.dart';
 import 'package:farm_vest/features/investor/presentation/providers/visit_provider.dart';
@@ -31,7 +32,6 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
 
     // 1. Availability Request
     final availabilityAsync = ref.watch(
@@ -90,8 +90,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
           _buildSlotSummaryCard(availabilityAsync, hasBookedThisMonth),
 
           // Date Strip
-          _buildDateStrip(
-            theme,  isDark),
+          _buildDateStrip(theme, isDark),
 
           const SizedBox(height: 24),
 
@@ -100,8 +99,8 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-               // color: Colors.white,
-               color: theme.colorScheme.surface,
+                // color: Colors.white,
+                color: theme.colorScheme.surface,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(30),
                 ),
@@ -118,33 +117,33 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                   
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Available Slots",
-                         style: AppTheme.headingMedium.copyWith(
-                          color: theme.colorScheme.onSurface,
-                         )
-                         ),
+                        Text(
+                          "Available Slots",
+                          style: AppTheme.headingMedium.copyWith(
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
                         if (hasBookedThisMonth && bookedVisit != null)
                           TextButton.icon(
-                            onPressed: () => _viewExistingPass(bookedVisit!,
-                            ),
-                            icon: Icon(Icons.qr_code, size: 20,
-                        
+                            onPressed: () => _viewExistingPass(bookedVisit!),
+                            icon: Icon(
+                              Icons.qr_code,
+                              size: 20,
 
-                           color: isDark? AppTheme.white : AppTheme.black87,
-                           
+                              color: isDark ? AppTheme.white : AppTheme.black87,
                             ),
-                            label:  Text("View Pass",
-                             style: 
-                             TextStyle(
-                              color: isDark? AppTheme.white : AppTheme.black87,
-                              
-                              fontWeight: FontWeight.w600,
-                             )
+                            label: Text(
+                              "View Pass",
+                              style: TextStyle(
+                                color: isDark
+                                    ? AppTheme.white
+                                    : AppTheme.black87,
+
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                       ],
@@ -153,7 +152,6 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                     Expanded(
                       child: availabilityAsync.when(
                         data: (data) => _buildTimeGrid(
-                          
                           data?.availableSlots ?? <String>[],
                           hasBookedThisMonth,
                           isDark,
@@ -323,7 +321,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     );
   }
 
-  Widget _buildDateStrip(ThemeData theme,bool isDark) {
+  Widget _buildDateStrip(ThemeData theme, bool isDark) {
     final List<DateTime> dates = List.generate(
       30,
       (index) => DateTime.now().add(Duration(days: index)),
@@ -355,12 +353,12 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(  
+                  Text(
                     DateFormat('E').format(date),
-                    style: TextStyle( 
-                      color: isSelected 
-                       ? theme.colorScheme.onSurface
-                       : theme.colorScheme.onSurface.withOpacity(0.6),
+                    style: TextStyle(
+                      color: isSelected
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.onSurface.withOpacity(0.6),
                       //Colors.black : Colors.grey,
                       fontWeight: isSelected
                           ? FontWeight.bold
@@ -372,10 +370,9 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                   Text(
                     date.day.toString(),
                     style: TextStyle(
-                       color: isSelected
-                      ? AppTheme.mediumGrey
-                      : (isDark ?AppTheme.white :AppTheme.black),
-                   
+                      color: isSelected
+                          ? AppTheme.mediumGrey
+                          : (isDark ? AppTheme.white : AppTheme.black),
 
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
@@ -393,7 +390,12 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     );
   }
 
-  Widget _buildTimeGrid(List<String> availableSlots, bool hasBookedThisMonth, bool isDark,  ThemeData theme) {
+  Widget _buildTimeGrid(
+    List<String> availableSlots,
+    bool hasBookedThisMonth,
+    bool isDark,
+    ThemeData theme,
+  ) {
     if (availableSlots.isEmpty) {
       return Center(
         child: Column(
@@ -463,23 +465,22 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
         // Color bgColor = Colors.transparent;
         // Color borderColor = AppTheme.successGreen.withOpacity(0.3);
         // Color textColor = Colors.black87;
-        Color bgColor=isDark? Colors.grey.shade50 :  Colors.transparent;
+        Color bgColor = isDark ? Colors.grey.shade50 : Colors.transparent;
         Color borderColor = AppTheme.successGreen.withOpacity(0.3);
-        Color textColor = isDark? AppTheme.white : AppTheme.black87;
+        Color textColor = isDark ? AppTheme.white : AppTheme.black87;
         if (isExpired) {
           //bgColor = Colors.grey.shade100;
-          bgColor = isDark? Colors.grey.shade600 : Colors.grey.shade100;
+          bgColor = isDark ? Colors.grey.shade600 : Colors.grey.shade100;
           borderColor = Colors.transparent;
-          textColor =isDark? AppTheme.white : AppTheme.black87;
+          textColor = isDark ? AppTheme.white : AppTheme.black87;
         } else if (isSelected) {
           bgColor = AppTheme.successGreen;
           borderColor = AppTheme.successGreen;
           textColor = AppTheme.white;
-        }
-        else{
-          bgColor = isDark?AppTheme.white: Colors.transparent;
+        } else {
+          bgColor = isDark ? AppTheme.white : Colors.transparent;
           borderColor = AppTheme.successGreen.withOpacity(0.3);
-          textColor=AppTheme.black;
+          textColor = AppTheme.black;
         }
 
         return InkWell(
@@ -576,7 +577,6 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     }
 
     showModalBottomSheet(
-
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -584,90 +584,91 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
       //builder: (context) => Padding(
       builder: (context) {
         final theme = Theme.of(context);
-  final isDark = theme.brightness == Brightness.dark;
+        final isDark = theme.brightness == Brightness.dark;
 
         return Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Confirm Booking",
-            style: AppTheme.headingMedium.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
-             //style: AppTheme.headingMedium,
-             ),
-            const SizedBox(height: 16),
-            Text(
-              "You are booking a visit on:",
-              style: AppTheme.bodyMedium.copyWith(
-                color: theme.colorScheme.onSurface,
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Confirm Booking",
+                style: AppTheme.headingMedium.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+                //style: AppTheme.headingMedium,
               ),
-             // style: AppTheme.bodyMedium.copyWith(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today,
-                  color: AppTheme.primary,
-                  size: 20,
+              const SizedBox(height: 16),
+              Text(
+                "You are booking a visit on:",
+                style: AppTheme.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurface,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  DateFormat('EEEE, d MMMM yyyy').format(_selectedDate),
-                  style: AppTheme.bodyLarge.copyWith(
-                    color: isDark? AppTheme.white : AppTheme.black87,
-                    fontWeight: FontWeight.bold,
+                // style: AppTheme.bodyMedium.copyWith(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today,
+                    color: AppTheme.primary,
+                    size: 20,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.access_time,
-                  color: AppTheme.primary,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  displayTime,
-                  style: AppTheme.bodyLarge.copyWith(
-                    color: isDark? AppTheme.white : AppTheme.black87,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(width: 8),
+                  Text(
+                    DateFormat('EEEE, d MMMM yyyy').format(_selectedDate),
+                    style: AppTheme.bodyLarge.copyWith(
+                      color: isDark ? AppTheme.white : AppTheme.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _processBooking(time),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.access_time,
+                    color: AppTheme.primary,
+                    size: 20,
                   ),
-                ),
-                child: const Text(
-                  "Confirm & Generate pass",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(width: 8),
+                  Text(
+                    displayTime,
+                    style: AppTheme.bodyLarge.copyWith(
+                      color: isDark ? AppTheme.white : AppTheme.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => _processBooking(time),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "Confirm & Generate pass",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-      }
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -707,12 +708,16 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
       builder: (c) => const Center(child: CircularProgressIndicator()),
     );
 
-    final visit = await ApiServices.bookVisit(request);
+    try {
+      // Get token from auth repository
+      final repository = AuthRepository();
+      final token = await repository.getToken();
 
-    if (!mounted) return;
-    Navigator.pop(context); // close loading
+      final visit = await ApiServices.bookVisit(request);
 
-    if (visit != null) {
+      if (!mounted) return;
+      Navigator.pop(context); // close loading
+
       // Refresh history to show the new booking
       ref.invalidate(myVisitsProvider);
       // Refresh availability if needed
@@ -726,8 +731,10 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
       );
 
       _showSuccessQRDialog(visit);
-    } else {
-      ToastUtils.showError(context, "Booking failed. Please try again.");
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // close loading
+      ToastUtils.showError(context, "Booking failed: ${e.toString()}");
     }
   }
 
@@ -760,77 +767,76 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
       ),
     );
   }
-void _viewExistingPass(Visit visit) {
-  //print("visit id: ${visit.visitId}");
-  final theme = Theme.of(context);
-  final isDark = theme.brightness == Brightness.dark;
 
-  showDialog(
-    context: context,
-    builder: (context) => Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: SingleChildScrollView( // prevents clipping
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Your Entry Pass",
-                style: AppTheme.headingMedium.copyWith(
-                  color: isDark ? AppTheme.white : AppTheme.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "${visit.visitDate} at ${visit.startTime}",
-                style: AppTheme.bodyLarge.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              _buildQrCode(visit), // keep QR white
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+  void _viewExistingPass(Visit visit) {
+    //print("visit id: ${visit.visitId}");
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: SingleChildScrollView(
+          // prevents clipping
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Your Entry Pass",
+                  style: AppTheme.headingMedium.copyWith(
+                    color: isDark ? AppTheme.white : AppTheme.black87,
                   ),
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Close"),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  "${visit.visitDate} at ${_formatTimeWithAmPm(visit.startTime)}",
+                  style: AppTheme.bodyLarge.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildQrCode(visit), // keep QR white
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Close"),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _buildQrCode(Visit visit) {
+    //   final qrData = visit.visitId?.toString().trim();
 
+    // if (qrData == null || qrData.isEmpty) {
+    //   return const Text(
+    //     "QR code not available",
+    //     style: TextStyle(
+    //       color: Colors.red,
+    //       fontWeight: FontWeight.bold,
+    //     ),
+    //   );
+    // }
 
-  //   final qrData = visit.visitId?.toString().trim();
-
-  // if (qrData == null || qrData.isEmpty) {
-  //   return const Text(
-  //     "QR code not available",
-  //     style: TextStyle(
-  //       color: Colors.red,
-  //       fontWeight: FontWeight.bold,
-  //     ),
-  //   );
-  // }
-
-  
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -841,14 +847,13 @@ void _viewExistingPass(Visit visit) {
         ],
       ),
       child: QrImageView(
-       // data: visit.visitId,
+        // data: visit.visitId,
         data: visit.visitId, // Encoded visit ID for scanning
         version: QrVersions.auto,
         size: 200.0,
       ),
     );
   }
-
 
   void _showBookingHistory() {
     showModalBottomSheet(
@@ -939,7 +944,9 @@ void _viewExistingPass(Visit visit) {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              subtitle: Text(visit.startTime),
+                              subtitle: Text(
+                                _formatTimeWithAmPm(visit.startTime),
+                              ),
                               trailing: isPast
                                   ? const Chip(
                                       label: Text(
@@ -973,5 +980,17 @@ void _viewExistingPass(Visit visit) {
         },
       ),
     );
+  }
+
+  String _formatTimeWithAmPm(String time) {
+    try {
+      // Parse time in HH:mm format
+      final dt = DateFormat("HH:mm").parse(time);
+      // Return in h:mm a format (e.g., "9:00 AM")
+      return DateFormat("h:mm a").format(dt);
+    } catch (e) {
+      // If parsing fails, return original
+      return time;
+    }
   }
 }

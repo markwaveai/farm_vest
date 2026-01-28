@@ -14,8 +14,6 @@ class _NewSupervisorShellState extends State<NewSupervisorShell> {
   int _currentIndex = 0;
 
   int? _indexForLocation(String location) {
-   
-
     if (location.startsWith('/supervisor-dashboard')) return 0;
     if (location.startsWith('/new-supervisor/buffalo')) return 1;
     if (location.startsWith('/new-supervisor/alerts')) return 2;
@@ -58,6 +56,7 @@ class _NewSupervisorShellState extends State<NewSupervisorShell> {
     }
 
     return Scaffold(
+      extendBody: true,
       resizeToAvoidBottomInset: false,
       body: widget.child,
       bottomNavigationBar: _NewSupervisorBottomNav(
@@ -87,13 +86,7 @@ class _NewSupervisorBottomNav extends StatelessWidget {
       Icons.more_horiz,
     ];
 
-    final labels = [
-      'Home',
-      'Buffalo',
-      'Alerts',
-      'Stats',
-      'More',
-    ];
+    final labels = ['Home', 'Buffalo', 'Alerts', 'Stats', 'More'];
 
     return SafeArea(
       child: Container(

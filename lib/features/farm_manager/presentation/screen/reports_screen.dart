@@ -1,4 +1,6 @@
 import 'package:farm_vest/features/farm_manager/presentation/providers/staff_list_provider.dart';
+import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -42,7 +44,18 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
               ref.read(milkReportProvider.notifier).clear();
-              context.go('/farm-manager-dashboard');
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                final userRole = ref.read(authProvider).role;
+                if (userRole == UserType.admin) {
+                  context.go('/admin-dashboard');
+                } else if (userRole == UserType.supervisor) {
+                  context.go('/supervisor-dashboard');
+                } else {
+                  context.go('/farm-manager-dashboard');
+                }
+              }
             },
           ),
           title: const Text(

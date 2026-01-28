@@ -1,134 +1,117 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import '../providers/buffalo_provider.dart';
 
-class CCTVMainScreen extends StatefulWidget {
+class CCTVMainScreen extends ConsumerStatefulWidget {
   const CCTVMainScreen({super.key});
 
   @override
-  State<CCTVMainScreen> createState() => _CCTVMainScreenState();
+  ConsumerState<CCTVMainScreen> createState() => _CCTVMainScreenState();
 }
 
-class _CCTVMainScreenState extends State<CCTVMainScreen> {
-  final List<String> _videoUrls = [
-    'http://161.97.182.208:8888/stream1/index.m3u8',
-    'http://161.97.182.208:8888/stream2/index.m3u8',
-    'http://161.97.182.208:8888/stream3/index.m3u8',
-    'http://161.97.182.208:8888/stream4/index.m3u8',
-  ];
+class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
+  final List<String> _videoUrls = [];
+  final List<String> _cameraNames = [];
 
-  final List<String> _cameraNames = [
-    'Main Entrance',
-    'Feeding Area',
-    'Rest Area',
-    'Water Station',
-  ];
-
-  late List<VideoPlayerController?> _controllers;
+  List<VideoPlayerController?> _controllers = [];
   int _mainPlayerIndex = 0;
   bool _isLoading = true;
   bool _isGridView = true;
-  List<bool> _cameraStatus = []; // Track individual camera status
+  List<bool> _cameraStatus = [];
   final List<Timer> _timers = [];
 
   @override
   void initState() {
     super.initState();
-    _cameraStatus = List.generate(_videoUrls.length, (index) => false);
+    // Dynamic initialization based on provider data
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeData());
+  }
 
-    print('=== CCTV Screen Initialization (Video Player) ===');
-    print('Total cameras: ${_videoUrls.length}');
+  void _initializeData() {
+    final buffalosAsync = ref.read(rawBuffaloListProvider);
+    buffalosAsync.whenData((buffalos) {
+      // Collect unique shed CCTV URLs
+      final Map<String, String> shedCctvs = {};
+      for (var animal in buffalos) {
+        if (animal.cctvUrl != null && animal.cctvUrl!.isNotEmpty) {
+          shedCctvs[animal.shedNumber ?? animal.farmName ?? 'Unknown'] =
+              animal.cctvUrl!;
+        }
+      }
 
-    _controllers = _videoUrls
-        .map((url) => VideoPlayerController.network(url))
-        .toList();
+      if (mounted) {
+        setState(() {
+          if (shedCctvs.isEmpty) {
+            // Fallback default URLs if none assigned
+            _videoUrls.addAll([
+              'http://161.97.182.208:8888/stream1/index.m3u8',
+              'http://161.97.182.208:8888/stream2/index.m3u8',
+            ]);
+            _cameraNames.addAll(['Default Camera 1', 'Default Camera 2']);
+          } else {
+            shedCctvs.forEach((name, url) {
+              _videoUrls.add(url);
+              _cameraNames.add('Shed $name');
+            });
+          }
 
-    // Initialize video controllers
-    _initializeVideoControllers();
+          _cameraStatus = List.generate(_videoUrls.length, (index) => false);
+          _controllers = _videoUrls
+              .map((url) => VideoPlayerController.network(url))
+              .toList();
+        });
+        _initializeVideoControllers();
+      }
+    });
   }
 
   void _initializeVideoControllers() {
-    print('Initializing video controllers...');
-
     for (int i = 0; i < _controllers.length; i++) {
       final controller = _controllers[i];
-      if (controller == null) {
-        print('Controller $i is null, skipping initialization');
-        setState(() {
-          _cameraStatus[i] = false;
-        });
-        continue;
-      }
-
-      print(
-        'Setting up video camera $i (${_cameraNames[i]}): ${_videoUrls[i]}',
-      );
+      if (controller == null) continue;
 
       controller.addListener(() {
         if (controller.value.isInitialized && controller.value.isPlaying) {
-          print('Video Camera $i (${_cameraNames[i]}) is playing');
-          setState(() {
-            _cameraStatus[i] = true;
-          });
+          if (mounted) {
+            setState(() {
+              _cameraStatus[i] = true;
+            });
+          }
         }
       });
 
       controller
           .initialize()
           .then((_) {
-            print(
-              'Video Camera $i (${_cameraNames[i]}) initialized successfully',
-            );
-
-            // Start playing immediately and also set up periodic restart for HLS
+            if (!mounted) return;
             controller.play();
             controller.setLooping(true);
-            print(
-              'Video Camera $i (${_cameraNames[i]}) play() called immediately',
-            );
 
-            // Set up periodic check to ensure video keeps playing (important for HLS)
             final timer = Timer.periodic(const Duration(seconds: 5), (timer) {
               if (!mounted) {
                 timer.cancel();
                 return;
               }
-
               if (controller.value.isInitialized &&
                   !controller.value.isPlaying) {
-                print(
-                  'Video Camera $i (${_cameraNames[i]}) stopped playing, restarting...',
-                );
                 controller.play();
               }
             });
             _timers.add(timer);
 
-            // Check if all cameras are done loading
             if (_cameraStatus.every((status) => status || !status)) {
-              setState(() {
-                _isLoading = false;
-              });
-              print('=== Video Initialization Complete ===');
+              setState(() => _isLoading = false);
             }
           })
           .catchError((error) {
-            print(
-              'Error initializing video camera $i (${_cameraNames[i]}): $error',
-            );
-            setState(() {
-              _cameraStatus[i] = false;
-            });
-
-            // Check if all cameras are done loading (including failed ones)
-            if (_cameraStatus.every(
-              (status) => status == true || status == false,
-            )) {
-              setState(() {
-                _isLoading = false;
-              });
-              print('Video initialization completed with some failures');
+            if (mounted) {
+              setState(() => _cameraStatus[i] = false);
+              if (_cameraStatus.length == _videoUrls.length) {
+                setState(() => _isLoading = false);
+              }
             }
           });
     }
@@ -140,25 +123,33 @@ class _CCTVMainScreenState extends State<CCTVMainScreen> {
       timer.cancel();
     }
     for (var controller in _controllers) {
-      if (controller != null) {
-        try {
-          controller.dispose();
-        } catch (e) {
-          print('Error disposing VLC controller: $e');
-        }
-      }
+      controller?.dispose();
     }
     super.dispose();
   }
 
   void _onThumbnailTapped(int index) {
-    setState(() {
-      _mainPlayerIndex = index;
-    });
+    setState(() => _mainPlayerIndex = index);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_videoUrls.isEmpty && !_isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          title: const Text('Live CCTV'),
+        ),
+        body: const Center(
+          child: Text(
+            'No CCTV cameras assigned to your sheds.',
+            style: TextStyle(color: Colors.white70),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -177,11 +168,7 @@ class _CCTVMainScreenState extends State<CCTVMainScreen> {
               color: Colors.white,
               size: 28,
             ),
-            onPressed: () {
-              setState(() {
-                _isGridView = !_isGridView;
-              });
-            },
+            onPressed: () => setState(() => _isGridView = !_isGridView),
           ),
         ],
       ),
@@ -218,7 +205,7 @@ class _CCTVMainScreenState extends State<CCTVMainScreen> {
         Expanded(
           flex: 3,
           child: _buildVideoPlayer(
-            _controllers[_mainPlayerIndex]!,
+            _controllers[_mainPlayerIndex],
             _mainPlayerIndex,
           ),
         ),
@@ -227,9 +214,7 @@ class _CCTVMainScreenState extends State<CCTVMainScreen> {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: _controllers.length,
-            itemBuilder: (context, index) {
-              return _buildThumbnail(index);
-            },
+            itemBuilder: (context, index) => _buildThumbnail(index),
           ),
         ),
       ],
@@ -247,24 +232,15 @@ class _CCTVMainScreenState extends State<CCTVMainScreen> {
           childAspectRatio: 16 / 9,
         ),
         itemCount: _controllers.length,
-        itemBuilder: (context, index) {
-          return _buildGridCamera(index);
-        },
+        itemBuilder: (context, index) => _buildGridCamera(index),
       ),
     );
   }
 
   Widget _buildVideoPlayer(VideoPlayerController? controller, int cameraIndex) {
-    print(
-      'Building video player for camera $cameraIndex, status: ${_cameraStatus[cameraIndex]}',
-    );
-
-    if (!_cameraStatus[cameraIndex] || controller == null) {
-      print(
-        'Camera $cameraIndex is offline or controller is null, showing placeholder',
-      );
+    if (controller == null || !_cameraStatus[cameraIndex]) {
       return Container(
-        color: Colors.grey[800],
+        color: Colors.grey[900],
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -287,28 +263,16 @@ class _CCTVMainScreenState extends State<CCTVMainScreen> {
     }
 
     if (!controller.value.isInitialized) {
-      print('Camera $cameraIndex video controller not initialized');
       return Container(
-        color: Colors.grey[800],
+        color: Colors.grey[900],
         child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(color: Colors.white54, strokeWidth: 2),
-              SizedBox(height: 8),
-              Text(
-                'Connecting...',
-                style: TextStyle(color: Colors.white54, fontSize: 12),
-              ),
-            ],
+          child: CircularProgressIndicator(
+            color: Colors.white54,
+            strokeWidth: 2,
           ),
         ),
       );
     }
-
-    print('Camera $cameraIndex video is ready, showing video');
-    print('Video is playing: ${controller.value.isPlaying}');
-    print('Video size: ${controller.value.size}');
 
     return AspectRatio(
       aspectRatio: controller.value.aspectRatio > 0

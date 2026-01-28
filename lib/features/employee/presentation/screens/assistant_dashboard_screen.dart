@@ -1,9 +1,12 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import '../widgets/employee_dashboard_card.dart';
 
 class AssignedTask {
@@ -44,15 +47,16 @@ class MonitoringRecord {
   });
 }
 
-class AssistantDashboardScreen extends StatefulWidget {
+class AssistantDashboardScreen extends ConsumerStatefulWidget {
   const AssistantDashboardScreen({super.key});
 
   @override
-  State<AssistantDashboardScreen> createState() =>
+  ConsumerState<AssistantDashboardScreen> createState() =>
       _AssistantDashboardScreenState();
 }
 
-class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
+class _AssistantDashboardScreenState
+    extends ConsumerState<AssistantDashboardScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<AssignedTask> _assignedTasks = [];
   List<MonitoringRecord> _monitoringRecords = [];
@@ -146,6 +150,12 @@ class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           actions: [
+            if (ref.watch(authProvider).availableRoles.length > 1)
+              IconButton(
+                icon: const Icon(Icons.swap_horiz),
+                onPressed: _showSwitchRoleBottomSheet,
+                tooltip: 'Switch Role',
+              ),
             IconButton(
               icon: const Icon(Icons.notifications),
               onPressed: () => context.push(
@@ -161,134 +171,134 @@ class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            // Welcome Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppConstants.spacingL),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppTheme.primary, AppTheme.secondary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+              // Welcome Section
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppConstants.spacingL),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppTheme.primary, AppTheme.secondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusL),
                 ),
-                borderRadius: BorderRadius.circular(AppConstants.radiusL),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Welcome, Assistant Kumar!',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Welcome, Assistant Kumar!',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.white,
+                      ),
                     ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    const Text(
+                      'Supporting healthcare operations',
+                      style: TextStyle(fontSize: 16, color: AppTheme.white),
+                    ),
+                    const SizedBox(height: AppConstants.spacingM),
+                    Row(
+                      children: [
+                        _buildQuickStat('Active Tasks', '8'),
+                        const SizedBox(width: AppConstants.spacingL),
+                        _buildQuickStat('Completed', '15'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingL),
+
+              // Quick Actions
+              const Text('Quick Actions', style: AppTheme.headingMedium),
+              const SizedBox(height: AppConstants.spacingM),
+
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: AppConstants.spacingM,
+                mainAxisSpacing: AppConstants.spacingM,
+                childAspectRatio: 1.1,
+                children: [
+                  EmployeeDashboardCard(
+                    title: 'Assigned Tasks',
+                    subtitle: 'View your tasks',
+                    icon: Icons.assignment,
+                    color: AppTheme.primary,
+                    onTap: () => _showAssignedTasks(),
                   ),
-                  const SizedBox(height: AppConstants.spacingS),
-                  const Text(
-                    'Supporting healthcare operations',
-                    style: TextStyle(fontSize: 16, color: AppTheme.white),
+                  EmployeeDashboardCard(
+                    title: 'Daily Monitoring',
+                    subtitle: 'Record observations',
+                    icon: Icons.monitor_heart,
+                    color: AppTheme.secondary,
+                    onTap: () => _showDailyMonitoring(),
                   ),
-                  const SizedBox(height: AppConstants.spacingM),
-                  Row(
-                    children: [
-                      _buildQuickStat('Active Tasks', '8'),
-                      const SizedBox(width: AppConstants.spacingL),
-                      _buildQuickStat('Completed', '15'),
-                    ],
+                  EmployeeDashboardCard(
+                    title: 'Treatment Execution',
+                    subtitle: 'Follow instructions',
+                    icon: Icons.medication,
+                    color: AppTheme.darkSecondary,
+                    onTap: () => _showTreatmentExecution(),
+                  ),
+                  EmployeeDashboardCard(
+                    title: 'Completed Updates',
+                    subtitle: 'Update progress',
+                    icon: Icons.check_circle,
+                    color: AppTheme.successGreen,
+                    onTap: () => _showCompletedUpdates(),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: AppConstants.spacingL),
+              const SizedBox(height: AppConstants.spacingL),
 
-            // Quick Actions
-            const Text('Quick Actions', style: AppTheme.headingMedium),
-            const SizedBox(height: AppConstants.spacingM),
+              // Assigned Tasks
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Today\'s Assigned Tasks',
+                    style: AppTheme.headingMedium,
+                  ),
+                  TextButton(
+                    onPressed: () => _showAssignedTasks(),
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.spacingM),
 
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: AppConstants.spacingM,
-              mainAxisSpacing: AppConstants.spacingM,
-              childAspectRatio: 1.1,
-              children: [
-                EmployeeDashboardCard(
-                  title: 'Assigned Tasks',
-                  subtitle: 'View your tasks',
-                  icon: Icons.assignment,
-                  color: AppTheme.primary,
-                  onTap: () => _showAssignedTasks(),
-                ),
-                EmployeeDashboardCard(
-                  title: 'Daily Monitoring',
-                  subtitle: 'Record observations',
-                  icon: Icons.monitor_heart,
-                  color: AppTheme.secondary,
-                  onTap: () => _showDailyMonitoring(),
-                ),
-                EmployeeDashboardCard(
-                  title: 'Treatment Execution',
-                  subtitle: 'Follow instructions',
-                  icon: Icons.medication,
-                  color: AppTheme.darkSecondary,
-                  onTap: () => _showTreatmentExecution(),
-                ),
-                EmployeeDashboardCard(
-                  title: 'Completed Updates',
-                  subtitle: 'Update progress',
-                  icon: Icons.check_circle,
-                  color: AppTheme.successGreen,
-                  onTap: () => _showCompletedUpdates(),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppConstants.spacingL),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _assignedTasks.take(3).length,
+                itemBuilder: (context, index) {
+                  final task = _assignedTasks[index];
+                  return _buildTaskCard(task);
+                },
+              ),
+              const SizedBox(height: AppConstants.spacingL),
 
-            // Assigned Tasks
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Today\'s Assigned Tasks',
-                  style: AppTheme.headingMedium,
-                ),
-                TextButton(
-                  onPressed: () => _showAssignedTasks(),
-                  child: const Text('View All'),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppConstants.spacingM),
+              // Recent Monitoring Records
+              const Text(
+                'Recent Monitoring Records',
+                style: AppTheme.headingMedium,
+              ),
+              const SizedBox(height: AppConstants.spacingM),
 
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _assignedTasks.take(3).length,
-              itemBuilder: (context, index) {
-                final task = _assignedTasks[index];
-                return _buildTaskCard(task);
-              },
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-
-            // Recent Monitoring Records
-            const Text(
-              'Recent Monitoring Records',
-              style: AppTheme.headingMedium,
-            ),
-            const SizedBox(height: AppConstants.spacingM),
-
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _monitoringRecords.take(3).length,
-              itemBuilder: (context, index) {
-                final record = _monitoringRecords[index];
-                return _buildMonitoringCard(record);
-              },
-            ),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _monitoringRecords.take(3).length,
+                itemBuilder: (context, index) {
+                  final record = _monitoringRecords[index];
+                  return _buildMonitoringCard(record);
+                },
+              ),
             ],
           ),
         ),
@@ -376,6 +386,15 @@ class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
               context.go('/profile');
             },
           ),
+          if (ref.watch(authProvider).availableRoles.length > 1)
+            ListTile(
+              leading: const Icon(Icons.swap_horiz),
+              title: const Text('Switch Role'),
+              onTap: () {
+                Navigator.pop(context);
+                _showSwitchRoleBottomSheet();
+              },
+            ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
@@ -383,6 +402,157 @@ class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
             onTap: () => _showLogoutDialog(),
           ),
         ],
+      ),
+    );
+  }
+
+  Map<String, dynamic> _getRoleInfo(UserType role) {
+    switch (role) {
+      case UserType.admin:
+        return {
+          'label': 'Administrator',
+          'icon': Icons.admin_panel_settings,
+          'color': Colors.blue,
+        };
+      case UserType.farmManager:
+        return {
+          'label': 'Farm Manager',
+          'icon': Icons.agriculture,
+          'color': Colors.green,
+        };
+      case UserType.supervisor:
+        return {
+          'label': 'Supervisor',
+          'icon': Icons.assignment_ind,
+          'color': Colors.orange,
+        };
+      case UserType.doctor:
+        return {
+          'label': 'Doctor',
+          'icon': Icons.medical_services,
+          'color': Colors.red,
+        };
+      case UserType.assistant:
+        return {
+          'label': 'Assistant Doctor',
+          'icon': Icons.health_and_safety,
+          'color': Colors.teal,
+        };
+      case UserType.customer:
+        return {
+          'label': 'Investor',
+          'icon': Icons.trending_up,
+          'color': Colors.indigo,
+        };
+    }
+  }
+
+  void _showSwitchRoleBottomSheet() {
+    final authState = ref.read(authProvider);
+    final availableRoles = authState.availableRoles;
+    final currentRole = authState.role;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Switch Active Role',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose which portal you want to access',
+                style: TextStyle(color: AppTheme.mediumGrey),
+              ),
+              const SizedBox(height: 24),
+              ...availableRoles.map((role) {
+                final info = _getRoleInfo(role);
+                final isSelected = role == currentRole;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    onTap: isSelected
+                        ? null
+                        : () async {
+                            Navigator.pop(context);
+                            await ref
+                                .read(authProvider.notifier)
+                                .selectRole(role);
+
+                            if (!mounted) return;
+                            switch (role) {
+                              case UserType.admin:
+                                context.go('/admin-dashboard');
+                                break;
+                              case UserType.farmManager:
+                                context.go('/farm-manager-dashboard');
+                                break;
+                              case UserType.supervisor:
+                                context.go('/supervisor-dashboard');
+                                break;
+                              case UserType.doctor:
+                                context.go('/doctor-dashboard');
+                                break;
+                              case UserType.assistant:
+                                context.go('/assistant-dashboard');
+                                break;
+                              case UserType.customer:
+                                context.go('/customer-dashboard');
+                                break;
+                            }
+                          },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isSelected
+                            ? info['color']
+                            : Colors.grey.shade200,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    tileColor: isSelected
+                        ? (info['color'] as Color).withOpacity(0.05)
+                        : null,
+                    leading: CircleAvatar(
+                      backgroundColor: (info['color'] as Color).withOpacity(
+                        0.1,
+                      ),
+                      child: Icon(
+                        info['icon'] as IconData,
+                        color: info['color'] as Color,
+                      ),
+                    ),
+                    title: Text(
+                      info['label'] as String,
+                      style: TextStyle(
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_circle,
+                            color: info['color'] as Color,
+                          )
+                        : const Icon(Icons.arrow_forward_ios, size: 14),
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -668,7 +838,6 @@ class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
     );
   }
 
-
   void _showDailyMonitoring() {
     showDialog(
       context: context,
@@ -824,9 +993,12 @@ class _AssistantDashboardScreenState extends State<AssistantDashboardScreen> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.go('/login');
+            onPressed: () async {
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) {
+                Navigator.pop(context);
+                context.go('/login');
+              }
             },
             child: const Text('Logout'),
           ),

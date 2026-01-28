@@ -9,31 +9,32 @@ final dashboardStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((
 
   return responseAsync.whenData((response) {
     // defaults
-    String count = '0';
+    String initialInvestment = '₹0';
     String calves = '0';
     String revenue = '₹0';
     String buffaloes = '0';
-
     String assetValue = '₹0';
+
     if (response != null) {
       // 1. Counts from OverallStats
       if (response.overallStats != null) {
-        count = (response.overallStats!.totalUnits ?? 0).toString();
         calves = (response.overallStats!.calvesCount ?? 0).toString();
         buffaloes = (response.overallStats!.buffaloesCount ?? 0).toString();
-        assetValue =
-            '₹${(response.overallStats!.totalAssetValue ?? 0).toStringAsFixed(0)}';
+        assetValue = (response.overallStats!.totalAssetValue ?? 0).toString();
       }
 
       // 2. Financials
       if (response.financials != null) {
         revenue =
             '₹${(response.financials!.totalRevenueEarned ?? 0).toStringAsFixed(0)}';
+        // Mapping initial investment from what we'll populate in ApiServices
+        initialInvestment =
+            '₹${(response.financials!.investmentWithCPF ?? 0).toStringAsFixed(0)}';
       }
     }
 
     return {
-      'count': count,
+      'initialInvestment': initialInvestment,
       'buffaloes': buffaloes,
       'calves': calves,
       'revenue': revenue,

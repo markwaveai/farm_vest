@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final String? hint;
@@ -6,12 +7,16 @@ class CustomTextField extends StatelessWidget {
   final String? initialValue;
   final bool enabled;
   final int maxLines;
+  final int? maxLength;
+  final List<TextInputFormatter>? inputFormatters;
   final TextEditingController? controller;
   final TextInputType keyboardType;
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onChanged;
   final Widget? prefixIcon;
   final TextStyle? style;
+  final TextCapitalization textCapitalization;
+  final bool readOnly;
 
   const CustomTextField({
     this.label,
@@ -19,13 +24,17 @@ class CustomTextField extends StatelessWidget {
     this.hint,
     this.initialValue,
     this.enabled = true,
+    this.readOnly = false,
     this.maxLines = 1,
+    this.maxLength,
+    this.inputFormatters,
     this.controller,
     this.keyboardType = TextInputType.text,
     this.validator,
     this.prefixIcon,
     this.style,
     this.onChanged,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   @override
@@ -34,21 +43,28 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       initialValue: controller == null ? initialValue : null,
       enabled: enabled,
+      readOnly: readOnly,
       maxLines: maxLines,
+      maxLength: maxLength,
+      inputFormatters: [
+        ...?inputFormatters,
+        if (textCapitalization == TextCapitalization.characters)
+          UpperCaseTextFormatter(),
+      ],
       keyboardType: keyboardType,
       validator: validator,
       style: style,
+      textCapitalization: textCapitalization,
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: prefixIcon,
         filled: true,
-        fillColor: Colors.grey[100],
+        fillColor: readOnly ? Colors.grey[200] : Colors.grey[100],
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 14,
         ),
-
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -58,6 +74,19 @@ class CustomTextField extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.grey),
         ),
       ),
+    );
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
     );
   }
 }

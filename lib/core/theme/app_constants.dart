@@ -6,11 +6,19 @@ const String kHyphen = '--';
 class AppConstants {
   static const String appName = 'FarmVest';
   //app live url
-  static const String apiUrl =
-      'https://markwave-live-apis-couipk45fa-el.a.run.app';
+  static const String animalKartStagingApiUrl =
+      'https://animalkart-stagging-services-jn6cma3vvq-el.a.run.app';
+
+  static const String animalKartApiUrl =
+      'https://animalkart-live-apis-jn6cma3vvq-el.a.run.app';
 
   static const String appLiveUrl =
       'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
+  // static const String corsProxyUrl =
+  //     'https://cors-612299373064.asia-south1.run.app';
+  // static const Map<String, String> corsProxyHeaders = {
+  //   'X-Requested-With': 'XMLHttpRequest',
+  // };
   static const String authApiKey =
       'bWFya3dhdmUtZmFybXZlc3QtdGVzdHRpbmctYXBpa2V5';
   static const String visitApiUrl =

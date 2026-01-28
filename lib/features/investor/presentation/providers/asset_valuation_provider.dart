@@ -6,8 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // implementation of the simulation.
 // To make this screen functional, the actual simulation logic needs to be
 // integrated into the _runSimulation function.
-Future<Map<String, Map<String, dynamic>>> _runSimulation({double units = 1.0}) async {
-  await Future.delayed(const Duration(milliseconds: 800)); // Simulate async work
+Future<Map<String, Map<String, dynamic>>> _runSimulation({
+  double units = 1.0,
+}) async {
+  await Future.delayed(
+    const Duration(milliseconds: 800),
+  ); // Simulate async work
 
   // This data structure is based on what AssetValuationScreen expects.
   // The real simulation would populate 'buffaloes' and 'yearlyData'.
@@ -19,13 +23,9 @@ Future<Map<String, Map<String, dynamic>>> _runSimulation({double units = 1.0}) a
       'years': 10,
       'totalBuffaloes': 0,
     },
-    'revenueData': {
-      'totalRevenue': 0.0,
-      'yearlyData': [],
-    },
+    'revenueData': {'totalRevenue': 0.0, 'yearlyData': []},
   };
 }
-
 
 class SimulationState {
   final bool isLoading;
@@ -63,8 +63,8 @@ class SimulationState {
 class SimulationNotifier extends Notifier<SimulationState> {
   @override
   SimulationState build() {
-    // Return the initial state. The simulation will be triggered by the UI
-    // after the initial unit count is known.
+    // Automatically trigger simulation with default units
+    Future.microtask(() => _runSimulationForState(1.0));
     return SimulationState(isLoading: true);
   }
 
@@ -94,6 +94,7 @@ class SimulationNotifier extends Notifier<SimulationState> {
   }
 }
 
-final simulationProvider = NotifierProvider<SimulationNotifier, SimulationState>(
-  SimulationNotifier.new,
-);
+final simulationProvider =
+    NotifierProvider<SimulationNotifier, SimulationState>(
+      SimulationNotifier.new,
+    );

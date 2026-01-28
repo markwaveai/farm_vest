@@ -49,7 +49,7 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
     // Combine parent and passed calves if needed.
     // If widget.parent has children populated, use them.
     // Otherwise attach widget.calves to widget.parent.
- final theme = Theme.of(context);
+    final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final effectiveRoot =
         widget.parent ?? Animal(id: widget.parentId, breedId: widget.parentId);
@@ -60,11 +60,13 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
         : widget.calves;
 
     return Scaffold(
-      backgroundColor:isDark ? AppTheme.darkSurfaceVariant : AppTheme.lightGrey,
+      backgroundColor: isDark
+          ? AppTheme.darkSurfaceVariant
+          : AppTheme.lightGrey,
       appBar: AppBar(
         title: Text('Lineage: ${widget.parent?.breedId ?? widget.parentId}'),
         centerTitle: true,
-        backgroundColor:isDark ? AppTheme.darkSurfaceVariant : Colors.white,
+        backgroundColor: isDark ? AppTheme.darkSurfaceVariant : Colors.white,
         elevation: 1,
       ),
       body: InteractiveViewer(
@@ -162,15 +164,17 @@ class _RecursiveTreeBuilder extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: [
           BuffaloCard(
+            imageUrl: animal.imageUrl,
             farmName: animal.farmName ?? 'FarmVest Unit',
             location: animal.farmLocation ?? 'Location',
             id: animal.breedId ?? animal.id ?? 'Unknown',
             healthStatus: animal.healthStatus ?? 'Healthy',
             lastMilking: 'N/A', // Not relevant for tree view
-            age: animal.ageYears != null ? '${animal.ageYears} yrs' : '-',
+            age: animal.ageMonths != null ? '${animal.ageMonths} Months' : '-',
             breed: animal.breedId ?? '-',
             isGridView: true,
             showLiveButton: false, // Cleaner UI
+
             onTap: () {
               // Show details?
             },

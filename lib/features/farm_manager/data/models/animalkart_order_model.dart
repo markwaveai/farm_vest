@@ -1,0 +1,147 @@
+class AnimalkartOrder {
+  final OrderInfo order;
+  final TransactionInfo transaction;
+  final InvestorInfo investor;
+
+  AnimalkartOrder({
+    required this.order,
+    required this.transaction,
+    required this.investor,
+  });
+
+  factory AnimalkartOrder.fromOrderAndUser(
+    Map<String, dynamic> orderJson,
+    Map<String, dynamic> userJson,
+  ) {
+    return AnimalkartOrder(
+      order: OrderInfo.fromJson(orderJson),
+      transaction: TransactionInfo.fromJson(orderJson),
+      investor: InvestorInfo.fromJson(userJson),
+    );
+  }
+
+  factory AnimalkartOrder.fromJson(Map<String, dynamic> json) {
+    // Legacy support or fallback if needed
+    return AnimalkartOrder(
+      order: OrderInfo.fromJson(json['order'] ?? json),
+      transaction: TransactionInfo.fromJson(json['transaction'] ?? json),
+      investor: InvestorInfo.fromJson(json['investor'] ?? {}),
+    );
+  }
+}
+
+class OrderInfo {
+  final String id;
+  final String breedId;
+  final int buffaloCount;
+  final int calfCount;
+  final int? numUnits;
+  final double totalCost;
+  final String status;
+  final String placedAt;
+  final List<String> buffaloIds;
+  final List<String> calfIds;
+
+  OrderInfo({
+    required this.id,
+    required this.breedId,
+    required this.buffaloCount,
+    required this.calfCount,
+    this.numUnits,
+    required this.totalCost,
+    required this.status,
+    required this.placedAt,
+    this.buffaloIds = const [],
+    this.calfIds = const [],
+  });
+
+  factory OrderInfo.fromJson(Map<String, dynamic> json) {
+    return OrderInfo(
+      id: json['id'],
+      breedId: json['breedId'],
+      buffaloCount: (json['buffaloCount'] ?? 0).toInt(),
+      calfCount: (json['calfCount'] ?? 0).toInt(),
+      numUnits: json['numUnits']?.toInt(),
+      totalCost: (json['totalCost'] ?? 0).toDouble(),
+      status: json['status'],
+      placedAt: json['placedAt'],
+      buffaloIds:
+          (json['buffaloIds'] as List?)?.map((e) => e.toString()).toList() ??
+          [],
+      calfIds:
+          (json['calfIds'] as List?)?.map((e) => e.toString()).toList() ?? [],
+    );
+  }
+}
+
+class TransactionInfo {
+  final String id;
+  final double amount;
+  final String utrNumber;
+  final String paymentType;
+  final String paymentScreenshotUrl;
+
+  TransactionInfo({
+    required this.id,
+    required this.amount,
+    required this.utrNumber,
+    required this.paymentType,
+    required this.paymentScreenshotUrl,
+  });
+
+  factory TransactionInfo.fromJson(Map<String, dynamic> json) {
+    return TransactionInfo(
+      id: json['id'],
+      amount: (json['amount'] ?? 0).toDouble(),
+      utrNumber: json['utrNumber'] ?? '',
+      paymentType: json['paymentType'] ?? '',
+      paymentScreenshotUrl: json['paymentScreenshotUrl'] ?? '',
+    );
+  }
+}
+
+class InvestorInfo {
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String mobile;
+  final String city;
+  final String state;
+  final String? aadharNumber;
+  final String? aadharFrontUrl;
+  final String? aadharBackUrl;
+  final String? panCardUrl;
+
+  InvestorInfo({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.mobile,
+    required this.city,
+    required this.state,
+    this.aadharNumber,
+    this.aadharFrontUrl,
+    this.aadharBackUrl,
+    this.panCardUrl,
+  });
+
+  factory InvestorInfo.fromJson(Map<String, dynamic> json) {
+    return InvestorInfo(
+      id: json['id'],
+      firstName: json['first_name'] ?? '',
+      lastName: json['last_name'] ?? '',
+      email: json['email'] ?? '',
+      mobile: json['mobile'] ?? '',
+      city: json['city'] ?? '',
+      state: json['state'] ?? '',
+      aadharNumber: json['aadhar_number'],
+      aadharFrontUrl: json['aadhar_front_image_url'],
+      aadharBackUrl: json['aadhar_back_image_url'],
+      panCardUrl: json['panCardUrl'],
+    );
+  }
+
+  String get fullName => '$firstName $lastName';
+}

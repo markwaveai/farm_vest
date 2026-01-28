@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:farm_vest/core/services/api_services.dart';
+import 'package:farm_vest/core/services/auth_api_services.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
+
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/core/widgets/floating_toast.dart';
 import 'package:farm_vest/features/auth/data/models/login_response.dart';
@@ -9,7 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:farm_vest/core/utils/image_helper_compressor.dart';
 import '../models/user_model.dart';
 import '../models/whatsapp_otp_response.dart';
 
@@ -19,10 +20,8 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 class AuthRepository {
   Future<LoginResponse> loginWithOtp(String mobile, String otp) async {
-    final response = await ApiServices.loginWithOtp(mobile, otp);
-    if (response == null) {
-      throw Exception('Failed to login');
-    }
+    final response = await AuthApiServices.loginWithOtp(mobile, otp);
+
     return response;
   }
 
@@ -37,28 +36,35 @@ class AuthRepository {
   }
 
   Future<WhatsappOtpResponse?> sendOtp(String mobile) async {
-    return await ApiServices.sendWhatsappOtp(mobile);
+    return await AuthApiServices.sendWhatsappOtp(mobile);
   }
 
   Future<UserModel?> getUserData(String mobile) async {
-    return await ApiServices.getUserData(mobile);
+    final token = await getToken();
+    return await AuthApiServices.getUserData(mobile, token: token);
   }
 
   Future<UserModel?> updateUserProfile({
     required String mobile,
     required Map<String, dynamic> body,
   }) async {
-    return await ApiServices.updateUserProfile(mobile: mobile, body: body);
+    final token = await getToken();
+    return await AuthApiServices.updateUserProfile(mobile: mobile, body: body);
   }
 
   Future<void> saveUserSession({
     required String mobile,
-    required UserType role,
+    required List<UserType> roles,
+    required UserType activeRole,
     required UserModel? userData,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('mobile_number', mobile);
-    await prefs.setString('user_role', role.value);
+    await prefs.setString(
+      'user_roles',
+      jsonEncode(roles.map((r) => r.value).toList()),
+    );
+    await prefs.setString('active_role', activeRole.value);
 
     if (userData != null) {
       final userDataString = jsonEncode(userData.toJson());
@@ -69,11 +75,15 @@ class AuthRepository {
   Future<Map<String, dynamic>?> getSession() async {
     final prefs = await SharedPreferences.getInstance();
     final mobile = prefs.getString('mobile_number');
-    final roleString = prefs.getString('user_role');
+    final rolesJson = prefs.getString('user_roles');
+    final activeRoleString = prefs.getString('active_role');
     final userDataString = prefs.getString('user_data');
 
-    if (mobile != null && roleString != null) {
-      final role = UserType.fromString(roleString);
+    if (mobile != null && rolesJson != null && activeRoleString != null) {
+      final List<dynamic> rolesList = jsonDecode(rolesJson);
+      final roles = rolesList.map((r) => UserType.fromString(r)).toList();
+      final activeRole = UserType.fromString(activeRoleString);
+
       UserModel? userData;
       if (userDataString != null) {
         try {
@@ -81,7 +91,12 @@ class AuthRepository {
           userData = UserModel.fromJson(userJson);
         } catch (_) {}
       }
-      return {'mobile': mobile, 'role': role, 'userData': userData};
+      return {
+        'mobile': mobile,
+        'roles': roles,
+        'activeRole': activeRole,
+        'userData': userData,
+      };
     }
     return null;
   }
@@ -91,9 +106,7 @@ class AuthRepository {
     required File file,
     required String userId,
   }) async {
-    final storage = FirebaseStorage.instanceFor(
-      bucket: AppConstants.storageBucketName,
-    );
+    final storage = FirebaseStorage.instance;
 
     final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
 
@@ -107,9 +120,7 @@ class AuthRepository {
 
   Future<String?> getCurrentFirebaseImageUrl(String userId) async {
     try {
-      final storage = FirebaseStorage.instanceFor(
-        bucket: AppConstants.storageBucketName,
-      );
+      final storage = FirebaseStorage.instance;
 
       final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
 
@@ -135,9 +146,7 @@ class AuthRepository {
     required String filePath,
   }) async {
     try {
-      final storage = FirebaseStorage.instanceFor(
-        bucket: AppConstants.storageBucketName,
-      );
+      final storage = FirebaseStorage.instance;
 
       final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
       await ref.delete();
@@ -165,13 +174,22 @@ class AuthRepository {
       final storage = FirebaseStorage.instanceFor(
         bucket: AppConstants.storageBucketName,
       );
+
+      // Compress image before uploading
+      final compressedFile =
+          await ImageCompressionHelper.getCompressedImageIfNeeded(
+            file,
+            maxSizeKB: 250,
+            isDocument: false,
+          );
+
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final ref = storage.ref().child(
         'farmvest/buffaloesonboarding/image_$timestamp.jpg',
       );
 
       final snapshot = await ref.putFile(
-        file,
+        compressedFile,
         SettableMetadata(contentType: 'image/jpeg', cacheControl: "no-cache"),
       );
       final url = await snapshot.ref.getDownloadURL();

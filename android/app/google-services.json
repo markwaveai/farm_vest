@@ -7,9 +7,47 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:612299373064:android:68670c69c3ac39b50eefbd",
+        "android_client_info": {
+          "package_name": "com.marktours.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC88x_wjf5oBRmTxyXUwXV_UY2N73kl82c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:612299373064:android:5985b830becec8cd0eefbd",
         "android_client_info": {
           "package_name": "com.markwave.animalcart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC88x_wjf5oBRmTxyXUwXV_UY2N73kl82c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:612299373064:android:c1d4128de1e099f20eefbd",
+        "android_client_info": {
+          "package_name": "com.markwave.farmvest"
         }
       },
       "oauth_client": [],

@@ -16,7 +16,8 @@ class BuffaloCard extends StatelessWidget {
   final String age;
   final String breed;
   final bool isGridView;
-  final bool showLiveButton; // Add flag to control live button visibility
+  final bool showLiveButton;
+  final String? imageUrl; // Added imageUrl property
   final VoidCallback? onTap;
   final VoidCallback? onCalvesTap;
   final VoidCallback? onInvoiceTap;
@@ -24,7 +25,7 @@ class BuffaloCard extends StatelessWidget {
   // Sample Murrah buffalo images
   static const List<String> murrahImages = [
     'assets/images/buffalo4.jpeg',
-    'assets/images/murrah1.jpeg',
+    'assets/images/murrah1.jpg',
     'assets/images/murrah1.jpg',
   ];
 
@@ -38,29 +39,33 @@ class BuffaloCard extends StatelessWidget {
     required this.age,
     required this.breed,
     this.isGridView = true,
-    this.showLiveButton = true, // Default to true
+    this.showLiveButton = true,
+    this.imageUrl, // Added to constructor
     this.onTap,
     this.onCalvesTap,
     this.onInvoiceTap,
   });
-static String getStableImage(String id) {
+
+  static String getStableImage(String id) {
     final index = id.hashCode.abs() % murrahImages.length;
     return murrahImages[index];
   }
+
   @override
   Widget build(BuildContext context) {
-    final imageUrl = getStableImage(id);
-    // Use a random image for each buffalo
-    //final random = Random();
-    //final imageUrl = murrahImages[random.nextInt(murrahImages.length)];
+    // Prioritize passed imageUrl, then fallback to stable asset image
+    final displayImageUrl = (imageUrl != null && imageUrl!.isNotEmpty)
+        ? imageUrl!
+        : getStableImage(id);
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallPhone = AppConstants.smallphoneheight<600;
-    final isMediumPhone = AppConstants.mediumphoneheight >= AppConstants.smallphoneheight && screenHeight < 800;
+    final isSmallPhone = AppConstants.smallphoneheight < 600;
+    final isMediumPhone =
+        AppConstants.mediumphoneheight >= AppConstants.smallphoneheight &&
+        screenHeight < 800;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -68,10 +73,10 @@ static String getStableImage(String id) {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-isDark                ? AppTheme.darkSurface
+            isDark
+                ? AppTheme.darkSurface
                 : AppTheme.beige.withValues(alpha: 0.3),
-isDark                ? AppTheme.darkSurfaceVariant
-                : AppTheme.white,
+            isDark ? AppTheme.darkSurfaceVariant : AppTheme.white,
           ],
         ),
         boxShadow: [
@@ -94,15 +99,16 @@ isDark                ? AppTheme.darkSurfaceVariant
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                AspectRatio(aspectRatio: 16/9,
-                child: 
-                _buildImageSection(
-                  imageUrl,
-                  context,
-                  isSmallPhone: isSmallPhone,
-                  isMediumPhone: isMediumPhone,
-                ),),
-               
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: _buildImageSection(
+                    displayImageUrl,
+                    context,
+                    isSmallPhone: isSmallPhone,
+                    isMediumPhone: isMediumPhone,
+                  ),
+                ),
+
                 if (isGridView)
                   Expanded(
                     child: _buildInfoSection(
@@ -156,25 +162,62 @@ isDark                ? AppTheme.darkSurfaceVariant
                 ],
               ),
             ),
-            child: Image.asset(
-              imageUrl,
-              key: ValueKey(imageUrl),
-              fit: BoxFit.cover,
-              width: double.infinity,
-              gaplessPlayback: true,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: AppTheme.lightGrey,
-                  child: Center(
-                    child: Icon(
-                      Icons.pets,
-                      size: 48,
-                      color: AppTheme.slate.withValues(alpha: 0.3),
-                    ),
+            child: imageUrl.startsWith('http')
+                ? Image.network(
+                    imageUrl,
+
+                    key: ValueKey(imageUrl),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                : null,
+                            color: AppTheme.primary.withOpacity(0.5),
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: AppTheme.lightGrey,
+                        child: Center(
+                          child: Icon(
+                            Icons.pets,
+                            size: 48,
+                            color: AppTheme.slate.withOpacity(0.3),
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : Image.asset(
+                    imageUrl,
+                    key: ValueKey(imageUrl),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    gaplessPlayback: true,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: AppTheme.lightGrey,
+                        child: Center(
+                          child: Icon(
+                            Icons.pets,
+                            size: 48,
+                            color: AppTheme.slate.withOpacity(0.3),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
 
           // Gradient Overlay
@@ -240,7 +283,7 @@ isDark                ? AppTheme.darkSurfaceVariant
     final paddingV = isSmallPhone ? 6.0 : (isMediumPhone ? 7.0 : 8.0);
     final fontSize = isSmallPhone ? 10.0 : 11.0;
     //final fontSize = isSmallPhone ? 14.0 : 16.0;
-//final fontSize = isSmallPhone ? 12.0 : 14.0;
+    //final fontSize = isSmallPhone ? 12.0 : 14.0;
 
     final rowGap = isSmallPhone ? 3.0 : 4.0;
     //final rowGap = isSmallPhone ? 4.0 : 6.0;
@@ -254,31 +297,35 @@ isDark                ? AppTheme.darkSurfaceVariant
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Au Id (formerly Breed)
-          _buildInfoRow(
-            'Au Id',
-            breed.toUpperCase(),
-            isDark: isDark,
-            fontSize: fontSize,
-          ),
+          // RFID
+          if (breed.isNotEmpty) ...[
+            _buildInfoRow(
+              'RFID',
+              breed.toUpperCase(),
+              isDark: isDark,
+              fontSize: fontSize,
+            ),
+            SizedBox(height: rowGap),
+          ],
+
+          // Age
+          _buildInfoRow('Age', age, isDark: isDark, fontSize: fontSize),
           SizedBox(height: rowGap),
 
-          // Site Name (formerly Purchase)
-          _buildInfoRow(
-            'Site Name',
-            farmName,
-            isDark: isDark,
-            fontSize: fontSize,
-          ),
-          SizedBox(height: rowGap),
+          // Farm (if available)
+          if (farmName.isNotEmpty && farmName.toLowerCase() != 'null') ...[
+            _buildInfoRow('Farm', farmName, isDark: isDark, fontSize: fontSize),
+            SizedBox(height: rowGap),
+          ],
 
-          // Location
-          _buildInfoRow(
-            'Location',
-            location.toUpperCase(),
-            isDark: isDark,
-            fontSize: fontSize,
-          ),
+          // Location (if available)
+          if (location.isNotEmpty && location.toLowerCase() != 'null')
+            _buildInfoRow(
+              'Location',
+              location.toUpperCase(),
+              isDark: isDark,
+              fontSize: fontSize,
+            ),
         ],
       ),
     );
@@ -372,7 +419,7 @@ isDark                ? AppTheme.darkSurfaceVariant
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                'ID',
+                'RFID',
                 style: TextStyle(
                   fontSize: badgeFont,
                   color: AppTheme.primary,
@@ -396,7 +443,7 @@ isDark                ? AppTheme.darkSurfaceVariant
                 maxLines: 1,
               ),
             ),
-             // Copy Icon
+            // Copy Icon
             // Container(
             //   padding: EdgeInsets.all(isSmallPhone ? 3 : 4),
             //   decoration: BoxDecoration(
@@ -405,12 +452,12 @@ isDark                ? AppTheme.darkSurfaceVariant
             //   ),
             //   child: Icon(Icons.copy, size: copyIconSize, color: Colors.white),
             // ),
-            if (onInvoiceTap != null)
-              _buildInvoiceButton(
-                context,
-                isSmallPhone: isSmallPhone,
-                isMediumPhone: isMediumPhone,
-              ),
+            // if (onInvoiceTap != null)
+            //   _buildInvoiceButton(
+            //     context,
+            //     isSmallPhone: isSmallPhone,
+            //     isMediumPhone: isMediumPhone,
+            //   ),
           ],
         ),
       ),
@@ -538,50 +585,6 @@ isDark                ? AppTheme.darkSurfaceVariant
                 fontWeight: FontWeight.bold,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInvoiceButton(
-    BuildContext context, {
-    required bool isSmallPhone,
-    required bool isMediumPhone,
-  }) {
-    final fontSize = isSmallPhone ? 9.0 : 10.0;
-    final iconSize = isSmallPhone ? 11.0 : 13.0;
-    final paddingH = isSmallPhone ? 6.0 : 8.0;
-    final paddingV = isSmallPhone ? 4.0 : (isMediumPhone ? 4.5 : 5.0);
-
-    return GestureDetector(
-      onTap: onInvoiceTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
-        decoration: BoxDecoration(
-          color: AppTheme.primary, // Or use a distinct color like purple/indigo
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primary.withValues(alpha: 0.4),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.receipt_long, size: iconSize, color: Colors.white),
-            // SizedBox(width: isSmallPhone ? 3 : 4),
-            // Text(
-            //   'Invoice',
-            //   style: TextStyle(
-            //     color: Colors.white,
-            //     fontSize: fontSize,
-            //     fontWeight: FontWeight.bold,
-            //   ),
-            // ),
           ],
         ),
       ),

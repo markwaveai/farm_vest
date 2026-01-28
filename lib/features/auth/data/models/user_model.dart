@@ -20,6 +20,11 @@ class UserModel {
   final bool otpVerified;
   final bool isQuit;
   final String? imageUrl;
+  final String? farmId;
+  final String? farmName;
+  final String? farmLocation;
+  final String? shedId;
+  final String? shedName;
 
   UserModel({
     required this.id,
@@ -43,6 +48,11 @@ class UserModel {
     this.otpVerified = false,
     this.isQuit = false,
     this.imageUrl,
+    this.farmId,
+    this.farmName,
+    this.farmLocation,
+    this.shedId,
+    this.shedName,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -68,6 +78,11 @@ class UserModel {
       otpVerified: json['otp_verified'] ?? false,
       isQuit: json['isQuit'] ?? false,
       imageUrl: (json['imageUrl'] ?? json['image_url'])?.toString(),
+      farmId: json['farm_id']?.toString(),
+      farmName: json['farm_name']?.toString(),
+      farmLocation: json['farm_location']?.toString(),
+      shedId: json['shed_id']?.toString(),
+      shedName: json['shed_name']?.toString(),
     );
   }
 
@@ -94,6 +109,11 @@ class UserModel {
       'otp_verified': otpVerified,
       'isQuit': isQuit,
       'image_url': imageUrl,
+      'farm_id': farmId,
+      'farm_name': farmName,
+      'farm_location': farmLocation,
+      'shed_id': shedId,
+      'shed_name': shedName,
     };
   }
 
@@ -118,6 +138,11 @@ class UserModel {
     bool? verified,
     bool? otpVerified,
     String? imageUrl,
+    String? farmId,
+    String? farmName,
+    String? farmLocation,
+    String? shedId,
+    String? shedName,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -140,6 +165,11 @@ class UserModel {
       verified: verified ?? this.verified,
       otpVerified: otpVerified ?? this.otpVerified,
       imageUrl: imageUrl ?? this.imageUrl,
+      farmId: farmId ?? this.farmId,
+      farmName: farmName ?? this.farmName,
+      farmLocation: farmLocation ?? this.farmLocation,
+      shedId: shedId ?? this.shedId,
+      shedName: shedName ?? this.shedName,
     );
   }
 }

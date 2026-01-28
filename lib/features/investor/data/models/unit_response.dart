@@ -4,6 +4,7 @@ class UnitResponse {
   final String? userId;
   final String? userCreatedAt;
   final List<Order>? orders;
+  final List<Animal>? animals; // Added for new investor flow
   final Financials? financials;
   final CpfSummary? cpfSummary;
   final OverallStats? overallStats;
@@ -14,6 +15,7 @@ class UnitResponse {
     this.userId,
     this.userCreatedAt,
     this.orders,
+    this.animals,
     this.financials,
     this.cpfSummary,
     this.overallStats,
@@ -27,6 +29,9 @@ class UnitResponse {
       userCreatedAt: json['userCreatedAt'],
       orders: json['orders'] != null
           ? List<Order>.from(json['orders'].map((x) => Order.fromJson(x)))
+          : [],
+      animals: json['animals'] != null
+          ? List<Animal>.from(json['animals'].map((x) => Animal.fromJson(x)))
           : [],
       financials: json['financials'] != null
           ? Financials.fromJson(json['financials'])
@@ -58,8 +63,9 @@ class Financials {
 
   factory Financials.fromJson(Map<String, dynamic> json) {
     return Financials(
-      totalRevenueEarned: json['totalRevenueEarned'],
-      investmentWithCPF: json['investmentWithCPF'],
+      totalRevenueEarned: json['totalRevenueEarned'] ?? json['revenue'],
+      investmentWithCPF:
+          json['investmentWithCPF'] ?? json['initial_investment'],
       investmentWithoutCPF: json['investmentWithoutCPF'],
       totalCpfValue: json['totalCpfValue'],
       netProfit: json['netProfit'],
@@ -107,6 +113,7 @@ class OverallStats {
   final num? healthyBuffaloes;
   final num? underTreatment;
   final num? totalAssetValue;
+  final String? memberSince;
 
   OverallStats({
     this.totalUnits,
@@ -116,17 +123,19 @@ class OverallStats {
     this.healthyBuffaloes,
     this.underTreatment,
     this.totalAssetValue,
+    this.memberSince,
   });
 
   factory OverallStats.fromJson(Map<String, dynamic> json) {
     return OverallStats(
       totalUnits: json['totalUnits'],
-      buffaloesCount: json['buffaloesCount'],
-      calvesCount: json['calvesCount'],
+      buffaloesCount: json['buffaloesCount'] ?? json['total_buffaloes'],
+      calvesCount: json['calvesCount'] ?? json['total_calves'],
       pregnantBuffaloes: json['pregnantBuffaloes'],
       healthyBuffaloes: json['healthyBuffaloes'],
       underTreatment: json['underTreatment'],
-      totalAssetValue: json['totalAssetValue'],
+      totalAssetValue: json['totalAssetValue'] ?? json['asset_value'],
+      memberSince: json['memberSince'] ?? json['member_since'],
     );
   }
 }
@@ -206,6 +215,7 @@ class Animal {
   final String? parentId;
   final String? breedId;
   final num? ageYears;
+  final num? ageMonths;
   final String? status;
   final String? type;
   final String? cpfDueDate;
@@ -215,6 +225,8 @@ class Animal {
   final String? farmLocation;
   final String? healthStatus;
   final num? assetValue;
+  final String? cctvUrl;
+  final String? imageUrl;
   final List<Animal>? children;
 
   Animal({
@@ -222,6 +234,7 @@ class Animal {
     this.parentId,
     this.breedId,
     this.ageYears,
+    this.ageMonths,
     this.status,
     this.type,
     this.cpfDueDate,
@@ -231,24 +244,40 @@ class Animal {
     this.farmLocation,
     this.healthStatus,
     this.assetValue,
+    this.cctvUrl,
+    this.imageUrl,
     this.children,
   });
 
   factory Animal.fromJson(Map<String, dynamic> json) {
+    // Helper to get first image from list if available
+    String? extractImage(dynamic images) {
+      if (images is List && images.isNotEmpty) {
+        return images[0].toString();
+      }
+      return null;
+    }
+
     return Animal(
-      id: json['id'],
+      id: json['id'] ?? json['animal_id'],
       parentId: json['parentId'],
-      breedId: json['breedId'],
+      // Prioritize rfid, then breedId, then animal_type
+      breedId: json['rfid'] ?? json['breedId'] ?? json['animal_type'],
       ageYears: json['ageYears'],
+      ageMonths: json['ageMonths'] ?? json['age_months'],
       status: json['status'],
-      type: json['type'],
+      type: json['type'] ?? json['animal_type'],
       cpfDueDate: json['cpfDueDate'],
       expectedMaturationDate: json['expectedMaturationDate'],
       shedNumber: json['shedNumber'],
-      farmName: json['farmName'],
-      farmLocation: json['farmLocation'],
-      healthStatus: json['healthStatus'],
-      assetValue: json['assetValue'],
+      farmName: json['farmName'] ?? json['farm_name'],
+      farmLocation:
+          json['farmLocation'] ?? json['farm_location'] ?? json['location'],
+      healthStatus: json['healthStatus'] ?? json['health_status'],
+      assetValue: json['assetValue'] ?? json['current_value'],
+      cctvUrl: json['cctv_url'],
+      imageUrl:
+          json['imageUrl'] ?? json['image_url'] ?? extractImage(json['images']),
       children: json['children'] != null
           ? (json['children'] as List).map((i) => Animal.fromJson(i)).toList()
           : null,

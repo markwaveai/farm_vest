@@ -23,6 +23,8 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   String _phoneNumber = '';
   String _otp = '';
   bool _isOtpSent = false;
+  bool _showRoleSelection = false;
+  List<UserType> _availableRoles = [];
   Timer? _timer;
   int _remainingSeconds = 24;
 
@@ -44,9 +46,8 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     });
   }
 
-  // 1. Centralized navigation logic to prevent errors and duplication
+  // 1. Centralized navigation logic
   void _navigateToDashboard(UserType role) {
-    print('this is the role based access $role');
     if (role == UserType.customer) {
       ref.invalidate(unitResponseProvider);
     }
@@ -66,7 +67,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
       case UserType.assistant:
         context.go('/assistant-dashboard');
         break;
-      case UserType.farmManager: // The missing case is now correctly handled
+      case UserType.farmManager:
         context.go('/farm-manager-dashboard');
         break;
       case UserType.admin:
@@ -78,38 +79,47 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   }
 
   Future<void> _handleContinue() async {
-    // 2. DEBUG-ONLY PATH (OTP SKIP)
-    // if (kDebugMode && !_isOtpSent && _phoneNumber.length == 10) {
-    //   final loginData = await ref
-    //       .read(authProvider.notifier)
-    //       .completeLoginWithData(_phoneNumber);
-    //   _navigateToDashboard(loginData['role'] as UserType);
-    //   return;
-    // }
-
-    // 3. STANDARD OTP PATH
     if (!_isOtpSent) {
       if (_phoneNumber.length == 10) {
-        // As requested, just navigate to the OTP screen without sending OTP yet.
-        setState(() {
-          _isOtpSent = true;
-          _otp = '';
-        });
-        _startTimer();
+        final response = await ref
+            .read(authProvider.notifier)
+            .sendWhatsappOtp(_phoneNumber);
+
+        if (response != null && response.status) {
+          if (mounted) {
+            setState(() {
+              _isOtpSent = true;
+              _otp = '';
+            });
+            _startTimer();
+          }
+        } else {
+          if (mounted) {
+            final error = ref.read(authProvider).error;
+            ToastUtils.showError(
+              context,
+              error ?? 'Failed to send OTP. Please try again.',
+            );
+          }
+        }
       }
     } else {
-      // Verify OTP with the new secure API
       if (_otp.length == 6) {
         final loginData = await ref
             .read(authProvider.notifier)
             .loginWithOtp(_phoneNumber, _otp);
 
         if (loginData != null) {
-          // On success, navigate to the correct dashboard
-          _navigateToDashboard(loginData['role'] as UserType);
+          final List<UserType> roles = loginData['roles'] as List<UserType>;
+          if (roles.length > 1) {
+            setState(() {
+              _availableRoles = roles;
+              _showRoleSelection = true;
+            });
+          } else {
+            _navigateToDashboard(roles.first);
+          }
         } else {
-          // On failure, show an error toast.
-          // The error message is set in the authProvider.
           if (mounted) {
             final error = ref.read(authProvider).error;
             ToastUtils.showError(
@@ -137,6 +147,47 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           ToastUtils.showError(context, 'Failed to resend OTP');
         }
       }
+    }
+  }
+
+  Map<String, dynamic> _getRoleInfo(UserType role) {
+    switch (role) {
+      case UserType.admin:
+        return {
+          'label': 'Administrator',
+          'icon': Icons.admin_panel_settings,
+          'color': Colors.blue,
+        };
+      case UserType.farmManager:
+        return {
+          'label': 'Farm Manager',
+          'icon': Icons.agriculture,
+          'color': Colors.green,
+        };
+      case UserType.supervisor:
+        return {
+          'label': 'Supervisor',
+          'icon': Icons.assignment_ind,
+          'color': Colors.orange,
+        };
+      case UserType.doctor:
+        return {
+          'label': 'Doctor',
+          'icon': Icons.medical_services,
+          'color': Colors.red,
+        };
+      case UserType.assistant:
+        return {
+          'label': 'Assistant Doctor',
+          'icon': Icons.health_and_safety,
+          'color': Colors.teal,
+        };
+      case UserType.customer:
+        return {
+          'label': 'Investor',
+          'icon': Icons.trending_up,
+          'color': Colors.indigo,
+        };
     }
   }
 
@@ -171,7 +222,9 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   children: [
                     IconButton(
                       onPressed: () {
-                        if (_isOtpSent) {
+                        if (_showRoleSelection) {
+                          setState(() => _showRoleSelection = false);
+                        } else if (_isOtpSent) {
                           setState(() {
                             _isOtpSent = false;
                             _otp = '';
@@ -209,33 +262,34 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
               const SizedBox(height: 10),
 
-              // App Logo Area
-              Hero(
-                tag: 'app_logo',
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 40,
-                        spreadRadius: 5,
+              // App Logo Area (Shrink if role selection is visible)
+              if (!_showRoleSelection)
+                Hero(
+                  tag: 'app_logo',
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 40,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
+                      'assets/images/farmvest_logo.png',
+                      height: 100,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.agriculture,
+                        size: 100,
+                        color: AppTheme.white,
                       ),
-                    ],
-                  ),
-                  child: Image.asset(
-                    'assets/images/farmvest_logo.png',
-                    height: 100,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Icon(
-                      Icons.agriculture,
-                      size: 100,
-                      color: AppTheme.white,
                     ),
                   ),
                 ),
-              ),
 
               const SizedBox(height: 20),
 
@@ -243,10 +297,16 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: Column(
-                  key: ValueKey(_isOtpSent),
+                  key: ValueKey(
+                    _showRoleSelection
+                        ? 'role'
+                        : (_isOtpSent ? 'otp' : 'login'),
+                  ),
                   children: [
                     Text(
-                      _isOtpSent ? 'Verify Your Phone' : 'Welcome Back',
+                      _showRoleSelection
+                          ? 'Select Role'
+                          : (_isOtpSent ? 'Verify Your Phone' : 'Welcome Back'),
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -258,9 +318,11 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: Text(
-                        _isOtpSent
-                            ? 'Enter the 6-digit code sent to\n+91 $_phoneNumber'
-                            : 'Enter your phone number to access your account',
+                        _showRoleSelection
+                            ? 'Choose how you want to log in'
+                            : (_isOtpSent
+                                  ? 'Enter the 6-digit code sent to\n+91 $_phoneNumber'
+                                  : 'Enter your phone number to access your account'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
@@ -276,7 +338,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
               const SizedBox(height: 40),
 
-              // Form Container
+              // Form/Role Container
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -294,65 +356,138 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                       ),
                     ],
                   ),
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 50),
-
-                        // Input Display
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 400),
-                          child: _isOtpSent
-                              ? _buildOtpDisplay()
-                              : _buildPhoneNumberDisplay(),
-                        ),
-
-                        const SizedBox(height: 40),
-
-                        // Timer Area (OTP screen only)
-                        if (_isOtpSent) ...[
-                          _buildTimerSection(),
-                          const SizedBox(height: 32),
-                        ],
-
-                        // Action Button
-                        PrimaryButton(
-                          text: _isOtpSent ? 'Verify & Login' : 'Continue',
-                          isLoading: authState.isLoading,
-                          onPressed: (_isOtpSent
-                              ? (_otp.length == 6 ? _handleContinue : null)
-                              : (_phoneNumber.length == 10
-                                    ? _handleContinue
-                                    : null)),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Footer privacy text
-                        if (!_isOtpSent)
-                          Text(
-                            'By continuing, you agree to our Terms & Privacy Policy',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.slate.withOpacity(0.5),
-                            ),
-                          ),
-
-                        // SizedBox(
-                        //   height: MediaQuery.of(context).viewInsets.bottom + 40,
-                        // ),
-                      ],
-                    ),
-                  ),
+                  child: _showRoleSelection
+                      ? _buildRoleSelection()
+                      : _buildLoginForm(authState),
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLoginForm(AuthState authState) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          const SizedBox(height: 50),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            child: _isOtpSent ? _buildOtpDisplay() : _buildPhoneNumberDisplay(),
+          ),
+          const SizedBox(height: 40),
+          if (_isOtpSent) ...[_buildTimerSection(), const SizedBox(height: 32)],
+          PrimaryButton(
+            text: _isOtpSent ? 'Verify & Login' : 'Continue',
+            isLoading: authState.isLoading,
+            onPressed: (_isOtpSent
+                ? (_otp.length == 6 ? _handleContinue : null)
+                : (_phoneNumber.length == 10 ? _handleContinue : null)),
+          ),
+          const SizedBox(height: 24),
+          if (!_isOtpSent)
+            Text(
+              'By continuing, you agree to our Terms & Privacy Policy',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppTheme.slate.withOpacity(0.5),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRoleSelection() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+      itemCount: _availableRoles.length,
+      itemBuilder: (context, index) {
+        final role = _availableRoles[index];
+        final info = _getRoleInfo(role);
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () async {
+                await ref.read(authProvider.notifier).selectRole(role);
+                _navigateToDashboard(role);
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: (info['color'] as Color).withOpacity(0.2),
+                    width: 2,
+                  ),
+                  gradient: LinearGradient(
+                    colors: [
+                      (info['color'] as Color).withOpacity(0.05),
+                      Colors.white,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: (info['color'] as Color).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        info['icon'] as IconData,
+                        color: info['color'] as Color,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            info['label'] as String,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.dark,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Log in as ${info['label']}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppTheme.slate.withOpacity(0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Colors.black26,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -527,6 +662,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
         Pinput(
           length: 6,
           autofocus: true,
+          keyboardType: TextInputType.number,
           defaultPinTheme: defaultPinTheme,
           focusedPinTheme: focusedPinTheme,
           separatorBuilder: (index) => const SizedBox(width: 8),

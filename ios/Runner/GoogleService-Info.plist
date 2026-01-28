@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyD2v698q2fOZTM8oegi2tq962-wBsLGay8</string>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:612299373064:ios:428bc6097f5171e80eefbd</string>
+	<key>GCM_SENDER_ID</key>
+	<string>612299373064</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.markwave.farmvest</string>
+	<key>PROJECT_ID</key>
+	<string>markwave-481315</string>
+	<key>STORAGE_BUCKET</key>
+	<string>markwave-481315.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+</dict>
+</plist>

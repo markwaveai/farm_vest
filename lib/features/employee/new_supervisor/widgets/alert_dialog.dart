@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:farm_vest/core/widgets/custom_Textfield.dart';
 import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:farm_vest/core/widgets/custom_dialog.dart';
@@ -5,18 +6,16 @@ import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:farm_vest/features/auth/data/repositories/auth_repository.dart';
 
-enum QuickActionType {
-  milkEntry,
-  healthTicket,
-  transferRequest,
-  locateAnimal,
-}
+enum QuickActionType { milkEntry, healthTicket, transferRequest, locateAnimal }
 
 const Map<QuickActionType, String> buttonLabels = {
   QuickActionType.milkEntry: 'Submit Entry',
-  QuickActionType.healthTicket: 'Raise Critical Ticket',
-  QuickActionType.transferRequest: 'Submit',
+  QuickActionType.healthTicket: 'Raise Health Ticket',
+  QuickActionType.transferRequest: 'Submit Transfer',
   QuickActionType.locateAnimal: 'Search',
 };
 
@@ -35,151 +34,31 @@ Future<void> showQuickActionDialog({
   String selectedShed = '';
   String selectedPriority = 'Critical';
   String selectedTiming = 'Morning';
+  String selectedDisease = 'FEVER';
 
   final quantityController = TextEditingController();
   final reasonController = TextEditingController();
   final idController = TextEditingController();
 
   String dialogTitle = '';
-  bool showShedButtons = false;
   String successMessage = '';
-  List<Widget> fields = [];
   bool _isSubmitting = false;
+  List<File> _pickedImages = [];
+  int? _selectedAnimalId;
+  String? _selectedAnimalTag;
 
   switch (type) {
     case QuickActionType.milkEntry:
       dialogTitle = 'Milk Entry';
-      showShedButtons = true;
-      fields = [
-        helperTextField(
-          helperText: 'Please enter quantity in liters',
-          field: CustomTextField(
-            hint: 'Enter quantity',
-            controller: quantityController,
-          ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Select a timing',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.grey1,
-              ),
-            ),
-            const SizedBox(height: 6),
-            DropdownButtonFormField<String>(
-              value: selectedTiming,
-              items: const [
-                DropdownMenuItem(value: 'Morning', child: Text('Morning')),
-                DropdownMenuItem(value: 'Afternoon', child: Text('Afternoon')),
-                DropdownMenuItem(value: 'Evening', child: Text('Evening')),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  selectedTiming = value;
-                }
-              },
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ];
-
       break;
-
     case QuickActionType.healthTicket:
       dialogTitle = 'Report Health Ticket';
       successMessage = 'Health ticket raised successfully!';
-
-      fields = [
-        helperTextField(
-          helperText: 'Please enter Buffalo ID / RFID',
-          field: CustomTextField(
-            hint: 'Buffalo ID / RFID',
-            controller: idController,
-          ),
-        ),
-        helperTextField(
-          helperText: 'Please describe the issue',
-          field: CustomTextField(
-            hint: 'Enter issue',
-            controller: reasonController,
-          ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Select Priority',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.grey1,
-              ),
-            ),
-            const SizedBox(height: 6),
-            DropdownButtonFormField<String>(
-              value: selectedPriority,
-              items: const [
-                DropdownMenuItem(value: 'Critical', child: Text('Critical')),
-                DropdownMenuItem(value: 'High', child: Text('High')),
-                DropdownMenuItem(value: 'Medium', child: Text('Medium')),
-                DropdownMenuItem(value: 'Low', child: Text('Low')),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  selectedPriority = value;
-                }
-              },
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ];
       break;
-
     case QuickActionType.transferRequest:
       dialogTitle = 'Transfer Request';
-      showShedButtons = true;
       successMessage = 'Transfer request submitted!';
-
-      fields = [
-        helperTextField(
-          helperText: 'Please enter ID',
-          field: CustomTextField(
-            hint: 'Enter buffalo ID/RFID',
-            controller: idController,
-          ),
-        ),
-        helperTextField(
-          helperText: 'Please enter reason ',
-          field: CustomTextField(
-            hint: 'Enter reason',
-            controller: reasonController,
-          ),
-        ),
-      ];
       break;
-
     case QuickActionType.locateAnimal:
       dialogTitle = 'Locate Buffalo Position';
       break;
@@ -192,235 +71,712 @@ Future<void> showQuickActionDialog({
       return Consumer(
         builder: (context, ref, child) {
           final dashboardState = ref.watch(supervisorDashboardProvider);
+          final suggestions = dashboardState.animalSuggestions;
 
-          return StatefulBuilder(builder: (context, setState) {
-            return CustomDialog(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        dialogTitle,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  SingleChildScrollView(
-                    child: Column(
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return CustomDialog(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (type != QuickActionType.locateAnimal)
-                          ...fields.map(
-                            (f) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: f,
-                            ),
+                        Text(
+                          dialogTitle,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                        if (showShedButtons) ...[
-                          const SizedBox(height: 12),
-                          // ... (rest of the shed buttons logic)
-                        ],
-                        if (type == QuickActionType.locateAnimal) ...[
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: CustomTextField(
-                                  hint: 'Search Animal by ID',
-                                  controller: idController,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            ref
+                                .read(supervisorDashboardProvider.notifier)
+                                .clearSuggestions();
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.6,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            if (type == QuickActionType.milkEntry) ...[
+                              helperTextField(
+                                helperText: 'Please enter quantity in liters',
+                                field: CustomTextField(
+                                  hint: 'Enter quantity',
+                                  controller: quantityController,
                                   keyboardType: TextInputType.number,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              CustomActionButton(
-                                width: 48,
-                                height: 48,
-                                color: AppTheme.lightPrimary,
-                                onPressed: () {
-                                  final id = int.tryParse(idController.text);
-                                  if (id != null) {
-                                    ref
-                                        .read(supervisorDashboardProvider.notifier)
-                                        .locateAnimal(id);
-                                  }
-                                },
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.search,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                              const SizedBox(height: 12),
+                              _buildTimingDropdown(
+                                selectedTiming,
+                                (val) => setState(() => selectedTiming = val!),
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 16),
-                          if (dashboardState.isLoading)
-                            const Center(child: CircularProgressIndicator())
-                          else if (dashboardState.error != null)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(dashboardState.error!,
-                                  style: const TextStyle(color: Colors.red)),
-                            )
-                          else if (dashboardState.animalLocation != null)
-                            Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+
+                            if (type == QuickActionType.healthTicket ||
+                                type == QuickActionType.transferRequest ||
+                                type == QuickActionType.locateAnimal) ...[
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  helperTextField(
+                                    helperText:
+                                        type == QuickActionType.locateAnimal
+                                        ? 'Search Animal by ID or Tag'
+                                        : 'Buffalo ID / RFID / Ear Tag',
+                                    field: CustomTextField(
+                                      hint: 'Enter Tag Number',
+                                      controller: idController,
+                                      onChanged: (val) {
+                                        if (type !=
+                                            QuickActionType.locateAnimal) {
+                                          ref
+                                              .read(
+                                                supervisorDashboardProvider
+                                                    .notifier,
+                                              )
+                                              .searchSuggestions(val);
+                                          if (_selectedAnimalId != null &&
+                                              val != _selectedAnimalTag) {
+                                            setState(() {
+                                              _selectedAnimalId = null;
+                                              _selectedAnimalTag = null;
+                                            });
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  if (type != QuickActionType.locateAnimal &&
+                                      suggestions.isNotEmpty &&
+                                      _selectedAnimalId == null)
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: Colors.grey.shade300,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(
+                                              0.05,
+                                            ),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      constraints: const BoxConstraints(
+                                        maxHeight: 150,
+                                      ),
+                                      child: ListView.separated(
+                                        shrinkWrap: true,
+                                        padding: EdgeInsets.zero,
+                                        itemCount: suggestions.length,
+                                        separatorBuilder: (_, __) =>
+                                            const Divider(height: 1),
+                                        itemBuilder: (context, index) {
+                                          final animal =
+                                              suggestions[index]['animal_details'];
+                                          final tag =
+                                              animal['rfid_tag_number'] ??
+                                              animal['ear_tag'] ??
+                                              animal['animal_id'];
+                                          return ListTile(
+                                            dense: true,
+                                            title: Text(tag),
+                                            subtitle: Text(
+                                              'ID: ${animal['animal_id']} • Row: ${animal['row_number'] ?? 'N/A'}',
+                                            ),
+                                            onTap: () {
+                                              setState(() {
+                                                _selectedAnimalId =
+                                                    animal['id'];
+                                                _selectedAnimalTag = tag;
+                                                idController.text = tag;
+                                              });
+                                              ref
+                                                  .read(
+                                                    supervisorDashboardProvider
+                                                        .notifier,
+                                                  )
+                                                  .clearSuggestions();
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                ],
                               ),
-                              elevation: 2,
-                              margin: const EdgeInsets.symmetric(vertical: 12),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Current Location',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16),
-                                    ),
-                                    const Divider(height: 20),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const Text('Shed:'),
-                                        Text(
-                                          dashboardState.animalLocation!['shed'] ??
-                                              'N/A',
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const Text('Row:'),
-                                        Text(
-                                          dashboardState.animalLocation!['row'] ??
-                                              'N/A',
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const Text('Slot:'),
-                                        Text(
-                                          dashboardState.animalLocation!['slot'] ??
-                                              'N/A',
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const Text('Health:'),
-                                        Text(
-                                          dashboardState.animalLocation!['health'] ??
-                                              'N/A',
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                              const SizedBox(height: 12),
+                            ],
+
+                            if (type == QuickActionType.healthTicket ||
+                                type == QuickActionType.transferRequest) ...[
+                              helperTextField(
+                                helperText: 'Description / Reason',
+                                field: CustomTextField(
+                                  hint: 'Enter detail here...',
+                                  controller: reasonController,
+                                  maxLines: 2,
                                 ),
                               ),
-                            ),
-                        ],
-                      ],
+                              const SizedBox(height: 12),
+                              if (type == QuickActionType.healthTicket) ...[
+                                _buildPriorityDropdown(
+                                  selectedPriority,
+                                  (val) =>
+                                      setState(() => selectedPriority = val!),
+                                ),
+                                const SizedBox(height: 12),
+                                _buildDiseaseDropdown(
+                                  selectedDisease,
+                                  (val) =>
+                                      setState(() => selectedDisease = val!),
+                                ),
+                                const SizedBox(height: 16),
+                                _buildMultiImagePicker(
+                                  _pickedImages,
+                                  onCameraPick: () async {
+                                    final picker = ImagePicker();
+                                    final image = await picker.pickImage(
+                                      source: ImageSource.camera,
+                                      imageQuality: 70,
+                                    );
+                                    if (image != null &&
+                                        _pickedImages.length < 5) {
+                                      setState(
+                                        () =>
+                                            _pickedImages.add(File(image.path)),
+                                      );
+                                    }
+                                  },
+                                  onGalleryPick: () async {
+                                    final picker = ImagePicker();
+                                    final images = await picker.pickMultiImage(
+                                      imageQuality: 70,
+                                    );
+                                    if (images.isNotEmpty) {
+                                      final remaining =
+                                          5 - _pickedImages.length;
+                                      final toAdd = images
+                                          .take(remaining)
+                                          .map((x) => File(x.path))
+                                          .toList();
+                                      setState(
+                                        () => _pickedImages.addAll(toAdd),
+                                      );
+                                    }
+                                  },
+                                  onRemove: (index) {
+                                    setState(
+                                      () => _pickedImages.removeAt(index),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ],
+
+                            if (type == QuickActionType.locateAnimal) ...[
+                              CustomActionButton(
+                                width: double.infinity,
+                                color: AppTheme.lightPrimary,
+                                onPressed: () {
+                                  final query = idController.text.trim();
+                                  if (query.isNotEmpty) {
+                                    ref
+                                        .read(
+                                          supervisorDashboardProvider.notifier,
+                                        )
+                                        .locateAnimal(query);
+                                  }
+                                },
+                                child: const Text(
+                                  'Search',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              if (dashboardState.isLoading)
+                                const Center(child: CircularProgressIndicator())
+                              else if (dashboardState.error != null)
+                                Text(
+                                  dashboardState.error!,
+                                  style: const TextStyle(color: Colors.red),
+                                )
+                              else if (dashboardState.animalLocation != null)
+                                _buildLocationResult(
+                                  context,
+                                  dashboardState.animalLocation!,
+                                ),
+                            ],
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  if (type != QuickActionType.locateAnimal)
-                  const SizedBox(height: 16),
-                  if (type != QuickActionType.locateAnimal)
-                  CustomActionButton(
-                    onPressed: () async {
-                      if (type == QuickActionType.milkEntry) {
-                        setState(() {
-                          _isSubmitting = true;
-                        });
+                    const SizedBox(height: 20),
+                    if (type != QuickActionType.locateAnimal)
+                      CustomActionButton(
+                        onPressed: _isSubmitting
+                            ? null
+                            : () async {
+                                if (type == QuickActionType.milkEntry) {
+                                  if (quantityController.text.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Quantity is required'),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  setState(() => _isSubmitting = true);
+                                  try {
+                                    final res = await ref
+                                        .read(
+                                          supervisorDashboardProvider.notifier,
+                                        )
+                                        .createMilkEntry(
+                                          timing: selectedTiming,
+                                          quantity: quantityController.text,
+                                        );
+                                    if (res != null && context.mounted) {
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Milk entry added'),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(e.toString()),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  } finally {
+                                    if (context.mounted)
+                                      setState(() => _isSubmitting = false);
+                                  }
+                                } else if (type ==
+                                        QuickActionType.healthTicket ||
+                                    type == QuickActionType.transferRequest) {
+                                  if (_selectedAnimalId == null &&
+                                      idController.text.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Animal selection is required',
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  if (reasonController.text.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Reason/Description is required',
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
 
-                        String? finalErrorMessage;
-                        Map<String, dynamic>? successResponse;
+                                  setState(() => _isSubmitting = true);
+                                  try {
+                                    List<String> uploadedUrls = [];
+                                    for (final img in _pickedImages) {
+                                      final url =
+                                          await AuthRepository.uploadImage(img);
+                                      if (url != null) {
+                                        uploadedUrls.add(url);
+                                      }
+                                    }
 
-                        try {
-                          successResponse = await ref
-                              .read(supervisorDashboardProvider.notifier)
-                              .createMilkEntry(
-                                timing: selectedTiming,
-                                quantity: quantityController.text,
-                              );
-                        } catch (e) {
-                          finalErrorMessage = e.toString();
-                        } finally {
-                          if (context.mounted) {
-                            setState(() {
-                              _isSubmitting = false;
-                            });
-                            Navigator.pop(context);
-                          }
-                        }
+                                    // If we don't have _selectedAnimalId from specific suggestion, we should search for it once more or error
+                                    int? finalAnimalId = _selectedAnimalId;
+                                    if (finalAnimalId == null) {
+                                      final animals = await ref
+                                          .read(supervisorRepositoryProvider)
+                                          .searchAnimals(
+                                            query: idController.text.trim(),
+                                          );
+                                      if (animals.isNotEmpty) {
+                                        finalAnimalId = animals
+                                            .first['animal_details']['id'];
+                                      }
+                                    }
 
-                        if (context.mounted) {
-                          if (finalErrorMessage != null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(finalErrorMessage), backgroundColor: Colors.red));
-                          } else if (successResponse != null) {
-                            final quantity = successResponse['quantity'];
-                            final timing = successResponse['timing'];
-                            final successMessage =
-                                'Today\'s $timing milk entry of $quantity L has been added successfully.';
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(successMessage), backgroundColor: Colors.green));
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Failed to create milk entry. Please try again.'), backgroundColor: Colors.red,));
-                          }
-                        }
-                      } else {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(SnackBar(content: Text(successMessage)));
-                      }
-                    },
-                    color: buttonBackgroundColors[type] ?? AppTheme.lightPrimary,
-                    width: double.infinity,
-                    child: _isSubmitting
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                            buttonLabels[type] ?? 'Submit',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                  ),
-                ],
-              ),
-            );
-          });
+                                    if (finalAnimalId == null) {
+                                      throw Exception(
+                                        'Could not find animal matching ${idController.text}',
+                                      );
+                                    }
+
+                                    final body = {
+                                      'animal_id': finalAnimalId,
+                                      'ticket_type':
+                                          type == QuickActionType.healthTicket
+                                          ? 'HEALTH'
+                                          : 'TRANSFER',
+                                      'description': reasonController.text,
+                                      'priority': selectedPriority
+                                          .toUpperCase(),
+                                      'disease':
+                                          type == QuickActionType.healthTicket
+                                          ? [selectedDisease]
+                                          : null,
+                                      'images': uploadedUrls,
+                                    };
+
+                                    final res = await ref
+                                        .read(
+                                          supervisorDashboardProvider.notifier,
+                                        )
+                                        .createTicket(body);
+                                    if (res != null && context.mounted) {
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(successMessage),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(e.toString()),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  } finally {
+                                    if (context.mounted)
+                                      setState(() => _isSubmitting = false);
+                                  }
+                                }
+                              },
+                        color:
+                            buttonBackgroundColors[type] ??
+                            AppTheme.lightPrimary,
+                        width: double.infinity,
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                buttonLabels[type] ?? 'Submit',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          );
         },
       );
     },
+  );
+}
+
+Widget _buildTimingDropdown(String current, ValueChanged<String?> onChanged) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        'Select Timing',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppTheme.grey1,
+        ),
+      ),
+      const SizedBox(height: 6),
+      DropdownButtonFormField<String>(
+        value: current,
+        items: [
+          'Morning',
+          'Afternoon',
+          'Evening',
+        ].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildPriorityDropdown(String current, ValueChanged<String?> onChanged) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        'Select Priority',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppTheme.grey1,
+        ),
+      ),
+      const SizedBox(height: 6),
+      DropdownButtonFormField<String>(
+        value: current,
+        items: [
+          'Critical',
+          'High',
+          'Medium',
+          'Low',
+        ].map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildDiseaseDropdown(String current, ValueChanged<String?> onChanged) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        'Identify Disease',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppTheme.grey1,
+        ),
+      ),
+      const SizedBox(height: 6),
+      DropdownButtonFormField<String>(
+        value: current,
+        items: [
+          'FEVER',
+          'MASTITIS',
+          'DIARRHEA',
+          'FOOT_ROT',
+          'ANEMIA',
+          'BLOAT',
+          'HEAT_STRESS',
+        ].map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildMultiImagePicker(
+  List<File> pickedImages, {
+  required VoidCallback onCameraPick,
+  required VoidCallback onGalleryPick,
+  required void Function(int) onRemove,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        'Evidence Images (Optional, max 5)',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppTheme.grey1,
+        ),
+      ),
+      const SizedBox(height: 8),
+      SizedBox(
+        height: 100,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            ...pickedImages.asMap().entries.map((entry) {
+              final index = entry.key;
+              final file = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        file,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: InkWell(
+                        onTap: () => onRemove(index),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            if (pickedImages.length < 5)
+              Row(
+                children: [
+                  _buildAddImageButton(
+                    Icons.camera_alt,
+                    'Camera',
+                    onCameraPick,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildAddImageButton(
+                    Icons.photo_library,
+                    'Gallery',
+                    onGalleryPick,
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildAddImageButton(IconData icon, String label, VoidCallback onTap) {
+  return InkWell(
+    onTap: onTap,
+    child: Container(
+      width: 80,
+      height: 100,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: AppTheme.primary),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: AppTheme.primary),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildLocationResult(
+  BuildContext context,
+  Map<String, dynamic> location,
+) {
+  return InkWell(
+    onTap: () {
+      Navigator.pop(context);
+      context.go(
+        '/buffalo-allocation',
+        extra: {
+          'shedId': location['shed_id'],
+          'parkingId': location['parking_id'],
+        },
+      );
+    },
+    borderRadius: BorderRadius.circular(12),
+    child: Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Current Location',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const Icon(Icons.directions, color: AppTheme.primary),
+              ],
+            ),
+            const Divider(),
+            _buildLocationRow('Shed', location['shed_name']),
+            _buildLocationRow('Row', location['row_number']?.toString()),
+            _buildLocationRow('Slot', location['parking_id']),
+            _buildLocationRow('Health', location['health_status']),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _buildLocationRow(String label, String? value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label),
+        Text(
+          value ?? 'N/A',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ],
+    ),
   );
 }
 

@@ -1,5 +1,6 @@
-
 import 'dart:io';
+import 'animalkart_order_model.dart';
+import 'shed_model.dart';
 
 class DashboardImage {
   final File? localFile;
@@ -22,6 +23,10 @@ class FarmManagerDashboardState {
   final bool isLoading;
   final String? error;
   final List<DashboardImage> images;
+  final AnimalkartOrder? currentOrder;
+  final List<dynamic> onboardedAnimalIds;
+  final List<Shed> sheds;
+  final ShedPositionResponse? currentShedAvailability;
 
   FarmManagerDashboardState({
     this.investorCount = 0,
@@ -30,6 +35,10 @@ class FarmManagerDashboardState {
     this.isLoading = false,
     this.error,
     this.images = const [],
+    this.currentOrder,
+    this.onboardedAnimalIds = const [],
+    this.sheds = const [],
+    this.currentShedAvailability,
   });
 
   FarmManagerDashboardState copyWith({
@@ -39,6 +48,10 @@ class FarmManagerDashboardState {
     bool? isLoading,
     String? error,
     List<DashboardImage>? images,
+    AnimalkartOrder? currentOrder,
+    List<dynamic>? onboardedAnimalIds,
+    List<Shed>? sheds,
+    ShedPositionResponse? currentShedAvailability,
   }) {
     return FarmManagerDashboardState(
       investorCount: investorCount ?? this.investorCount,
@@ -47,6 +60,11 @@ class FarmManagerDashboardState {
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       images: images ?? this.images,
+      currentOrder: currentOrder ?? this.currentOrder,
+      onboardedAnimalIds: onboardedAnimalIds ?? this.onboardedAnimalIds,
+      sheds: sheds ?? this.sheds,
+      currentShedAvailability:
+          currentShedAvailability ?? this.currentShedAvailability,
     );
   }
 }

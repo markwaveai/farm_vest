@@ -6,11 +6,13 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 //class StaffApiService {
-class FarmManagerApiServices{
-  static const String url =
-      "${AppConstants.appLiveUrl}/farm_manager/get_total_staff";
+class FarmManagerApiServices {
+  static const String url = "${AppConstants.appLiveUrl}/farm/staff";
 
-  static Future<List<Staff>> fetchStaff() async {
+  static Future<List<Staff>> fetchStaff({
+    String query = '',
+    String? role,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
     print("Access token:$token");
@@ -19,8 +21,17 @@ class FarmManagerApiServices{
       throw Exception("Access token not found. Please login again.");
     }
 
+    // Construct URL with query parameters
+    var url =
+        "${AppConstants.appLiveUrl}/employee/search_employee?query_str=$query&size=100";
+    if (role != null && role.isNotEmpty && role.toUpperCase() != 'ALL') {
+      url += "&role=${role.toUpperCase().replaceAll(' ', '_')}";
+    }
+
+    final uri = Uri.parse(url);
+
     final response = await http.get(
-      Uri.parse(url),
+      uri,
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -38,74 +49,74 @@ class FarmManagerApiServices{
     final decoded = json.decode(response.body);
 
     if (decoded['data'] == null) {
-      throw Exception("No data found in API response");
+      return [];
     }
 
-    final data = decoded['data'];
+    final data = decoded['data'] as List;
+    List<Staff> staffList = [];
 
-    List<Staff> staff = [];
-
-    if (data['supervisors'] != null) {
-      for (final s in data['supervisors']) {
-        staff.add(Staff.fromJson(s, "Supervisor"));
+    for (final item in data) {
+      final roles = (item['roles'] as List?)?.cast<String>() ?? [];
+      String role = "Staff";
+      if (roles.contains("SUPERVISOR")) {
+        role = "Supervisor";
+      } else if (roles.contains("DOCTOR")) {
+        role = "Doctor";
+      } else if (roles.contains("ASSISTANT_DOCTOR")) {
+        role = "Assistant Doctor";
+      } else if (roles.contains("FARM_MANAGER")) {
+        role = "Farm Manager";
       }
+
+      staffList.add(
+        Staff.fromJson({
+          ...item,
+          'name': "${item['first_name']} ${item['last_name']}".trim(),
+          'mobile': item['mobile'],
+          'email': item['email'],
+          'status': (item['is_active'] ?? false) ? 'On Duty' : 'Inactive',
+        }, role),
+      );
     }
 
-    if (data['doctors'] != null) {
-      for (final d in data['doctors']) {
-        staff.add(Staff.fromJson(d, "Doctor"));
-      }
-    }
-
-    if (data['assistant_doctors'] != null) {
-      for (final a in data['assistant_doctors']) {
-        staff.add(Staff.fromJson(a, "Assistant Doctor"));
-      }
-    }
-
-    return staff;
+    return staffList;
   }
-
-
-
 
   //Api for milk report....
   static Future<dynamic> fetchMilkReport({
     required String reportDate,
     required String entryFrequency,
     String? timing,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
 
-  }) async{
-    final prefs=await SharedPreferences.getInstance();
-    final token=prefs.getString('access_token');
-    
-    if (token==null){
+    if (token == null) {
       throw Exception("Access token not found. Please LOgin");
     }
-    final queryParams={
-      'report_date' : reportDate,
-      'entry_frequency' :entryFrequency.toUpperCase(),
-      if(timing !=null) 'timing' :timing.toUpperCase(),
+    final queryParams = {
+      'report_date': reportDate,
+      'entry_frequency': entryFrequency.toUpperCase(),
+      if (timing != null) 'timing': timing.toUpperCase(),
     };
     final uri = Uri.parse(
-      "${AppConstants.appLiveUrl}/farm_manager/get_milk_report",
+      "${AppConstants.appLiveUrl}/milk/reports",
     ).replace(queryParameters: queryParams);
 
     final response = await http.get(
       uri,
       headers: {
-        'Authorization':'Bearer $token',
-        'content-type' : 'application/json',
+        'Authorization': 'Bearer $token',
+        'content-type': 'application/json',
       },
     );
-       print("Milk Report API Response:${response.body} ");
+    print("Milk Report API Response:${response.body} ");
 
-       if(response.statusCode!=200){
-          throw Exception(
-            "Failed to load milk.Status code: ${response.statusCode}",
-          );
-       }
-       return json.decode(response.body);
+    if (response.statusCode != 200) {
+      throw Exception(
+        "Failed to load milk.Status code: ${response.statusCode}",
+      );
+    }
+    return json.decode(response.body);
   }
-
 }

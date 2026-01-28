@@ -124,7 +124,7 @@ class _BiometricLockScreenState extends State<BiometricLockScreen>
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: _isAuthenticating ? null : _authenticate,
-                  child: Text( 'unlock'),
+                  child: Text('unlock'),
                 ),
               ],
             ),

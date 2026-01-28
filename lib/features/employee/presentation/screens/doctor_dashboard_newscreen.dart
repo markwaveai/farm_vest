@@ -7,20 +7,50 @@ import 'package:farm_vest/features/employee/presentation/screens/search_history_
 import 'package:farm_vest/features/employee/presentation/widgets/doctor_dashboard/log_routine_visit_dialog.dart';
 import 'package:farm_vest/features/employee/presentation/widgets/doctor_dashboard/treat_prescribe_dialog.dart';
 import 'package:farm_vest/features/employee/presentation/widgets/doctor_dashboard/view_history_dialog.dart';
+import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/widgets/custom_button.dart';
 
-class DoctorDashboardNewscreen extends StatefulWidget {
+class DoctorDashboardNewscreen extends ConsumerStatefulWidget {
   const DoctorDashboardNewscreen({super.key});
 
   @override
-  State<DoctorDashboardNewscreen> createState() =>
+  ConsumerState<DoctorDashboardNewscreen> createState() =>
       _DoctorDashboardNewscreenState();
 }
 
-class _DoctorDashboardNewscreenState extends State<DoctorDashboardNewscreen> {
+class _DoctorDashboardNewscreenState
+    extends ConsumerState<DoctorDashboardNewscreen> {
   bool _showAllPriority = false;
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) {
+                context.go('/login');
+              }
+            },
+            child: const Text('Logout', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   List<CustomCard> _buildPriorityCards() {
     return [
       CustomCard(
@@ -244,6 +274,10 @@ class _DoctorDashboardNewscreenState extends State<DoctorDashboardNewscreen> {
                 ],
               ),
             ],
+          ),
+          IconButton(
+            onPressed: _showLogoutDialog,
+            icon: const Icon(Icons.logout, color: AppTheme.errorRed),
           ),
         ],
       ),

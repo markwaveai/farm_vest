@@ -1,18 +1,22 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
+import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 
-class ProfileScreen extends StatefulWidget {
+import 'package:farm_vest/core/utils/app_enums.dart';
+
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -34,24 +38,176 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _loadProfileData() {
-    // Load existing profile data
-    _nameController.text = 'Uma Sankar';
-    _phoneController.text = '+91 6305447441';
-    _emailController.text = 'umaSankar@farmvest.com';
+    final user = ref.read(authProvider).userData;
+    _nameController.text = user?.name ?? '';
+    _phoneController.text = user?.mobile ?? '';
+    _emailController.text = user?.email ?? '';
+  }
+
+  Map<String, dynamic> _getRoleInfo(UserType role) {
+    switch (role) {
+      case UserType.admin:
+        return {
+          'label': 'Administrator',
+          'icon': Icons.admin_panel_settings,
+          'color': Colors.blue,
+        };
+      case UserType.farmManager:
+        return {
+          'label': 'Farm Manager',
+          'icon': Icons.agriculture,
+          'color': Colors.green,
+        };
+      case UserType.supervisor:
+        return {
+          'label': 'Supervisor',
+          'icon': Icons.assignment_ind,
+          'color': Colors.orange,
+        };
+      case UserType.doctor:
+        return {
+          'label': 'Doctor',
+          'icon': Icons.medical_services,
+          'color': Colors.red,
+        };
+      case UserType.assistant:
+        return {
+          'label': 'Assistant Doctor',
+          'icon': Icons.health_and_safety,
+          'color': Colors.teal,
+        };
+      case UserType.customer:
+        return {
+          'label': 'Investor',
+          'icon': Icons.trending_up,
+          'color': Colors.indigo,
+        };
+    }
+  }
+
+  void _showSwitchRoleBottomSheet() {
+    final availableRoles = ref.read(authProvider).availableRoles;
+    final currentRole = ref.read(authProvider).role;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Switch Active Role',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose which portal you want to access',
+                style: TextStyle(color: AppTheme.mediumGrey),
+              ),
+              const SizedBox(height: 24),
+              ...availableRoles.map((role) {
+                final info = _getRoleInfo(role);
+                final isSelected = role == currentRole;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    onTap: isSelected
+                        ? null
+                        : () async {
+                            Navigator.pop(context);
+                            await ref
+                                .read(authProvider.notifier)
+                                .selectRole(role);
+
+                            if (!mounted) return;
+                            switch (role) {
+                              case UserType.admin:
+                                context.go('/admin-dashboard');
+                                break;
+                              case UserType.farmManager:
+                                context.go('/farm-manager-dashboard');
+                                break;
+                              case UserType.supervisor:
+                                context.go('/supervisor-dashboard');
+                                break;
+                              case UserType.doctor:
+                                context.go('/doctor-dashboard');
+                                break;
+                              case UserType.assistant:
+                                context.go('/assistant-dashboard');
+                                break;
+                              case UserType.customer:
+                                context.go('/customer-dashboard');
+                                break;
+                            }
+                          },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isSelected
+                            ? info['color']
+                            : Colors.grey.shade200,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    tileColor: isSelected
+                        ? (info['color'] as Color).withOpacity(0.05)
+                        : null,
+                    leading: CircleAvatar(
+                      backgroundColor: (info['color'] as Color).withOpacity(
+                        0.1,
+                      ),
+                      child: Icon(
+                        info['icon'] as IconData,
+                        color: info['color'] as Color,
+                      ),
+                    ),
+                    title: Text(
+                      info['label'] as String,
+                      style: TextStyle(
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_circle,
+                            color: info['color'] as Color,
+                          )
+                        : const Icon(Icons.arrow_forward_ios, size: 14),
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final currentRole = authState.role;
+    final roleInfo = _getRoleInfo(currentRole ?? UserType.customer);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
         automaticallyImplyLeading: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => NavigationHelper.safePopOrNavigate(
-            context,
-            fallbackRoute: '/supervisor-dashboard',
-          ),
+          onPressed: () =>
+              NavigationHelper.safePopOrNavigate(context, fallbackRoute: '/'),
         ),
         actions: [
           IconButton(
@@ -120,15 +276,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         vertical: AppConstants.spacingS,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.secondary.withValues(alpha: 0.1),
+                        color: (roleInfo['color'] as Color).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(
                           AppConstants.radiusL,
                         ),
                       ),
-                      child: const Text(
-                        'Supervisor',
+                      child: Text(
+                        roleInfo['label'] as String,
                         style: TextStyle(
-                          color: AppTheme.primary,
+                          color: roleInfo['color'] as Color,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -328,32 +484,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: AppConstants.spacingL),
 
             // Action Buttons
-            if (!_isEditing) ...[
-              // SizedBox(
-              //   width: double.infinity,
-              //   child: OutlinedButton.icon(
-              //     onPressed: () {
-              //       // Handle password change
-              //       _showChangePasswordDialog();
-              //     },
-              //     icon: const Icon(Icons.lock),
-              //     label: const Text('Change Password'),
-              //   ),
-              // ),
-              const SizedBox(height: AppConstants.spacingM),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => _showLogoutDialog(),
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Logout'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.errorRed,
+            if (authState.availableRoles.length > 1) ...[
+              Card(
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.swap_horiz,
+                    color: AppTheme.primary,
                   ),
+                  title: const Text('Switch Active Role'),
+                  subtitle: Text('Currently as ${roleInfo['label']}'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: _showSwitchRoleBottomSheet,
                 ),
               ),
+              const SizedBox(height: AppConstants.spacingM),
             ],
+
+            const SizedBox(height: AppConstants.spacingM),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _showLogoutDialog(),
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.errorRed,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -443,9 +602,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.go('/login');
+            onPressed: () async {
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) {
+                Navigator.pop(context);
+                context.go('/login');
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorRed),
             child: const Text('Logout'),

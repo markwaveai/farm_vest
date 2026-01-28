@@ -1,13 +1,145 @@
+import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SupervisorBuffaloScreen extends StatelessWidget {
+class SupervisorBuffaloScreen extends ConsumerWidget {
   const SupervisorBuffaloScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final animalsAsync = ref.watch(searchedAnimalsProvider);
+    final searchController = TextEditingController(
+      text: ref.read(animalSearchQueryProvider) == 'all'
+          ? ''
+          : ref.read(animalSearchQueryProvider),
+    );
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Buffalo')),
-      body: const Center(child: Text('Buffalo')),
+      backgroundColor: AppTheme.grey,
+      appBar: AppBar(
+        title: const Text('Animals List'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: 'Search by Tag, RFID or ID',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    searchController.clear();
+                    ref.read(animalSearchQueryProvider.notifier).state = 'all';
+                  },
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              onSubmitted: (value) {
+                ref.read(animalSearchQueryProvider.notifier).state =
+                    value.isEmpty ? 'all' : value;
+              },
+            ),
+          ),
+        ),
+      ),
+      body: animalsAsync.when(
+        data: (animals) {
+          if (animals.isEmpty) {
+            return const Center(child: Text('No animals found'));
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: animals.length,
+            itemBuilder: (context, index) {
+              final animal = animals[index];
+              final details = animal['animal_details'] ?? {};
+              final shed = animal['shed_details'] ?? {};
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ExpansionTile(
+                  leading: CircleAvatar(
+                    backgroundColor: AppTheme.primary.withOpacity(0.1),
+                    child: const Icon(Icons.pets, color: AppTheme.primary),
+                  ),
+                  title: Text(
+                    details['animal_id'] ?? 'Unknown ID',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    'Tag: ${details['ear_tag'] ?? 'N/A'} | Shed: ${shed['shed_name'] ?? 'N/A'}',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildDetailRow('RFID', details['rfid_tag_number']),
+                          _buildDetailRow('Breed', details['breed_name']),
+                          _buildDetailRow(
+                            'Age',
+                            '${details['age_months'] ?? 'N/A'} months',
+                          ),
+                          _buildDetailRow('Type', details['animal_type']),
+                          _buildDetailRow('Health', details['health_status']),
+                          _buildDetailRow('Status', details['status']),
+                          const Divider(),
+                          _buildDetailRow(
+                            'Farm',
+                            animal['farm_details']?['farm_name'],
+                          ),
+                          _buildDetailRow(
+                            'Investor',
+                            animal['investor_details']?['full_name'],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, dynamic value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value?.toString() ?? 'N/A',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 }

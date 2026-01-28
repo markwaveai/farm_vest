@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:farm_vest/core/services/api_services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // 1. Model for an Investor
 // This should be moved to a proper model file in data/models eventually
@@ -50,48 +52,38 @@ class InvestorListState {
 // 3. The Notifier to manage the state
 class InvestorListNotifier extends Notifier<InvestorListState> {
   // Hold the original, unfiltered list of investors
-  final List<Investor> _sourceInvestors = [
-    Investor(
-      name: "Rahul Sharma",
-      location: "Hyderabad, India",
-      amount: "₹25,00,000",
-      date: "Jan 2024",
-      status: "Active",
-    ),
-    Investor(
-      name: "Venture Alpha",
-      location: "Bangalore, India",
-      amount: "₹75,00,000",
-      date: "Mar 2024",
-      status: "Active",
-    ),
-    Investor(
-      name: "Sneha Patel",
-      location: "Ahmedabad, India",
-      amount: "₹5,00,000",
-      date: "Apr 2023",
-      status: "Exited",
-    ),
-    Investor(
-      name: "Aayush Sharma",
-      location: "Mumbai, India",
-      amount: "10,00,000",
-      date: "Jan 2025",
-      status: "Active",
-    ),
-    Investor(
-      name: "Anjaneyulu",
-      location: "Hyderabad, India",
-      amount: "33,00,000",
-      date: "Oct 2023",
-      status: "Active",
-    ),
-  ];
+  List<Investor> _sourceInvestors = [];
 
   @override
   InvestorListState build() {
-    // Initially, show all investors
-    return InvestorListState(investors: _sourceInvestors);
+    _loadInvestors();
+    return InvestorListState(isLoading: true);
+  }
+
+  Future<void> _loadInvestors() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+      if (token == null) return;
+
+      final data = await ApiServices.getAllInvestors(token: token);
+
+      _sourceInvestors = data.map((json) {
+        final amount = json['total_investment']?.toString() ?? "0";
+        return Investor(
+          name: "${json['first_name']} ${json['last_name']}".trim(),
+          location: json['address'] ?? 'Unknown',
+          amount: "₹$amount",
+          date: "N/A", // API doesn't provide join date in list
+          status: (json['active_status'] == true) ? "Active" : "Exited",
+        );
+      }).toList();
+
+      _runFilters();
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      // Ideally handle error state
+    }
   }
 
   void _runFilters({String? status, String? query}) {
@@ -112,8 +104,9 @@ class InvestorListNotifier extends Notifier<InvestorListState> {
     // Then apply search query on the result
     if (currentQuery.isNotEmpty) {
       filteredList = filteredList
-          .where((i) =>
-              i.name.toLowerCase().contains(currentQuery.toLowerCase()))
+          .where(
+            (i) => i.name.toLowerCase().contains(currentQuery.toLowerCase()),
+          )
           .toList();
     }
 
@@ -140,5 +133,5 @@ class InvestorListNotifier extends Notifier<InvestorListState> {
 // 4. The final provider that the UI will use
 final investorListProvider =
     NotifierProvider<InvestorListNotifier, InvestorListState>(
-  InvestorListNotifier.new,
-);
+      InvestorListNotifier.new,
+    );
