@@ -1,4 +1,5 @@
 import 'package:farm_vest/core/error/exceptions.dart';
+import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/core/services/api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,7 +35,7 @@ class SupervisorRepository {
     if (token == null) {
       throw AuthException('Authentication token not found');
     }
-    return await ApiServices.searchAnimals(token: token, query: query);
+    return await AnimalApiServices.searchAnimals(token: token, query: query);
   }
 
   Future<Map<String, dynamic>> createMilkEntry({

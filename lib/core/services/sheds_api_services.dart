@@ -164,45 +164,4 @@ class ShedsApiServices {
       throw AppException(e.toString());
     }
   }
-
-  static Future<AllocatedAnimalDetails> getAnimalDetails({
-    required String token,
-    required String farmId,
-    required String shedId,
-    required String rowNumber,
-    required String parkingId,
-  }) async {
-    try {
-      final query = parkingId;
-
-      final url =
-          "${AppConstants.appLiveUrl}/animal/search_animal?query_str=$query";
-
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List<dynamic> animals = data['data'];
-
-        if (animals.isNotEmpty) {
-          return AllocatedAnimalDetails.fromJson(animals.first);
-        }
-
-        throw ServerException(
-          'No animal found at this position',
-          statusCode: 404,
-        );
-      }
-
-      throw ServerException(
-        'Failed to fetch animal details',
-        statusCode: response.statusCode,
-      );
-    } catch (e) {
-      throw AppException(e.toString());
-    }
-  }
 }

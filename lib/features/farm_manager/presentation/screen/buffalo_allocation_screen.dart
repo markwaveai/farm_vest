@@ -1,3 +1,4 @@
+import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
@@ -1224,17 +1225,14 @@ class _BuffaloAllocationScreenState
                           ),
                         );
 
-                        final details = await ShedsApiServices.getAnimalDetails(
-                          token: token,
-                          farmId: shed.farmId.toString(),
-                          shedId: shed.id.toString(),
-                          rowNumber: rowNum,
-                          parkingId: fullParkingId,
-                        );
+                        // final details = await AnimalApiServices.searchAnimals(
+                        //   token: token,
+                        //   query: fullParkingId,
+                        // );
 
-                        if (mounted) {
-                          _showAllocatedAnimalDetails(details);
-                        }
+                        // if (mounted) {
+                        //   _showAllocatedAnimalDetails(details);
+                        // }
                       }
                     } catch (e) {
                       debugPrint("Error fetching details: $e");
@@ -1471,43 +1469,37 @@ class _BuffaloAllocationScreenState
     }
 
     // Convert draftAllocations to required format
-    final farmName = selectedShed.farmName.toLowerCase().replaceAll(' ', '');
-    final shedCode = selectedShed.shedId;
+    final List<Map<String, dynamic>> allocations = draftAllocations.entries.map(
+      (e) {
+        final parts = e.key.split('-'); // e.g. ["R1", "A4"]
+        final rowId = parts[0]; // "R1"
+        final slotId = parts[1]; // "A4"
 
-    final List<Map<String, dynamic>>
-    allocations = draftAllocations.entries.map((e) {
-      final parts = e.key.split('-'); // e.g. ["R1", "A4"]
-      final rowId = parts[0]; // "R1"
-      final slotId = parts[1]; // "A4"
+        final String animalId = e.value;
+        // Find the animal object to get the RFID tag
+        final animalObj = onboardedAnimals.firstWhere(
+          (a) {
+            final aId = (a is Map)
+                ? (a['animal_id'] ?? a['rfid'])
+                : a.toString();
+            return aId.toString() == animalId;
+          },
+          orElse: () => <String, dynamic>{}, // Return empty map if not found
+        );
 
-      // Extract numbers for row_number keys
-      final rowNum = int.parse(rowId.replaceAll(RegExp(r'[^0-9]'), ''));
+        String rfidTag = animalId; // Fallback to ID
+        if (animalObj is Map) {
+          rfidTag = (animalObj['rfid_tag'] ?? animalObj['rfid'] ?? animalId)
+              .toString();
+        }
 
-      // Construct parking_id matching backend expectation: {farm_name}{shed_code}{row_id}{slot_id}
-      final parkingId = '$farmName$shedCode$rowId$slotId';
-
-      final String animalId = e.value;
-      // Find the animal object to get the RFID tag
-      final animalObj = onboardedAnimals.firstWhere(
-        (a) {
-          final aId = (a is Map) ? (a['animal_id'] ?? a['rfid']) : a.toString();
-          return aId.toString() == animalId;
-        },
-        orElse: () => <String, dynamic>{}, // Return empty map if not found
-      );
-
-      String rfidTag = animalId; // Fallback to ID
-      if (animalObj is Map) {
-        rfidTag = (animalObj['rfid_tag'] ?? animalObj['rfid'] ?? animalId)
-            .toString();
-      }
-
-      return {
-        'rfid_tag_number': rfidTag,
-        'parking_id': parkingId,
-        'row_number': rowNum,
-      };
-    }).toList();
+        return {
+          'rfid_tag_number': rfidTag,
+          'parking_id': slotId, // Just the slot ID like "A4"
+          'row_number': rowId, // Row ID as string like "R1"
+        };
+      },
+    ).toList();
 
     final success = await ref
         .read(farmManagerProvider.notifier)
