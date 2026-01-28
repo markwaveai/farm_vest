@@ -1,55 +1,50 @@
+import 'package:farm_vest/features/admin/presentation/screens/add_farm_screen.dart';
+import 'package:farm_vest/features/admin/presentation/screens/add_shed_screen.dart';
+import 'package:farm_vest/features/admin/presentation/screens/add_staff_screen.dart';
+import 'package:farm_vest/features/admin/presentation/screens/admin_dashboard_screen.dart';
+import 'package:farm_vest/features/admin/presentation/screens/admin_onboard_animal_screen.dart';
+import 'package:farm_vest/features/admin/presentation/screens/farm_sheds_screen.dart';
+import 'package:farm_vest/features/admin/presentation/screens/investor_animals_screen.dart';
+import 'package:farm_vest/features/admin/presentation/screens/investor_management_screen.dart';
+import 'package:farm_vest/features/admin/presentation/screens/ticket_management_screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/actual_alert_Screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/create_leave_request_screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/leave_requests_screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/new_supervisor_dashboard.dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/new_supervisor_shell.dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_buffalo_screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_more_screen%20(1).dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_stats_screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/transfer_tickets_screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_details_screen.dart';
+import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_grid_screen.dart';
+import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/buffalo_allocation_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/farm_manager_dashboard.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/manager_transfer_approval_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/onboard_animal_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/reports_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/staff_list_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/widgets/investor_details.dart';
-import 'package:farm_vest/features/farm_manager/presentation/screen/buffalo_allocation_screen.dart';
-import 'package:farm_vest/features/farm_manager/presentation/screen/manager_transfer_approval_screen.dart';
-import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_details_screen.dart';
-import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_grid_screen.dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/leave_requests_screen.dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/create_leave_request_screen.dart';
-import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/actual_alert_Screen.dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_stats_screen.dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_more_screen%20(1).dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/new_supervisor_dashboard.dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/new_supervisor_shell.dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_buffalo_screen.dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/transfer_tickets_screen.dart';
+import 'package:farm_vest/features/investor/presentation/screens/monthly_visits/monthly_visits_screen.dart';
+import 'package:farm_vest/features/investor/presentation/screens/profile_Screens/investor_profile_screen.dart';
+import 'package:farm_vest/features/investor/presentation/widgets/investor_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:farm_vest/features/investor/presentation/screens/cctv_main_screen.dart';
-import 'package:farm_vest/features/investor/presentation/screens/investor_profile_screen.dart';
-import 'package:farm_vest/features/investor/presentation/widgets/investor_shell.dart';
-import '../../features/investor/presentation/screens/buffalo_calves_screen.dart';
-import '../../features/investor/data/models/unit_response.dart';
+
 import '../../features/auth/presentation/screens/new_login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
-import '../../features/auth/presentation/screens/admin_login_screen.dart';
 import '../../features/common/presentation/screens/notifications_screen.dart';
-import '../../features/investor/presentation/screens/asset_valuation_screen.dart';
-import '../../features/investor/presentation/screens/investor_dashboard_screen.dart';
-import '../../features/investor/presentation/screens/monthly_visits_screen.dart';
-import '../../features/investor/presentation/screens/revenue_screen.dart';
-import '../../features/investor/presentation/screens/support_screen.dart';
-import '../../features/investor/presentation/screens/unit_details_screen.dart';
 import '../../features/employee/presentation/screens/assistant_dashboard_screen.dart';
-
 import '../../features/employee/presentation/screens/health_issues_screen.dart';
 import '../../features/employee/presentation/screens/milk_production_screen.dart';
 import '../../features/employee/presentation/screens/profile_screen.dart';
 import '../../features/employee/presentation/screens/raise_ticket_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/admin_dashboard_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/add_farm_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/add_shed_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/admin_onboard_animal_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/add_staff_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/ticket_management_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/farm_sheds_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/investor_management_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/investor_animals_screen.dart';
+
+import '../../features/investor/presentation/screens/investor_dashboard_screen.dart';
+import '../../features/investor/presentation/screens/profile_Screens/support_screen.dart';
+import '../../features/investor/presentation/screens/unit_details_screen.dart';
 
 // 1. Define the GlobalKey for the navigator.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -78,11 +73,6 @@ class AppRouter {
         },
       ),
 
-      GoRoute(
-        path: '/admin-login',
-        builder: (context, state) => const AdminLoginScreen(),
-      ),
-
       // Customer Routes
       ShellRoute(
         builder: (context, state, child) => InvestorShell(child: child),
@@ -91,18 +81,18 @@ class AppRouter {
             path: '/customer-dashboard',
             builder: (context, state) => const InvestorDashboardScreen(),
           ),
-          GoRoute(
-            path: '/asset-valuation',
-            builder: (context, state) => const AssetValuationScreen(),
-          ),
-          GoRoute(
-            path: '/cctv-live',
-            builder: (context, state) => const CCTVMainScreen(),
-          ),
-          GoRoute(
-            path: '/revenue',
-            builder: (context, state) => const RevenueScreen(),
-          ),
+          // GoRoute(
+          //   path: '/asset-valuation',
+          //   builder: (context, state) => const AssetValuationScreen(),
+          // ),
+          // GoRoute(
+          //   path: '/cctv-live',
+          //   builder: (context, state) => const CCTVMainScreen(),
+          // ),
+          // GoRoute(
+          //   path: '/revenue',
+          //   builder: (context, state) => const RevenueScreen(),
+          // ),
           GoRoute(
             path: '/customer-profile',
             builder: (context, state) => const InvestorProfileScreen(),
@@ -126,17 +116,17 @@ class AppRouter {
         path: '/support',
         builder: (context, state) => const SupportScreen(),
       ),
-      GoRoute(
-        path: '/buffalo-calves',
-        builder: (context, state) {
-          final extras = state.extra as Map<String, dynamic>;
-          return BuffaloCalvesScreen(
-            calves: extras['calves'] as List<Animal>,
-            parentId: extras['parentId'] as String,
-            parent: extras['parent'] as Animal?,
-          );
-        },
-      ),
+      // GoRoute(
+      //   path: '/buffalo-calves',
+      //   builder: (context, state) {
+      //     final extras = state.extra as Map<String, dynamic>;
+      //     return BuffaloCalvesScreen(
+      //       calves: extras['calves'] as List<Animal>,
+      //       parentId: extras['parentId'] as String,
+      //       parent: extras['parent'] as Animal?,
+      //     );
+      //   },
+      // ),
 
       // Employee Routes
       ShellRoute(

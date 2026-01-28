@@ -1,3 +1,4 @@
+import 'package:farm_vest/core/services/investor_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:farm_vest/features/auth/data/repositories/auth_repository.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
@@ -33,7 +34,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
 
     try {
       // 1. Fetch Investors
-      final investors = await ApiServices.getAllInvestors(token: token);
+      final investors = await InvestorApiServices.getAllInvestors(token: token);
       final investorCount = investors.length;
 
       // 2. Fetch Staff Count

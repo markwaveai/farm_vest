@@ -1,12 +1,17 @@
-
-import 'package:equatable/equatable.dart';
-
-class VisitAvailabilityParams extends Equatable {
+class VisitAvailabilityParams {
   final String date;
-  final String location;
+  final int farmId;
 
-  const VisitAvailabilityParams({required this.date, required this.location});
+  const VisitAvailabilityParams({required this.date, required this.farmId});
 
   @override
-  List<Object?> get props => [date, location];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VisitAvailabilityParams &&
+          runtimeType == other.runtimeType &&
+          date == other.date &&
+          farmId == other.farmId;
+
+  @override
+  int get hashCode => date.hashCode ^ farmId.hashCode;
 }

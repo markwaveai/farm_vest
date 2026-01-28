@@ -4,11 +4,7 @@ class TypingIndicator extends StatefulWidget {
   final String? avatarUrl; // optional profile image
   final double avatarSize;
 
-  const TypingIndicator({
-    super.key,
-    this.avatarUrl,
-    this.avatarSize = 28,
-  });
+  const TypingIndicator({super.key, this.avatarUrl, this.avatarSize = 28});
 
   @override
   State<TypingIndicator> createState() => _TypingIndicatorState();
@@ -38,19 +34,12 @@ class _TypingIndicatorState extends State<TypingIndicator>
       opacity: Tween(begin: 0.3, end: 1.0).animate(
         CurvedAnimation(
           parent: _controller,
-          curve: Interval(
-            index * 0.2,
-            1.0,
-            curve: Curves.easeInOut,
-          ),
+          curve: Interval(index * 0.2, 1.0, curve: Curves.easeInOut),
         ),
       ),
       child: const Padding(
         padding: EdgeInsets.symmetric(horizontal: 2),
-        child: CircleAvatar(
-          radius: 3,
-          backgroundColor: Colors.deepPurple,
-        ),
+        child: CircleAvatar(radius: 3, backgroundColor: Colors.deepPurple),
       ),
     );
   }
@@ -84,13 +73,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
       children: [
         _buildAvatar(),
         const SizedBox(width: 8),
-        Row(
-          children: [
-            _dot(0),
-            _dot(1),
-            _dot(2),
-          ],
-        ),
+        Row(children: [_dot(0), _dot(1), _dot(2)]),
       ],
     );
   }

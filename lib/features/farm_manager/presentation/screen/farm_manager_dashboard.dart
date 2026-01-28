@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/services/api_services.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/farm_manager_provider.dart';
@@ -122,7 +123,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             try {
               final prefs = await SharedPreferences.getInstance();
               final token = prefs.getString('access_token') ?? '';
-              final list = await ApiServices.searchAnimals(
+              final list = await AnimalApiServices.searchAnimals(
                 token: token,
                 query: query,
               );

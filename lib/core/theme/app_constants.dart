@@ -21,8 +21,7 @@ class AppConstants {
   // };
   static const String authApiKey =
       'bWFya3dhdmUtZmFybXZlc3QtdGVzdHRpbmctYXBpa2V5';
-  static const String visitApiUrl =
-      'https://animalkart-farmvest-services-staging-jn6cma3vvq-el.a.run.app';
+
   static String storageBucketName = 'gs://markwave-481315.firebasestorage.app';
   static const String poweredBy = 'Powered by MarkWave';
   static Duration kToastAnimDuration = Duration(milliseconds: 600);

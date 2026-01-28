@@ -1,3 +1,4 @@
+import 'package:farm_vest/core/services/investor_api_services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/services/api_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,7 +67,7 @@ class InvestorListNotifier extends Notifier<InvestorListState> {
       final token = prefs.getString('access_token');
       if (token == null) return;
 
-      final data = await ApiServices.getAllInvestors(token: token);
+      final data = await InvestorApiServices.getAllInvestors(token: token);
 
       _sourceInvestors = data.map((json) {
         final amount = json['total_investment']?.toString() ?? "0";

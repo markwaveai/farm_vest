@@ -114,7 +114,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
           builder: (context, ref, child) {
             final ordersAsync = ref.watch(
               paidOrdersProvider(
-                PaidOrdersParams(mobile: mobile.isEmpty ? null : mobile),
+                IntransitOrdersParams(mobile: mobile.isEmpty ? null : mobile),
               ),
             );
 

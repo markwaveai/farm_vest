@@ -1,10 +1,9 @@
-import 'dart:math';
-
-import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 
 class BuffaloCard extends StatelessWidget {

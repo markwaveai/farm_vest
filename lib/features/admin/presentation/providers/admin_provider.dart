@@ -1,3 +1,4 @@
+import 'package:farm_vest/core/services/investor_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -282,7 +283,7 @@ class AdminNotifier extends Notifier<AdminState> {
         state = state.copyWith(isLoading: false, error: 'Token not found');
         return;
       }
-      final investors = await ApiServices.getInvestors(token: token);
+      final investors = await InvestorApiServices.getInvestors(token: token);
       state = state.copyWith(isLoading: false, investorList: investors);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -298,10 +299,11 @@ class AdminNotifier extends Notifier<AdminState> {
         state = state.copyWith(isLoading: false, error: 'Token not found');
         return;
       }
-      final animals = await ApiServices.getInvestorAnimals(
+      final response = await InvestorApiServices.getInvestorAnimals(
         token: token,
         investorId: investorId,
       );
+      final animals = response.data.map((e) => e.toJson()).toList();
       state = state.copyWith(isLoading: false, investorAnimals: animals);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

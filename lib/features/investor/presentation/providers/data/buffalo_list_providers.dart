@@ -1,0 +1,170 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
+import 'package:farm_vest/features/investor/presentation/providers/data/investor_data_providers.dart';
+import 'package:farm_vest/features/investor/presentation/providers/filter/buffalo_filter_notifier.dart';
+
+/* -------------------------------------------------------------------------- */
+/*                          DERIVED DATA PROVIDERS                            */
+/* -------------------------------------------------------------------------- */
+
+/// Provider for raw buffalo list (unfiltered).
+///
+/// Extracts the animal list from the investor animals response.
+/// This provider returns an AsyncValue containing the list of animals.
+///
+/// Use this when you need the complete, unfiltered list of animals.
+///
+/// Example:
+/// ```dart
+/// final rawListAsync = ref.watch(rawBuffaloListProvider);
+/// rawListAsync.when(
+///   data: (animals) => Text('Total: ${animals.length}'),
+///   loading: () => CircularProgressIndicator(),
+///   error: (err, stack) => Text('Error'),
+/// );
+/// ```
+final rawBuffaloListProvider = Provider<AsyncValue<List<InvestorAnimal>>>((
+  ref,
+) {
+  final responseAsync = ref.watch(investorAnimalsProvider);
+
+  return responseAsync.whenData((response) {
+    if (response == null) return [];
+    return response.data;
+  });
+});
+
+/// Provider for filtered buffalo list.
+///
+/// Applies the current filter state to the raw buffalo list.
+/// This provider automatically updates when either the animal list
+/// or the filter state changes.
+///
+/// Filters applied:
+/// - Search query (matches animal ID or farm name)
+/// - Health status (healthy, warning, critical, or all)
+/// - Selected farms
+/// - Selected locations
+///
+/// Example:
+/// ```dart
+/// final filteredListAsync = ref.watch(filteredBuffaloListProvider);
+/// filteredListAsync.when(
+///   data: (animals) => ListView.builder(
+///     itemCount: animals.length,
+///     itemBuilder: (context, index) => AnimalCard(animals[index]),
+///   ),
+///   loading: () => CircularProgressIndicator(),
+///   error: (err, stack) => ErrorWidget(err),
+/// );
+/// ```
+final filteredBuffaloListProvider = Provider<AsyncValue<List<InvestorAnimal>>>((
+  ref,
+) {
+  final allBuffaloesAsync = ref.watch(rawBuffaloListProvider);
+  final filter = ref.watch(buffaloFilterProvider);
+
+  return allBuffaloesAsync.whenData((allBuffaloes) {
+    return allBuffaloes.where((buffalo) {
+      // Search filter - matches animal ID or farm name
+      final query = filter.searchQuery.toLowerCase();
+      final matchesSearch =
+          query.isEmpty ||
+          buffalo.animalId.toLowerCase().contains(query) ||
+          (buffalo.farmName?.toLowerCase().contains(query) ?? false);
+
+      // Farm filter - matches selected farms or all if none selected
+      final matchesFarm =
+          filter.selectedFarms.isEmpty ||
+          filter.selectedFarms.contains('all') ||
+          (buffalo.farmName != null &&
+              filter.selectedFarms.contains(buffalo.farmName));
+
+      // Location filter - matches selected locations or all if none selected
+      final matchesLocation =
+          filter.selectedLocations.isEmpty ||
+          filter.selectedLocations.contains('all') ||
+          (buffalo.farmLocation != null &&
+              filter.selectedLocations.contains(buffalo.farmLocation));
+
+      // Health status filter - matches selected status or all
+      final matchesHealth =
+          filter.statusFilter == 'all' ||
+          buffalo.healthStatus.toLowerCase() ==
+              filter.statusFilter.toLowerCase();
+
+      return matchesSearch && matchesFarm && matchesLocation && matchesHealth;
+    }).toList();
+  });
+});
+
+/// Provider for unique farm names.
+///
+/// Extracts all unique farm names from the animal list for filter options.
+/// Returns a list of farm names sorted alphabetically.
+///
+/// Returns ['All Farms'] if no farms are available.
+///
+/// Example:
+/// ```dart
+/// final farms = ref.watch(allFarmsProvider);
+/// DropdownButton<String>(
+///   items: farms.map((farm) => DropdownMenuItem(
+///     value: farm,
+///     child: Text(farm),
+///   )).toList(),
+/// );
+/// ```
+final allFarmsProvider = Provider<List<String>>((ref) {
+  final responseAsync = ref.watch(investorAnimalsProvider);
+  return responseAsync.whenData((response) {
+        if (response == null) return ['All Farms'];
+
+        final farms = <String>{};
+        for (var animal in response.data) {
+          if (animal.farmName != null && animal.farmName!.isNotEmpty) {
+            farms.add(animal.farmName!);
+          }
+        }
+
+        if (farms.isEmpty) return ['All Farms'];
+        return farms.toList()..sort();
+      }).value ??
+      ['All Farms'];
+});
+
+/// Provider for unique farm locations.
+///
+/// Extracts all unique locations from the animal list for filter options.
+/// Returns a list of locations sorted alphabetically.
+///
+/// Returns ['All Locations'] if no locations are available.
+///
+/// Example:
+/// ```dart
+/// final locations = ref.watch(allLocationsProvider);
+/// Wrap(
+///   children: locations.map((location) => FilterChip(
+///     label: Text(location),
+///     onSelected: (selected) => /* handle selection */,
+///   )).toList(),
+/// );
+/// ```
+final allLocationsProvider = Provider<List<String>>((ref) {
+  final responseAsync = ref.watch(investorAnimalsProvider);
+  return responseAsync.whenData((response) {
+        if (response == null) return ['All Locations'];
+
+        final locations = <String>{};
+        for (var animal in response.data) {
+          if (animal.farmLocation != null && animal.farmLocation!.isNotEmpty) {
+            locations.add(animal.farmLocation!);
+          }
+        }
+
+        if (locations.isEmpty) return ['All Locations'];
+        return locations.toList()..sort();
+      }).value ??
+      ['All Locations'];
+});

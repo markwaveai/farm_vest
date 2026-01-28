@@ -104,7 +104,7 @@ class _AdminOnboardAnimalScreenState
       builder: (context) => Consumer(
         builder: (context, ref, child) {
           final ordersAsync = ref.watch(
-            paidOrdersProvider(PaidOrdersParams(mobile: mobile)),
+            paidOrdersProvider(IntransitOrdersParams(mobile: mobile)),
           );
           return Dialog(
             insetPadding: const EdgeInsets.all(20),

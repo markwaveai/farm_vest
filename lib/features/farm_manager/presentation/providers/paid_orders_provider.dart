@@ -1,17 +1,18 @@
+import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/services/api_services.dart';
+
 import '../../data/models/animalkart_order_model.dart';
 
-class PaidOrdersData {
+class IntransitOrdersData {
   final List<AnimalkartOrder> orders;
 
-  PaidOrdersData({required this.orders});
+  IntransitOrdersData({required this.orders});
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is PaidOrdersData && other.orders.length == orders.length;
+    return other is IntransitOrdersData && other.orders.length == orders.length;
   }
 
   @override
@@ -20,15 +21,15 @@ class PaidOrdersData {
   }
 }
 
-class PaidOrdersParams {
+class IntransitOrdersParams {
   final String? mobile;
 
-  PaidOrdersParams({this.mobile});
+  IntransitOrdersParams({this.mobile});
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is PaidOrdersParams && other.mobile == mobile;
+    return other is IntransitOrdersParams && other.mobile == mobile;
   }
 
   @override
@@ -36,17 +37,17 @@ class PaidOrdersParams {
 }
 
 final paidOrdersProvider =
-    FutureProvider.family<PaidOrdersData, PaidOrdersParams>((
+    FutureProvider.family<IntransitOrdersData, IntransitOrdersParams>((
       ref,
       params,
     ) async {
       final prefs = await SharedPreferences.getInstance();
       final adminMobile = prefs.getString('mobile_number') ?? "";
 
-      final response = await ApiServices.getIntransitOrders(
+      final response = await AnimalApiServices.getIntransitOrders(
         mobile: params.mobile.toString(),
         adminMobile: adminMobile,
       );
 
-      return PaidOrdersData(orders: response);
+      return IntransitOrdersData(orders: response);
     });

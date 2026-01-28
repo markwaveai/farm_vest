@@ -3,7 +3,7 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:farm_vest/core/widgets/primary_button.dart';
-import 'package:farm_vest/features/investor/presentation/providers/buffalo_provider.dart';
+import 'package:farm_vest/features/investor/presentation/providers/investor_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,7 +49,9 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   // 1. Centralized navigation logic
   void _navigateToDashboard(UserType role) {
     if (role == UserType.customer) {
-      ref.invalidate(unitResponseProvider);
+      // Refresh investor data providers
+      ref.invalidate(investorSummaryProvider);
+      ref.invalidate(investorAnimalsProvider);
     }
 
     if (!mounted) return;

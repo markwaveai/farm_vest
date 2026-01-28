@@ -1,19 +1,48 @@
+class InvestorFarm {
+  final int farmId;
+  final String farmName;
+  final String location;
+  final int investorBuffaloesCount;
+
+  InvestorFarm({
+    required this.farmId,
+    required this.farmName,
+    required this.location,
+    required this.investorBuffaloesCount,
+  });
+
+  factory InvestorFarm.fromJson(Map<String, dynamic> json) {
+    return InvestorFarm(
+      farmId: json['farm_id'] as int,
+      farmName: json['farm_name'] as String,
+      location: json['location'] as String,
+      investorBuffaloesCount: json['investor_buffaloes_count'] as int,
+    );
+  }
+}
+
 class VisitAvailability {
   final String visitDate;
+  final String farmName;
+  final int totalCapacityPerSlot;
   final List<String> availableSlots;
-  final String message;
+  final List<dynamic> filledSlots;
 
   VisitAvailability({
     required this.visitDate,
+    required this.farmName,
+    required this.totalCapacityPerSlot,
     required this.availableSlots,
-    required this.message,
+    required this.filledSlots,
   });
 
   factory VisitAvailability.fromJson(Map<String, dynamic> json) {
     return VisitAvailability(
-      visitDate: json['visit_date'] ?? '',
+      visitDate: json['visit_date'] as String,
+      farmName: json['farm_name'] as String,
+      totalCapacityPerSlot: json['total_capacity_per_slot'] as int,
       availableSlots: List<String>.from(json['available_slots'] ?? []),
-      message: json['message'] ?? '',
+      filledSlots: List<dynamic>.from(json['filled_slots'] ?? []),
     );
   }
 }
@@ -26,10 +55,9 @@ class Visit {
   final String endTime;
   final int durationMinutes;
   final String status;
-  final String farmLocation;
-  final String locationId;
-  final String? userName;
-  final String? userEmail;
+  final String? farmName;
+  final String? farmLocation;
+  final int farmId;
 
   Visit({
     required this.visitId,
@@ -39,51 +67,43 @@ class Visit {
     required this.endTime,
     required this.durationMinutes,
     required this.status,
-    required this.farmLocation,
-    required this.locationId,
-    this.userName,
-    this.userEmail,
+    this.farmName,
+    this.farmLocation,
+    required this.farmId,
   });
 
   factory Visit.fromJson(Map<String, dynamic> json) {
     return Visit(
-      visitId: json['visitId'] ?? '',
-      userMobile: json['user_mobile'] ?? '',
-      visitDate: json['visit_date'] ?? '',
-      startTime: json['start_time'] ?? '',
-      endTime: json['end_time'] ?? '',
-      durationMinutes: json['duration_minutes'] ?? 0,
-      status: json['status'] ?? '',
-      farmLocation: json['farm_location'] ?? '',
-      locationId: json['location_id'] ?? '',
-      userName: json['user_name'],
-      userEmail: json['user_email'],
+      visitId: json['visit_id'] as String,
+      userMobile: json['user_mobile'] as String,
+      visitDate: json['visit_date'] as String,
+      startTime: json['start_time'] as String,
+      endTime: json['end_time'] as String,
+      durationMinutes: json['duration_minutes'] as int? ?? 30,
+      status: json['status'] as String,
+      farmName: json['farm_name'] as String?,
+      farmLocation: json['farm_location'] as String?,
+      farmId: json['farm_id'] as int,
     );
   }
 }
 
 class VisitBookingRequest {
-  final String farmLocation;
-  final String locationId;
+  final int farmId;
   final String startTime;
-  final String userMobile;
   final String visitDate;
 
   VisitBookingRequest({
-    required this.farmLocation,
-    required this.locationId,
+    required this.farmId,
     required this.startTime,
-    required this.userMobile,
     required this.visitDate,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      "farm_location": farmLocation,
-      "location_id": locationId,
-      "start_time": startTime,
-      "user_mobile": userMobile,
-      "visit_date": visitDate,
+      'farm_id': farmId,
+      'start_time': startTime,
+      'visit_date': visitDate,
     };
   }
 }

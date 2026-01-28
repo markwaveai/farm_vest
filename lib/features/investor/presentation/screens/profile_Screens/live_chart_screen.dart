@@ -4,8 +4,8 @@ import 'package:farm_vest/core/services/biometric_service.dart'
     show BiometricService;
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/core/utils/image_helper_compressor.dart';
-import 'package:farm_vest/features/investor/presentation/widgets/chat_bubble.dart';
-import 'package:farm_vest/features/investor/presentation/widgets/typing_indicator.dart';
+import 'package:farm_vest/features/investor/presentation/widgets/support/chat_bubble.dart';
+import 'package:farm_vest/features/investor/presentation/widgets/support/typing_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
