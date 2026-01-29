@@ -26,13 +26,32 @@ class AuthApiServices {
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        final data = jsonDecode(response.body);
-        // The API returns { "data": { "status": "success", ... } }
-        // We need to pass the inner map to formJson if 'data' key exists
-        if (data is Map<String, dynamic> && data.containsKey('data')) {
-          return WhatsappOtpResponse.fromJson(data['data']);
+        // Check if response body is a valid JSON string
+        if (response.body.isNotEmpty) {
+          try {
+            final data = jsonDecode(response.body);
+            // The API returns { "data": { "status": "success", ... } }
+            // We need to pass the inner map to formJson if 'data' key exists
+            if (data is Map<String, dynamic> && data.containsKey('data')) {
+              return WhatsappOtpResponse.fromJson(data['data']);
+            }
+            return WhatsappOtpResponse.fromJson(data);
+          } catch (e) {
+              if (response.body is String) {
+              final responseString = response.body as String;
+              final otpMatch = RegExp(r'\b\d{4,6}\b').firstMatch(responseString);
+              final extractedOtp = otpMatch?.group(0);   
+              return WhatsappOtpResponse(
+                otp: extractedOtp,
+                user: null,
+                message: responseString,
+                status: true, 
+              );
+            }           
+          }
+        } else {
+          throw ServerException('Empty response from server');
         }
-        return WhatsappOtpResponse.fromJson(data);
       }
 
       String errorMessage = 'Failed to send OTP';
