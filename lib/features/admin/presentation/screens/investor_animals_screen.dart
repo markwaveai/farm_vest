@@ -125,7 +125,7 @@ class _InvestorAnimalsScreenState extends ConsumerState<InvestorAnimalsScreen> {
                   Row(
                     children: [
                       const Icon(
-                        Icons.calendar_today,
+                        Icons.calendar_month_outlined,
                         size: 14,
                         color: Colors.grey,
                       ),

@@ -282,7 +282,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
               Row(
                 children: [
                   const Icon(
-                    Icons.calendar_today,
+                    Icons.calendar_month_outlined,
                     color: AppTheme.primary,
                     size: 20,
                   ),
@@ -591,7 +591,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
-                                  Icons.calendar_today,
+                                  Icons.calendar_month_outlined,
                                   color: isPast
                                       ? Colors.grey
                                       : AppTheme.primary,
