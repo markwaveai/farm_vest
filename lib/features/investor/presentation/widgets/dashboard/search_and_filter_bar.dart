@@ -58,13 +58,9 @@ class _SearchAndFilterBarState extends ConsumerState<SearchAndFilterBar> {
             controller: _searchController,
             style: theme.textTheme.bodyMedium,
             textCapitalization: TextCapitalization.characters,
+            // keyboardType: TextInputType.,
             autocorrect: false,
             enableSuggestions: false,
-            inputFormatters: [
-              TextInputFormatter.withFunction((oldValue, newValue) {
-                return newValue.copyWith(text: newValue.text.toUpperCase());
-              }),
-            ],
             decoration: InputDecoration(
               hintText: 'Search by ID...',
               hintStyle: TextStyle(
