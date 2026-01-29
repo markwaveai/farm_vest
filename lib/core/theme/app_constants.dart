@@ -7,7 +7,7 @@ class AppConstants {
   static const String appName = 'FarmVest';
   //app live url
   static const String animalKartStagingApiUrl =
-      'https://animalkart-stagging-services-jn6cma3vvq-el.a.run.app';
+      'https://animalkart-stagging-jn6cma3vvq-el.a.run.app';
 
   static const String animalKartApiUrl =
       'https://animalkart-live-apis-jn6cma3vvq-el.a.run.app';

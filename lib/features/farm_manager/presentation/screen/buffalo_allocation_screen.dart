@@ -818,7 +818,10 @@ class _BuffaloAllocationScreenState
     // Determine the ID to use for filtering. If map, use animal_id or rfid. If string, use string
     final pendingAnimals = onboardedAnimals.where((animal) {
       final id = (animal is Map)
-          ? (animal['animal_id'] ?? animal['rfid'])
+          ? (animal['rfid_tag'] ??
+                animal['rfid'] ??
+                animal['rfid_tag_number'] ??
+                animal['animal_id'])
           : animal.toString();
       return !draftAllocations.values.contains(id);
     }).toList();
@@ -850,9 +853,12 @@ class _BuffaloAllocationScreenState
                 final animalData = pendingAnimals[index];
 
                 // Extract Identifiers
+                // Extract Identifiers - Prioritize RFID/Tag for uniqueness in UI
                 final String id = (animalData is Map)
-                    ? (animalData['animal_id'] ??
+                    ? (animalData['rfid_tag'] ??
                               animalData['rfid'] ??
+                              animalData['rfid_tag_number'] ??
+                              animalData['animal_id'] ??
                               animalData.toString())
                           .toString()
                     : animalData.toString();
@@ -1480,7 +1486,10 @@ class _BuffaloAllocationScreenState
         final animalObj = onboardedAnimals.firstWhere(
           (a) {
             final aId = (a is Map)
-                ? (a['animal_id'] ?? a['rfid'])
+                ? (a['rfid_tag'] ??
+                      a['rfid'] ??
+                      a['rfid_tag_number'] ??
+                      a['animal_id'])
                 : a.toString();
             return aId.toString() == animalId;
           },

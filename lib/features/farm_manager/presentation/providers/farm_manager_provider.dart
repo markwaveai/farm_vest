@@ -205,7 +205,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
             : 'RFID-${animal.rfidTag}',
         "ear_tag": animal.earTag,
         "age_months": animal.ageMonths,
-        "health_status": animal.healthStatus,
+        "health_status": animal.healthStatus.toUpperCase(),
         "images": imageUrls,
       };
 
@@ -307,7 +307,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
     // We use the same ApiServices.onboardAnimal method as it accepts a Map.
 
     try {
-      final response = await ApiServices.onboardAnimal(payload, token);
+      final response = await ShedsApiServices.onboardAnimal(payload, token);
 
       if (response !=
           null /*  && response['onboarded_animal_ids'] != null */ ) {

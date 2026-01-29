@@ -9,12 +9,24 @@ class AnimalApiServices {
   static Future<List<Map<String, dynamic>>> searchAnimals({
     required String token,
     required String query,
+    String? healthStatus,
+    int? farmId,
   }) async {
     try {
+      final queryParams = {'query_str': query};
+      if (healthStatus != null && healthStatus.isNotEmpty) {
+        queryParams['health_status'] = healthStatus;
+      }
+      if (farmId != null) {
+        queryParams['farm_id'] = farmId.toString();
+      }
+
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/animal/search_animal",
+      ).replace(queryParameters: queryParams);
+
       final response = await http.get(
-        Uri.parse(
-          "${AppConstants.appLiveUrl}/animal/search_animal?query_str=$query",
-        ),
+        uri,
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
 

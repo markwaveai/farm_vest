@@ -256,37 +256,6 @@ class ApiServices {
     }
   }
 
-  static Future<Map<String, dynamic>?> onboardAnimal(
-    Map<String, dynamic> body,
-    String token,
-  ) async {
-    try {
-      final uri = Uri.parse("${AppConstants.appLiveUrl}/animal/onboard_animal");
-      final response = await http.post(
-        uri,
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $token',
-          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
-          HttpHeaders.acceptHeader: AppConstants.applicationJson,
-        },
-        body: jsonEncode(body),
-      );
-
-      if (response.statusCode == 401) {
-        onUnauthorized?.call();
-        throw ServerException('Unauthorized', statusCode: 401);
-      }
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return jsonDecode(response.body);
-      }
-      return null;
-    } catch (e) {
-      debugPrint("Exception: $e");
-      return null;
-    }
-  }
-
   //keep this apis as it is
 
   static Future<List<Map<String, dynamic>>> getStaff({

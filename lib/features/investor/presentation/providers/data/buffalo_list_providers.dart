@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:farm_vest/features/investor/presentation/providers/data/investor_data_providers.dart';
 import 'package:farm_vest/features/investor/presentation/providers/filter/buffalo_filter_notifier.dart';
+import 'package:farm_vest/core/services/animal_api_services.dart';
+import 'package:farm_vest/features/auth/data/repositories/auth_repository.dart';
 
 /* -------------------------------------------------------------------------- */
 /*                          DERIVED DATA PROVIDERS                            */
@@ -59,88 +61,61 @@ final rawBuffaloListProvider = Provider<AsyncValue<List<InvestorAnimal>>>((
 ///   error: (err, stack) => ErrorWidget(err),
 /// );
 /// ```
-final filteredBuffaloListProvider = Provider<AsyncValue<List<InvestorAnimal>>>((
-  ref,
-) {
-  final allBuffaloesAsync = ref.watch(rawBuffaloListProvider);
-  final filter = ref.watch(buffaloFilterProvider);
+final filteredBuffaloListProvider =
+    FutureProvider.autoDispose<List<InvestorAnimal>>((ref) async {
+      final filter = ref.watch(buffaloFilterProvider);
+      final token = await ref.read(authRepositoryProvider).getToken();
 
-  return allBuffaloesAsync.whenData((allBuffaloes) {
-    return allBuffaloes.where((buffalo) {
-      // Search filter - matches animal ID or farm name
-      final query = filter.searchQuery.toLowerCase();
-      final rfid = buffalo.rfid?.toLowerCase()??'';
-       final farmName = buffalo.farmName?.toLowerCase() ?? '';
-      final matchesSearch =
-          query.isEmpty ||
-          rfid.contains(query) ||
-          farmName.contains(query);
+      // Call dynamic search API
+      // If query is empty, pass "all" to get everything (as per backend logic)
+      final results = await AnimalApiServices.searchAnimals(
+        token: token ?? '',
+        query: filter.searchQuery.isEmpty ? 'all' : filter.searchQuery,
+        healthStatus: filter.statusFilter == 'all' ? null : filter.statusFilter,
+      );
 
-      // Farm filter - matches selected farms or all if none selected
-      final matchesFarm =
-          filter.selectedFarms.isEmpty ||
-          filter.selectedFarms.contains('all') ||
-          (buffalo.farmName != null &&
-              filter.selectedFarms.contains(buffalo.farmName));
-              
+      // Map nested search_animal response to InvestorAnimal manually
+      // because InvestorAnimal.fromJson expects a flat structure
+      var animals = results.map((data) {
+        final animal = data['animal_details'] ?? {};
+        final farm = data['farm_details'] ?? {};
+        final shed = data['shed_details'] ?? {};
 
-      // Location filter - matches selected locations or all if none selected
-      final matchesLocation =
-          filter.selectedLocations.isEmpty ||
-          filter.selectedLocations.contains('all') ||
-          (buffalo.farmLocation != null &&
-              filter.selectedLocations.contains(buffalo.farmLocation));
+        return InvestorAnimal(
+          animalId: animal['animal_id'] ?? '',
+          rfid: animal['rfid_tag_number'],
+          age: animal['age_months'] is int ? animal['age_months'] : null,
+          shedName: shed['shed_name'],
+          shedId: shed['id'] is int ? shed['id'] : null,
+          animalType: animal['animal_type'] ?? 'Buffalo',
+          images:
+              (animal['images'] as List<dynamic>?)
+                  ?.map((e) => e.toString())
+                  .toList() ??
+              [],
+          farmName: farm['farm_name'],
+          farmLocation: farm['location'],
+          healthStatus: animal['health_status'] ?? 'Unknown',
+        );
+      }).toList();
 
-      // Health status filter - matches selected status or all
-      final matchesHealth =
-          filter.statusFilter == 'all' ||
-          buffalo.healthStatus.toLowerCase() ==
-              filter.statusFilter.toLowerCase();
+      // Apply Farm & Location filters locally (backend requires IDs, we have Names)
+      if (filter.selectedFarms.isNotEmpty &&
+          !filter.selectedFarms.contains('all')) {
+        animals = animals
+            .where((a) => filter.selectedFarms.contains(a.farmName))
+            .toList();
+      }
 
-      return matchesSearch && matchesFarm 
-      && 
-      matchesLocation && matchesHealth
-      ;
-    }).toList();
-  });
-});
-//Provider
-// final filteredBuffaloListProvider =
-//     Provider<AsyncValue<List<InvestorAnimal>>>((ref) {
-//   final allBuffaloesAsync = ref.watch(rawBuffaloListProvider);
-//   final filter = ref.watch(buffaloFilterProvider);
+      if (filter.selectedLocations.isNotEmpty &&
+          !filter.selectedLocations.contains('all')) {
+        animals = animals
+            .where((a) => filter.selectedLocations.contains(a.farmLocation))
+            .toList();
+      }
 
-//   return allBuffaloesAsync.whenData((allBuffaloes) {
-//     return allBuffaloes.where((buffalo) {
-//       final query = filter.searchQuery.toLowerCase();
-// final rfid = buffalo.rfid?.toLowerCase()??'';
-
-//       final farmName = buffalo.farmName?.toLowerCase() ?? '';
-
-      
-//       final matchesSearch =
-//           query.isEmpty ||
-//           rfid.contains(query) ||
-//           farmName.contains(query);
-
-     
-//       final matchesFarm =
-//           filter.selectedFarms.isEmpty ||
-//           filter.selectedFarms.contains('all') ||
-//           (buffalo.farmName != null &&
-//               filter.selectedFarms.contains(buffalo.farmName));
-
-//       final matchesLocation =
-//           filter.selectedLocations.isEmpty ||
-//           filter.selectedLocations.contains('all') ||
-//           (buffalo.farmLocation != null &&
-//               filter.selectedLocations.contains(buffalo.farmLocation));
-
-//       return matchesSearch && matchesFarm && matchesLocation;
-//     }).toList();
-//   });
-// });
-
+      return animals;
+    });
 
 /// Provider for unique farm names.
 ///
