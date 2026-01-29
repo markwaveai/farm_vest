@@ -18,7 +18,7 @@ import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_st
 import 'package:farm_vest/features/employee/new_supervisor/screens/transfer_tickets_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_details_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_grid_screen.dart';
-import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_newscreen.dart';
+import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/buffalo_allocation_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/farm_manager_dashboard.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/manager_transfer_approval_screen.dart';
@@ -209,8 +209,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/doctor-dashboard',
-        builder: (context, state) => DoctorDashboardNewscreen(),
-        //const DoctorDashboardScreen(),
+        builder: (context, state) => DoctorDashboardScreen(),
       ),
       GoRoute(
         path: '/assistant-dashboard',
