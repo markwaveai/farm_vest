@@ -39,6 +39,34 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     // Fetch Farms
     final farmsAsync = ref.watch(investorFarmsProvider);
 
+    // Auto-select if only one farm is available
+    ref.listen<AsyncValue<List<InvestorFarm>>>(investorFarmsProvider, (
+      previous,
+      next,
+    ) {
+      next.whenData((farms) {
+        if (farms.length == 1 && _selectedFarm == null) {
+          setState(() {
+            _selectedFarm = farms.first;
+          });
+        }
+      });
+    });
+
+    // Handle initial load auto-selection
+    if (_selectedFarm == null &&
+        farmsAsync.hasValue &&
+        farmsAsync.value != null &&
+        farmsAsync.value!.length == 1) {
+      Future.microtask(() {
+        if (mounted && _selectedFarm == null) {
+          setState(() {
+            _selectedFarm = farmsAsync.value!.first;
+          });
+        }
+      });
+    }
+
     // Fetch Availability only if farm is selected
     AsyncValue<VisitAvailability>? availabilityAsync;
     if (_selectedFarm != null) {
@@ -149,7 +177,10 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
