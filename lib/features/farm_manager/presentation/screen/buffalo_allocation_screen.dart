@@ -880,8 +880,12 @@ class _BuffaloAllocationScreenState
                 if (onboardedAtRaw.isNotEmpty) {
                   try {
                     final dt = DateTime.parse(onboardedAtRaw).toLocal();
+                    int hour = dt.hour;
+                    final String amPm = hour >= 12 ? 'PM' : 'AM';
+                    if (hour > 12) hour -= 12;
+                    if (hour == 0) hour = 12;
                     onboardedTime =
-                        "${dt.day}/${dt.month} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}";
+                        "${dt.day}/${dt.month} $hour:${dt.minute.toString().padLeft(2, '0')} $amPm";
                   } catch (_) {}
                 }
 

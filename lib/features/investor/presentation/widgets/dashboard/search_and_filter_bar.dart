@@ -1,6 +1,7 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/investor/presentation/providers/investor_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SearchAndFilterBar extends ConsumerStatefulWidget {
@@ -56,6 +57,14 @@ class _SearchAndFilterBarState extends ConsumerState<SearchAndFilterBar> {
           TextField(
             controller: _searchController,
             style: theme.textTheme.bodyMedium,
+            textCapitalization: TextCapitalization.characters,
+            autocorrect: false,
+            enableSuggestions: false,
+            inputFormatters: [
+              TextInputFormatter.withFunction((oldValue, newValue) {
+                return newValue.copyWith(text: newValue.text.toUpperCase());
+              }),
+            ],
             decoration: InputDecoration(
               hintText: 'Search by ID...',
               hintStyle: TextStyle(

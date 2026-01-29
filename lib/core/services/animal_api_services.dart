@@ -40,6 +40,32 @@ class AnimalApiServices {
     }
   }
 
+  static Future<List<Map<String, dynamic>>> getCalves({
+    required String token,
+    required String rfid,
+  }) async {
+    try {
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/animal/get_calves",
+      ).replace(queryParameters: {'rfid': rfid});
+
+      final response = await http.get(
+        uri,
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['data'] is List) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+      }
+      return [];
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
   static Future<List<AnimalkartOrder>> getIntransitOrders({
     String? mobile,
     required String adminMobile,

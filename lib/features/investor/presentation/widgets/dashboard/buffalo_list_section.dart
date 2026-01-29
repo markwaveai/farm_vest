@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:farm_vest/core/services/animal_api_services.dart';
+import 'package:farm_vest/features/investor/presentation/screens/buffalo_calves_screen.dart';
 
 class BuffaloListSection extends ConsumerStatefulWidget {
   const BuffaloListSection({super.key});
@@ -239,7 +241,12 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
     */
   }
 
-  Future<void> _handleCalvesTap(BuildContext context, String? buffaloId) async {
+  Future<void> _handleCalvesTap(
+    BuildContext context,
+    String? buffaloRfid,
+  ) async {
+    if (buffaloRfid == null) return;
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
     if (token == null) {
@@ -247,9 +254,59 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
       return;
     }
 
+    if (!context.mounted) return;
     ToastUtils.showInfo(context, "Fetching calves...");
 
-    // Logic for fetching calves would go here
-    // Currently disabled/commented out in original code
+    try {
+      final calvesData = await AnimalApiServices.getCalves(
+        token: token,
+        rfid: buffaloRfid,
+      );
+
+      if (!context.mounted) return;
+
+      if (calvesData.isEmpty) {
+        ToastUtils.showInfo(context, "No calves found for this buffalo.");
+        return;
+      }
+
+      // Map to InvestorAnimal
+      final List<InvestorAnimal> calves = calvesData.map((data) {
+        // Handle potentially nested or flat structure.
+        // If nested like search_animal response:
+        final animal = data['animal_details'] ?? data;
+        final farm = data['farm_details'] ?? {};
+        final shed = data['shed_details'] ?? {};
+
+        return InvestorAnimal(
+          animalId: (animal['animal_id'] ?? animal['id'] ?? '').toString(),
+          rfid: (animal['rfid_tag_number'] ?? animal['rfid'] ?? '').toString(),
+          age: animal['age_months'] is int ? animal['age_months'] : null,
+          shedName: shed['shed_name'],
+          shedId: shed['id'] is int ? shed['id'] : null,
+          animalType: animal['animal_type'] ?? 'Calf',
+          images:
+              (animal['images'] as List<dynamic>?)
+                  ?.map((e) => e.toString())
+                  .toList() ??
+              [],
+          farmName: farm['farm_name'],
+          farmLocation: farm['location'],
+          healthStatus: animal['health_status'] ?? 'Unknown',
+        );
+      }).toList();
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              BuffaloCalvesScreen(parentId: buffaloRfid, calves: calves),
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ToastUtils.showError(context, "Failed to fetch calves: $e");
+      }
+    }
   }
 }
