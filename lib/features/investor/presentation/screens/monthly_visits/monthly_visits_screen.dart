@@ -500,7 +500,11 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  visit.farmName ?? "Unknown Farm",
+                  (visit.farmName != null && visit.farmLocation != null)
+                      ? "${visit.farmName}, ${visit.farmLocation}"
+                      : (visit.farmName ??
+                            visit.farmLocation ??
+                            "Unknown Farm"),
                   style: AppTheme.bodyMedium,
                 ),
                 const SizedBox(height: 24),
@@ -639,10 +643,16 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(_formatTimeWithAmPm(visit.startTime)),
-                                  if (visit.farmName != null)
+                                  if (visit.farmName != null ||
+                                      visit.farmLocation != null)
                                     Text(
-                                      visit.farmName!,
-                                      style: TextStyle(fontSize: 12),
+                                      (visit.farmName != null &&
+                                              visit.farmLocation != null)
+                                          ? "${visit.farmName}, ${visit.farmLocation}"
+                                          : (visit.farmName ??
+                                                visit.farmLocation ??
+                                                ""),
+                                      style: const TextStyle(fontSize: 12),
                                     ),
                                 ],
                               ),
