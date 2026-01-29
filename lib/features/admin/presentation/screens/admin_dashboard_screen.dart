@@ -85,7 +85,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       case 2:
         return _AdminGlobalTicketsView();
       case 3:
-        return _AdminStaffView();
+        return _AdminStaffView(
+          onBack: () => setState(() => _selectedIndex = 0),
+        );
       default:
         return _AdminHomeView(
           onNavigate: (index) => setState(() => _selectedIndex = index),
@@ -979,8 +981,12 @@ class _AdminGlobalTicketsView extends StatelessWidget {
 }
 
 class _AdminStaffView extends StatelessWidget {
+  final VoidCallback? onBack;
+
+  const _AdminStaffView({this.onBack});
+
   @override
   Widget build(BuildContext context) {
-    return const StaffManagementScreen();
+    return StaffManagementScreen(onBackPressed: onBack);
   }
 }

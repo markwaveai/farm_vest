@@ -7,7 +7,12 @@ import 'package:farm_vest/core/utils/app_enums.dart';
 import '../providers/admin_provider.dart';
 
 class StaffManagementScreen extends ConsumerStatefulWidget {
-  const StaffManagementScreen({super.key});
+  final VoidCallback? onBackPressed;
+
+  const StaffManagementScreen({
+    super.key,
+    this.onBackPressed,
+  });
 
   @override
   ConsumerState<StaffManagementScreen> createState() =>
@@ -226,6 +231,27 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
     return Scaffold(
       backgroundColor: AppTheme.lightGrey,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (widget.onBackPressed != null) {
+              widget.onBackPressed!();
+              return;
+            }
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              final userRole = ref.read(authProvider).role;
+              if (userRole == UserType.admin) {
+                context.go('/admin-dashboard');
+              } else if (userRole == UserType.supervisor) {
+                context.go('/supervisor-dashboard');
+              } else {
+                context.go('/farm-manager-dashboard');
+              }
+            }
+          },
+        ),
         title: _isSearching
             ? TextField(
                 controller: _searchController,
