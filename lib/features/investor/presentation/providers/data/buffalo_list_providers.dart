@@ -69,10 +69,12 @@ final filteredBuffaloListProvider = Provider<AsyncValue<List<InvestorAnimal>>>((
     return allBuffaloes.where((buffalo) {
       // Search filter - matches animal ID or farm name
       final query = filter.searchQuery.toLowerCase();
+      final rfid = buffalo.rfid?.toLowerCase()??'';
+       final farmName = buffalo.farmName?.toLowerCase() ?? '';
       final matchesSearch =
           query.isEmpty ||
-          buffalo.animalId.toLowerCase().contains(query) ||
-          (buffalo.farmName?.toLowerCase().contains(query) ?? false);
+          rfid.contains(query) ||
+          farmName.contains(query);
 
       // Farm filter - matches selected farms or all if none selected
       final matchesFarm =
@@ -80,6 +82,7 @@ final filteredBuffaloListProvider = Provider<AsyncValue<List<InvestorAnimal>>>((
           filter.selectedFarms.contains('all') ||
           (buffalo.farmName != null &&
               filter.selectedFarms.contains(buffalo.farmName));
+              
 
       // Location filter - matches selected locations or all if none selected
       final matchesLocation =
@@ -94,10 +97,50 @@ final filteredBuffaloListProvider = Provider<AsyncValue<List<InvestorAnimal>>>((
           buffalo.healthStatus.toLowerCase() ==
               filter.statusFilter.toLowerCase();
 
-      return matchesSearch && matchesFarm && matchesLocation && matchesHealth;
+      return matchesSearch && matchesFarm 
+      && 
+      matchesLocation && matchesHealth
+      ;
     }).toList();
   });
 });
+//Provider
+// final filteredBuffaloListProvider =
+//     Provider<AsyncValue<List<InvestorAnimal>>>((ref) {
+//   final allBuffaloesAsync = ref.watch(rawBuffaloListProvider);
+//   final filter = ref.watch(buffaloFilterProvider);
+
+//   return allBuffaloesAsync.whenData((allBuffaloes) {
+//     return allBuffaloes.where((buffalo) {
+//       final query = filter.searchQuery.toLowerCase();
+// final rfid = buffalo.rfid?.toLowerCase()??'';
+
+//       final farmName = buffalo.farmName?.toLowerCase() ?? '';
+
+      
+//       final matchesSearch =
+//           query.isEmpty ||
+//           rfid.contains(query) ||
+//           farmName.contains(query);
+
+     
+//       final matchesFarm =
+//           filter.selectedFarms.isEmpty ||
+//           filter.selectedFarms.contains('all') ||
+//           (buffalo.farmName != null &&
+//               filter.selectedFarms.contains(buffalo.farmName));
+
+//       final matchesLocation =
+//           filter.selectedLocations.isEmpty ||
+//           filter.selectedLocations.contains('all') ||
+//           (buffalo.farmLocation != null &&
+//               filter.selectedLocations.contains(buffalo.farmLocation));
+
+//       return matchesSearch && matchesFarm && matchesLocation;
+//     }).toList();
+//   });
+// });
+
 
 /// Provider for unique farm names.
 ///

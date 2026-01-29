@@ -1,3 +1,5 @@
+import 'package:farm_vest/core/theme/app_constants.dart';
+
 /// Model for investor animal data from /api/investors/animals endpoint.
 ///
 /// This model represents a simplified animal view for investors,
@@ -5,9 +7,13 @@
 class InvestorAnimal {
   /// Unique identifier for the animal
   final String animalId;
-
+final String? rfid;
+final int? age;
   /// List of image URLs for the animal
   final List<String> images;
+  final int? shedId;
+  final String? shedName;
+  final String? animalType;
 
   /// Name of the farm where the animal is located
   final String? farmName;
@@ -20,10 +26,15 @@ class InvestorAnimal {
 
   /// Creates an instance of [InvestorAnimal].
   const InvestorAnimal({
-    required this.animalId,
+   required this.animalId,
+   this.rfid,
+   this.age,
+   required this.shedName,
+   required this.animalType,
+   
     required this.images,
     this.farmName,
-    this.farmLocation,
+    this.farmLocation, required this.shedId,  
     required this.healthStatus,
   });
 
@@ -41,22 +52,34 @@ class InvestorAnimal {
   /// ```
   factory InvestorAnimal.fromJson(Map<String, dynamic> json) {
     return InvestorAnimal(
+       
       animalId: json['animal_id'] as String,
+     rfid: json['rfid_tag_number'] as String?,
+       age: json['age_months'] as int?,
       images:
           (json['images'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
       farmName: json['farm_name'] as String?,
-      farmLocation: json['farm_location'] as String?,
-      healthStatus: json['health_status'] as String? ?? 'Unknown',
+      farmLocation: json['farm_location'] as String?, 
+       shedId: json['shed_id']as int?,
+       shedName: json['shed_name'] as String?,
+
+       
+
+       healthStatus: json['health_status'] as String? ?? kHyphen, 
+       animalType: json['animal_type']as String,
     );
   }
 
   /// Converts this [InvestorAnimal] to JSON.
   Map<String, dynamic> toJson() {
     return {
-      'animal_id': animalId,
+      'rfid': rfid,
+      'age': age,
+      'shed_name': shedId,
+       'animal_id': animalId,
       'images': images,
       'farm_name': farmName,
       'farm_location': farmLocation,
@@ -66,18 +89,30 @@ class InvestorAnimal {
 
   /// Creates a copy of this [InvestorAnimal] with the given fields replaced.
   InvestorAnimal copyWith({
+     String? rfid,
+    int? age,
+    String? shedName,
+    int? shedId,
     String? animalId,
     List<String>? images,
     String? farmName,
     String? farmLocation,
     String? healthStatus,
+    String? animalType,
   }) {
     return InvestorAnimal(
       animalId: animalId ?? this.animalId,
+      rfid: rfid ?? this.rfid,
+      animalType: animalType??this.animalType,
+      age: age ?? this.age,
+      shedName: shedName ?? this.shedName,
+      shedId: shedId ?? this.shedId,
+      
+
       images: images ?? this.images,
       farmName: farmName ?? this.farmName,
-      farmLocation: farmLocation ?? this.farmLocation,
-      healthStatus: healthStatus ?? this.healthStatus,
+      farmLocation: farmLocation ?? this.farmLocation, 
+       healthStatus: healthStatus ?? this.healthStatus,
     );
   }
 
@@ -86,6 +121,10 @@ class InvestorAnimal {
     return 'InvestorAnimal(animalId: $animalId, farmName: $farmName, '
         'farmLocation: $farmLocation, healthStatus: $healthStatus)';
   }
+  // String toString() {
+  //   return 'InvestorAnimal(rfid: $rfid, age: $age, shedName: $shedId, '
+  //       'farmName: $farmName, farmLocation: $farmLocation)';
+  // }
 
   @override
   bool operator ==(Object other) {
@@ -93,9 +132,14 @@ class InvestorAnimal {
 
     return other is InvestorAnimal && other.animalId == animalId;
   }
+  //  bool operator ==(Object other) {
+  //   if (identical(this, other)) return true;
+  //   return other is InvestorAnimal && other.rfid == rfid;
+  // }
+
 
   @override
-  int get hashCode => animalId.hashCode;
+  int get hashCode => rfid.hashCode;
 }
 
 /// Response model for /api/investors/animals endpoint.

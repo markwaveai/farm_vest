@@ -1,3 +1,4 @@
+import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:farm_vest/features/investor/presentation/providers/investor_providers.dart';
@@ -90,28 +91,49 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
       itemCount: buffalos.length,
       itemBuilder: (context, index) {
         final buffalo = buffalos[index];
+return BuffaloCard(
+  rfid: buffalo.rfid??'',
+shedName: buffalo.shedId.toString() ??'',
 
-        return BuffaloCard(
-          farmName: buffalo.farmName ?? 'FarmVest Unit',
-          location: buffalo.farmLocation ?? 'Location',
-          id: buffalo.animalId,
-          healthStatus: buffalo.healthStatus,
-          lastMilking: 'Checked recently',
-          age: '-', // Field not available in new model
-          breed: '-', // Field not available in new model
-          imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
-          isGridView: true,
-          onTap: () {
-            // Passing the new model directly. Screen receiving this must be updated to handle InvestorAnimal.
-            context.push('/unit-details', extra: {'buffalo': buffalo});
-          },
-          onInvoiceTap: () async {
-            _handleInvoiceTap(context, ref, buffalo.animalId);
-          },
-          onCalvesTap: () async {
-            _handleCalvesTap(context, buffalo.animalId);
-          },
-        );
+  age: buffalo.age?.toString() ?? '-',
+  
+
+  farmName: buffalo.farmName ?? 'FarmVest Unit',
+  location: buffalo.farmLocation ?? 'Location',
+  // ShedName: buffalo.ShedName ?? '-',
+  imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
+  isGridView: true,
+  onTap: () {
+    context.push('/unit-details', extra: {'buffalo': buffalo});
+  },
+  onInvoiceTap: () async {
+    _handleInvoiceTap(context, ref, buffalo.rfid);
+  },
+  onCalvesTap: () async {
+    _handleCalvesTap(context, buffalo.rfid);
+  }, healthStatus: '', lastMilking: '', breed: '', id: '',  
+);
+        // return BuffaloCard(
+        //   farmName: buffalo.farmName ?? 'FarmVest Unit',
+        //   location: buffalo.farmLocation ?? 'Location',
+        //   id: buffalo.animalId,
+        //   healthStatus: buffalo.healthStatus,
+        //   lastMilking: 'Checked recently',
+        //   age: '-', // Field not available in new model
+        //   breed: '-', // Field not available in new model
+        //   imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
+        //   isGridView: true,
+        //   onTap: () {
+        //     // Passing the new model directly. Screen receiving this must be updated to handle InvestorAnimal.
+        //     context.push('/unit-details', extra: {'buffalo': buffalo});
+        //   },
+        //   onInvoiceTap: () async {
+        //     _handleInvoiceTap(context, ref, buffalo.animalId);
+        //   },
+        //   onCalvesTap: () async {
+        //     _handleCalvesTap(context, buffalo.animalId);
+        //   },
+        // );
       },
     );
   }
@@ -127,26 +149,46 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
       itemBuilder: (context, index) {
         final buffalo = buffalos[index];
 
-        return BuffaloCard(
-          farmName: buffalo.farmName ?? 'FarmVest Unit',
-          location: buffalo.farmLocation ?? 'Location',
-          id: buffalo.animalId,
-          healthStatus: buffalo.healthStatus,
-          lastMilking: 'Checked recently',
-          age: '-', // Field not available in new model
-          breed: '-', // Field not available in new model
-          imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
-          isGridView: false,
-          onTap: () {
-            context.push('/unit-details', extra: {'buffalo': buffalo});
-          },
-          onInvoiceTap: () async {
-            _handleInvoiceTap(context, ref, buffalo.animalId);
-          },
-          onCalvesTap: () async {
-            _handleCalvesTap(context, buffalo.animalId);
-          },
-        );
+return BuffaloCard(
+  rfid: buffalo.rfid ?? kHyphen,
+  age: buffalo.age?.toString() ?? kHyphen,
+  farmName: buffalo.farmName ?? kHyphen,
+  location: buffalo.farmLocation ?? kHyphen,
+  shedName: buffalo.shedId?.toString() ?? kHyphen,
+  imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
+  isGridView: false,
+  onTap: () {
+    context.push('/unit-details', extra: {'buffalo': buffalo});
+  },
+  onInvoiceTap: () async {
+    _handleInvoiceTap(context, ref, buffalo.rfid);
+  },
+  onCalvesTap: () async {
+    _handleCalvesTap(context, buffalo.rfid);
+  }, id: '', healthStatus: '', lastMilking: '', breed: '',
+);
+
+
+        // return BuffaloCard(
+        //   farmName: buffalo.farmName ?? 'FarmVest Unit',
+        //   location: buffalo.farmLocation ?? 'Location',
+        //   id: buffalo.animalId,
+        //   healthStatus: buffalo.healthStatus,
+        //   lastMilking: 'Checked recently',
+        //   age: '-', // Field not available in new model
+        //   breed: '-', // Field not available in new model
+        //   imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
+        //   isGridView: false,
+        //   onTap: () {
+        //     context.push('/unit-details', extra: {'buffalo': buffalo});
+        //   },
+        //   onInvoiceTap: () async {
+        //     _handleInvoiceTap(context, ref, buffalo.animalId);
+        //   },
+        //   onCalvesTap: () async {
+        //     _handleCalvesTap(context, buffalo.animalId);
+        //   },
+        // );
       },
     );
   }
