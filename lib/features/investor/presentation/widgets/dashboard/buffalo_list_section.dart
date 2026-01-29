@@ -86,33 +86,36 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
         maxCrossAxisExtent: 220,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
-        childAspectRatio: 0.78,
+        childAspectRatio: 0.65,
       ),
       itemCount: buffalos.length,
       itemBuilder: (context, index) {
         final buffalo = buffalos[index];
-return BuffaloCard(
-  rfid: buffalo.rfid??'',
-shedName: buffalo.shedId.toString() ??'',
+        return BuffaloCard(
+          rfid: buffalo.rfid ?? '',
+          shedName: buffalo.shedId.toString() ?? '',
 
-  age: buffalo.age?.toString() ?? '-',
-  
+          age: buffalo.age?.toString() ?? '-',
 
-  farmName: buffalo.farmName ?? 'FarmVest Unit',
-  location: buffalo.farmLocation ?? 'Location',
-  // ShedName: buffalo.ShedName ?? '-',
-  imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
-  isGridView: true,
-  onTap: () {
-    context.push('/unit-details', extra: {'buffalo': buffalo});
-  },
-  onInvoiceTap: () async {
-    _handleInvoiceTap(context, ref, buffalo.rfid);
-  },
-  onCalvesTap: () async {
-    _handleCalvesTap(context, buffalo.rfid);
-  }, healthStatus: '', lastMilking: '', breed: '', id: '',  
-);
+          farmName: buffalo.farmName ?? 'FarmVest Unit',
+          location: buffalo.farmLocation ?? 'Location',
+          // ShedName: buffalo.ShedName ?? '-',
+          imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
+          isGridView: true,
+          onTap: () {
+            context.push('/unit-details', extra: {'buffalo': buffalo});
+          },
+          onInvoiceTap: () async {
+            _handleInvoiceTap(context, ref, buffalo.rfid);
+          },
+          onCalvesTap: () async {
+            _handleCalvesTap(context, buffalo.rfid);
+          },
+          healthStatus: buffalo.healthStatus,
+          lastMilking: '',
+          breed: '',
+          id: buffalo.animalId,
+        );
         // return BuffaloCard(
         //   farmName: buffalo.farmName ?? 'FarmVest Unit',
         //   location: buffalo.farmLocation ?? 'Location',
@@ -149,25 +152,28 @@ shedName: buffalo.shedId.toString() ??'',
       itemBuilder: (context, index) {
         final buffalo = buffalos[index];
 
-return BuffaloCard(
-  rfid: buffalo.rfid ?? kHyphen,
-  age: buffalo.age?.toString() ?? kHyphen,
-  farmName: buffalo.farmName ?? kHyphen,
-  location: buffalo.farmLocation ?? kHyphen,
-  shedName: buffalo.shedId?.toString() ?? kHyphen,
-  imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
-  isGridView: false,
-  onTap: () {
-    context.push('/unit-details', extra: {'buffalo': buffalo});
-  },
-  onInvoiceTap: () async {
-    _handleInvoiceTap(context, ref, buffalo.rfid);
-  },
-  onCalvesTap: () async {
-    _handleCalvesTap(context, buffalo.rfid);
-  }, id: '', healthStatus: '', lastMilking: '', breed: '',
-);
-
+        return BuffaloCard(
+          rfid: buffalo.rfid ?? kHyphen,
+          age: buffalo.age?.toString() ?? kHyphen,
+          farmName: buffalo.farmName ?? kHyphen,
+          location: buffalo.farmLocation ?? kHyphen,
+          shedName: buffalo.shedId?.toString() ?? kHyphen,
+          imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
+          isGridView: false,
+          onTap: () {
+            context.push('/unit-details', extra: {'buffalo': buffalo});
+          },
+          onInvoiceTap: () async {
+            _handleInvoiceTap(context, ref, buffalo.rfid);
+          },
+          onCalvesTap: () async {
+            _handleCalvesTap(context, buffalo.rfid);
+          },
+          id: buffalo.animalId,
+          healthStatus: buffalo.healthStatus,
+          lastMilking: '',
+          breed: '',
+        );
 
         // return BuffaloCard(
         //   farmName: buffalo.farmName ?? 'FarmVest Unit',

@@ -46,7 +46,7 @@ class BuffaloCard extends StatelessWidget {
     this.imageUrl, // Added to constructor
     this.onTap,
     this.onCalvesTap,
-    this.onInvoiceTap, 
+    this.onInvoiceTap,
   });
 
   static String getStableImage(String id) {
@@ -98,9 +98,8 @@ class BuffaloCard extends StatelessWidget {
             onTap:
                 onTap ??
                 () => context.push('/unit-details', extra: {'buffaloId': id}),
-            
-              child:
-            Column(
+
+            child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -113,29 +112,25 @@ class BuffaloCard extends StatelessWidget {
                     isMediumPhone: isMediumPhone,
                   ),
                 ),
-// Flexible(
-//   child: SingleChildScrollView(
-//     physics: BouncingScrollPhysics(),
-//     child: _buildInfoSection(
-//       context,
-//       isSmallPhone: isSmallPhone,
-//       isMediumPhone: isMediumPhone,
-//     ),
-//   ),
-// ),
+                // Flexible(
+                //   child: SingleChildScrollView(
+                //     physics: BouncingScrollPhysics(),
+                //     child: _buildInfoSection(
+                //       context,
+                //       isSmallPhone: isSmallPhone,
+                //       isMediumPhone: isMediumPhone,
+                //     ),
+                //   ),
+                // ),
 
-
-
-
-// Flexible(
-//   fit: FlexFit.loose,
-//   child: _buildInfoSection(
-//     context,
-//     isSmallPhone: isSmallPhone,
-//     isMediumPhone: isMediumPhone,
-//   ),
-// ),
-
+                // Flexible(
+                //   fit: FlexFit.loose,
+                //   child: _buildInfoSection(
+                //     context,
+                //     isSmallPhone: isSmallPhone,
+                //     isMediumPhone: isMediumPhone,
+                //   ),
+                // ),
 
                 // if (isGridView)
                 //   Expanded(
@@ -151,29 +146,47 @@ class BuffaloCard extends StatelessWidget {
                 //     isSmallPhone: isSmallPhone,
                 //     isMediumPhone: isMediumPhone,
                 //   ),
-                Flexible(
-      child: _buildInfoSection(
-        context,
-        isSmallPhone: isSmallPhone,
-        isMediumPhone: isMediumPhone,
-      ),
-    ),
-    //  _buildInfoSection(
-    //     context,
-    //     isSmallPhone: isSmallPhone,
-    //     isMediumPhone: isMediumPhone,
-    //   ),
+                if (isGridView)
+                  Expanded(
+                    child: Container(
+                      color: isDark
+                          ? Colors.transparent
+                          : AppTheme.beige.withValues(alpha: 0.3),
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: _buildInfoSection(
+                          context,
+                          isSmallPhone: isSmallPhone,
+                          isMediumPhone: isMediumPhone,
+                          applyColor:
+                              false, // Pass flag to not apply color inside
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  _buildInfoSection(
+                    context,
+                    isSmallPhone: isSmallPhone,
+                    isMediumPhone: isMediumPhone,
+                    applyColor: true,
+                  ),
 
+                //  _buildInfoSection(
+                //     context,
+                //     isSmallPhone: isSmallPhone,
+                //     isMediumPhone: isMediumPhone,
+                //   ),
                 _buildFooter(
                   context: context,
                   isSmallPhone: isSmallPhone,
                   isMediumPhone: isMediumPhone,
                 ),
               ],
-            ),),
+            ),
           ),
         ),
-      
+      ),
     );
   }
 
@@ -317,6 +330,7 @@ class BuffaloCard extends StatelessWidget {
     BuildContext context, {
     required bool isSmallPhone,
     required bool isMediumPhone,
+    bool applyColor = true,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -331,9 +345,11 @@ class BuffaloCard extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
-      color: isDark
-          ? Colors.transparent
-          : AppTheme.beige.withValues(alpha: 0.3),
+      color: applyColor
+          ? (isDark
+                ? Colors.transparent
+                : AppTheme.beige.withValues(alpha: 0.3))
+          : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,33 +365,21 @@ class BuffaloCard extends StatelessWidget {
           //   SizedBox(height: rowGap),
           // ],
           // RFID
-if (rfid.isNotEmpty) ...[
-  _buildInfoRow(
-    'RFID',
-    rfid.toUpperCase(),
-    isDark: isDark,
-    fontSize: fontSize,
-  ),
-  SizedBox(height: rowGap),
-],
-_buildInfoRow(
-  'Health',
-  healthStatus,
-  isDark: isDark,
-  fontSize: fontSize,
-),
-SizedBox(height: rowGap),
-// Shed Name
-if (shedName.isNotEmpty && shedName.toLowerCase() != 'null') ...[
-  _buildInfoRow(
-    'Shed',
-    shedName,
-    isDark: isDark,
-    fontSize: fontSize,
-  ),
-  SizedBox(height: rowGap),
-],
+          if (rfid.isNotEmpty) ...[
+            _buildInfoRow(
+              'RFID',
+              rfid.toUpperCase(),
+              isDark: isDark,
+              fontSize: fontSize,
+            ),
+            SizedBox(height: rowGap),
+          ],
 
+          // Shed Name
+          if (shedName.isNotEmpty && shedName.toLowerCase() != 'null') ...[
+            _buildInfoRow('Shed', shedName, isDark: isDark, fontSize: fontSize),
+            SizedBox(height: rowGap),
+          ],
 
           // Age
           _buildInfoRow('Age', age, isDark: isDark, fontSize: fontSize),
@@ -449,8 +453,7 @@ if (shedName.isNotEmpty && shedName.toLowerCase() != 'null') ...[
 
     return GestureDetector(
       onTap: () async {
-        await Clipboard.setData(
-          ClipboardData(text: breed.toUpperCase()));
+        await Clipboard.setData(ClipboardData(text: breed.toUpperCase()));
         Fluttertoast.showToast(
           msg: "ID Copied",
           toastLength: Toast.LENGTH_SHORT,
@@ -503,7 +506,7 @@ if (shedName.isNotEmpty && shedName.toLowerCase() != 'null') ...[
             // ID Value
             Expanded(
               child: Text(
-                breed.toUpperCase(),
+                rfid.toUpperCase(),
                 style: TextStyle(
                   fontSize: valueFont,
                   color: Colors.white,
