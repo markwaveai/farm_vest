@@ -139,8 +139,7 @@ Future<void> showQuickActionDialog({
                                       hint: 'Enter Tag Number',
                                       controller: idController,
                                       onChanged: (val) {
-                                        if (type !=
-                                            QuickActionType.locateAnimal) {
+                                        if (true) {
                                           ref
                                               .read(
                                                 supervisorDashboardProvider
@@ -158,8 +157,7 @@ Future<void> showQuickActionDialog({
                                       },
                                     ),
                                   ),
-                                  if (type != QuickActionType.locateAnimal &&
-                                      suggestions.isNotEmpty &&
+                                  if (suggestions.isNotEmpty &&
                                       _selectedAnimalId == null)
                                     Container(
                                       margin: const EdgeInsets.only(top: 4),
@@ -302,6 +300,15 @@ Future<void> showQuickActionDialog({
                                           supervisorDashboardProvider.notifier,
                                         )
                                         .locateAnimal(query);
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Please enter a tag or ID to search',
+                                        ),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
                                   }
                                 },
                                 child: const Text(
@@ -310,7 +317,7 @@ Future<void> showQuickActionDialog({
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              if (dashboardState.isLoading)
+                              if (dashboardState.isLocatingAnimal)
                                 const Center(child: CircularProgressIndicator())
                               else if (dashboardState.error != null)
                                 Text(

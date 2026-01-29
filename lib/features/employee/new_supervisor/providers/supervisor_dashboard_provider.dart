@@ -39,6 +39,7 @@ class SupervisorDashboardState {
   final List<SupervisorTask> tasks;
   final List<HealthConcern> healthConcerns;
   final bool isLoading;
+  final bool isLocatingAnimal;
   final String? error;
   final Map<String, dynamic>? animalLocation;
   final List<Map<String, dynamic>> animalSuggestions;
@@ -54,6 +55,7 @@ class SupervisorDashboardState {
     this.tasks = const [],
     this.healthConcerns = const [],
     this.isLoading = false,
+    this.isLocatingAnimal = false,
     this.morningFeed = true,
     this.waterCleaning = true,
     this.shedWash = false,
@@ -68,6 +70,7 @@ class SupervisorDashboardState {
     List<SupervisorTask>? tasks,
     List<HealthConcern>? healthConcerns,
     bool? isLoading,
+    bool? isLocatingAnimal,
     bool? morningFeed,
     bool? waterCleaning,
     bool? shedWash,
@@ -81,6 +84,7 @@ class SupervisorDashboardState {
       tasks: tasks ?? this.tasks,
       healthConcerns: healthConcerns ?? this.healthConcerns,
       isLoading: isLoading ?? this.isLoading,
+      isLocatingAnimal: isLocatingAnimal ?? this.isLocatingAnimal,
       morningFeed: morningFeed ?? this.morningFeed,
       waterCleaning: waterCleaning ?? this.waterCleaning,
       shedWash: shedWash ?? this.shedWash,
@@ -241,38 +245,58 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
 
   Future<void> locateAnimal(String query) async {
     final supervisorRepo = ref.read(supervisorRepositoryProvider);
-    state = state.copyWith(isLoading: true, animalLocation: null, error: null);
+    state = state.copyWith(
+      isLocatingAnimal: true,
+      animalLocation: null,
+      error: null,
+    );
     try {
       // 1. Search for animal by tag/query string
       final animals = await supervisorRepo.searchAnimals(query: query);
       if (animals.isEmpty) {
         state = state.copyWith(
-          isLoading: false,
+          isLocatingAnimal: false,
           error: 'No animal found with this tag $query.',
         );
         return;
       }
 
-      // 2. Get the database ID of the first match
-      // The search result from animal/search_animal has a structure: {'animal_details': {...}, ...}
-      final animalId = animals.first['animal_details']['id'];
+      // 2. Extract location directly from search result
+      // Prioritize exact match if multiple results found
+      final q = query.trim().toLowerCase();
+      final animalData = animals.firstWhere((a) {
+        final d = a['animal_details'] ?? {};
+        final rfid = (d['rfid_tag_number'] ?? '').toString().toLowerCase();
+        final ear = (d['ear_tag'] ?? '').toString().toLowerCase();
+        final aid = (d['animal_id'] ?? '').toString().toLowerCase();
+        return rfid == q || ear == q || aid == q;
+      }, orElse: () => animals.first);
+      final animalDetails = animalData['animal_details'];
+      final shedDetails = animalData['shed_details'];
 
-      if (animalId == null) {
+      // Check if animal exists
+      if (animalDetails == null) {
         state = state.copyWith(
-          isLoading: false,
-          error: 'Could not resolve animal ID $query.',
+          isLocatingAnimal: false,
+          error: 'Invalid animal data structure.',
         );
         return;
       }
 
-      // 3. Get its specific location
-      final response = await supervisorRepo.getAnimalLocation(animalId);
+      final Map<String, dynamic> locationData = {
+        'shed_id': animalDetails['shed_id'] ?? shedDetails?['id'],
+        'shed_name': shedDetails?['shed_name'],
+        'row_number': animalDetails['row_number'],
+        'parking_id': animalDetails['parking_id'],
+        'health_status': animalDetails['health_status'],
+      };
+
       state = state.copyWith(
-        animalLocation: response['data'],
-        isLoading: false,
+        animalLocation: locationData,
+        isLocatingAnimal: false,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLocatingAnimal: false, error: e.toString());
     }
   }
 

@@ -1144,7 +1144,18 @@ class _BuffaloAllocationScreenState
     final slotKey = '$rowName-$posId';
     final draftAnimalId = draftAllocations[slotKey];
     final isBeingAllocated = draftAnimalId != null;
-    final isTarget = widget.targetParkingId == posId;
+
+    final String targetId = (widget.targetParkingId ?? '').trim().toUpperCase();
+    final String currentPos = posId.trim().toUpperCase();
+    final String currentRowPos = '$rowName$currentPos'.toUpperCase();
+
+    // Check if target ID matches (exact, endsWith, or contains Row+Slot)
+    final isTarget =
+        targetId.isNotEmpty &&
+        (targetId == currentPos ||
+            targetId.endsWith(currentPos) ||
+            targetId.endsWith('-$currentPos') ||
+            targetId.contains(currentRowPos));
 
     return Container(
       height: 60,
@@ -1173,25 +1184,31 @@ class _BuffaloAllocationScreenState
                   ? Colors.white
                   : Colors.white.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(16),
+
               border: Border.all(
                 color: isBeingAllocated
                     ? AppTheme.secondary
                     : isTarget
-                    ? Colors.orange
+                    ? AppTheme
+                          .secondary // Highlight target with secondary color
                     : isOccupied
                     ? AppTheme.primary.withValues(alpha: 0.1)
                     : Colors.transparent,
-                width: (isBeingAllocated || isTarget) ? 2 : 1.5,
+                width: (isBeingAllocated || isTarget)
+                    ? 3
+                    : 1.5, // Thicker border for target
               ),
-              boxShadow: (isOccupied || isBeingAllocated)
+              boxShadow: (isOccupied || isBeingAllocated || isTarget)
                   ? [
                       BoxShadow(
                         color:
-                            (isBeingAllocated
+                            (isBeingAllocated || isTarget
                                     ? AppTheme.secondary
                                     : AppTheme.primary)
-                                .withValues(alpha: 0.15),
-                        blurRadius: 12,
+                                .withValues(
+                                  alpha: 0.3,
+                                ), // Stronger shadow for target
+                        blurRadius: isTarget ? 16 : 12,
                         offset: const Offset(0, 6),
                       ),
                     ]

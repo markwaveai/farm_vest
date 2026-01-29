@@ -70,41 +70,45 @@ class CustomCard extends StatelessWidget {
   }
 
   Widget _buildPriorityCard() {
-    return Stack(
-      children: [
-        Positioned(
-          left: 0,
-          top: 0,
-          bottom: 0,
-          child: Container(
-            width: 8,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                bottomLeft: Radius.circular(16),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            child: Container(
+              width: 8,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  bottomLeft: Radius.circular(16),
+                ),
               ),
             ),
           ),
-        ),
-        Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(left: 4),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.all(Radius.circular(16)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(left: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: child,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: child,
-        ),
-      ],
+        ],
+      ),
     );
   }
 
