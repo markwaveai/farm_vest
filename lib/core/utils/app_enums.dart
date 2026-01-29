@@ -18,21 +18,59 @@ enum UserType {
     final normalized = value.toLowerCase().trim().replaceAll(' ', '_');
 
     // Explicit mapping for known backend roles
-    if (normalized == 'investor' || normalized == 'customer')
+    if (normalized == 'investor' || normalized == 'customer') {
       return UserType.customer;
+    }
     if (normalized == 'supervisor') return UserType.supervisor;
     if (normalized == 'doctor') return UserType.doctor;
-    if (normalized == 'farm_manager' || normalized == 'manager')
+    if (normalized == 'farm_manager' || normalized == 'manager') {
       return UserType.farmManager;
-    if (normalized == 'admin' || normalized == 'administrator')
+    }
+    if (normalized == 'admin' || normalized == 'administrator') {
       return UserType.admin;
-    if (normalized == 'assistant' || normalized == 'assistant_doctor')
+    }
+    if (normalized == 'assistant' || normalized == 'assistant_doctor') {
       return UserType.assistant;
+    }
 
     return UserType.values.firstWhere(
       (type) => type.value == normalized,
       orElse: () => UserType.customer, // Default to customer if not found
     );
+  }
+
+  String get backendValue {
+    switch (this) {
+      case UserType.customer:
+        return 'INVESTOR';
+      case UserType.farmManager:
+        return 'FARM_MANAGER';
+      case UserType.supervisor:
+        return 'SUPERVISOR';
+      case UserType.doctor:
+        return 'DOCTOR';
+      case UserType.assistant:
+        return 'ASSISTANT_DOCTOR';
+      case UserType.admin:
+        return 'ADMIN';
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case UserType.customer:
+        return 'Investor';
+      case UserType.farmManager:
+        return 'Farm Manager';
+      case UserType.supervisor:
+        return 'Supervisor';
+      case UserType.doctor:
+        return 'Doctor';
+      case UserType.assistant:
+        return 'Assistant';
+      case UserType.admin:
+        return 'Administrator';
+    }
   }
 }
 

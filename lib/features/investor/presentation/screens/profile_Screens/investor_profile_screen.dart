@@ -80,8 +80,8 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
                 filePath: currentImageUrl,
               );
             }
-            // Set to empty for API
-            finalImageUrlForApi = '';
+            // Set to null for API
+            finalImageUrlForApi = null;
           } else if (_profileImage != null) {
             // Upload new image
             final uploadedImageUrl = await authNotifier.uploadProfileImage(
@@ -93,7 +93,7 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
             // User didn't change image - check what's actually in Firebase now
             final currentFirebaseImageUrl = await authNotifier
                 .getCurrentFirebaseImageUrl(user.mobile);
-            finalImageUrlForApi = currentFirebaseImageUrl ?? '';
+            finalImageUrlForApi = currentFirebaseImageUrl;
           }
 
           // Always prepare update data
@@ -103,10 +103,10 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
             'address': _addressController.text,
           };
 
-          // Always include imageUrl, even if empty
-          updateData['imageUrl'] = finalImageUrlForApi ?? '';
+          // Always include profile (image URL), even if empty
+          updateData['profile'] = finalImageUrlForApi;
 
-          debugPrint('Sending to API - imageUrl: ${updateData['imageUrl']}');
+          debugPrint('Sending to API - profile: ${updateData['profile']}');
 
           // Update user data via API
           final updatedUser = await authNotifier.updateUserdata(
@@ -142,31 +142,19 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     final authState = ref.watch(authProvider);
     final userData = authState.userData;
 
-    // Aggressive sync for initial load or when userData arrives
-    if (userData != null && !_isEditing) {
-      if (_nameController.text.isEmpty && userData.name.isNotEmpty) {
-        _nameController.text = userData.name;
-      }
-      if (_emailController.text.isEmpty && userData.email.isNotEmpty) {
-        _emailController.text = userData.email;
-      }
-      if (_addressController.text.isEmpty &&
-          (userData.address?.isNotEmpty ?? false)) {
-        _addressController.text = userData.address!;
-      }
-      if (_phoneController.text.isEmpty && userData.mobile.isNotEmpty) {
-        _phoneController.text = userData.mobile;
-      }
-    }
+    // Aggressive sync removed to prevent build-phase state modification error.
+    // relying on ref.listen to update controllers.
 
     // Listen for future updates
     ref.listen(authProvider, (previous, next) {
       if (next.userData != null && next.userData != previous?.userData) {
         if (!_isEditing) {
-          _nameController.text = next.userData?.name ?? '';
-          _emailController.text = next.userData?.email ?? '';
-          _addressController.text = next.userData?.address ?? '';
-          _phoneController.text = next.userData?.mobile ?? '';
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _nameController.text = next.userData?.name ?? '';
+            _emailController.text = next.userData?.email ?? '';
+            _addressController.text = next.userData?.address ?? '';
+            _phoneController.text = next.userData?.mobile ?? '';
+          });
         }
       }
     });
@@ -174,19 +162,21 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
     ref.listen(investorSummaryProvider, (previous, next) {
       next.whenData((summary) {
         if (!_isEditing && summary != null) {
-          final details = summary.data.profileDetails;
-          if (details.fullName.isNotEmpty) {
-            _nameController.text = details.fullName;
-          }
-          if (details.phoneNumber.isNotEmpty) {
-            _phoneController.text = details.phoneNumber;
-          }
-          if (details.email != null && details.email!.isNotEmpty) {
-            _emailController.text = details.email!;
-          }
-          if (details.address != null && details.address!.isNotEmpty) {
-            _addressController.text = details.address!;
-          }
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final details = summary.data.profileDetails;
+            if (details.fullName.isNotEmpty) {
+              _nameController.text = details.fullName;
+            }
+            if (details.phoneNumber.isNotEmpty) {
+              _phoneController.text = details.phoneNumber;
+            }
+            if (details.email != null && details.email!.isNotEmpty) {
+              _emailController.text = details.email!;
+            }
+            if (details.address != null && details.address!.isNotEmpty) {
+              _addressController.text = details.address!;
+            }
+          });
         }
       });
     });

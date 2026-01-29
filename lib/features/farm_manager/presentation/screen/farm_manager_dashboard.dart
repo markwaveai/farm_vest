@@ -686,7 +686,24 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     }
     return Column(
       children: ds.onboardedAnimalIds.take(3).map((item) {
-        final rfid = item.toString().split('-').last;
+        String rfid = 'Unknown';
+        if (item is String) {
+          rfid = item.split('-').last;
+        } else if (item is Map) {
+          rfid =
+              (item['rfid_tag'] ??
+                      item['rfid'] ??
+                      item['rfid_tag_number'] ??
+                      item['animal_id'] ??
+                      '')
+                  .toString();
+          if (rfid.contains('-')) {
+            rfid = rfid.split('-').last;
+          }
+        } else {
+          rfid = item.toString().split('-').last;
+        }
+
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(

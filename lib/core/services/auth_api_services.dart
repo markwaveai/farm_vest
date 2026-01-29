@@ -37,17 +37,19 @@ class AuthApiServices {
             }
             return WhatsappOtpResponse.fromJson(data);
           } catch (e) {
-              if (response.body is String) {
+            if (response.body is String) {
               final responseString = response.body as String;
-              final otpMatch = RegExp(r'\b\d{4,6}\b').firstMatch(responseString);
-              final extractedOtp = otpMatch?.group(0);   
+              final otpMatch = RegExp(
+                r'\b\d{4,6}\b',
+              ).firstMatch(responseString);
+              final extractedOtp = otpMatch?.group(0);
               return WhatsappOtpResponse(
                 otp: extractedOtp,
                 user: null,
                 message: responseString,
-                status: true, 
+                status: true,
               );
-            }           
+            }
           }
         } else {
           throw ServerException('Empty response from server');
@@ -115,10 +117,11 @@ class AuthApiServices {
         headers["Authorization"] = AppConstants.authApiKey;
       }
 
-      final response = await http.get(
-        Uri.parse("${AppConstants.appLiveUrl}/users/$mobile"),
-        headers: headers,
-      );
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/users/get_user_data",
+      ).replace(queryParameters: {'mobile': mobile});
+
+      final response = await http.get(uri, headers: headers);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body);
@@ -140,13 +143,24 @@ class AuthApiServices {
   static Future<UserModel> updateUserProfile({
     required String mobile,
     required Map<String, dynamic> body,
+    String? token,
   }) async {
     try {
-      final url = "${AppConstants.appLiveUrl}/users/$mobile";
+      final url = "${AppConstants.appLiveUrl}/users/update_user_details/";
+
+      final headers = {
+        HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+      };
+
+      if (token != null && token.isNotEmpty) {
+        headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
+      } else {
+        headers["Authorization"] = AppConstants.authApiKey;
+      }
 
       final response = await http.put(
         Uri.parse(url),
-        headers: {HttpHeaders.contentTypeHeader: AppConstants.applicationJson},
+        headers: headers,
         body: jsonEncode(body),
       );
 
@@ -157,10 +171,10 @@ class AuthApiServices {
           return UserModel.fromJson(data["user"]);
         }
       }
-      throw ServerException(
-        'Failed to update user profile',
-        statusCode: response.statusCode,
-      );
+      final data = jsonDecode(response.body);
+      final message = data['detail'] ?? 'Failed to update user profile';
+
+      throw ServerException(message, statusCode: response.statusCode);
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {

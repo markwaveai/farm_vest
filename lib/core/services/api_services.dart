@@ -4,7 +4,6 @@ import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../theme/app_constants.dart';
-import '../../features/investor/data/models/visit_model.dart';
 
 class ApiServices {
   // Global callback for handling unauthorized access
@@ -364,11 +363,20 @@ class ApiServices {
   static Future<List<Map<String, dynamic>>> getFarms({
     required String token,
     String? query,
+    int? page,
+    int? size,
   }) async {
     try {
       var url = "${AppConstants.appLiveUrl}/farm/get_all_farms";
+      final queryParams = <String, String>{};
       if (query != null && query.isNotEmpty) {
-        url += "?name=$query";
+        queryParams['name'] = query;
+      }
+      if (page != null) queryParams['page'] = page.toString();
+      if (size != null) queryParams['size'] = size.toString();
+
+      if (queryParams.isNotEmpty) {
+        url += "?${Uri(queryParameters: queryParams).query}";
       }
 
       final response = await http.get(
@@ -549,7 +557,7 @@ class ApiServices {
       }
 
       if (queryParams.isNotEmpty) {
-        url += "?" + Uri(queryParameters: queryParams).query;
+        url += "?${Uri(queryParameters: queryParams).query}";
       }
 
       final response = await http.get(

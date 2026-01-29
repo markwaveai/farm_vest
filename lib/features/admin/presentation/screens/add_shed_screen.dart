@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
-import 'package:farm_vest/core/widgets/primary_button.dart';
+import 'package:farm_vest/core/widgets/farm_selector_input.dart';
+import '../../../../core/widgets/primary_button.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,14 +19,6 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
   final _shedNameController = TextEditingController();
   final _capacityController = TextEditingController(text: '300');
 
-  // CCTV Controllers
-  final _cctv1 = TextEditingController();
-  final _cctv2 = TextEditingController();
-  final _cctv3 = TextEditingController();
-  final _cctv4 = TextEditingController();
-
-  bool _showCctvFields = false;
-
   @override
   void initState() {
     super.initState();
@@ -36,10 +29,6 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
   void dispose() {
     _shedNameController.dispose();
     _capacityController.dispose();
-    _cctv1.dispose();
-    _cctv2.dispose();
-    _cctv3.dispose();
-    _cctv4.dispose();
     super.dispose();
   }
 
@@ -98,10 +87,7 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
 
               const SizedBox(height: 24),
 
-              _buildCctvSection(),
-
-              const SizedBox(height: 40),
-
+              // CCTV section removed as per request
               if (adminState.error != null)
                 _buildErrorWidget(adminState.error!),
 
@@ -183,142 +169,9 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
   }
 
   Widget _buildFarmDropdown(AdminState state) {
-    return DropdownButtonFormField<int>(
-      value: _selectedFarmId,
-      decoration: InputDecoration(
-        hintText: 'Select a farm unit',
-        prefixIcon: const Icon(
-          Icons.agriculture_rounded,
-          size: 22,
-          color: AppTheme.primary,
-        ),
-        filled: true,
-        fillColor: Colors.grey[50],
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
-        ),
-        helperText: 'Select the primary location for this shed.',
-        helperStyle: const TextStyle(fontSize: 11),
-      ),
-      items: state.farms
-          .map(
-            (f) => DropdownMenuItem(
-              value: f['id'] as int,
-              child: Text(
-                f['farm_name'] as String,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                  color: AppTheme.dark,
-                ),
-              ),
-            ),
-          )
-          .toList(),
-      onChanged: (v) => setState(() => _selectedFarmId = v),
-      validator: (v) => v == null ? 'Required' : null,
-    );
-  }
-
-  Widget _buildCctvSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: _showCctvFields
-            ? Colors.white
-            : Colors.blueGrey[50]?.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: _showCctvFields
-              ? AppTheme.primary.withOpacity(0.2)
-              : Colors.transparent,
-        ),
-      ),
-      child: Column(
-        children: [
-          ListTile(
-            onTap: () => setState(() => _showCctvFields = !_showCctvFields),
-            leading: Icon(
-              Icons.videocam_rounded,
-              color: _showCctvFields ? AppTheme.primary : Colors.grey,
-            ),
-            title: const Text(
-              'CCTV Configuration',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(
-              _showCctvFields ? 'Hide angles' : 'Optional: Set corner cameras',
-              style: const TextStyle(fontSize: 12),
-            ),
-            trailing: _showCctvFields
-                ? TextButton.icon(
-                    onPressed: _fillTestUrls,
-                    icon: const Icon(Icons.auto_fix_high_rounded, size: 16),
-                    label: const Text(
-                      'Fill Test',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                : Icon(Icons.expand_more, color: Colors.grey[300]),
-          ),
-          if (_showCctvFields)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: Column(
-                children: [
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  _buildAngleField(_cctv1, 'Angle 1 (Main Entrance)'),
-                  const SizedBox(height: 16),
-                  _buildAngleField(_cctv2, 'Angle 2 (Back Corner)'),
-                  const SizedBox(height: 16),
-                  _buildAngleField(_cctv3, 'Angle 3 (Left Wall)'),
-                  const SizedBox(height: 16),
-                  _buildAngleField(_cctv4, 'Angle 4 (Right Wall)'),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  void _fillTestUrls() {
-    setState(() {
-      _cctv1.text = 'http://161.97.182.208:8888/stream1/index.m3u8';
-      _cctv2.text = 'http://161.97.182.208:8888/stream2/index.m3u8';
-      _cctv3.text = 'http://161.97.182.208:8888/stream3/index.m3u8';
-      _cctv4.text = 'http://161.97.182.208:8888/stream4/index.m3u8';
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Test HLS URLs pre-filled.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
-  Widget _buildAngleField(TextEditingController controller, String label) {
-    return CustomTextField(
-      controller: controller,
-      hint: 'rtsp://...',
-      label: label,
-      prefixIcon: const Icon(Icons.add_link_rounded, size: 18),
+    return FarmSelectorInput(
+      selectedFarmId: _selectedFarmId,
+      onChanged: (id) => setState(() => _selectedFarmId = id),
     );
   }
 
@@ -359,10 +212,6 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
             shedId: autoShedId,
             shedName: _shedNameController.text.trim(),
             capacity: int.tryParse(_capacityController.text.trim()) ?? 300,
-            cctvUrl: _cctv1.text.trim().isEmpty ? null : _cctv1.text.trim(),
-            cctvUrl2: _cctv2.text.trim().isEmpty ? null : _cctv2.text.trim(),
-            cctvUrl3: _cctv3.text.trim().isEmpty ? null : _cctv3.text.trim(),
-            cctvUrl4: _cctv4.text.trim().isEmpty ? null : _cctv4.text.trim(),
           );
 
       if (success && mounted) {

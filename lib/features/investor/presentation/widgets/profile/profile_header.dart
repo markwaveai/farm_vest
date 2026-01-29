@@ -33,7 +33,7 @@ class ProfileHeader extends ConsumerStatefulWidget {
 }
 
 class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
-  void _showImageSourceSheet() {
+  void _showImageSourceSheet(bool hasImage) {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -57,7 +57,7 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_camera),
-                title: const Text('Choose from camera'),
+                title: const Text('Take a photo'),
                 onTap: () async {
                   Navigator.pop(ctx);
                   final file = await ref
@@ -68,10 +68,47 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
                   }
                 },
               ),
+              if (hasImage)
+                ListTile(
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: const Text(
+                    'Remove photo',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _confirmRemove();
+                  },
+                ),
             ],
           ),
         );
       },
+    );
+  }
+
+  void _confirmRemove() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Profile Photo'),
+        content: const Text(
+          'Are you sure you want to remove your profile photo?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              widget.onImageRemoved();
+            },
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -112,10 +149,14 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
                             );
                           },
                           errorBuilder: (context, error, stackTrace) {
+                            debugPrint(
+                              'Image load error for $remoteImageUrl: $error',
+                            );
                             return const Center(
                               child: Text(
                                 'Image not supported',
                                 style: AppTheme.bodySmall,
+                                textAlign: TextAlign.center,
                               ),
                             );
                           },
@@ -141,36 +182,9 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
                     shape: BoxShape.circle,
                   ),
                   child: InkWell(
-                    onTap: () {
-                      if (hasImage) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Remove Profile Photo'),
-                            content: const Text(
-                              'Are you sure you want to remove your profile photo?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  widget.onImageRemoved();
-                                },
-                                child: const Text('Remove'),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        _showImageSourceSheet();
-                      }
-                    },
-                    child: Icon(
-                      hasImage ? Icons.delete_outline : Icons.camera_alt,
+                    onTap: () => _showImageSourceSheet(hasImage),
+                    child: const Icon(
+                      Icons.camera_alt,
                       size: 20,
                       color: Colors.white,
                     ),

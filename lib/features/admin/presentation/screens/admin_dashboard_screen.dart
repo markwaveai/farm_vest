@@ -476,15 +476,7 @@ class _AdminHomeView extends ConsumerWidget {
           Colors.blue,
           () => context.pushNamed('add-staff'),
         ),
-        _buildActionItem(
-          'Onboard Manager',
-          Icons.manage_accounts_rounded,
-          Colors.deepPurple,
-          () => context.pushNamed(
-            'add-staff',
-            extra: {'isOnboardingManager': true},
-          ),
-        ),
+
         _buildActionItem(
           'Staff Directory',
           Icons.badge_rounded,
@@ -563,11 +555,14 @@ class _AdminFarmsView extends ConsumerStatefulWidget {
 class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
+  int _currentPage = 1;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(adminProvider.notifier).fetchFarms());
+    Future.microtask(
+      () => ref.read(adminProvider.notifier).fetchFarms(page: 1),
+    );
   }
 
   @override
@@ -577,8 +572,8 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
   }
 
   void _onSearch(String query) {
-    // Add debounce here if needed, or search on submit
-    ref.read(adminProvider.notifier).fetchFarms(query: query);
+    _currentPage = 1;
+    ref.read(adminProvider.notifier).fetchFarms(query: query, page: 1);
   }
 
   Map<String, dynamic> _getRoleInfo(UserType role) {
@@ -732,6 +727,24 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
     );
   }
 
+  bool _onScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollEndNotification &&
+        notification.metrics.pixels >=
+            notification.metrics.maxScrollExtent - 50) {
+      final state = ref.read(adminProvider);
+      if (!state.isLoading) {
+        _currentPage++;
+        ref
+            .read(adminProvider.notifier)
+            .fetchFarms(
+              page: _currentPage,
+              query: _searchController.text.trim(),
+            );
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final adminState = ref.watch(adminProvider);
@@ -766,7 +779,8 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
                 if (_isSearching) {
                   _isSearching = false;
                   _searchController.clear();
-                  ref.read(adminProvider.notifier).fetchFarms();
+                  _currentPage = 1;
+                  ref.read(adminProvider.notifier).fetchFarms(page: 1);
                 } else {
                   _isSearching = true;
                 }
@@ -780,17 +794,30 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
             ),
         ],
       ),
-      body: adminState.isLoading
+      body: adminState.isLoading && farms.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : farms.isEmpty
           ? _buildEmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: farms.length,
-              itemBuilder: (context, index) {
-                final farm = farms[index];
-                return _buildFarmCard(farm);
-              },
+          : NotificationListener<ScrollNotification>(
+              onNotification: _onScrollNotification,
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: farms.length + (adminState.isLoading ? 1 : 0),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  if (index == farms.length) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  final farm = farms[index];
+                  return _buildFarmCard(farm);
+                },
+              ),
             ),
     );
   }

@@ -50,7 +50,7 @@ class AdminNotifier extends Notifier<AdminState> {
     return AdminState();
   }
 
-  Future<void> fetchFarms({String? query}) async {
+  Future<void> fetchFarms({String? query, int page = 1, int size = 20}) async {
     state = state.copyWith(isLoading: true);
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -59,8 +59,21 @@ class AdminNotifier extends Notifier<AdminState> {
         state = state.copyWith(isLoading: false, error: 'Token not found');
         return;
       }
-      final farms = await ApiServices.getFarms(token: token, query: query);
-      state = state.copyWith(isLoading: false, farms: farms);
+      final newFarms = await ApiServices.getFarms(
+        token: token,
+        query: query,
+        page: page,
+        size: size,
+      );
+
+      if (page == 1) {
+        state = state.copyWith(isLoading: false, farms: newFarms);
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          farms: [...state.farms, ...newFarms],
+        );
+      }
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }

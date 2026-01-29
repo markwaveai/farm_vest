@@ -3,9 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:farm_vest/core/services/biometric_service.dart';
-import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/image_helper_compressor.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:farm_vest/core/utils/app_enums.dart';
@@ -89,6 +87,10 @@ class AuthController extends Notifier<AuthState> {
     } on AppException catch (e) {
       state = state.copyWith(error: e.message);
       return null;
+    } catch (e) {
+      debugPrint("Upload profile image error: $e");
+      state = state.copyWith(error: "Failed to upload image: $e");
+      return null;
     }
   }
 
@@ -105,30 +107,15 @@ class AuthController extends Notifier<AuthState> {
     } on AppException catch (e) {
       state = state.copyWith(error: e.message);
       return false;
+    } catch (e) {
+      debugPrint("Delete profile image error: $e");
+      return false;
     }
   }
 
   // In AuthController class
   Future<String?> getCurrentFirebaseImageUrl(String userId) async {
-    try {
-      final storage = FirebaseStorage.instanceFor(
-        bucket: AppConstants.storageBucketName,
-      );
-
-      final ref = storage.ref().child('farmvestuserpics/$userId/profile.jpg');
-
-      // Try to get the download URL
-      final url = await ref.getDownloadURL();
-      return url;
-    } on FirebaseException catch (e) {
-      if (e.code == 'object-not-found') {
-        // Image doesn't exist in Firebase
-        return '';
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
+    return await _repository.getCurrentFirebaseImageUrl(userId);
   }
 
   Future<WhatsappOtpResponse?> sendWhatsappOtp(String phone) async {

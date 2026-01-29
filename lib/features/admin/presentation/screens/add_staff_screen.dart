@@ -1,8 +1,12 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:farm_vest/core/services/sheds_api_services.dart';
+import 'package:farm_vest/core/widgets/farm_selector_input.dart';
 import 'package:farm_vest/core/widgets/primary_button.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/admin_provider.dart';
 
 class AddStaffScreen extends ConsumerStatefulWidget {
@@ -18,23 +22,33 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-  String? _selectedRole;
+  UserType? _selectedRole;
   int? _selectedFarmId;
   int? _selectedShedId;
   bool _isTestAccount = false;
+  List<Map<String, dynamic>> _sheds = [];
 
-  final Map<String, String> _roleMapping = {
-    'Farm Manager': 'FARM_MANAGER',
-    'Supervisor': 'SUPERVISOR',
-    'Doctor': 'DOCTOR',
-    'Assistant': 'ASSISTANT_DOCTOR',
-  };
+  Future<void> _fetchSheds(int farmId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token != null) {
+      final sheds = await ShedsApiServices.getSheds(
+        token: token,
+        farmId: farmId,
+      );
+      if (mounted) {
+        setState(() {
+          _sheds = sheds;
+        });
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     if (widget.isOnboardingManager) {
-      _selectedRole = 'Farm Manager';
+      _selectedRole = UserType.farmManager;
     }
     Future.microtask(() => ref.read(adminProvider.notifier).fetchFarms());
   }
@@ -112,7 +126,7 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
               const SizedBox(height: 20),
               if (!widget.isOnboardingManager) ...[
                 _buildLabel('Assigned Role'),
-                DropdownButtonFormField<String>(
+                DropdownButtonFormField<UserType>(
                   value: _selectedRole,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(
@@ -129,47 +143,67 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                     ),
                   ),
                   hint: const Text('Select Role'),
-                  items: _roleMapping.keys
-                      .map((r) => DropdownMenuItem(value: r, child: Text(r)))
-                      .toList(),
+                  items:
+                      [
+                            UserType.farmManager,
+                            UserType.supervisor,
+                            UserType.doctor,
+                            UserType.assistant,
+                          ]
+                          .map(
+                            (r) => DropdownMenuItem(
+                              value: r,
+                              child: Text(r.label),
+                            ),
+                          )
+                          .toList(),
                   onChanged: (v) => setState(() => _selectedRole = v),
                   validator: (v) => v == null ? 'Role is required' : null,
                 ),
                 const SizedBox(height: 20),
               ],
               _buildLabel('Assigned Farm'),
-              DropdownButtonFormField<int>(
-                value: _selectedFarmId,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppTheme.mediumGrey),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppTheme.mediumGrey),
-                  ),
-                ),
-                hint: const Text('Select Farm'),
-                items: adminState.farms
-                    .map(
-                      (f) => DropdownMenuItem(
-                        value: f['id'] as int,
-                        child: Text(f['farm_name'] as String),
+              FormField<int>(
+                initialValue: _selectedFarmId,
+                validator: (v) => _selectedFarmId == null
+                    ? 'Farm selection is required'
+                    : null,
+                builder: (state) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FarmSelectorInput(
+                        selectedFarmId: _selectedFarmId,
+                        onChanged: (v) {
+                          setState(() {
+                            _selectedFarmId = v;
+                            _selectedShedId = null;
+                            _sheds = [];
+                          });
+                          state.didChange(v);
+                          if (v != null) _fetchSheds(v);
+                        },
+                        label: 'Select Farm',
                       ),
-                    )
-                    .toList(),
-                onChanged: (v) => setState(() => _selectedFarmId = v),
-                validator: (v) =>
-                    v == null ? 'Farm selection is required' : null,
+                      if (state.hasError)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12, top: 4),
+                          child: Text(
+                            state.errorText!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 20),
 
-              if (_selectedRole == 'Supervisor' && _selectedFarmId != null) ...[
+              if (_selectedRole == UserType.supervisor &&
+                  _selectedFarmId != null) ...[
                 _buildLabel('Assigned Shed'),
                 DropdownButtonFormField<int>(
                   value: _selectedShedId,
@@ -188,7 +222,12 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                     ),
                   ),
                   hint: const Text('Select Shed'),
-                  items: _getShedsForFarm(adminState.farms, _selectedFarmId),
+                  items: _sheds.map<DropdownMenuItem<int>>((s) {
+                    return DropdownMenuItem(
+                      value: s['id'] as int,
+                      child: Text('${s['shed_name']} (${s['shed_id']})'),
+                    );
+                  }).toList(),
                   onChanged: (v) => setState(() => _selectedShedId = v),
                   validator: (v) => v == null
                       ? 'Shed assignment is required for Supervisors'
@@ -199,7 +238,7 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
 
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Is Test Account'),
+                title: const Text('Is Test Employee'),
                 value: _isTestAccount,
                 onChanged: (val) =>
                     setState(() => _isTestAccount = val ?? false),
@@ -235,9 +274,9 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                           lastName: lastName,
                           email: _emailController.text.trim(),
                           mobile: _phoneController.text.trim(),
-                          roles: [_roleMapping[_selectedRole!]!],
+                          roles: [_selectedRole!.backendValue],
                           farmId: _selectedFarmId!,
-                          shedId: _selectedRole == 'Supervisor'
+                          shedId: _selectedRole == UserType.supervisor
                               ? _selectedShedId
                               : null,
                           isTest: _isTestAccount,
@@ -275,21 +314,5 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
         ),
       ),
     );
-  }
-
-  List<DropdownMenuItem<int>> _getShedsForFarm(
-    List<Map<String, dynamic>> farms,
-    int? farmId,
-  ) {
-    if (farmId == null) return [];
-    final farm = farms.firstWhere((f) => f['id'] == farmId, orElse: () => {});
-    if (farm.isEmpty || farm['sheds'] == null) return [];
-    final sheds = farm['sheds'] as List;
-    return sheds.map<DropdownMenuItem<int>>((s) {
-      return DropdownMenuItem(
-        value: s['id'] as int,
-        child: Text('${s['shed_name']} (${s['shed_id']})'),
-      );
-    }).toList();
   }
 }

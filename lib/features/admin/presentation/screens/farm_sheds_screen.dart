@@ -64,57 +64,6 @@ class _FarmShedsScreenState extends State<FarmShedsScreen> {
     _fetchSheds(query: query);
   }
 
-  void _showEditCctvUrlDialog(Map<String, dynamic> shed) {
-    final controller = TextEditingController(text: shed['cctv_url']);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Update CCTV URL - ${shed['shed_name']}'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'CCTV Stream URL',
-            hintText: 'e.g. rtsp://... or https://...',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newUrl = controller.text.trim();
-              try {
-                final prefs = await SharedPreferences.getInstance();
-                final token = prefs.getString('access_token');
-                if (token == null) return;
-
-                final success = await ShedsApiServices.updateShed(
-                  token: token,
-                  shedId: shed['id'] as int,
-                  body: {'cctv_url': newUrl.isEmpty ? null : newUrl},
-                );
-
-                if (success && mounted) {
-                  Navigator.pop(context);
-                  _fetchSheds();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('CCTV URL updated')),
-                  );
-                }
-              } catch (e) {
-                // error handled by api service
-              }
-            },
-            child: const Text('Update'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,7 +116,6 @@ class _FarmShedsScreenState extends State<FarmShedsScreen> {
     final available = shed['available_positions'] ?? 0;
     final capacity = shed['capacity'] ?? 0;
     final currentBuffaloes = shed['current_buffaloes'] ?? 0;
-    final cctvUrl = shed['cctv_url'] as String?;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -228,44 +176,6 @@ class _FarmShedsScreenState extends State<FarmShedsScreen> {
                 _buildStat('Animals', '$currentBuffaloes'),
                 const SizedBox(width: 24),
                 _buildStat('Available', '$available'),
-              ],
-            ),
-            const Divider(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'CCTV Feed URL',
-                        style: TextStyle(fontSize: 12, color: AppTheme.slate),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        cctvUrl ?? 'Not assigned',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: cctvUrl != null
-                              ? AppTheme.primary
-                              : AppTheme.mediumGrey,
-                          fontStyle: cctvUrl != null
-                              ? FontStyle.normal
-                              : FontStyle.italic,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => _showEditCctvUrlDialog(shed),
-                  icon: const Icon(Icons.edit_outlined, size: 20),
-                  color: AppTheme.primary,
-                  tooltip: 'Update CCTV URL',
-                ),
               ],
             ),
           ],

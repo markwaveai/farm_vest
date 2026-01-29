@@ -49,7 +49,11 @@ class AuthRepository {
     required Map<String, dynamic> body,
   }) async {
     final token = await getToken();
-    return await AuthApiServices.updateUserProfile(mobile: mobile, body: body);
+    return await AuthApiServices.updateUserProfile(
+      mobile: mobile,
+      body: body,
+      token: token,
+    );
   }
 
   Future<void> saveUserSession({
@@ -106,7 +110,9 @@ class AuthRepository {
     required File file,
     required String userId,
   }) async {
-    final storage = FirebaseStorage.instance;
+    final storage = FirebaseStorage.instanceFor(
+      bucket: AppConstants.storageBucketName,
+    );
 
     final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
 
@@ -120,7 +126,9 @@ class AuthRepository {
 
   Future<String?> getCurrentFirebaseImageUrl(String userId) async {
     try {
-      final storage = FirebaseStorage.instance;
+      final storage = FirebaseStorage.instanceFor(
+        bucket: AppConstants.storageBucketName,
+      );
 
       final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
 
@@ -130,7 +138,7 @@ class AuthRepository {
     } on FirebaseException catch (e) {
       if (e.code == 'object-not-found') {
         // File doesn't exist in Firebase
-        return '';
+        return null;
       }
       debugPrint('Firebase error: ${e.code} ${e.message}');
       return null;
@@ -146,25 +154,27 @@ class AuthRepository {
     required String filePath,
   }) async {
     try {
-      final storage = FirebaseStorage.instance;
+      final storage = FirebaseStorage.instanceFor(
+        bucket: AppConstants.storageBucketName,
+      );
 
       final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
       await ref.delete();
 
-      FloatingToast.showSimpleToast('Front image deleted successfully');
+      FloatingToast.showSimpleToast('Profile image deleted successfully');
       return true;
     } on FirebaseException catch (e) {
       if (e.code == 'object-not-found') {
         // Already deleted or never uploaded.
-        SnackBar(content: Text('Profile image already deleted'));
+        // SnackBar(content: Text('Profile image already deleted'));
         return true;
       }
-      debugPrint('Error deleting front image: ${e.code} ${e.message}');
-      SnackBar(content: Text('Failed to delete front image'));
+      debugPrint('Error deleting profile image: ${e.code} ${e.message}');
+      // SnackBar(content: Text('Failed to delete profile image'));
       return false;
     } catch (e) {
-      debugPrint('Error deleting front image: $e');
-      SnackBar(content: Text('Failed to delete front image'));
+      debugPrint('Error deleting profile image: $e');
+      // SnackBar(content: Text('Failed to delete profile image'));
       return false;
     }
   }
