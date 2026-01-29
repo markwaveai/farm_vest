@@ -198,7 +198,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

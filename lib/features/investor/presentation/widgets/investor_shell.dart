@@ -85,7 +85,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
         SystemNavigator.pop();
       },
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: _currentIndex == 4
             ? null
             : AppBar(
