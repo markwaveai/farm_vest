@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:screen_protector/screen_protector.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:farm_vest/core/services/api_services.dart';
 import 'core/router/app_router.dart';
@@ -86,14 +86,7 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
   @override
   void initState() {
     super.initState();
-    _initScreenProtection();
-  }
-
-  Future<void> _initScreenProtection() async {
-    // Prevent screenshots and screen recording (IOS & Android)
-    await ScreenProtector.preventScreenshotOn();
-    // Protect data in app switcher (iOS)
-    await ScreenProtector.protectDataLeakageWithBlur();
+    // _initScreenProtection() removed
   }
 
   @override

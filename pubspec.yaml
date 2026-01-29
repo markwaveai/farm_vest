@@ -86,7 +86,7 @@ dependencies:
   # excel removed
   # pdf removed
   # printing removed
-  screen_protector: ^1.4.11
+  # screen_protector removed
   qr_flutter: ^4.1.0
   flutter_svg: ^2.2.3
   pdf: ^3.11.3
