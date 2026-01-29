@@ -196,133 +196,125 @@ class BuffaloCard extends StatelessWidget {
     required bool isSmallPhone,
     required bool isMediumPhone,
   }) {
-    final imageHeight = isSmallPhone ? 105.0 : (isMediumPhone ? 125.0 : 140.0);
     final overlayPadding = isSmallPhone ? 6.0 : 8.0;
 
-    return SizedBox(
-      height: imageHeight,
-      child: Stack(
-        children: [
-          // Main Image
-          Container(
-            height: imageHeight,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppTheme.slate.withValues(alpha: 0.1),
-                  AppTheme.lightGrey,
-                ],
-              ),
-            ),
-            child: imageUrl.startsWith('http')
-                ? Image.network(
-                    imageUrl,
-
-                    key: ValueKey(imageUrl),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                : null,
-                            color: AppTheme.primary.withOpacity(0.5),
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: AppTheme.lightGrey,
-                        child: Center(
-                          child: Icon(
-                            Icons.pets,
-                            size: 48,
-                            color: AppTheme.slate.withOpacity(0.3),
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                : Image.asset(
-                    imageUrl,
-                    key: ValueKey(imageUrl),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    gaplessPlayback: true,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: AppTheme.lightGrey,
-                        child: Center(
-                          child: Icon(
-                            Icons.pets,
-                            size: 48,
-                            color: AppTheme.slate.withOpacity(0.3),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-
-          // Gradient Overlay
-          Container(
-            height: imageHeight,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.1),
-                ],
-              ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Main Image
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppTheme.slate.withValues(alpha: 0.1),
+                AppTheme.lightGrey,
+              ],
             ),
           ),
+          child: imageUrl.startsWith('http')
+              ? Image.network(
+                  imageUrl,
 
-          // Top Right: Health Status Badge
+                  key: ValueKey(imageUrl),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                              : null,
+                          color: AppTheme.primary.withOpacity(0.5),
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: AppTheme.lightGrey,
+                      child: Center(
+                        child: Icon(
+                          Icons.pets,
+                          size: 48,
+                          color: AppTheme.slate.withOpacity(0.3),
+                        ),
+                      ),
+                    );
+                  },
+                )
+              : Image.asset(
+                  imageUrl,
+                  key: ValueKey(imageUrl),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  gaplessPlayback: true,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: AppTheme.lightGrey,
+                      child: Center(
+                        child: Icon(
+                          Icons.pets,
+                          size: 48,
+                          color: AppTheme.slate.withOpacity(0.3),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+
+        // Gradient Overlay
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Colors.black.withValues(alpha: 0.1)],
+            ),
+          ),
+        ),
+
+        // Top Right: Health Status Badge
+        Positioned(
+          top: overlayPadding,
+          right: overlayPadding,
+          child: _buildStatusChip(
+            isSmallPhone: isSmallPhone,
+            isMediumPhone: isMediumPhone,
+          ),
+        ),
+
+        // Bottom Left: Calves Button
+        if (onCalvesTap != null)
           Positioned(
-            top: overlayPadding,
-            right: overlayPadding,
-            child: _buildStatusChip(
+            bottom: overlayPadding,
+            left: overlayPadding,
+            child: _buildCalvesButton(
               isSmallPhone: isSmallPhone,
               isMediumPhone: isMediumPhone,
             ),
           ),
 
-          // Bottom Left: Calves Button
-          if (onCalvesTap != null)
-            Positioned(
-              bottom: overlayPadding,
-              left: overlayPadding,
-              child: _buildCalvesButton(
-                isSmallPhone: isSmallPhone,
-                isMediumPhone: isMediumPhone,
-              ),
+        // Bottom Right: Live Button
+        if (showLiveButton)
+          Positioned(
+            bottom: overlayPadding,
+            right: overlayPadding,
+            child: _buildLiveButton(
+              context,
+              isSmallPhone: isSmallPhone,
+              isMediumPhone: isMediumPhone,
             ),
-
-          // Bottom Right: Live Button
-          if (showLiveButton)
-            Positioned(
-              bottom: overlayPadding,
-              right: overlayPadding,
-              child: _buildLiveButton(
-                context,
-                isSmallPhone: isSmallPhone,
-                isMediumPhone: isMediumPhone,
-              ),
-            ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 
