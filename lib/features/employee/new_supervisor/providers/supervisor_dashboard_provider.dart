@@ -196,12 +196,38 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
   Future<Map<String, dynamic>?> createMilkEntry({
     required String timing,
     required String quantity,
+    required int animalId,
+    String? date,
   }) async {
     final supervisorRepo = ref.read(supervisorRepositoryProvider);
     try {
       final response = await supervisorRepo.createMilkEntry(
         timing: timing,
         quantity: quantity,
+        animalId: animalId,
+        date: date,
+      );
+      if (response['status'] == 'success') {
+        await _fetchData(); // Refresh data after successful entry
+        return response;
+      }
+      return null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> createDistributedMilkEntry({
+    required List<String> dates,
+    required String timing,
+    required String totalQuantity,
+  }) async {
+    final supervisorRepo = ref.read(supervisorRepositoryProvider);
+    try {
+      final response = await supervisorRepo.createDistributedMilkEntry(
+        dates: dates,
+        timing: timing,
+        totalQuantity: totalQuantity,
       );
       if (response['status'] == 'success') {
         await _fetchData(); // Refresh data after successful entry

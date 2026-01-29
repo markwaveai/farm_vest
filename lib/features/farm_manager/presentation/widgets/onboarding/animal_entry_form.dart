@@ -19,6 +19,7 @@ class AnimalEntryForm extends StatefulWidget {
   final VoidCallback onUpdate;
   final List<AnimalOnboardingEntry> buffaloEntries;
   final List<AnimalOnboardingEntry> calfEntries;
+  final AnimalOnboardingEntry? calfEntry;
 
   const AnimalEntryForm({
     super.key,
@@ -28,6 +29,7 @@ class AnimalEntryForm extends StatefulWidget {
     required this.onUpdate,
     this.buffaloEntries = const [],
     this.calfEntries = const [],
+    this.calfEntry,
   });
 
   @override
@@ -139,6 +141,41 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
           ),
         );
       },
+    );
+  }
+
+  void _openCalfDialog() {
+    if (widget.calfEntry == null) return;
+
+    // Auto-link to parent
+    if (widget.calfEntry!.parentAnimalId.isEmpty) {
+      if (widget.buffaloEntries.isNotEmpty &&
+          widget.index < widget.buffaloEntries.length &&
+          widget.buffaloEntries[widget.index].animalId.isNotEmpty) {
+        widget.calfEntry!.parentAnimalId =
+            widget.buffaloEntries[widget.index].animalId;
+      } else {
+        widget.calfEntry!.parentAnimalId = "BUFFALOTEMP_${widget.index}";
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        backgroundColor: Colors.transparent,
+        child: SingleChildScrollView(
+          child: AnimalEntryForm(
+            entry: widget.calfEntry!,
+            index: widget.index, // Same index
+            onRemove:
+                () {}, // Cannot remove calf individually via this view easily (or add remove logic)
+            onUpdate: widget.onUpdate,
+            buffaloEntries: widget.buffaloEntries,
+            calfEntries: widget.calfEntries,
+          ),
+        ),
+      ),
     );
   }
 
@@ -392,119 +429,51 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                             Container(
                               height: 48,
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
+                                horizontal: 16,
                               ),
                               decoration: BoxDecoration(
                                 color: AppTheme.lightGrey.withValues(
                                   alpha: 0.5,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.transparent),
                               ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  isExpanded: true,
-                                  hint: Text(
-                                    'Select Parent Buffalo (RFID)',
-                                    style: TextStyle(
-                                      color: AppTheme.grey1.withValues(
-                                        alpha: 0.7,
-                                      ),
-                                      fontSize: 14,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.link_rounded,
+                                    size: 18,
+                                    color: AppTheme.primary.withValues(
+                                      alpha: 0.6,
                                     ),
                                   ),
-                                  value: () {
-                                    final exists = widget.buffaloEntries
-                                        .asMap()
-                                        .keys
-                                        .any(
-                                          (idx) =>
-                                              "BUFFALOTEMP_$idx" ==
-                                              animal.parentAnimalId,
-                                        );
-                                    return exists
-                                        ? animal.parentAnimalId
-                                        : null;
-                                  }(),
-                                  icon: Icon(
-                                    Icons.arrow_drop_down_rounded,
-                                    color: AppTheme.grey1,
-                                  ),
-                                  items: widget.buffaloEntries.asMap().entries.map((
-                                    entry,
-                                  ) {
-                                    final idx = entry.key;
-                                    final buff = entry.value;
-                                    final buffaloId = "BUFFALOTEMP_$idx";
-
-                                    // Get list of already selected parent IDs (excluding current calf)
-                                    final selectedParents = widget.calfEntries
-                                        .where(
-                                          (c) =>
-                                              c != animal &&
-                                              c.parentAnimalId.isNotEmpty,
-                                        )
-                                        .map((c) => c.parentAnimalId)
-                                        .toSet();
-
-                                    // Check if this buffalo is already selected
-                                    final isAlreadySelected = selectedParents
-                                        .contains(buffaloId);
-
-                                    // Show RFID tag in dropdown
-                                    final displayRfid = buff.rfidTag.isNotEmpty
-                                        ? buff.rfidTag
-                                        : 'Not Set';
-
-                                    return DropdownMenuItem(
-                                      value: buffaloId,
-                                      enabled:
-                                          !isAlreadySelected, // Disable if already selected
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "Buffalo #${idx + 1} - RFID: $displayRfid",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: isAlreadySelected
-                                                    ? Colors.grey.withValues(
-                                                        alpha: 0.5,
-                                                      )
-                                                    : Colors.black,
-                                                decoration: isAlreadySelected
-                                                    ? TextDecoration.lineThrough
-                                                    : null,
-                                              ),
-                                            ),
-                                          ),
-                                          if (isAlreadySelected)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                left: 8.0,
-                                              ),
-                                              child: Icon(
-                                                Icons.block,
-                                                size: 16,
-                                                color: Colors.red.withValues(
-                                                  alpha: 0.6,
-                                                ),
-                                              ),
-                                            ),
-                                        ],
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      () {
+                                        if (widget.buffaloEntries.isNotEmpty &&
+                                            widget.index <
+                                                widget.buffaloEntries.length) {
+                                          final p = widget
+                                              .buffaloEntries[widget.index];
+                                          return p.rfidTag.isNotEmpty
+                                              ? p.rfidTag
+                                              : 'Buffalo #${widget.index + 1} (No RFID)';
+                                        }
+                                        return 'Not Linked';
+                                      }(),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.darkGrey,
                                       ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (val) {
-                                    if (val != null) {
-                                      setState(
-                                        () => animal.parentAnimalId = val,
-                                      );
-                                      widget.onUpdate();
-                                    }
-                                  },
-                                ),
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.lock,
+                                    size: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -759,6 +728,66 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
               ],
             ),
           ),
+
+          if (isBuffalo && widget.calfEntry != null) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: InkWell(
+                onTap: _openCalfDialog,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0F9FF), // Light Blue
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFBCE3FF)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.child_friendly_rounded,
+                          color: Colors.blue,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Calf Details",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            widget.calfEntry!.earTag.isNotEmpty
+                                ? "Tag: ${widget.calfEntry!.earTag}"
+                                : "Tap to enter calf details",
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: Colors.blue,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -204,11 +204,8 @@ class NewSupervisorDashboard extends ConsumerWidget {
                     children: [
                       CustomCard(
                         type: DashboardCardType.quickAction,
-                        onTap: () => showQuickActionDialog(
-                          context: context,
-                          type: QuickActionType.milkEntry,
-                          ref: ref,
-                        ),
+                        onTap: () =>
+                            context.go('/new-supervisor/bulk-milk-entry'),
                         child: _buildQuickActionContent(
                           context,
                           Icons.water_drop,

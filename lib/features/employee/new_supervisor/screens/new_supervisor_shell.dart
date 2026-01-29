@@ -56,8 +56,8 @@ class _NewSupervisorShellState extends State<NewSupervisorShell> {
     }
 
     return Scaffold(
-      extendBody: true,
-      resizeToAvoidBottomInset: false,
+      extendBody: false,
+      resizeToAvoidBottomInset: true,
       body: widget.child,
       bottomNavigationBar: _NewSupervisorBottomNav(
         selectedIndex: _currentIndex,

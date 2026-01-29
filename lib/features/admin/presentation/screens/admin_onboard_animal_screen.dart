@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:farm_vest/core/services/api_services.dart';
 import '../../../farm_manager/data/models/animal_onboarding_entry.dart';
+import '../../../farm_manager/data/models/farm_manager_dashboard_model.dart';
 import '../../../farm_manager/presentation/widgets/onboarding/animal_entry_form.dart';
 import '../../../farm_manager/presentation/widgets/onboarding/collapsible_section_title.dart';
 import '../../../farm_manager/presentation/widgets/onboarding/info_card.dart';
@@ -32,7 +33,7 @@ class _AdminOnboardAnimalScreenState
   List<AnimalOnboardingEntry> calfEntries = [];
 
   bool _isBuffaloExpanded = true;
-  bool _isCalfExpanded = true;
+
   bool _isSubmitting = false;
   int? selectedFarmId; // For Admin to select farm during onboarding
   late Future<List<Map<String, dynamic>>> _farmsFuture;
@@ -392,32 +393,31 @@ class _AdminOnboardAnimalScreenState
                       setState(() => _isBuffaloExpanded = !_isBuffaloExpanded),
                 ),
               if (_isBuffaloExpanded)
-                ...buffaloEntries.asMap().entries.map(
-                  (e) => AnimalEntryForm(
-                    entry: e.value,
-                    index: e.key,
-                    onRemove: () =>
-                        setState(() => buffaloEntries.removeAt(e.key)),
-                    onUpdate: () => setState(() {}),
-                  ),
-                ),
-              if (calfEntries.isNotEmpty)
-                CollapsibleSectionTitle(
-                  title: 'Calves',
-                  isExpanded: _isCalfExpanded,
-                  onToggle: () =>
-                      setState(() => _isCalfExpanded = !_isCalfExpanded),
-                ),
-              if (_isCalfExpanded)
-                ...calfEntries.asMap().entries.map(
-                  (e) => AnimalEntryForm(
-                    entry: e.value,
-                    index: e.key,
-                    onRemove: () => setState(() => calfEntries.removeAt(e.key)),
+                ...buffaloEntries.asMap().entries.map((e) {
+                  final index = e.key;
+                  final buffalo = e.value;
+                  final calf = (index < calfEntries.length)
+                      ? calfEntries[index]
+                      : null;
+
+                  return AnimalEntryForm(
+                    entry: buffalo,
+                    calfEntry: calf,
+                    index: index,
+                    onRemove: () {
+                      setState(() {
+                        buffaloEntries.removeAt(index);
+                        if (index < calfEntries.length) {
+                          calfEntries.removeAt(index);
+                        }
+                      });
+                    },
                     onUpdate: () => setState(() {}),
                     buffaloEntries: buffaloEntries,
-                  ),
-                ),
+                    calfEntries: calfEntries,
+                  );
+                }),
+
               if (buffaloEntries.isNotEmpty || calfEntries.isNotEmpty)
                 Center(
                   child: TextButton.icon(
@@ -430,6 +430,14 @@ class _AdminOnboardAnimalScreenState
                           entry.earTag = 'ET-${(seed + i) % 10000}';
                           entry.ageMonths = 36;
                           entry.dob = '2021-01-01';
+                          entry.images = [
+                            DashboardImage(
+                              networkUrl:
+                                  "https://firebasestorage.googleapis.com/v0/b/markwave-481315.firebasestorage.app/o/placeholders%2Fpy.jpg?alt=media",
+                              localFile: null,
+                              isUploading: false,
+                            ),
+                          ];
                         }
                         for (int i = 0; i < calfEntries.length; i++) {
                           final entry = calfEntries[i];
@@ -438,8 +446,23 @@ class _AdminOnboardAnimalScreenState
                           entry.earTag = 'CET-${(seed + i + 100) % 10000}';
                           entry.ageMonths = 6;
                           entry.dob = '2023-01-01';
-                          if (buffaloEntries.isNotEmpty) {
-                            entry.parentAnimalId = 'BUFFALOTEMP_0';
+
+                          // Add dummy image
+                          entry.images = [
+                            DashboardImage(
+                              networkUrl:
+                                  "https://firebasestorage.googleapis.com/v0/b/markwave-481315.firebasestorage.app/o/placeholders%2Fpy.jpg?alt=media",
+                              localFile: null,
+                              isUploading: false,
+                            ),
+                          ];
+
+                          if (i < buffaloEntries.length) {
+                            if (buffaloEntries[i].animalId.isNotEmpty) {
+                              entry.parentAnimalId = buffaloEntries[i].animalId;
+                            } else {
+                              entry.parentAnimalId = 'BUFFALOTEMP_$i';
+                            }
                           }
                         }
                       });

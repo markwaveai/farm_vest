@@ -12,8 +12,9 @@ import 'package:farm_vest/features/employee/new_supervisor/screens/create_leave_
 import 'package:farm_vest/features/employee/new_supervisor/screens/leave_requests_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/new_supervisor_dashboard.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/new_supervisor_shell.dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/bulk_milk_entry_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_buffalo_screen.dart';
-import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_more_screen%20(1).dart';
+import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_more_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_stats_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/transfer_tickets_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_details_screen.dart';
@@ -151,6 +152,10 @@ class AppRouter {
           GoRoute(
             path: '/new-supervisor/more',
             builder: (context, state) => const SupervisorMoreScreen(),
+          ),
+          GoRoute(
+            path: '/new-supervisor/bulk-milk-entry',
+            builder: (context, state) => const BulkMilkEntryScreen(),
           ),
         ],
       ),

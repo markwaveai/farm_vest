@@ -34,7 +34,6 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
   int currentCalfIndex = 0;
 
   bool _isBuffaloExpanded = true;
-  bool _isCalfExpanded = true;
 
   bool _isSubmitting = false;
 
@@ -642,14 +641,24 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                   ...buffaloEntries.asMap().entries.map((entry) {
                     final index = entry.key;
                     final buffalo = entry.value;
+                    final calf = (index < calfEntries.length)
+                        ? calfEntries[index]
+                        : null;
+
                     return AnimalEntryForm(
                       key: ValueKey('buffalo_${index}_${buffalo.animalId}'),
                       entry: buffalo,
+                      calfEntry: calf,
                       index: index,
+                      buffaloEntries: buffaloEntries,
+                      calfEntries: calfEntries,
                       // title: 'Buffalo', // Widget determines title from type
                       onRemove: () {
                         setState(() {
                           buffaloEntries.removeAt(index);
+                          if (index < calfEntries.length) {
+                            calfEntries.removeAt(index);
+                          }
                           // Re-index remaining entries
                           final updatedEntries = <AnimalOnboardingEntry>[];
                           for (int i = 0; i < buffaloEntries.length; i++) {
@@ -669,38 +678,6 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                       onUpdate: () => setState(() {}),
                     );
                   }),
-              ],
-
-              // Calf Forms
-              if (calfEntries.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                CollapsibleSectionTitle(
-                  title: 'Calves (${calfEntries.length})',
-                  isExpanded: _isCalfExpanded,
-                  onToggle: () =>
-                      setState(() => _isCalfExpanded = !_isCalfExpanded),
-                ),
-                const SizedBox(height: 12),
-
-                if (_isCalfExpanded)
-                  ...calfEntries.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final calf = entry.value;
-
-                    return AnimalEntryForm(
-                      key: ValueKey('calf_${index}_${calf.animalId}'),
-                      entry: calf,
-                      index: index,
-                      onRemove: () {
-                        setState(() {
-                          calfEntries.removeAt(index);
-                        });
-                      },
-                      onUpdate: () => setState(() {}),
-                      buffaloEntries: buffaloEntries,
-                      calfEntries: calfEntries,
-                    );
-                  }).toList(),
               ],
 
               const SizedBox(height: 24),

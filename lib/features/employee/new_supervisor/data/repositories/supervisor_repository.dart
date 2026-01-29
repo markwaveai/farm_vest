@@ -41,6 +41,8 @@ class SupervisorRepository {
   Future<Map<String, dynamic>> createMilkEntry({
     required String timing,
     required String quantity,
+    required int animalId,
+    String? date,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
@@ -51,8 +53,28 @@ class SupervisorRepository {
       'entry_frequency': 'DAILY',
       'quantity': double.tryParse(quantity) ?? 0.0,
       'timing': timing.toUpperCase(),
+      'animal_id': animalId,
+      if (date != null) 'entry_date': date,
     };
     return await ApiServices.createMilkEntry(token: token, body: body);
+  }
+
+  Future<Map<String, dynamic>> createDistributedMilkEntry({
+    required List<String> dates,
+    required String timing,
+    required String totalQuantity,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token == null) {
+      throw AuthException('Authentication token not found');
+    }
+    return await ApiServices.createDistributedMilkEntry(
+      token: token,
+      dates: dates,
+      timing: timing.toUpperCase(),
+      totalQuantity: double.tryParse(totalQuantity) ?? 0.0,
+    );
   }
 
   Future<Map<String, dynamic>> createLeaveRequest({

@@ -351,6 +351,7 @@ Future<void> showQuickActionDialog({
                                         .createMilkEntry(
                                           timing: selectedTiming,
                                           quantity: quantityController.text,
+                                          animalId: 0,
                                         );
                                     if (res != null && context.mounted) {
                                       Navigator.pop(context);
