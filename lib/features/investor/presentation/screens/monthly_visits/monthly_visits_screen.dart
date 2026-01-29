@@ -138,7 +138,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(30),
+                    top: Radius.circular(20),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -149,7 +149,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -184,7 +184,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       Expanded(
                         child: availabilityAsync.when(
                           data: (data) => VisitTimeGrid(

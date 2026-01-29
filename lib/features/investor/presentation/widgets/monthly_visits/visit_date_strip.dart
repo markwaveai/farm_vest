@@ -24,7 +24,7 @@ class VisitDateStrip extends StatelessWidget {
     );
 
     return SizedBox(
-      height: 80,
+      height: 65,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
