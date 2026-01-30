@@ -15,13 +15,14 @@ import 'package:farm_vest/core/widgets/biometric_lock_screen.dart';
 import 'package:farm_vest/core/services/remote_config_service.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   ApiServices.onUnauthorized = () async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Clear all user data
     print('here we logout unauthorised');
     AppRouter.router.go('/login');
   };
-  WidgetsFlutterBinding.ensureInitialized();
 
   if (Firebase.apps.isEmpty) {
     try {
@@ -68,6 +69,9 @@ Future<void> main() async {
       debugPrint("Firebase initialization failed: $e");
     }
   }
+
+  // One-time setup to create the config document in Firestore
+  // await RemoteConfigService.seedDefaultConfig();
 
   // Initialize Remote Config (URLs & Version)
   await RemoteConfigService.initialize();

@@ -42,7 +42,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       final totalStaff = employeesData.length;
 
       // 3. Fetch Pending Leaves
-      final leavesData = await ApiServices.getLeaveRequests(token);
+      // final leavesData = await ApiServices.getLeaveRequests(token);
       // Filter locally or via API if supported. API supports status_filter.
       // But getLeaveRequests signature in ApiServices.dart (lines 227) didn't take params?
       // Wait, let me check ApiServices.getLeaveRequests defined at lines 227.
@@ -55,10 +55,10 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       }
       */
       // It doesn't allow params. So filtering locally.
-      final leaves = leavesData['data'] as List? ?? [];
-      final pendingLeaves = leaves
-          .where((l) => l['status'] == 'PENDING')
-          .length;
+      // final leaves = leavesData['data'] as List? ?? [];
+      // final pendingLeaves = leaves
+      //     .where((l) => l['status'] == 'PENDING')
+      //     .length;
 
       // 4. Fetch Pending Tickets
       final ticketsData = await ApiServices.getTickets(
@@ -96,7 +96,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       state = state.copyWith(
         investorCount: investorCount,
         totalStaff: totalStaff,
-        pendingApprovals: pendingLeaves + pendingTickets,
+        // pendingApprovals: pendingLeaves + pendingTickets,
         sheds: sheds,
         onboardedAnimalIds: onboardedAnimals,
         isLoading: false,
@@ -215,7 +215,10 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
         "rfid_tag": animal.rfidTag.startsWith('RFID-')
             ? animal.rfidTag
             : 'RFID-${animal.rfidTag}',
-        "ear_tag": animal.earTag,
+        "ear_tag": animal.rfidTag.startsWith('ET-')
+            ? animal.rfidTag
+            : 'ET-${animal.rfidTag}',
+
         "age_months": animal.ageMonths,
         "health_status": animal.healthStatus.toUpperCase(),
         "images": imageUrls,
@@ -228,7 +231,9 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
             : '';
         animalData["breed_name"] = animal.breedName;
         if (animal.neckbandId.isNotEmpty) {
-          animalData["neckband_id"] = animal.neckbandId;
+          animalData["neckband_id"] = animal.rfidTag.startsWith('NB-')
+              ? animal.rfidTag
+              : 'NB-${animal.neckbandId}';
         }
       } else if (animal.type == 'CALF') {
         // Map parent ID. The parent ID in entry is likely just the ID/Tag selected.
@@ -238,7 +243,10 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
           // The request example uses "BUFF-V-001" and "BUFF-V-001" as parent.
           // If the parent is in the same batch, we need to ensure the ID matches.
           // Let's assume for now the user provides or we generate consistency.
-          animalData["parent_animal_id"] = animal.parentAnimalId;
+          animalData["parent_animal_id"] =
+              animal.parentAnimalId.startsWith('ET-')
+              ? animal.parentAnimalId
+              : 'ET-${animal.parentAnimalId}';
         }
       }
 

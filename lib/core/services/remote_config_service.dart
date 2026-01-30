@@ -8,7 +8,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 class RemoteConfigService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String _collection = 'app_settings';
-  static const String _doc = 'config';
+  static const String _doc = 'farmvest_config';
 
   /// Fetch configuration from Firestore and update AppConstants
   static Future<void> initialize() async {
