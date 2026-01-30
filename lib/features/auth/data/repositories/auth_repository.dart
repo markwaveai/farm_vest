@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:farm_vest/core/utils/image_helper_compressor.dart';
+import 'package:intl/intl.dart';
 import '../models/user_model.dart';
 import '../models/whatsapp_otp_response.dart';
 
@@ -193,9 +194,12 @@ class AuthRepository {
             isDocument: false,
           );
 
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final now = DateTime.now();
+      final dateFolder = DateFormat('yyyy-MM-dd').format(now);
+      final timestamp = now.millisecondsSinceEpoch;
+
       final ref = storage.ref().child(
-        'farmvest/buffaloesonboarding/image_$timestamp.jpg',
+        'farmvest/buffaloesonboarding/$dateFolder/image_$timestamp.jpg',
       );
 
       final snapshot = await ref.putFile(
