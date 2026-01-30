@@ -209,15 +209,234 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
         );
   }
 
-  void _onFilterChanged(String label) {
-    if (_selectedRoleFilter != label) {
-      setState(() => _selectedRoleFilter = label);
-      _fetchStaff();
-    }
-  }
-
   void _onSearch(String query) {
     _fetchStaff();
+  }
+
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          final adminState = ref.read(adminProvider);
+          return Container(
+            padding: const EdgeInsets.all(24),
+            height: MediaQuery.of(context).size.height * 0.75,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Filters',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Reset filters
+                        this.setState(() {
+                          _selectedRoleFilter = 'All';
+                          _selectedFarmId = null;
+                        });
+                        ref
+                            .read(adminProvider.notifier)
+                            .fetchStaff(
+                              isActive: true,
+                            ); // Reset to default active
+                        setState(() {}); // Update local sheet state
+                      },
+                      child: const Text('Reset'),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Status',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            _buildSheetFilterChip(
+                              setState,
+                              'Active',
+                              adminState.staffActiveFilter == true,
+                              () => ref
+                                  .read(adminProvider.notifier)
+                                  .fetchStaff(
+                                    isActive: true,
+                                    role:
+                                        _roleFilterMapping[_selectedRoleFilter]!
+                                            .isEmpty
+                                        ? null
+                                        : _roleFilterMapping[_selectedRoleFilter],
+                                    name: _searchController.text.trim().isEmpty
+                                        ? null
+                                        : _searchController.text.trim(),
+                                    farmId: _selectedFarmId,
+                                  ),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildSheetFilterChip(
+                              setState,
+                              'Inactive',
+                              adminState.staffActiveFilter == false,
+                              () => ref
+                                  .read(adminProvider.notifier)
+                                  .fetchStaff(
+                                    isActive: false,
+                                    role:
+                                        _roleFilterMapping[_selectedRoleFilter]!
+                                            .isEmpty
+                                        ? null
+                                        : _roleFilterMapping[_selectedRoleFilter],
+                                    name: _searchController.text.trim().isEmpty
+                                        ? null
+                                        : _searchController.text.trim(),
+                                    farmId: _selectedFarmId,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Role',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _roleFilterMapping.keys.map((label) {
+                            return _buildSheetFilterChip(
+                              setState,
+                              label,
+                              _selectedRoleFilter == label,
+                              () {
+                                this.setState(
+                                  () => _selectedRoleFilter = label,
+                                );
+                                _fetchStaff();
+                              },
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Farm',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _buildSheetFilterChip(
+                              setState,
+                              'All Farms',
+                              _selectedFarmId == null,
+                              () {
+                                this.setState(() => _selectedFarmId = null);
+                                _fetchStaff();
+                              },
+                            ),
+                            ...adminState.farms.map((f) {
+                              return _buildSheetFilterChip(
+                                setState,
+                                f['farm_name'],
+                                _selectedFarmId == f['id'],
+                                () {
+                                  this.setState(
+                                    () => _selectedFarmId = f['id'],
+                                  );
+                                  _fetchStaff();
+                                },
+                              );
+                            }),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Show Results',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSheetFilterChip(
+    StateSetter setState,
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        onTap();
+        setState(() {}); // Refresh sheet UI
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primary : Colors.grey[100],
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppTheme.primary : Colors.grey[300]!,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black87,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -226,50 +445,51 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
     final staffList = adminState.staffList;
     final authState = ref.watch(authProvider);
 
+    int activeFilters = 0;
+    if (_selectedRoleFilter != 'All') activeFilters++;
+    if (_selectedFarmId != null) activeFilters++;
+    if (adminState.staffActiveFilter == false) activeFilters++;
+
     return Scaffold(
-      backgroundColor: AppTheme.lightGrey,
+      backgroundColor: AppTheme.white, // Clean white background
       appBar: AppBar(
+        backgroundColor: AppTheme.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             if (widget.onBackPressed != null) {
               widget.onBackPressed!();
               return;
             }
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              final userRole = ref.read(authProvider).role;
-              if (userRole == UserType.admin) {
-                context.go('/admin-dashboard');
-              } else if (userRole == UserType.supervisor) {
-                context.go('/supervisor-dashboard');
-              } else {
-                context.go('/farm-manager-dashboard');
-              }
-            }
+            context.pop();
           },
         ),
         title: _isSearching
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
+                style: const TextStyle(color: Colors.black),
                 decoration: const InputDecoration(
                   hintText: 'Search staff...',
                   border: InputBorder.none,
+                  hintStyle: TextStyle(color: Colors.grey),
                 ),
                 onChanged: _onSearch,
               )
-            : const Text('Staff Directory'),
+            : const Text(
+                'Staff Directory',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
         actions: [
-          if (!_isSearching && authState.availableRoles.length > 1)
-            IconButton(
-              icon: const Icon(Icons.swap_horiz),
-              onPressed: _showSwitchRoleBottomSheet,
-              tooltip: 'Switch Role',
-            ),
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              color: Colors.black,
+            ),
             onPressed: () {
               setState(() {
                 if (_isSearching) {
@@ -283,153 +503,107 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
             },
           ),
           if (!_isSearching)
+            Stack(
+              alignment: Alignment.topRight,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.tune_rounded, color: Colors.black),
+                  tooltip: 'Filters',
+                  onPressed: _showFilterBottomSheet,
+                ),
+                if (activeFilters > 0)
+                  Container(
+                    margin: const EdgeInsets.only(top: 8, right: 8),
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: AppTheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$activeFilters',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          if (!_isSearching)
             IconButton(
-              icon: const Icon(Icons.person_add_alt_1),
+              icon: const Icon(Icons.person_add_alt_1, color: AppTheme.primary),
               onPressed: () => context.pushNamed('add-staff'),
             ),
         ],
       ),
       body: Column(
         children: [
-          _buildFilterChips(),
-          _buildFarmFilterChips(adminState.farms),
-          _buildActiveInactiveFilters(adminState.staffActiveFilter),
+          // Filter Summary Bar (Optional - shows what's active)
+          if (activeFilters > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: AppTheme.lightGrey,
+              child: Row(
+                children: [
+                  Text(
+                    'Active Filters: $_selectedRoleFilter ${adminState.staffActiveFilter ? '' : '(Inactive)'}',
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedRoleFilter = 'All';
+                        _selectedFarmId = null;
+                      });
+                      ref
+                          .read(adminProvider.notifier)
+                          .fetchStaff(isActive: true);
+                    },
+                    child: const Text(
+                      'Clear',
+                      style: TextStyle(
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           Expanded(
             child: adminState.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : staffList.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No staff members found',
-                      style: TextStyle(color: AppTheme.slate),
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.people_outline,
+                          size: 64,
+                          color: Colors.grey[300],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'No staff members found',
+                          style: TextStyle(color: AppTheme.slate, fontSize: 16),
+                        ),
+                      ],
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                : ListView.separated(
+                    padding: const EdgeInsets.all(16),
                     itemCount: staffList.length,
+                    separatorBuilder: (c, i) => const SizedBox(height: 12),
                     itemBuilder: (context, index) =>
                         _buildStaffTile(staffList[index], index),
                   ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChips() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: _roleFilterMapping.keys.map((label) {
-          return _filterChip(label, _selectedRoleFilter == label);
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildFarmFilterChips(List<Map<String, dynamic>> farms) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _farmFilterChip("All Farms", null),
-          ...farms.map((f) {
-            return _farmFilterChip(
-              f['farm_name']?.toString() ?? "Farm",
-              f['id'] as int?,
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _farmFilterChip(String label, int? farmId) {
-    final isSelected = _selectedFarmId == farmId;
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (v) {
-          setState(() => _selectedFarmId = farmId);
-          _fetchStaff();
-        },
-        selectedColor: Colors.orange.withOpacity(0.2),
-        checkmarkColor: Colors.orange,
-        labelStyle: TextStyle(
-          color: isSelected ? Colors.orange : AppTheme.slate,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          fontSize: 12,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-      ),
-    );
-  }
-
-  Widget _filterChip(String label, bool isSelected) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (v) => _onFilterChanged(label),
-        selectedColor: AppTheme.primary.withOpacity(0.2),
-        checkmarkColor: AppTheme.primary,
-        labelStyle: TextStyle(
-          color: isSelected ? AppTheme.primary : AppTheme.slate,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActiveInactiveFilters(bool staffActiveFilter) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        children: [
-          _activeInactiveChip("Active", true, staffActiveFilter),
-          const SizedBox(width: 8),
-          _activeInactiveChip("Inactive", false, staffActiveFilter),
-        ],
-      ),
-    );
-  }
-
-  Widget _activeInactiveChip(String label, bool value, bool currentFilter) {
-    final isSelected = currentFilter == value;
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (val) {
-        if (val) {
-          ref
-              .read(adminProvider.notifier)
-              .fetchStaff(
-                role: _roleFilterMapping[_selectedRoleFilter]!.isEmpty
-                    ? null
-                    : _roleFilterMapping[_selectedRoleFilter],
-                name: _searchController.text.trim().isEmpty
-                    ? null
-                    : _searchController.text.trim(),
-                farmId: _selectedFarmId,
-                isActive: value,
-              );
-        }
-      },
-      selectedColor: value
-          ? Colors.green.withOpacity(0.2)
-          : Colors.red.withOpacity(0.2),
-      checkmarkColor: value ? Colors.green : Colors.red,
-      labelStyle: TextStyle(
-        color: isSelected
-            ? (value ? Colors.green : Colors.red)
-            : AppTheme.slate,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
       ),
     );
   }
@@ -559,182 +733,218 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
         : 'No Role';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppTheme.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
         ],
-        border: isActive
-            ? null
-            : Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.grey.shade100),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        leading: CircleAvatar(
-          backgroundColor: isActive
-              ? AppTheme.lightGrey
-              : Colors.red.withOpacity(0.1),
-          radius: 25,
-          child: Icon(
-            Icons.person,
-            color: isActive ? AppTheme.slate : Colors.red,
-          ),
-        ),
-        title: Text(
-          '${staff['first_name']} ${staff['last_name']}',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            decoration: isActive ? null : TextDecoration.lineThrough,
-            color: isActive ? Colors.black : Colors.grey,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              roleDisplay,
-              style: TextStyle(
-                color: isActive ? AppTheme.primary : Colors.grey,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'Mobile: ${staff['mobile']}',
-              style: const TextStyle(fontSize: 12),
-            ),
-            if (staff['assigned_farms'] != null &&
-                (staff['assigned_farms'] as List).isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: (staff['assigned_farms'] as List).map((f) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Colors.orange.withOpacity(0.2)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.agriculture_rounded,
-                          size: 10,
-                          color: Colors.orange,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          f['name']?.toString() ?? 'Farm',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.orange,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-            if (staff['assigned_sheds'] != null &&
-                (staff['assigned_sheds'] as List).isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: (staff['assigned_sheds'] as List).map((s) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blueGrey.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: Colors.blueGrey.withOpacity(0.2),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            // Can add detail view navigation here
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Avatar
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? AppTheme.primary.withOpacity(0.1)
+                        : Colors.red.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      staff['first_name']
+                              ?.toString()
+                              .substring(0, 1)
+                              .toUpperCase() ??
+                          'U',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: isActive ? AppTheme.primary : Colors.red,
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.warehouse_rounded,
-                          size: 10,
-                          color: Colors.blueGrey,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          s['name']?.toString() ?? 'Shed',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.blueGrey,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-            if (!isActive)
-              const Padding(
-                padding: EdgeInsets.only(top: 4.0),
-                child: Text(
-                  'INACTIVE',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-          ],
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) async {
-            if (value == 'reassign') {
-              _showReassignDialog(context, staff['id']);
-            } else if (value == 'toggle_status') {
-              final success = await ref
-                  .read(adminProvider.notifier)
-                  .toggleEmployeeStatus(
-                    mobile: staff['mobile'],
-                    isActive: !isActive,
-                  );
-              if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Employee ${isActive ? 'deactivated' : 'activated'} successfully',
-                    ),
+                const SizedBox(width: 16),
+                // Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${staff['first_name']} ${staff['last_name']}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isActive ? AppTheme.dark : Colors.grey,
+                                decoration: isActive
+                                    ? null
+                                    : TextDecoration.lineThrough,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (!isActive)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              margin: const EdgeInsets.only(left: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'INACTIVE',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        roleDisplay,
+                        style: TextStyle(
+                          color: isActive ? AppTheme.primary : Colors.grey,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.phone_outlined,
+                            size: 12,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            staff['mobile'] ?? 'N/A',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (staff['email'] != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.email_outlined,
+                                size: 12,
+                                color: Colors.grey[600],
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  staff['email']!,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
-                );
-              }
-            }
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'toggle_status',
-              child: Text(isActive ? 'Deactivate' : 'Activate'),
+                ),
+                // Actions
+                Column(
+                  children: [
+                    PopupMenuButton<String>(
+                      icon: const Icon(
+                        Icons.more_vert_rounded,
+                        color: Colors.grey,
+                      ),
+                      onSelected: (value) async {
+                        if (value == 'reassign') {
+                          _showReassignDialog(context, staff['id']);
+                        } else if (value == 'toggle_status') {
+                          final success = await ref
+                              .read(adminProvider.notifier)
+                              .toggleEmployeeStatus(
+                                mobile: staff['mobile'],
+                                isActive: !isActive,
+                              );
+                          if (success && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Employee ${isActive ? 'deactivated' : 'activated'} successfully',
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'toggle_status',
+                          child: Row(
+                            children: [
+                              Icon(
+                                isActive ? Icons.block : Icons.check_circle,
+                                color: isActive ? Colors.red : Colors.green,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(isActive ? 'Deactivate' : 'Activate'),
+                            ],
+                          ),
+                        ),
+                        if (isActive)
+                          const PopupMenuItem(
+                            value: 'reassign',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.move_up_rounded,
+                                  color: AppTheme.slate,
+                                  size: 18,
+                                ),
+                                SizedBox(width: 8),
+                                Text('Reassign Farm'),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const PopupMenuItem(
-              value: 'reassign',
-              child: Text('Reassign Farm'),
-            ),
-          ],
+          ),
         ),
       ),
     );
