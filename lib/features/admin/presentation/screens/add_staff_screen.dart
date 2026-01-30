@@ -5,6 +5,7 @@ import 'package:farm_vest/core/widgets/farm_selector_input.dart';
 import 'package:farm_vest/core/widgets/primary_button.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/admin_provider.dart';
@@ -124,34 +125,111 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                 style: TextStyle(color: AppTheme.slate.withOpacity(0.7)),
               ),
               const SizedBox(height: 32),
-              _buildLabel('Full Name'),
+              _buildLabel('Full Name', isRequired: true),
               CustomTextField(
                 controller: _nameController,
                 hint: 'e.g. John Doe',
-                validator: (v) =>
-                    v?.isEmpty ?? true ? 'Name is required' : null,
+                inputFormatters: [
+                  // Only allow letters and spaces
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                ],
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Full name is required';
+                  }
+
+                  final trimmedName = v.trim();
+
+                  // Check if name contains only letters and spaces
+                  final nameRegex = RegExp(r'^[a-zA-Z\s]+$');
+                  if (!nameRegex.hasMatch(trimmedName)) {
+                    return 'Name should only contain letters and spaces';
+                  }
+
+                  // Check if name has at least 2 characters
+                  if (trimmedName.length < 2) {
+                    return 'Name must be at least 2 characters long';
+                  }
+
+                  // Check if name doesn't start or end with space
+                  if (trimmedName.startsWith(' ') ||
+                      trimmedName.endsWith(' ')) {
+                    return 'Name should not start or end with spaces';
+                  }
+
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
-              _buildLabel('Email Address'),
+              _buildLabel('Email Address', isRequired: true),
               CustomTextField(
                 controller: _emailController,
                 hint: 'e.g. john@farmvest.com',
                 keyboardType: TextInputType.emailAddress,
-                validator: (v) =>
-                    v?.isEmpty ?? true ? 'Email is required' : null,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Email is required';
+                  }
+
+                  final trimmedEmail = v.trim().toLowerCase();
+
+                  // Comprehensive email validation
+                  final emailRegex = RegExp(
+                    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                  );
+
+                  if (!emailRegex.hasMatch(trimmedEmail)) {
+                    return 'Please enter a valid email address';
+                  }
+
+                  // Check for consecutive dots
+                  if (trimmedEmail.contains('..')) {
+                    return 'Email cannot contain consecutive dots';
+                  }
+
+                  // Check if email starts or ends with dot
+                  if (trimmedEmail.startsWith('.') ||
+                      trimmedEmail.endsWith('.')) {
+                    return 'Email cannot start or end with a dot';
+                  }
+
+                  // Check domain part
+                  final parts = trimmedEmail.split('@');
+                  if (parts.length != 2) {
+                    return 'Email must contain exactly one @ symbol';
+                  }
+
+                  if (parts[0].isEmpty) {
+                    return 'Email must have a username before @';
+                  }
+
+                  if (parts[1].isEmpty || !parts[1].contains('.')) {
+                    return 'Email must have a valid domain';
+                  }
+
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
-              _buildLabel('Phone Number'),
+              _buildLabel('Phone Number', isRequired: true),
               CustomTextField(
                 controller: _phoneController,
                 hint: 'e.g. 9876543210',
                 keyboardType: TextInputType.phone,
-                validator: (v) =>
-                    v?.isEmpty ?? true ? 'Phone is required' : null,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Phone number is required';
+                  }
+                  final phoneRegex = RegExp(r'^\d{10}$');
+                  if (!phoneRegex.hasMatch(v.trim())) {
+                    return 'Please enter a valid 10-digit phone number';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
               if (!widget.isOnboardingManager) ...[
-                _buildLabel('Assigned Role'),
+                _buildLabel('Assigned Role', isRequired: true),
                 DropdownButtonFormField<UserType>(
                   value: _selectedRole,
                   decoration: InputDecoration(
@@ -189,7 +267,7 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                 const SizedBox(height: 20),
               ],
               if (!isFM) ...[
-                _buildLabel('Assigned Farm'),
+                _buildLabel('Assigned Farm', isRequired: true),
                 FormField<int>(
                   initialValue: _selectedFarmId,
                   validator: (v) => _selectedFarmId == null
@@ -232,7 +310,7 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
 
               if (_selectedRole == UserType.supervisor &&
                   _selectedFarmId != null) ...[
-                _buildLabel('Assigned Shed'),
+                _buildLabel('Assigned Shed', isRequired: true),
                 DropdownButtonFormField<int>(
                   value: _selectedShedId,
                   decoration: InputDecoration(
@@ -295,6 +373,19 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                         ? nameParts.sublist(1).join(' ')
                         : '';
 
+                    debugPrint("=== ADD STAFF FORM DATA ===");
+                    debugPrint("First Name: $firstName");
+                    debugPrint("Last Name: $lastName");
+                    debugPrint("Email: ${_emailController.text.trim()}");
+                    debugPrint("Mobile: ${_phoneController.text.trim()}");
+                    debugPrint("Selected Role: $_selectedRole");
+                    debugPrint(
+                      "Role Backend Value: ${_selectedRole?.backendValue}",
+                    );
+                    debugPrint("Farm ID: $_selectedFarmId");
+                    debugPrint("Shed ID: $_selectedShedId");
+                    debugPrint("Is Test: $_isTestAccount");
+
                     final success = await ref
                         .read(adminProvider.notifier)
                         .addStaff(
@@ -342,14 +433,26 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, {bool isRequired = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, left: 4),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          color: AppTheme.slate,
+      child: Text.rich(
+        TextSpan(
+          text: text,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AppTheme.slate,
+          ),
+          children: [
+            if (isRequired)
+              const TextSpan(
+                text: ' *',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
         ),
       ),
     );

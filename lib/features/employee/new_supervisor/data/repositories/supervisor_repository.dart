@@ -140,9 +140,12 @@ class SupervisorRepository {
     if (token == null) {
       throw AuthException('Authentication token not found');
     }
-    return {};
-
-    // return await ApiServices.getTickets(token: token, status: status,type: '');
+    final tickets = await ApiServices.getTickets(
+      token: token,
+      status: status,
+      ticketType: 'HEALTH',
+    );
+    return {'data': tickets};
   }
 
   Future<Map<String, dynamic>> createTicket({
@@ -162,15 +165,37 @@ class SupervisorRepository {
     }
   }
 
+  Future<Map<String, dynamic>> createTransferTicket({
+    required Map<String, dynamic> body,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token == null) {
+      throw AuthException('Authentication token not found');
+    }
+
+    final success = await ApiServices.createTransferTicket(
+      token: token,
+      body: body,
+    );
+    if (success) {
+      return {'status': 'success', 'message': 'Transfer ticket created'};
+    } else {
+      throw AppException('Failed to create transfer ticket');
+    }
+  }
+
   Future<Map<String, dynamic>> getTransferTickets() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
     if (token == null) {
       throw AuthException('Authentication token not found');
     }
-    return {};
-
-    // return await ApiServices.getTickets(token, ticketType: 'TRANSFER');
+    final tickets = await ApiServices.getTransferTickets(
+      token: token,
+      status: 'PENDING',
+    );
+    return {'data': tickets};
   }
 
   Future<Map<String, dynamic>> getTransferSummary() async {
@@ -179,7 +204,15 @@ class SupervisorRepository {
     if (token == null) {
       throw AuthException('Authentication token not found');
     }
-    return {};
-    // return await ApiServices.getTransferSummary(token);
+    return await ApiServices.getTransferSummary(token: token);
+  }
+
+  Future<List<Map<String, dynamic>>> getSheds() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token == null) {
+      throw AuthException('Authentication token not found');
+    }
+    return await ShedsApiServices.getSheds(token: token);
   }
 }

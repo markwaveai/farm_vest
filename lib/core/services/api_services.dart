@@ -438,23 +438,56 @@ class ApiServices {
     required String token,
     required Map<String, dynamic> body,
   }) async {
-    final response = await http.post(
-      Uri.parse("${AppConstants.appLiveUrl}/employee/create_employee"),
-      headers: {
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-        HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
-      },
-      body: jsonEncode(body),
-    );
+    try {
+      debugPrint("=== CREATE EMPLOYEE REQUEST ===");
+      debugPrint("URL: ${AppConstants.appLiveUrl}/employee/create_employee");
+      debugPrint("Request Body: ${jsonEncode(body)}");
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return true;
+      final response = await http.post(
+        Uri.parse("${AppConstants.appLiveUrl}/employee/create_employee"),
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+        },
+        body: jsonEncode(body),
+      );
+
+      debugPrint("Response Status: ${response.statusCode}");
+      debugPrint("Response Body: ${response.body}");
+
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint("Employee created successfully!");
+        return true;
+      }
+
+      try {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['detail'] ?? 'Failed to create employee';
+        debugPrint("Server Error: $errorMessage");
+        throw ServerException(errorMessage, statusCode: response.statusCode);
+      } catch (jsonError) {
+        debugPrint("Error parsing response body: $jsonError");
+        throw ServerException(
+          'Failed to create employee (Status: ${response.statusCode})',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException catch (e) {
+      debugPrint("Network error: $e");
+      throw NetworkException('No Internet connection');
+    } on ServerException {
+      rethrow;
+    } on NetworkException {
+      rethrow;
+    } catch (e) {
+      debugPrint("createEmployee unexpected error: $e");
+      throw AppException(e.toString());
     }
-    final errorBody = jsonDecode(response.body);
-    throw ServerException(
-      errorBody['detail'] ?? 'Failed to create employee',
-      statusCode: response.statusCode,
-    );
   }
   // Alias for getSheds if consumers use getShedList
 
@@ -581,6 +614,28 @@ class ApiServices {
     }
   }
 
+  static Future<List<Map<String, dynamic>>> getTransferTickets({
+    required String token,
+    String status = 'PENDING',
+  }) async {
+    try {
+      final url =
+          "${AppConstants.appLiveUrl}/ticket/transfer_tickets?status=$status";
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(data['data']);
+      }
+      return [];
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
   static Future<bool> createTicket({
     required String token,
     required Map<String, dynamic> body,
@@ -598,11 +653,40 @@ class ApiServices {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return true;
       }
-      throw ServerException(
-        'Failed to create ticket',
-        statusCode: response.statusCode,
+      debugPrint(
+        "Create Ticket Failed (${response.statusCode}): ${response.body}",
       );
+      return false;
     } catch (e) {
+      debugPrint("Create Ticket Exception: $e");
+      return false;
+    }
+  }
+
+  static Future<bool> createTransferTicket({
+    required String token,
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      debugPrint("Creating Transfer Ticket: ${jsonEncode(body)}");
+      final response = await http.post(
+        Uri.parse("${AppConstants.appLiveUrl}/ticket/transfer_ticket"),
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return true;
+      }
+      debugPrint(
+        "Create Transfer Ticket Failed (${response.statusCode}): ${response.body}",
+      );
+      return false;
+    } catch (e) {
+      debugPrint("Create Transfer Ticket Exception: $e");
       return false;
     }
   }

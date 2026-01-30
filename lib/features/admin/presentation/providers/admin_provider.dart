@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/services/investor_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/api_services.dart';
@@ -212,33 +213,68 @@ class AdminNotifier extends Notifier<AdminState> {
     int? seniorDoctorId,
     bool isTest = false,
   }) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, error: null);
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access_token');
-      if (token == null) return false;
+      if (token == null) {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Authentication token not found. Please login again.',
+        );
+        return false;
+      }
 
-      final body = {
+      final body = <String, dynamic>{
         "first_name": firstName,
         "last_name": lastName,
         "email": email,
         "mobile": mobile,
         "roles": roles,
         "farm_id": farmId,
-        "shed_id": shedId,
-        "senior_doctor_id": seniorDoctorId,
         "is_test": isTest,
       };
+
+      // Only add optional fields if they're not null
+      if (shedId != null) {
+        body["shed_id"] = shedId;
+      }
+      if (seniorDoctorId != null) {
+        body["senior_doctor_id"] = seniorDoctorId;
+      }
+
+      debugPrint("=== ADMIN PROVIDER: Adding Staff ===");
+      debugPrint("Request Body: $body");
 
       final success = await ApiServices.createEmployee(
         token: token,
         body: body,
       );
-      state = state.copyWith(isLoading: false);
+
+      debugPrint("Add Staff Success: $success");
+      state = state.copyWith(isLoading: false, error: null);
       if (success) fetchStaff(); // Refresh staff list on success
       return success;
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      // Extract user-friendly error message
+      String errorMessage = 'Failed to add employee';
+
+      final errorStr = e.toString();
+      if (errorStr.contains('NetworkException')) {
+        errorMessage = 'No internet connection. Please check your network.';
+      } else if (errorStr.contains('ServerException')) {
+        // Extract the actual error message from ServerException
+        final match = RegExp(r'ServerException: (.+)').firstMatch(errorStr);
+        if (match != null && match.group(1) != null) {
+          errorMessage = match.group(1)!;
+        }
+      } else if (errorStr.contains('Unauthorized')) {
+        errorMessage = 'Session expired. Please login again.';
+      } else if (errorStr.contains('already exists')) {
+        errorMessage = 'An employee with this email or phone already exists.';
+      }
+
+      state = state.copyWith(isLoading: false, error: errorMessage);
       return false;
     }
   }

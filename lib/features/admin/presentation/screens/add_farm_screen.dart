@@ -16,8 +16,34 @@ class _AddFarmScreenState extends ConsumerState<AddFarmScreen> {
   final _nameController = TextEditingController();
   String _selectedLocation = 'KURNOOL';
   bool _isTestAccount = false;
+  bool _isFormValid = false;
 
   final List<String> _locations = ['KURNOOL', 'HYDERABAD'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to name changes to update button state
+    _nameController.addListener(_validateForm);
+  }
+
+  @override
+  void dispose() {
+    _nameController.removeListener(_validateForm);
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  void _validateForm() {
+    final farmName = _nameController.text.trim();
+    final isValid = farmName.isNotEmpty && farmName.length >= 3;
+
+    if (isValid != _isFormValid) {
+      setState(() {
+        _isFormValid = isValid;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,17 +73,39 @@ class _AddFarmScreenState extends ConsumerState<AddFarmScreen> {
               ),
               const SizedBox(height: 32),
 
-              _buildLabel('Farm Name'),
+              _buildLabel('Farm Name', isRequired: true),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'e.g. Green Valley Farm',
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
                 ),
-                validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Farm name is required';
+                  }
+                  if (v.trim().length < 3) {
+                    return 'Farm name must be at least 3 characters';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
 
-              _buildLabel('Location'),
+              _buildLabel('Location', isRequired: true),
               DropdownButtonFormField<String>(
                 value: _selectedLocation,
                 items: _locations
@@ -96,25 +144,28 @@ class _AddFarmScreenState extends ConsumerState<AddFarmScreen> {
               PrimaryButton(
                 text: 'Create Farm',
                 isLoading: adminState.isLoading,
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    final success = await ref
-                        .read(adminProvider.notifier)
-                        .createFarm(
-                          name: _nameController.text.trim(),
-                          location: _selectedLocation,
-                          isTest: _isTestAccount,
-                        );
-                    if (success && mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Farm created successfully'),
-                        ),
-                      );
-                      Navigator.pop(context);
-                    }
-                  }
-                },
+                onPressed: _isFormValid
+                    ? () async {
+                        if (_formKey.currentState!.validate()) {
+                          final success = await ref
+                              .read(adminProvider.notifier)
+                              .createFarm(
+                                name: _nameController.text.trim(),
+                                location: _selectedLocation,
+                                isTest: _isTestAccount,
+                              );
+                          if (success && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Farm created successfully'),
+                                backgroundColor: AppTheme.successGreen,
+                              ),
+                            );
+                            Navigator.pop(context);
+                          }
+                        }
+                      }
+                    : null, // Disabled when form is invalid
               ),
             ],
           ),
@@ -123,14 +174,26 @@ class _AddFarmScreenState extends ConsumerState<AddFarmScreen> {
     );
   }
 
-  Widget _buildLabel(String label) {
+  Widget _buildLabel(String label, {bool isRequired = false}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          color: AppTheme.dark,
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text.rich(
+        TextSpan(
+          text: label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AppTheme.slate,
+          ),
+          children: [
+            if (isRequired)
+              const TextSpan(
+                text: ' *',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
         ),
       ),
     );

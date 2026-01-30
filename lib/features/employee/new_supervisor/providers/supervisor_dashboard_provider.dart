@@ -133,6 +133,7 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
       final totalAnimals = await supervisorRepo.getTotalAnimals();
       final milkEntries = await supervisorRepo.getMilkEntries();
       final ticketsResponse = await supervisorRepo.getTickets();
+      final transfersResponse = await supervisorRepo.getTransferTickets();
 
       // Sum milk quantity for entries that match today's date
       final milkData = milkEntries['data'] as List<dynamic>? ?? [];
@@ -149,16 +150,16 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
 
       // Filter tickets
       final allTickets = ticketsResponse['data'] as List<dynamic>? ?? [];
-      final activeHealthIssues = allTickets
-          .where(
-            (t) => t['ticket_type'] == 'HEALTH' && t['status'] == 'PENDING',
-          )
-          .length;
-      final transferRequests = allTickets
-          .where(
-            (t) => t['ticket_type'] == 'TRANSFER' && t['status'] == 'PENDING',
-          )
-          .length;
+      final activeHealthIssues = allTickets.where((t) {
+        final type = (t['ticket_type'] ?? '').toString().toUpperCase();
+        final status = (t['status'] ?? '').toString().toUpperCase();
+        return type == 'HEALTH' && status == 'PENDING';
+      }).length;
+      final transferTickets = transfersResponse['data'] as List<dynamic>? ?? [];
+      final transferRequests = transferTickets.where((t) {
+        final status = (t['status'] ?? '').toString().toUpperCase();
+        return status == 'PENDING';
+      }).length;
 
       // Fetch pending allocations
       int pendingCount = 0;
@@ -198,6 +199,22 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
     final supervisorRepo = ref.read(supervisorRepositoryProvider);
     try {
       final response = await supervisorRepo.createTicket(body: body);
+      if (response['status'] == 'success') {
+        await _fetchData(); // Refresh data after successful entry
+        return response;
+      }
+      return null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> createTransferTicket(
+    Map<String, dynamic> body,
+  ) async {
+    final supervisorRepo = ref.read(supervisorRepositoryProvider);
+    try {
+      final response = await supervisorRepo.createTransferTicket(body: body);
       if (response['status'] == 'success') {
         await _fetchData(); // Refresh data after successful entry
         return response;
