@@ -44,6 +44,8 @@ class CustomTextField extends StatelessWidget {
       initialValue: controller == null ? initialValue : null,
       enabled: enabled,
       readOnly: readOnly,
+      enableInteractiveSelection:
+          !readOnly, // Disable selection menu for read-only fields
       maxLines: maxLines,
       maxLength: maxLength,
       inputFormatters: [
@@ -60,7 +62,7 @@ class CustomTextField extends StatelessWidget {
         hintText: hint,
         prefixIcon: prefixIcon,
         filled: true,
-        fillColor: readOnly ? Colors.grey[200] : Colors.grey[100],
+        fillColor: !enabled || readOnly ? Colors.grey[200] : Colors.grey[100],
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 14,

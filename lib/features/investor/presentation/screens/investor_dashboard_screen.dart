@@ -31,6 +31,7 @@ class _InvestorDashboardScreenState
   void _refreshData() {
     ref.invalidate(investorSummaryProvider);
     ref.invalidate(investorAnimalsProvider);
+    ref.invalidate(rawBuffaloListProvider);
   }
 
   @override

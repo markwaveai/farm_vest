@@ -358,13 +358,12 @@ class _AdminHomeView extends ConsumerWidget {
                           fit: BoxFit.contain,
                         ),
                         const Spacer(),
-                          // Role Switcher
-                          _buildHeaderIcon(
-                            Icons.swap_horiz_rounded,
-                            onTap: () =>
-                                _showSwitchRoleBottomSheet(context, ref),
-                          ),
-                          const SizedBox(width: 8),
+                        // Role Switcher
+                        _buildHeaderIcon(
+                          Icons.swap_horiz_rounded,
+                          onTap: () => _showSwitchRoleBottomSheet(context, ref),
+                        ),
+                        const SizedBox(width: 8),
                         _buildHeaderIcon(
                           Icons.power_settings_new_rounded,
                           onTap: () => _showLogoutDialog(context, ref),
@@ -449,7 +448,7 @@ class _AdminHomeView extends ConsumerWidget {
       childAspectRatio: 1.3,
       children: [
         _buildActionItem(
-          'Register Farm',
+          'Create Farm',
           Icons.add_home_work_rounded,
           Colors.orange,
           () => context.pushNamed('add-farm'),

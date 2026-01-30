@@ -53,22 +53,31 @@ class InvestorAnimal {
   /// }
   /// ```
   factory InvestorAnimal.fromJson(Map<String, dynamic> json) {
+    // Check if data is nested or flat
+    final bool isNested = json.containsKey('animal_details');
+
+    final animalData = isNested ? json['animal_details'] : json;
+    final farmData = isNested ? json['farm_details'] : json;
+    final shedData = isNested ? json['shed_details'] : json;
+
     return InvestorAnimal(
-      animalId: json['animal_id'] as String,
-      rfid: json['rfid_tag_number'] as String?,
-      age: json['age_months'] as int?,
+      animalId: (animalData['animal_id'] ?? animalData['id']?.toString() ?? '')
+          .toString(),
+      rfid: (animalData['rfid_tag_number'] ?? animalData['rfid'] ?? '')
+          .toString(),
+      age: animalData['age_months'] is int ? animalData['age_months'] : null,
       images:
-          (json['images'] as List<dynamic>?)
+          (animalData['images'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      farmName: json['farm_name'] as String?,
-      farmLocation: json['farm_location'] as String?,
-      shedId: json['shed_id'] as int?,
-      shedName: json['shed_name'] as String?,
-
-      healthStatus: json['health_status'] as String? ?? kHyphen,
-      animalType: json['animal_type'] as String,
+      farmName: (farmData['farm_name'] ?? farmData['name'] ?? '').toString(),
+      farmLocation: (farmData['location'] ?? farmData['farm_location'] ?? '')
+          .toString(),
+      shedId: shedData['id'] is int ? shedData['id'] : null,
+      shedName: (shedData['shed_name'] ?? shedData['name'] ?? '').toString(),
+      healthStatus: (animalData['health_status'] ?? kHyphen).toString(),
+      animalType: (animalData['animal_type'] ?? 'Buffalo').toString(),
     );
   }
 
@@ -77,8 +86,7 @@ class InvestorAnimal {
     return {
       'rfid': rfid,
       'age': age,
-      'shed_name': shedName,
-      'shed_id': shedId,
+      'shed_name': shedId,
       'animal_id': animalId,
       'images': images,
       'farm_name': farmName,

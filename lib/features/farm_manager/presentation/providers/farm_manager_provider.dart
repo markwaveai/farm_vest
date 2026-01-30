@@ -208,9 +208,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       // }
 
       final animalData = {
-        "animal_id": animal.animalId.isNotEmpty
-            ? animal.animalId
-            : Uuid().v4(),
+        "animal_id": animal.animalId.isNotEmpty ? animal.animalId : Uuid().v4(),
         "animal_type": animal.type,
         "rfid_tag": animal.rfidTag.startsWith('RFID-')
             ? animal.rfidTag
@@ -243,10 +241,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
           // The request example uses "BUFF-V-001" and "BUFF-V-001" as parent.
           // If the parent is in the same batch, we need to ensure the ID matches.
           // Let's assume for now the user provides or we generate consistency.
-          animalData["parent_animal_id"] =
-              animal.parentAnimalId.startsWith('ET-')
-              ? animal.parentAnimalId
-              : 'ET-${animal.parentAnimalId}';
+          animalData["parent_animal_id"] = animal.parentAnimalId;
         }
       }
 

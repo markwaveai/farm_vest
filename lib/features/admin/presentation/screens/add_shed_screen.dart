@@ -77,7 +77,7 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
                   _buildLabel('Capacity (Standard 300)'),
                   CustomTextField(
                     controller: _capacityController,
-                    readOnly: true,
+                    enabled: false,
                     keyboardType: TextInputType.number,
                     prefixIcon: const Icon(Icons.group_work_rounded, size: 20),
                     hint: '300',

@@ -89,7 +89,7 @@ class _SearchAndFilterBarState extends ConsumerState<SearchAndFilterBar> {
                       ? AppTheme.primary
                       : (isDark ? Colors.grey[400] : Colors.grey[700]),
                 ),
-                onPressed: () => _showFilterSheet(context, ref),
+                onPressed: () => _showFilterSheet(context),
               ),
             ),
             onChanged: (value) {
@@ -102,53 +102,27 @@ class _SearchAndFilterBarState extends ConsumerState<SearchAndFilterBar> {
     );
   }
 
-  void _showFilterSheet(BuildContext context, WidgetRef ref) {
+  void _showFilterSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       builder: (context) {
-        final currentFilterState = ref.read(buffaloFilterProvider);
-        return _FilterSheetContent(
-          initialState: currentFilterState,
-          onApply: (newState) {
-            ref
-                .read(buffaloFilterProvider.notifier)
-                .applyFilters(
-                  status: newState.statusFilter,
-                  farms: newState.selectedFarms,
-                  locations: newState.selectedLocations,
-                );
-            Navigator.pop(context);
-          },
-          allFarms: ref.read(allFarmsProvider),
-          allLocations: ref.read(allLocationsProvider),
-        );
+        return _FilterSheetContent();
       },
     );
   }
 }
 
-class _FilterSheetContent extends StatefulWidget {
-  final BuffaloFilterState initialState;
-  final Function(BuffaloFilterState) onApply;
-  final List<String> allFarms;
-  final List<String> allLocations;
-
-  const _FilterSheetContent({
-    required this.initialState,
-    required this.onApply,
-    required this.allFarms,
-    required this.allLocations,
-  });
+class _FilterSheetContent extends ConsumerStatefulWidget {
+  const _FilterSheetContent();
 
   @override
-  State<_FilterSheetContent> createState() => _FilterSheetContentState();
+  ConsumerState<_FilterSheetContent> createState() =>
+      _FilterSheetContentState();
 }
 
-class _FilterSheetContentState extends State<_FilterSheetContent> {
+class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
   late String currentFilter;
   late Set<String> currentFarms;
   late Set<String> currentLocations;
@@ -156,13 +130,18 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
   @override
   void initState() {
     super.initState();
-    currentFilter = widget.initialState.statusFilter;
-    currentFarms = Set.from(widget.initialState.selectedFarms);
-    currentLocations = Set.from(widget.initialState.selectedLocations);
+    final initialState = ref.read(buffaloFilterProvider);
+    currentFilter = initialState.statusFilter;
+    currentFarms = Set.from(initialState.selectedFarms);
+    currentLocations = Set.from(initialState.selectedLocations);
   }
 
   @override
   Widget build(BuildContext context) {
+    final allFarms = ref.watch(allFarmsProvider);
+    final allLocations = ref.watch(allLocationsProvider);
+    final allHealthStatuses = ref.watch(allHealthStatusesProvider);
+
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -196,7 +175,7 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
           const Divider(),
           _buildFilterSection(
             title: 'Health Status',
-            items: const ['all', 'healthy', 'warning', 'critical'],
+            items: ['all', ...allHealthStatuses],
             selectedItems: {currentFilter},
             onSelectionChanged: (selected) {
               setState(() {
@@ -207,7 +186,7 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
           ),
           _buildFilterSection(
             title: 'Farms',
-            items: widget.allFarms,
+            items: allFarms,
             selectedItems: currentFarms,
             onSelectionChanged: (selected) {
               setState(() {
@@ -218,7 +197,7 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
           ),
           _buildFilterSection(
             title: 'Locations',
-            items: widget.allLocations,
+            items: allLocations,
             selectedItems: currentLocations,
             onSelectionChanged: (selected) {
               setState(() {
@@ -233,13 +212,14 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  widget.onApply(
-                    widget.initialState.copyWith(
-                      statusFilter: currentFilter,
-                      selectedFarms: currentFarms,
-                      selectedLocations: currentLocations,
-                    ),
-                  );
+                  ref
+                      .read(buffaloFilterProvider.notifier)
+                      .applyFilters(
+                        status: currentFilter,
+                        farms: currentFarms,
+                        locations: currentLocations,
+                      );
+                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
@@ -291,7 +271,8 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
               label: Text(
                 item == 'all'
                     ? 'All'
-                    : item[0].toUpperCase() + item.substring(1),
+                    : item[0].toUpperCase() +
+                          item.substring(1).toLowerCase().replaceAll('_', ' '),
               ),
               selected: isSelected,
               onSelected: (selected) {

@@ -34,7 +34,7 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
       _rootNode = InvestorAnimal(
         animalId: widget.parentId,
         rfid: widget.parentId,
-        images: [],
+        images: const [],
         farmName: 'Unknown',
         farmLocation: '',
         shedName: 'Unknown',
