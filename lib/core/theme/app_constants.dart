@@ -19,8 +19,10 @@ class AppConstants {
   static String animalKartApiUrl =
       'https://animalkart-live-apis-jn6cma3vvq-el.a.run.app';
 
-  static String appLiveUrl = /* kDebugMode ? _defaultLocalUrl : */
-      _defaultLiveUrl;
+  // static String appLiveUrl =
+  //     'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
+  static String appLiveUrl = 'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
+  
   // static const String corsProxyUrl =
   //     'https://cors-612299373064.asia-south1.run.app';
   // static const Map<String, String> corsProxyHeaders = {
@@ -28,6 +30,8 @@ class AppConstants {
   // };
   static const String authApiKey =
       'bWFya3dhdmUtZmFybXZlc3QtdGVzdHRpbmctYXBpa2V5';
+
+  static String visitApiUrl = appLiveUrl;
 
   static String storageBucketName = 'gs://markwave-481315.firebasestorage.app';
   static const String poweredBy = 'Powered by MarkWave';
@@ -73,7 +77,7 @@ class AppConstants {
       final raw = value.toString();
       final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
       amount = num.tryParse(cleaned);
-    }
+    } 
 
     if (amount == null) return '₹0';
 

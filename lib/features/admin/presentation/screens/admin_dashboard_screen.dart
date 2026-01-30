@@ -358,14 +358,13 @@ class _AdminHomeView extends ConsumerWidget {
                           fit: BoxFit.contain,
                         ),
                         const Spacer(),
-                        if (authState.availableRoles.length > 1) ...[
+                          // Role Switcher
                           _buildHeaderIcon(
                             Icons.swap_horiz_rounded,
                             onTap: () =>
                                 _showSwitchRoleBottomSheet(context, ref),
                           ),
                           const SizedBox(width: 8),
-                        ],
                         _buildHeaderIcon(
                           Icons.power_settings_new_rounded,
                           onTap: () => _showLogoutDialog(context, ref),
@@ -769,7 +768,7 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
               )
             : const Text('Farms Management'),
         actions: [
-          if (!_isSearching && authState.availableRoles.length > 1)
+          if (!_isSearching) // Removed role count check
             IconButton(
               icon: const Icon(Icons.swap_horiz),
               onPressed: _showSwitchRoleBottomSheet,

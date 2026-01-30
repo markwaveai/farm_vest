@@ -484,6 +484,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: AppConstants.spacingL),
 
             // Action Buttons
+            // Only show switch role option if the user has multiple roles
             if (authState.availableRoles.length > 1) ...[
               Card(
                 child: ListTile(

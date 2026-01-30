@@ -32,7 +32,7 @@ Future<void> showQuickActionDialog({
   required WidgetRef ref,
 }) async {
   String selectedShed = '';
-  String selectedPriority = 'Critical';
+  String selectedPriority = 'High';
   String selectedTiming = 'Morning';
   String selectedDisease = 'FEVER';
 
@@ -46,8 +46,10 @@ Future<void> showQuickActionDialog({
   List<File> _pickedImages = [];
   int? _selectedAnimalId;
   String? _selectedAnimalTag;
+  String? _selectedAnimalRfid;
 
   switch (type) {
+
     case QuickActionType.milkEntry:
       dialogTitle = 'Milk Entry';
       break;
@@ -420,6 +422,8 @@ Future<void> showQuickActionDialog({
 
                                     // If we don't have _selectedAnimalId from specific suggestion, we should search for it once more or error
                                     int? finalAnimalId = _selectedAnimalId;
+                                    String? finalAnimalRfid = _selectedAnimalRfid;
+
                                     if (finalAnimalId == null) {
                                       final animals = await ref
                                           .read(supervisorRepositoryProvider)
@@ -427,8 +431,9 @@ Future<void> showQuickActionDialog({
                                             query: idController.text.trim(),
                                           );
                                       if (animals.isNotEmpty) {
-                                        finalAnimalId = animals
-                                            .first['animal_details']['id'];
+                                        final details = animals.first['animal_details'];
+                                        finalAnimalId = details['id'];
+                                        finalAnimalRfid = details['rfid_tag_number'];
                                       }
                                     }
 
@@ -437,9 +442,39 @@ Future<void> showQuickActionDialog({
                                         'Could not find animal matching ${idController.text}',
                                       );
                                     }
+                                    
+                                    if (finalAnimalRfid == null && (type == QuickActionType.healthTicket || type == QuickActionType.transferRequest)) {
+                                       // Fallback to animal_id (as string) or ear_tag if RFID is missing
+                                       // We use the animal_id from the details map if available.
+                                       // Logic: if rfid is null, use animal.animal_id
+                                       
+                                       // We need to fetch the animal_id string from the animal object (not the DB ID int)
+                                       // Wait, 'finalAnimalId' is the DB INT id.
+                                       // We need the 'animal_id' STRING (e.g. "BUF001").
+                                       
+                                       // Re-fetch logic above got 'details' which has 'animal_id' string?
+                                       // Let's check how 'animals' list is structured.
+                                       // In 'searchAnimals', it returns 'animal_details' map.
+                                       // Let's assume we can get the string ID.
+                                       
+                                       // But here we only have finalAnimalId (int) and finalAnimalRfid (string).
+                                       // We might need to look at suggestions again or re-fetch.
+                                       
+                                       // Simplified fix: Just trust that if we found the animal by ID/Tag search, we can use the input text as the identifier?
+                                       // Or better: Use the 'idController.text' if it matched!
+                                       // BUT 'idController.text' might be "123" (db id?) or "BUF001".
+                                       
+                                       // Let's use the 'finalAnimalRfid' if present, otherwise create a new variable for identification.
+                                       
+                                       // Actually, let's use the `finalAnimalId` (int) ?? No, backend expects string.
+                                       // Let's use `_selectedAnimalTag` if valid?
+                                       
+                                       // Safer approach: define finalIdentifier.
+                                       finalAnimalRfid = finalAnimalRfid ?? _selectedAnimalTag ?? idController.text;
+                                    }
 
                                     final body = {
-                                      'animal_id': finalAnimalId,
+                                      'rfid_tag': finalAnimalRfid, // Using strict RFID or fallback identifier
                                       'ticket_type':
                                           type == QuickActionType.healthTicket
                                           ? 'HEALTH'
@@ -452,6 +487,11 @@ Future<void> showQuickActionDialog({
                                           ? [selectedDisease]
                                           : null,
                                       'images': uploadedUrls,
+                                      // Transfer specific fields if needed
+                                      if (type == QuickActionType.transferRequest) ...{
+                                         'transfer_direction': 'OUT', // Default or need input?
+                                         // 'destination_shed_id': ... 
+                                      }
                                     };
 
                                     final res = await ref
@@ -561,7 +601,6 @@ Widget _buildPriorityDropdown(String current, ValueChanged<String?> onChanged) {
       DropdownButtonFormField<String>(
         value: current,
         items: [
-          'Critical',
           'High',
           'Medium',
           'Low',

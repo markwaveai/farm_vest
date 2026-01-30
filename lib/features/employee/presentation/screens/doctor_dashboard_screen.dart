@@ -94,10 +94,11 @@ class _DoctorDashboardScreenState extends ConsumerState<DoctorDashboardScreen> {
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           actions: [
-            if (ref.watch(authProvider).availableRoles.length > 1)
+            // if (ref.watch(authProvider).availableRoles.length > 1)
+              // Enabling role switch for all
               IconButton(
-                icon: const Icon(Icons.swap_horiz),
-                onPressed: _showSwitchRoleBottomSheet,
+                onPressed: () => _showSwitchRoleBottomSheet(),
+                icon: const Icon(Icons.swap_horiz_rounded),
                 tooltip: 'Switch Role',
               ),
             IconButton(

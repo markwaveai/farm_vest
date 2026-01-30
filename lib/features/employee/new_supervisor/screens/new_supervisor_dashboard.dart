@@ -86,12 +86,11 @@ class NewSupervisorDashboard extends ConsumerWidget {
           ],
         ),
         actions: [
-          if (ref.watch(authProvider).availableRoles.length > 1)
-            IconButton(
-              onPressed: () => _showSwitchRoleBottomSheet(context, ref),
-              icon: const Icon(Icons.swap_horiz_rounded),
-              tooltip: 'Switch Role',
-            ),
+          IconButton(
+            onPressed: () => _showSwitchRoleBottomSheet(context, ref),
+            icon: const Icon(Icons.swap_horiz_rounded, color: AppTheme.primary),
+            tooltip: 'Switch Role',
+          ),
           IconButton(
             onPressed: () => context.push('/notifications'),
             icon: const Icon(Icons.notifications_active_outlined),

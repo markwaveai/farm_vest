@@ -6,6 +6,7 @@ class UserModel {
   final String name;
   final String email;
   final String role;
+  final List<String> roles; // Added roles list
   final String? gender;
   final String? dob;
   final String? address;
@@ -34,6 +35,7 @@ class UserModel {
     required this.name,
     required this.email,
     required this.role,
+    this.roles = const [], // Default to empty list
     this.gender,
     this.dob,
     this.address,
@@ -56,6 +58,17 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Parse roles list safely
+    List<String> parsedRoles = [];
+    if (json['roles'] != null) {
+      if (json['roles'] is List) {
+        parsedRoles = List<String>.from(json['roles'].map((e) => e.toString()));
+      }
+    } else if (json['role'] != null) {
+       // Fallback: if roles is missing but role exists, add it to list
+       parsedRoles = [json['role'].toString()];
+    }
+
     return UserModel(
       id: json['id']?.toString() ?? '',
       mobile: json['mobile']?.toString() ?? '',
@@ -64,6 +77,7 @@ class UserModel {
       name: json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       role: json['role']?.toString() ?? 'Customer',
+      roles: parsedRoles,
       gender: json['gender']?.toString(),
       dob: json['dob']?.toString(),
       address: json['address']?.toString(),
@@ -95,6 +109,7 @@ class UserModel {
       'name': name,
       'email': email,
       'role': role,
+      'roles': roles,
       'gender': gender,
       'dob': dob,
       'address': address,
@@ -125,6 +140,7 @@ class UserModel {
     String? name,
     String? email,
     String? role,
+    List<String>? roles,
     String? gender,
     String? dob,
     String? address,
@@ -152,6 +168,7 @@ class UserModel {
       name: name ?? this.name,
       email: email ?? this.email,
       role: role ?? this.role,
+      roles: roles ?? this.roles,
       gender: gender ?? this.gender,
       dob: dob ?? this.dob,
       address: address ?? this.address,
@@ -173,3 +190,4 @@ class UserModel {
     );
   }
 }
+

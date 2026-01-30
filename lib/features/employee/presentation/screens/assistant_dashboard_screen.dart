@@ -150,7 +150,7 @@ class _AssistantDashboardScreenState
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           actions: [
-            if (ref.watch(authProvider).availableRoles.length > 1)
+            // if (ref.watch(authProvider).availableRoles.length > 1)
               IconButton(
                 icon: const Icon(Icons.swap_horiz),
                 onPressed: _showSwitchRoleBottomSheet,
@@ -386,7 +386,7 @@ class _AssistantDashboardScreenState
               context.go('/profile');
             },
           ),
-          if (ref.watch(authProvider).availableRoles.length > 1)
+          // if (ref.watch(authProvider).availableRoles.length > 1)
             ListTile(
               leading: const Icon(Icons.swap_horiz),
               title: const Text('Switch Role'),

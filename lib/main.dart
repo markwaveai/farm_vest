@@ -74,7 +74,7 @@ Future<void> main() async {
   // await RemoteConfigService.seedDefaultConfig();
 
   // Initialize Remote Config (URLs & Version)
-  await RemoteConfigService.initialize();
+  // await RemoteConfigService.initialize();
 
   runApp(
     DevicePreview(

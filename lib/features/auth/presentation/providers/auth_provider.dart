@@ -278,7 +278,13 @@ class AuthController extends Notifier<AuthState> {
     // Fallback or complement with userData role if list is still empty
     final localData = userData;
     if (availableRoles.isEmpty && localData != null) {
-      availableRoles = [UserType.fromString(localData.role)];
+      // Prioritize the new roles list from UserModel
+      if (localData.roles.isNotEmpty) {
+        availableRoles = localData.roles.map((r) => UserType.fromString(r)).toList();
+      } else {
+        // Fallback to single role string
+        availableRoles = [UserType.fromString(localData.role)];
+      }
     }
 
     if (availableRoles.isEmpty) {
@@ -335,10 +341,24 @@ class AuthController extends Notifier<AuthState> {
       final userData = await _repository.getUserData(state.mobileNumber!);
       if (userData != null) {
         debugPrint('Refresh success: ${userData.name}');
-        state = state.copyWith(userData: userData, isLoading: false);
+        
+        // Update available roles from the fresh user data
+        List<UserType> newAvailableRoles = [];
+        if (userData.roles.isNotEmpty) {
+           newAvailableRoles = userData.roles.map((r) => UserType.fromString(r)).toList();
+        } else {
+           newAvailableRoles = [UserType.fromString(userData.role)];
+        }
+
+        state = state.copyWith(
+            userData: userData, 
+            isLoading: false,
+            availableRoles: newAvailableRoles, // Update state with new roles
+        );
+        
         await _repository.saveUserSession(
           mobile: state.mobileNumber!,
-          roles: state.availableRoles,
+          roles: newAvailableRoles, // Save new roles to session
           activeRole: state.role ?? UserType.customer,
           userData: userData,
         );

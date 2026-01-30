@@ -210,7 +210,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       final animalData = {
         "animal_id": animal.animalId.isNotEmpty
             ? animal.animalId
-            : const Uuid().v4(),
+            : Uuid().v4(),
         "animal_type": animal.type,
         "rfid_tag": animal.rfidTag.startsWith('RFID-')
             ? animal.rfidTag
