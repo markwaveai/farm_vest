@@ -314,9 +314,20 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Staff member added successfully!'),
+                          backgroundColor: AppTheme.successGreen,
                         ),
                       );
                       Navigator.pop(context);
+                    } else if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            ref.read(adminProvider).error ??
+                                'Failed to add staff',
+                          ),
+                          backgroundColor: AppTheme.errorRed,
+                        ),
+                      );
                     }
                   }
                 },

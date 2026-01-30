@@ -438,28 +438,23 @@ class ApiServices {
     required String token,
     required Map<String, dynamic> body,
   }) async {
-    try {
-      final response = await http.post(
-        Uri.parse("${AppConstants.appLiveUrl}/employee/create_employee"),
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $token',
-          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
-        },
-        body: jsonEncode(body),
-      );
+    final response = await http.post(
+      Uri.parse("${AppConstants.appLiveUrl}/employee/create_employee"),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+      },
+      body: jsonEncode(body),
+    );
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return true;
-      }
-      final errorBody = jsonDecode(response.body);
-      throw ServerException(
-        errorBody['detail'] ?? 'Failed to create employee',
-        statusCode: response.statusCode,
-      );
-    } catch (e) {
-      debugPrint("Error creating employee: $e");
-      return false;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return true;
     }
+    final errorBody = jsonDecode(response.body);
+    throw ServerException(
+      errorBody['detail'] ?? 'Failed to create employee',
+      statusCode: response.statusCode,
+    );
   }
   // Alias for getSheds if consumers use getShedList
 
