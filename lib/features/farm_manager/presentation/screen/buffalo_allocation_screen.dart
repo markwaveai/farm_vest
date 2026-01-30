@@ -2,13 +2,13 @@ import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
-import 'package:farm_vest/core/services/api_services.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/farm_manager_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:farm_vest/core/widgets/farm_selector_input.dart';
 import '../../data/models/farm_manager_dashboard_model.dart';
 import '../../data/models/shed_model.dart';
 import 'package:farm_vest/features/farm_manager/data/models/allocated_animal_details.dart';
@@ -38,7 +38,6 @@ class _BuffaloAllocationScreenState
   String? selectedAnimalId;
   int? selectedShedId;
   int? selectedFarmId; // For Admin to select farm
-  Future<List<Map<String, dynamic>>>? _farmsFuture;
 
   @override
   void initState() {
@@ -54,13 +53,6 @@ class _BuffaloAllocationScreenState
     Future.microtask(() {
       final authState = ref.read(authProvider);
       final userRole = authState.role;
-
-      // Admin needs to select farm first
-      if (userRole == UserType.admin) {
-        setState(() {
-          _farmsFuture = _fetchFarms(ref);
-        });
-      }
 
       // Only auto-fetch for Farm Manager and Supervisor
       // Admin needs to select farm first
@@ -286,7 +278,16 @@ class _BuffaloAllocationScreenState
               builder: (context, ref, child) {
                 final authState = ref.watch(authProvider);
                 if (authState.role == UserType.admin) {
-                  return _buildFarmSelector(ref);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: FarmSelectorInput(
+                      selectedFarmId: selectedFarmId,
+                      onChanged: _onFarmSelected,
+                    ),
+                  );
                 }
                 return const SizedBox.shrink();
               },
@@ -348,132 +349,6 @@ class _BuffaloAllocationScreenState
         ),
       ),
     );
-  }
-
-  Widget _buildFarmSelector(WidgetRef ref) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _farmsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.red.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.red.shade200),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  'Error loading farms: ${snapshot.error}',
-                  style: const TextStyle(color: Colors.red, fontSize: 12),
-                  textAlign: TextAlign.center,
-                ),
-                TextButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _farmsFuture = _fetchFarms(ref);
-                    });
-                  },
-                  icon: const Icon(Icons.refresh, size: 16),
-                  label: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final farms = snapshot.data ?? [];
-        if (farms.isEmpty) {
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.warning_amber_rounded, color: Colors.orange),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    'No farms found. Access might be restricted.',
-                    style: TextStyle(color: Colors.orange, fontSize: 13),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _farmsFuture = _fetchFarms(ref);
-                    });
-                  },
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<int>(
-              isExpanded: true,
-              hint: const Text('Select Farm'),
-              value: selectedFarmId,
-              items: farms.map((farm) {
-                final farmId = int.tryParse(farm['id'].toString());
-                return DropdownMenuItem<int>(
-                  value: farmId,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.agriculture_rounded, size: 20),
-                      const SizedBox(width: 12),
-                      Text(
-                        farm['farm_name']?.toString() ?? 'Unnamed Farm',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: _onFarmSelected,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<List<Map<String, dynamic>>> _fetchFarms(WidgetRef ref) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
-    if (token == null) throw Exception('No access token');
-
-    return await ApiServices.getFarms(token: token);
   }
 
   Widget _buildShedSelector(FarmManagerDashboardState state) {

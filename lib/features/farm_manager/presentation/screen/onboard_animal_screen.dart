@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:farm_vest/core/widgets/farm_selector_input.dart';
 import '../../data/models/animal_onboarding_entry.dart';
 import '../widgets/onboarding/animal_entry_form.dart';
 import '../widgets/onboarding/collapsible_section_title.dart';
@@ -34,8 +35,8 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
   int currentCalfIndex = 0;
 
   bool _isBuffaloExpanded = true;
-
   bool _isSubmitting = false;
+  int? _selectedFarmId;
 
   @override
   void initState() {
@@ -444,7 +445,11 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
 
       final success = await ref
           .read(farmManagerProvider.notifier)
-          .onboardAnimalsBulk(order: order, animals: preparedAnimals);
+          .onboardAnimalsBulk(
+            order: order,
+            animals: preparedAnimals,
+            farmId: _selectedFarmId,
+          );
 
       if (!success) {
         if (mounted) {
@@ -618,7 +623,17 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              if (ref.read(authProvider).role == UserType.admin) ...[
+                FarmSelectorInput(
+                  selectedFarmId: _selectedFarmId,
+                  onChanged: (id) => setState(() => _selectedFarmId = id),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              const SizedBox(height: 20),
+
               SectionTitle('Animals to Onboard'),
               const SizedBox(height: 8),
               Text(

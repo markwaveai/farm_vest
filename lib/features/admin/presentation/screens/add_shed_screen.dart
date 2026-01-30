@@ -68,7 +68,7 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
                   _buildLabel('Shed Name / Designation'),
                   CustomTextField(
                     controller: _shedNameController,
-                    hint: 'e.g. Northeast Cluster A',
+                    hint: 'e.g. Kurnool shed A',
                     prefixIcon: const Icon(Icons.warehouse_rounded, size: 20),
                     validator: (v) =>
                         v?.isEmpty ?? true ? 'Name is required' : null,

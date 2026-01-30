@@ -8,8 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:farm_vest/core/services/api_services.dart';
+import 'package:farm_vest/core/widgets/farm_selector_input.dart';
 import '../../../farm_manager/data/models/animal_onboarding_entry.dart';
 import '../../../farm_manager/data/models/farm_manager_dashboard_model.dart';
 import '../../../farm_manager/presentation/widgets/onboarding/animal_entry_form.dart';
@@ -36,13 +35,11 @@ class _AdminOnboardAnimalScreenState
 
   bool _isSubmitting = false;
   int? selectedFarmId; // For Admin to select farm during onboarding
-  late Future<List<Map<String, dynamic>>> _farmsFuture;
 
   @override
   void initState() {
     super.initState();
     _initializeEmptyEntries();
-    _farmsFuture = _fetchFarms();
   }
 
   void _initializeEmptyEntries() {
@@ -196,108 +193,6 @@ class _AdminOnboardAnimalScreenState
     );
   }
 
-  Future<List<Map<String, dynamic>>> _fetchFarms() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
-    if (token == null) return [];
-
-    try {
-      return await ApiServices.getFarms(token: token);
-    } catch (e) {
-      debugPrint('Error fetching farms: $e');
-      return [];
-    }
-  }
-
-  Widget _buildFarmSelector(WidgetRef ref) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _farmsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Error loading farms',
-              style: TextStyle(color: AppTheme.errorRed),
-            ),
-          );
-        }
-
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              'No farms available',
-              style: TextStyle(color: Colors.orange),
-            ),
-          );
-        }
-
-        final farms = snapshot.data!;
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<int>(
-              isExpanded: true,
-              hint: const Text('Select Farm for Onboarding'),
-              value: selectedFarmId,
-              items: farms.map((farm) {
-                return DropdownMenuItem(
-                  value: farm['id'] as int,
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.agriculture_rounded,
-                        size: 20,
-                        color: AppTheme.primary,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        farm['farm_name'] as String,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedFarmId = value;
-                });
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen(farmManagerProvider.select((s) => s.currentOrder), (prev, next) {
@@ -359,7 +254,10 @@ class _AdminOnboardAnimalScreenState
               const SizedBox(height: 16),
 
               // Farm Selector
-              _buildFarmSelector(ref),
+              FarmSelectorInput(
+                selectedFarmId: selectedFarmId,
+                onChanged: (id) => setState(() => selectedFarmId = id),
+              ),
               const SizedBox(height: 16),
 
               // Investment Summary Card
