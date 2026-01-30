@@ -68,25 +68,37 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       final pendingTickets = ticketsData.length;
 
       // 5. Fetch Sheds
-      final farmId = int.tryParse(authState.userData?.farmId ?? '');
-      final rawSheds = await ShedsApiServices.getShedList(
-        token: token,
-        farmId: farmId,
-      );
-      final sheds = rawSheds.map((s) => Shed.fromJson(s)).toList();
+      final farmIdStr = authState.userData?.farmId;
+      final farmId = (farmIdStr != null && farmIdStr.isNotEmpty)
+          ? int.tryParse(farmIdStr)
+          : null;
 
-      // 6. Fetch Unallocated Animals
-      final animalIds = await ShedsApiServices.getUnallocatedAnimals(
-        token: token,
-        farmId: farmId,
-      );
+      List<Shed> sheds = [];
+      List<Map<String, dynamic>> onboardedAnimals = [];
+
+      final roleStr = authState.userData?.role;
+      final isFM = roleStr == 'FARM_MANAGER' || roleStr == 'SUPERVISOR';
+
+      if (farmId != null || isFM) {
+        final rawSheds = await ShedsApiServices.getShedList(
+          token: token,
+          farmId: farmId,
+        );
+        sheds = rawSheds.map((s) => Shed.fromJson(s)).toList();
+
+        // 6. Fetch Unallocated Animals
+        onboardedAnimals = await ShedsApiServices.getUnallocatedAnimals(
+          token: token,
+          farmId: farmId,
+        );
+      }
 
       state = state.copyWith(
         investorCount: investorCount,
         totalStaff: totalStaff,
         pendingApprovals: pendingLeaves + pendingTickets,
         sheds: sheds,
-        onboardedAnimalIds: animalIds,
+        onboardedAnimalIds: onboardedAnimals,
         isLoading: false,
         error: null,
       );

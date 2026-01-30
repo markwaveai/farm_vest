@@ -310,6 +310,7 @@ class ApiServices {
     required String token,
     String? name,
     String? role,
+    bool? isActive,
     int? farmId,
     int? page,
     int? size,
@@ -318,6 +319,7 @@ class ApiServices {
       final queryParams = <String, String>{
         'query_str': name ?? '',
         if (role != null && role.isNotEmpty && role != 'All') 'role': role,
+        if (isActive != null) 'is_active': isActive.toString(),
         if (page != null) 'page': page.toString(),
         if (size != null) 'size': size.toString(),
       };
@@ -488,12 +490,19 @@ class ApiServices {
 
   static Future<bool> toggleEmployeeStatus({
     required String token,
-    required int employeeId,
+    required String mobile,
     required bool isActive,
   }) async {
     try {
-      // Stub for now or use /users/deactivate if appropriate
-      return true;
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/users/activate_deactivate_user/$mobile?is_active=$isActive",
+      );
+      final response = await http.put(
+        uri,
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      );
+
+      return response.statusCode == 200;
     } catch (e) {
       return false;
     }
@@ -503,15 +512,17 @@ class ApiServices {
     required String token,
     required int staffId,
     required int newFarmId,
+    required String role,
     int? shedId,
   }) async {
     try {
       final uri = Uri.parse(
-        "${AppConstants.appLiveUrl}/employee/reassign_employee",
+        "${AppConstants.appLiveUrl}/employee/update_employee",
       );
       final body = {
-        "staff_id": staffId,
-        "new_farm_id": newFarmId,
+        "user_id": staffId,
+        "farm_id": newFarmId,
+        "role": role,
         "shed_id": shedId,
       };
 

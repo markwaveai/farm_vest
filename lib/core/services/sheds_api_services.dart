@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
-import 'package:farm_vest/features/farm_manager/data/models/allocated_animal_details.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,20 +14,22 @@ class ShedsApiServices {
     int? farmId,
   }) async {
     try {
-      var url = "${AppConstants.appLiveUrl}/shed/list";
-      if (farmId != null) {
-        url += "?farm_id=$farmId";
-      }
-
+      final uri = Uri.parse("${AppConstants.appLiveUrl}/shed/list").replace(
+        queryParameters: {if (farmId != null) 'farm_id': farmId.toString()},
+      );
+      print("Fetching sheds from: $uri");
       final response = await http.get(
-        Uri.parse(url),
+        uri,
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
 
+      print("Shed List Status: ${response.statusCode}");
       if (response.statusCode == 200) {
+        print("Shed List Body: ${response.body}");
         final data = jsonDecode(response.body);
         return List<Map<String, dynamic>>.from(data['data']);
       }
+      print("Failed to fetch sheds: ${response.body}");
       return [];
     } catch (e) {
       throw AppException(e.toString());

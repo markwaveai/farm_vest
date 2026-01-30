@@ -16,11 +16,13 @@ import 'package:farm_vest/features/farm_manager/data/models/allocated_animal_det
 class BuffaloAllocationScreen extends ConsumerStatefulWidget {
   final int? initialShedId;
   final String? targetParkingId;
+  final String? initialAnimalId;
 
   const BuffaloAllocationScreen({
     super.key,
     this.initialShedId,
     this.targetParkingId,
+    this.initialAnimalId,
   });
 
   @override
@@ -44,6 +46,9 @@ class _BuffaloAllocationScreenState
 
     if (widget.initialShedId != null) {
       selectedShedId = widget.initialShedId;
+    }
+    if (widget.initialAnimalId != null) {
+      selectedAnimalId = widget.initialAnimalId;
     }
 
     Future.microtask(() {
@@ -1226,20 +1231,11 @@ class _BuffaloAllocationScreenState
                       if (selectedShedId == null) return;
                       final sheds = ref.read(farmManagerProvider).sheds;
                       final shed = sheds.firstWhere(
-                        (s) => s.id.toString() == selectedShedId!,
+                        (s) => s.id == selectedShedId!,
                         orElse: () => sheds.first,
                       );
-                      // Fallback just to avoid crash if not found, though unlikely if selectedShedId is set
 
-                      final rowNum = rowName.replaceAll(RegExp(r'[^0-9]'), '');
-
-                      final farmName = shed.farmName.toLowerCase().replaceAll(
-                        ' ',
-                        '',
-                      );
-                      final shedCode = shed.shedId;
-
-                      final fullParkingId = '$farmName$shedCode$rowName$posId';
+                      final rowNum = rowName;
 
                       final token = await ref
                           .read(authProvider.notifier)
@@ -1252,14 +1248,21 @@ class _BuffaloAllocationScreenState
                           ),
                         );
 
-                        // final details = await AnimalApiServices.searchAnimals(
-                        //   token: token,
-                        //   query: fullParkingId,
-                        // );
+                        final detailsMap =
+                            await AnimalApiServices.getAnimalByPosition(
+                              token: token,
+                              farmId: shed.farmId,
+                              shedId: shed.id,
+                              rowNumber: rowNum,
+                              parkingId: posId,
+                            );
 
-                        // if (mounted) {
-                        //   _showAllocatedAnimalDetails(details);
-                        // }
+                        if (mounted && detailsMap != null) {
+                          final details = AllocatedAnimalDetails.fromJson(
+                            detailsMap,
+                          );
+                          _showAllocatedAnimalDetails(details);
+                        }
                       }
                     } catch (e) {
                       debugPrint("Error fetching details: $e");
@@ -1365,6 +1368,10 @@ class _BuffaloAllocationScreenState
               ),
               _buildDetailRow('Slot', data.animalDetails.parkingId ?? 'N/A'),
               _buildDetailRow('RFID Tag', data.animalDetails.rfidTagNumber),
+              _buildDetailRow(
+                'Onboarded',
+                data.animalDetails.onboardedAt?.split('T').first ?? 'N/A',
+              ),
 
               const SizedBox(height: 16),
 

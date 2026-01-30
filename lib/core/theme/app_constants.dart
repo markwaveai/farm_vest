@@ -6,14 +6,13 @@ const String kHyphen = '--';
 class AppConstants {
   static const String appName = 'FarmVest';
   //app live url
-  static const String animalKartStagingApiUrl =
+  static String animalKartStagingApiUrl =
       'https://animalkart-stagging-jn6cma3vvq-el.a.run.app';
 
-  static const String animalKartApiUrl =
+  static String animalKartApiUrl =
       'https://animalkart-live-apis-jn6cma3vvq-el.a.run.app';
 
-  static const String appLiveUrl =
-      'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
+  static String appLiveUrl = 'http://127.0.0.1:8000/api';
   // static const String corsProxyUrl =
   //     'https://cors-612299373064.asia-south1.run.app';
   // static const Map<String, String> corsProxyHeaders = {

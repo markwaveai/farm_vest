@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/admin_provider.dart';
+import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 
 class AddStaffScreen extends ConsumerStatefulWidget {
   final bool isOnboardingManager;
@@ -28,7 +29,36 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
   bool _isTestAccount = false;
   List<Map<String, dynamic>> _sheds = [];
 
-  Future<void> _fetchSheds(int farmId) async {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isOnboardingManager) {
+      _selectedRole = UserType.farmManager;
+    }
+
+    Future.microtask(() {
+      final auth = ref.read(authProvider);
+      final roleStr = auth.userData?.role;
+      debugPrint("AddStaffScreen: User Role: $roleStr");
+      final role = roleStr != null ? UserType.fromString(roleStr) : null;
+
+      if (role == UserType.farmManager) {
+        final fId = int.tryParse(auth.userData?.farmId ?? '');
+        debugPrint("AddStaffScreen: FM Farm ID: $fId");
+        if (mounted) {
+          setState(() {
+            _selectedFarmId = fId;
+          });
+        }
+        _fetchSheds(fId);
+      } else {
+        ref.read(adminProvider.notifier).fetchFarms();
+      }
+    });
+  }
+
+  Future<void> _fetchSheds(int? farmId) async {
+    debugPrint("AddStaffScreen: Fetching sheds for farm $farmId");
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
     if (token != null) {
@@ -36,21 +66,13 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
         token: token,
         farmId: farmId,
       );
+      debugPrint("AddStaffScreen: Found ${sheds.length} sheds");
       if (mounted) {
         setState(() {
           _sheds = sheds;
         });
       }
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.isOnboardingManager) {
-      _selectedRole = UserType.farmManager;
-    }
-    Future.microtask(() => ref.read(adminProvider.notifier).fetchFarms());
   }
 
   // ... (rest of build method)
@@ -68,6 +90,10 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
   @override
   Widget build(BuildContext context) {
     final adminState = ref.watch(adminProvider);
+    final currentUserRole = ref.watch(authProvider).userData?.role;
+    final isFM =
+        currentUserRole != null &&
+        UserType.fromString(currentUserRole) == UserType.farmManager;
 
     return Scaffold(
       appBar: AppBar(
@@ -145,7 +171,7 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                   hint: const Text('Select Role'),
                   items:
                       [
-                            UserType.farmManager,
+                            if (!isFM) UserType.farmManager,
                             UserType.supervisor,
                             UserType.doctor,
                             UserType.assistant,
@@ -162,45 +188,47 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                 ),
                 const SizedBox(height: 20),
               ],
-              _buildLabel('Assigned Farm'),
-              FormField<int>(
-                initialValue: _selectedFarmId,
-                validator: (v) => _selectedFarmId == null
-                    ? 'Farm selection is required'
-                    : null,
-                builder: (state) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FarmSelectorInput(
-                        selectedFarmId: _selectedFarmId,
-                        onChanged: (v) {
-                          setState(() {
-                            _selectedFarmId = v;
-                            _selectedShedId = null;
-                            _sheds = [];
-                          });
-                          state.didChange(v);
-                          if (v != null) _fetchSheds(v);
-                        },
-                        label: 'Select Farm',
-                      ),
-                      if (state.hasError)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12, top: 4),
-                          child: Text(
-                            state.errorText!,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                              fontSize: 12,
+              if (!isFM) ...[
+                _buildLabel('Assigned Farm'),
+                FormField<int>(
+                  initialValue: _selectedFarmId,
+                  validator: (v) => _selectedFarmId == null
+                      ? 'Farm selection is required'
+                      : null,
+                  builder: (state) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FarmSelectorInput(
+                          selectedFarmId: _selectedFarmId,
+                          onChanged: (v) {
+                            setState(() {
+                              _selectedFarmId = v;
+                              _selectedShedId = null;
+                              _sheds = [];
+                            });
+                            state.didChange(v);
+                            if (v != null) _fetchSheds(v);
+                          },
+                          label: 'Select Farm',
+                        ),
+                        if (state.hasError)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 12, top: 4),
+                            child: Text(
+                              state.errorText!,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
 
               if (_selectedRole == UserType.supervisor &&
                   _selectedFarmId != null) ...[

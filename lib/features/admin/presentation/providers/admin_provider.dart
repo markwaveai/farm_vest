@@ -12,6 +12,7 @@ class AdminState {
   final List<Map<String, dynamic>> investorList;
   final List<Map<String, dynamic>> investorAnimals;
   final List<Map<String, dynamic>> tickets;
+  final bool staffActiveFilter;
 
   AdminState({
     this.isLoading = false,
@@ -21,6 +22,7 @@ class AdminState {
     this.investorList = const [],
     this.investorAnimals = const [],
     this.tickets = const [],
+    this.staffActiveFilter = true,
   });
 
   AdminState copyWith({
@@ -31,6 +33,7 @@ class AdminState {
     List<Map<String, dynamic>>? investorList,
     List<Map<String, dynamic>>? investorAnimals,
     List<Map<String, dynamic>>? tickets,
+    bool? staffActiveFilter,
   }) {
     return AdminState(
       isLoading: isLoading ?? this.isLoading,
@@ -40,6 +43,7 @@ class AdminState {
       investorList: investorList ?? this.investorList,
       investorAnimals: investorAnimals ?? this.investorAnimals,
       tickets: tickets ?? this.tickets,
+      staffActiveFilter: staffActiveFilter ?? this.staffActiveFilter,
     );
   }
 }
@@ -79,8 +83,16 @@ class AdminNotifier extends Notifier<AdminState> {
     }
   }
 
-  Future<void> fetchStaff({String? name, String? role, int? farmId}) async {
-    state = state.copyWith(isLoading: true);
+  Future<void> fetchStaff({
+    String? name,
+    String? role,
+    int? farmId,
+    bool? isActive,
+  }) async {
+    state = state.copyWith(
+      isLoading: true,
+      staffActiveFilter: isActive ?? state.staffActiveFilter,
+    );
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access_token');
@@ -93,6 +105,7 @@ class AdminNotifier extends Notifier<AdminState> {
         name: name,
         role: role,
         farmId: farmId,
+        isActive: isActive ?? state.staffActiveFilter,
       );
       state = state.copyWith(isLoading: false, staffList: staff);
     } catch (e) {
@@ -233,6 +246,7 @@ class AdminNotifier extends Notifier<AdminState> {
   Future<bool> reassignEmployeeFarm({
     required int staffId,
     required int newFarmId,
+    required String role,
     int? shedId,
   }) async {
     state = state.copyWith(isLoading: true);
@@ -245,6 +259,7 @@ class AdminNotifier extends Notifier<AdminState> {
         token: token,
         staffId: staffId,
         newFarmId: newFarmId,
+        role: role,
         shedId: shedId,
       );
 
@@ -261,7 +276,7 @@ class AdminNotifier extends Notifier<AdminState> {
   }
 
   Future<bool> toggleEmployeeStatus({
-    required int employeeId,
+    required String mobile,
     required bool isActive,
   }) async {
     // Optimistic update could happen here, but simpler to wait
@@ -272,7 +287,7 @@ class AdminNotifier extends Notifier<AdminState> {
 
       final success = await ApiServices.toggleEmployeeStatus(
         token: token,
-        employeeId: employeeId,
+        mobile: mobile,
         isActive: isActive,
       );
 

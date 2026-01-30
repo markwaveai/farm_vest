@@ -1,0 +1,98 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+class RemoteConfigService {
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static const String _collection = 'app_settings';
+  static const String _doc = 'config';
+
+  /// Fetch configuration from Firestore and update AppConstants
+  static Future<void> initialize() async {
+    try {
+      debugPrint("Fetching remote config...");
+      final docSnapshot = await _firestore
+          .collection(_collection)
+          .doc(_doc)
+          .get();
+
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        final data = docSnapshot.data()!;
+        _updateConstants(data);
+        await _checkVersion(data);
+      } else {
+        debugPrint(
+          "Remote config document '$_collection/$_doc' not found. Using defaults.",
+        );
+      }
+    } catch (e) {
+      debugPrint("Error fetching remote config: $e");
+      // App continues with default constants
+    }
+  }
+
+  static void _updateConstants(Map<String, dynamic> data) {
+    final String? liveUrl = data['live_api_url'];
+    final String? stagingUrl = data['staging_api_url'];
+    final String? akLiveUrl = data['animalkart_live_url'];
+    final String? akStagingUrl = data['animalkart_staging_url'];
+
+    // Update URLs based on build mode
+    if (kReleaseMode) {
+      // Production Mode
+      if (liveUrl != null && liveUrl.isNotEmpty) {
+        AppConstants.appLiveUrl = liveUrl;
+        debugPrint("Updated AppLiveUrl (Prod): $liveUrl");
+      }
+      if (akLiveUrl != null && akLiveUrl.isNotEmpty) {
+        AppConstants.animalKartApiUrl = akLiveUrl;
+      }
+    } else {
+      // Debug/Profile Mode - Prefer Staging
+      if (stagingUrl != null && stagingUrl.isNotEmpty) {
+        AppConstants.appLiveUrl = stagingUrl;
+        debugPrint("Updated AppLiveUrl (Staging): $stagingUrl");
+      } else if (liveUrl != null && liveUrl.isNotEmpty) {
+        // Fallback to live URL from config if staging not set
+        AppConstants.appLiveUrl = liveUrl;
+      }
+
+      if (akStagingUrl != null && akStagingUrl.isNotEmpty) {
+        AppConstants.animalKartStagingApiUrl = akStagingUrl;
+      }
+    }
+  }
+
+  static Future<void> _checkVersion(Map<String, dynamic> data) async {
+    try {
+      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      final String currentVersion = packageInfo.version;
+
+      String? latestVersion;
+      bool forceUpdate = data['force_update'] ?? false;
+
+      if (Platform.isAndroid) {
+        latestVersion = data['android_version'];
+      } else if (Platform.isIOS) {
+        latestVersion = data['ios_version'];
+      }
+
+      if (latestVersion != null) {
+        debugPrint(
+          "Version Check: Current=$currentVersion, Latest=$latestVersion, Force=$forceUpdate",
+        );
+        // Compare logic can be enhanced (semver)
+        if (currentVersion != latestVersion) {
+          debugPrint("New version available.");
+          // You can use a provider or global key to show dialog here
+          // For now we just log it as per request "maintain app version"
+        }
+      }
+    } catch (e) {
+      debugPrint("Error checking version: $e");
+    }
+  }
+}

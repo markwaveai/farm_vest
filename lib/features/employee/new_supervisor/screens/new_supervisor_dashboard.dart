@@ -169,9 +169,17 @@ class NewSupervisorDashboard extends ConsumerWidget {
                         onTap: () {
                           final shedId = int.tryParse(user?.shedId ?? '');
                           if (shedId != null) {
-                            context.go(
+                            context.push(
                               '/buffalo-allocation',
                               extra: {'shedId': shedId},
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'No shed assigned to your profile',
+                                ),
+                              ),
                             );
                           }
                         },
@@ -186,6 +194,33 @@ class NewSupervisorDashboard extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 20),
+                  if (dashboardState.unallocatedAnimals.isNotEmpty) ...[
+                    Text(
+                      "Unallocated Animals",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.045,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 120,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: dashboardState.unallocatedAnimals.length,
+                        itemBuilder: (context, index) {
+                          final animal =
+                              dashboardState.unallocatedAnimals[index];
+                          return _buildUnallocatedAnimalCard(
+                            context,
+                            animal,
+                            user?.shedId,
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                   Text(
                     "Quick Actions",
                     style: TextStyle(
@@ -256,7 +291,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                         onTap: () {
                           final shedId = int.tryParse(user?.shedId ?? '');
                           if (shedId != null) {
-                            context.go(
+                            context.push(
                               '/buffalo-allocation',
                               extra: {'shedId': shedId},
                             );
@@ -272,14 +307,14 @@ class NewSupervisorDashboard extends ConsumerWidget {
                         },
                         child: _buildQuickActionContent(
                           context,
-                          Icons.grid_view,
-                          'View Buffalo Shed',
+                          Icons.grid_view_rounded,
+                          'Shed Allocation',
                           AppTheme.primary,
                         ),
                       ),
                       CustomCard(
                         type: DashboardCardType.quickAction,
-                        onTap: () => context.go('/onboard-animal'),
+                        onTap: () => context.push('/onboard-animal'),
                         child: _buildQuickActionContent(
                           context,
                           Icons.add_business_rounded,
@@ -550,6 +585,89 @@ class NewSupervisorDashboard extends ConsumerWidget {
                 );
               }).toList(),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUnallocatedAnimalCard(
+    BuildContext context,
+    Map<String, dynamic> animal,
+    String? currentShedId,
+  ) {
+    final rfid = animal['rfid'] ?? 'No RFID';
+    final investor = animal['investor_name'] ?? 'Unknown';
+
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.only(right: 12),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        elevation: 1,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            final shedId = int.tryParse(currentShedId ?? '');
+            if (shedId != null) {
+              context.push(
+                '/buffalo-allocation',
+                extra: {'shedId': shedId, 'animalId': animal['rfid']},
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No shed assigned to your profile'),
+                ),
+              );
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.errorRed.withOpacity(0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.errorRed.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'UNALLOCATED',
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.errorRed,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  rfid,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  investor,
+                  style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -59,6 +59,14 @@ class AnimalInfo {
   });
 
   factory AnimalInfo.fromJson(Map<String, dynamic> json) {
+    int? parseRow(dynamic val) {
+      if (val is num) return val.toInt();
+      if (val is String) {
+        return int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), ''));
+      }
+      return null;
+    }
+
     return AnimalInfo(
       id: json['id'] is num ? (json['id'] as num).toInt() : 0,
       animalId: json['animal_id'] ?? '',
@@ -66,9 +74,7 @@ class AnimalInfo {
       earTag: json['ear_tag'],
       breedName: json['breed_name'],
       status: json['status'],
-      rowNumber: json['row_number'] is num
-          ? (json['row_number'] as num).toInt()
-          : null,
+      rowNumber: parseRow(json['row_number']),
       parkingId: json['parking_id'],
       images: json['images'] != null ? List<String>.from(json['images']) : [],
       onboardedAt: json['onboarded_at'],

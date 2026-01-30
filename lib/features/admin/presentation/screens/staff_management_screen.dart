@@ -9,10 +9,7 @@ import '../providers/admin_provider.dart';
 class StaffManagementScreen extends ConsumerStatefulWidget {
   final VoidCallback? onBackPressed;
 
-  const StaffManagementScreen({
-    super.key,
-    this.onBackPressed,
-  });
+  const StaffManagementScreen({super.key, this.onBackPressed});
 
   @override
   ConsumerState<StaffManagementScreen> createState() =>
@@ -208,6 +205,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
           role: role!.isEmpty ? null : role,
           name: query.isEmpty ? null : query,
           farmId: _selectedFarmId,
+          isActive: ref.read(adminProvider).staffActiveFilter,
         );
   }
 
@@ -295,6 +293,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
         children: [
           _buildFilterChips(),
           _buildFarmFilterChips(adminState.farms),
+          _buildActiveInactiveFilters(adminState.staffActiveFilter),
           Expanded(
             child: adminState.isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -387,6 +386,54 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
     );
   }
 
+  Widget _buildActiveInactiveFilters(bool staffActiveFilter) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          _activeInactiveChip("Active", true, staffActiveFilter),
+          const SizedBox(width: 8),
+          _activeInactiveChip("Inactive", false, staffActiveFilter),
+        ],
+      ),
+    );
+  }
+
+  Widget _activeInactiveChip(String label, bool value, bool currentFilter) {
+    final isSelected = currentFilter == value;
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (val) {
+        if (val) {
+          ref
+              .read(adminProvider.notifier)
+              .fetchStaff(
+                role: _roleFilterMapping[_selectedRoleFilter]!.isEmpty
+                    ? null
+                    : _roleFilterMapping[_selectedRoleFilter],
+                name: _searchController.text.trim().isEmpty
+                    ? null
+                    : _searchController.text.trim(),
+                farmId: _selectedFarmId,
+                isActive: value,
+              );
+        }
+      },
+      selectedColor: value
+          ? Colors.green.withOpacity(0.2)
+          : Colors.red.withOpacity(0.2),
+      checkmarkColor: value ? Colors.green : Colors.red,
+      labelStyle: TextStyle(
+        color: isSelected
+            ? (value ? Colors.green : Colors.red)
+            : AppTheme.slate,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        fontSize: 12,
+      ),
+    );
+  }
+
   void _showReassignDialog(BuildContext context, int staffId) {
     final adminState = ref.read(adminProvider);
     final farms = adminState.farms;
@@ -475,11 +522,16 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
           ElevatedButton(
             onPressed: () async {
               if (selectedFarmId != null) {
+                final primaryRole = roles.firstWhere(
+                  (r) => r == 'FARM_MANAGER' || r == 'SUPERVISOR',
+                  orElse: () => roles.isNotEmpty ? roles.first : '',
+                );
                 final success = await ref
                     .read(adminProvider.notifier)
                     .reassignEmployeeFarm(
                       staffId: staffId,
                       newFarmId: selectedFarmId!,
+                      role: primaryRole,
                       shedId: selectedShedId,
                     );
                 if (success && mounted) {
@@ -659,7 +711,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
               final success = await ref
                   .read(adminProvider.notifier)
                   .toggleEmployeeStatus(
-                    employeeId: staff['id'],
+                    mobile: staff['mobile'],
                     isActive: !isActive,
                   );
               if (success && mounted) {

@@ -128,35 +128,75 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
           ),
         ],
       ),
-      body: staffState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : staffState.error != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    staffState.error!,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                  TextButton(
-                    onPressed: () =>
-                        ref.read(staffListProvider.notifier).loadStaff(),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            )
-          : staffState.staff.isEmpty
-          ? const Center(child: Text("No staff found"))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: staffState.staff.length,
-              itemBuilder: (context, index) {
-                final staffMember = staffState.staff[index];
-                return StaffCard(staff: staffMember);
-              },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                FilterChip(
+                  label: const Text('Active Staff'),
+                  selected: staffState.isActiveFilter == true,
+                  onSelected: (val) {
+                    if (val) {
+                      ref
+                          .read(staffListProvider.notifier)
+                          .setIsActiveFilter(true);
+                    }
+                  },
+                  selectedColor: Colors.green.withOpacity(0.2),
+                  checkmarkColor: Colors.green,
+                ),
+                const SizedBox(width: 8),
+                FilterChip(
+                  label: const Text('Inactive Staff'),
+                  selected: staffState.isActiveFilter == false,
+                  onSelected: (val) {
+                    if (val) {
+                      ref
+                          .read(staffListProvider.notifier)
+                          .setIsActiveFilter(false);
+                    }
+                  },
+                  selectedColor: Colors.red.withOpacity(0.2),
+                  checkmarkColor: Colors.red,
+                ),
+              ],
             ),
+          ),
+          Expanded(
+            child: staffState.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : staffState.error != null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          staffState.error!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              ref.read(staffListProvider.notifier).loadStaff(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                : staffState.staff.isEmpty
+                ? const Center(child: Text("No staff found"))
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: staffState.staff.length,
+                    itemBuilder: (context, index) {
+                      final staffMember = staffState.staff[index];
+                      return StaffCard(staff: staffMember);
+                    },
+                  ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddStaffBottomSheet,
         backgroundColor: Colors.green,
@@ -654,7 +694,7 @@ class StaffCard extends ConsumerWidget {
                       final success = await ref
                           .read(staffListProvider.notifier)
                           .toggleEmployeeStatus(
-                            employeeId: int.parse(staff.id!),
+                            mobile: staff.phone!,
                             isActive: !isActive,
                           );
                       if (success && context.mounted) {

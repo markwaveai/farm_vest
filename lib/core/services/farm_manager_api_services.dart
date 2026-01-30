@@ -7,11 +7,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 //class StaffApiService {
 class FarmManagerApiServices {
-  static const String url = "${AppConstants.appLiveUrl}/farm/staff";
+  static String get url => "${AppConstants.appLiveUrl}/farm/staff";
 
   static Future<List<Staff>> fetchStaff({
     String query = '',
     String? role,
+    bool? isActive,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
@@ -26,6 +27,9 @@ class FarmManagerApiServices {
         "${AppConstants.appLiveUrl}/employee/search_employee?query_str=$query&size=100";
     if (role != null && role.isNotEmpty && role.toUpperCase() != 'ALL') {
       url += "&role=${role.toUpperCase().replaceAll(' ', '_')}";
+    }
+    if (isActive != null) {
+      url += "&is_active=$isActive";
     }
 
     final uri = Uri.parse(url);

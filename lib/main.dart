@@ -12,6 +12,8 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/widgets/biometric_lock_screen.dart';
 
+import 'package:farm_vest/core/services/remote_config_service.dart';
+
 Future<void> main() async {
   ApiServices.onUnauthorized = () async {
     final prefs = await SharedPreferences.getInstance();
@@ -66,6 +68,9 @@ Future<void> main() async {
       debugPrint("Firebase initialization failed: $e");
     }
   }
+
+  // Initialize Remote Config (URLs & Version)
+  await RemoteConfigService.initialize();
 
   runApp(
     DevicePreview(

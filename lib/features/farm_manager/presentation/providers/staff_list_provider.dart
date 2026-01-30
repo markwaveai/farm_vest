@@ -1,5 +1,4 @@
 import 'package:farm_vest/core/services/sheds_api_services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:farm_vest/core/services/api_services.dart';
@@ -12,6 +11,7 @@ class StaffListState {
   final String? error;
   final String searchQuery;
   final String roleFilter;
+  final bool isActiveFilter;
 
   StaffListState({
     this.isLoading = false,
@@ -19,6 +19,7 @@ class StaffListState {
     this.error,
     this.searchQuery = '',
     this.roleFilter = 'All',
+    this.isActiveFilter = true,
   });
 
   StaffListState copyWith({
@@ -27,6 +28,7 @@ class StaffListState {
     String? error,
     String? searchQuery,
     String? roleFilter,
+    bool? isActiveFilter,
   }) {
     return StaffListState(
       isLoading: isLoading ?? this.isLoading,
@@ -34,6 +36,7 @@ class StaffListState {
       error: error ?? this.error,
       searchQuery: searchQuery ?? this.searchQuery,
       roleFilter: roleFilter ?? this.roleFilter,
+      isActiveFilter: isActiveFilter ?? this.isActiveFilter,
     );
   }
 }
@@ -49,12 +52,18 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
       final staff = await FarmManagerApiServices.fetchStaff(
         query: state.searchQuery,
         role: state.roleFilter,
+        isActive: state.isActiveFilter,
       );
 
       state = state.copyWith(isLoading: false, staff: staff);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  void setIsActiveFilter(bool isActive) {
+    state = state.copyWith(isActiveFilter: isActive);
+    loadStaff();
   }
 
   void setSearchQuery(String query) {
@@ -160,7 +169,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
   }
 
   Future<bool> toggleEmployeeStatus({
-    required int employeeId,
+    required String mobile,
     required bool isActive,
   }) async {
     try {
@@ -170,7 +179,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
 
       final success = await ApiServices.toggleEmployeeStatus(
         token: token,
-        employeeId: employeeId,
+        mobile: mobile,
         isActive: isActive,
       );
 
@@ -189,6 +198,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
   Future<bool> reassignEmployeeFarm({
     required int staffId,
     required int newFarmId,
+    required String role,
     int? shedId,
   }) async {
     try {
@@ -200,6 +210,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
         token: token,
         staffId: staffId,
         newFarmId: newFarmId,
+        role: role,
         shedId: shedId,
       );
 

@@ -107,4 +107,41 @@ class AnimalApiServices {
       throw AppException(e.toString());
     }
   }
+
+  static Future<Map<String, dynamic>?> getAnimalByPosition({
+    required String token,
+    required int farmId,
+    required int shedId,
+    required String rowNumber,
+    required String parkingId,
+  }) async {
+    try {
+      final queryParams = {
+        'farm_id': farmId.toString(),
+        'shed_id': shedId.toString(),
+        'row_number': rowNumber,
+        'parking_id': parkingId,
+      };
+
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/animal/get-position",
+      ).replace(queryParameters: queryParams);
+
+      final response = await http.get(
+        uri,
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success' && data['data'] != null) {
+          print("Animal Details Response: ${data['data']}");
+          return Map<String, dynamic>.from(data['data']);
+        }
+      }
+      return null;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
 }

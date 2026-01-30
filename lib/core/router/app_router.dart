@@ -197,6 +197,7 @@ class AppRouter {
           return BuffaloAllocationScreen(
             initialShedId: extras?['shedId'] as int?,
             targetParkingId: extras?['parkingId'] as String?,
+            initialAnimalId: extras?['animalId'] as String?,
           );
         },
       ),

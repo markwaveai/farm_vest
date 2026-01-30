@@ -50,6 +50,8 @@ class SupervisorDashboardState {
   final bool shedWash;
   final bool eveningMilking;
 
+  final List<Map<String, dynamic>> unallocatedAnimals;
+
   SupervisorDashboardState({
     required this.stats,
     this.tasks = const [],
@@ -63,6 +65,7 @@ class SupervisorDashboardState {
     this.error,
     this.animalLocation,
     this.animalSuggestions = const [],
+    this.unallocatedAnimals = const [],
   });
 
   SupervisorDashboardState copyWith({
@@ -78,6 +81,7 @@ class SupervisorDashboardState {
     String? error,
     Map<String, dynamic>? animalLocation,
     List<Map<String, dynamic>>? animalSuggestions,
+    List<Map<String, dynamic>>? unallocatedAnimals,
   }) {
     return SupervisorDashboardState(
       stats: stats ?? this.stats,
@@ -92,6 +96,7 @@ class SupervisorDashboardState {
       error: error ?? this.error,
       animalLocation: animalLocation ?? this.animalLocation,
       animalSuggestions: animalSuggestions ?? this.animalSuggestions,
+      unallocatedAnimals: unallocatedAnimals ?? this.unallocatedAnimals,
     );
   }
 }
@@ -157,9 +162,11 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
 
       // Fetch pending allocations
       int pendingCount = 0;
+      List<Map<String, dynamic>> unallocatedList = [];
       try {
         final unallocated = await supervisorRepo.getUnallocatedAnimals(token);
-        pendingCount = unallocated.length;
+        unallocatedList = List<Map<String, dynamic>>.from(unallocated);
+        pendingCount = unallocatedList.length;
       } catch (e) {
         debugPrint('Error fetching unallocated animals: $e');
       }
@@ -172,7 +179,11 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
         pendingAllocations: pendingCount.toString(),
       );
 
-      state = state.copyWith(stats: newStats, isLoading: false);
+      state = state.copyWith(
+        stats: newStats,
+        isLoading: false,
+        unallocatedAnimals: unallocatedList,
+      );
     } catch (e, stackTrace) {
       debugPrint('Error fetching supervisor stats: $e');
       debugPrint(stackTrace.toString());
