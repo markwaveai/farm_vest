@@ -12,7 +12,8 @@ class AppConstants {
   static String animalKartApiUrl =
       'https://animalkart-live-apis-jn6cma3vvq-el.a.run.app';
 
-  static String appLiveUrl = 'http://127.0.0.1:8000/api';
+  static String appLiveUrl =
+      'https://farmvest-api-production-jn6cma3vvq-el.a.run.app/api';
   // static const String corsProxyUrl =
   //     'https://cors-612299373064.asia-south1.run.app';
   // static const Map<String, String> corsProxyHeaders = {
