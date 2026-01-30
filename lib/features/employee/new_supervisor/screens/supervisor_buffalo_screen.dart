@@ -151,7 +151,7 @@ class _SupervisorBuffaloScreenState
               child: const Icon(Icons.pets, color: AppTheme.primary),
             ),
             title: Text(
-              details['animal_id'] ?? 'Unknown ID',
+              details['rfid_tag_number']?.toString() ?? 'Unknown RFID',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
@@ -164,7 +164,7 @@ class _SupervisorBuffaloScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDetailRow('RFID', details['rfid_tag_number']),
+                    _buildDetailRow('ID', details['animal_id']),
                     _buildDetailRow('Breed', details['breed_name']),
                     _buildDetailRow(
                       'Age',
