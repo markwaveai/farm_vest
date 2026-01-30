@@ -31,8 +31,8 @@ class EmployeeDashboardCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 50,
-                height: 50,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(25),
@@ -42,7 +42,7 @@ class EmployeeDashboardCard extends StatelessWidget {
               const SizedBox(height: AppConstants.spacingM),
               Text(
                 title,
-                style: AppTheme.headingSmall.copyWith(fontSize: 16),
+                style: AppTheme.headingSmall.copyWith(fontSize: 10),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
