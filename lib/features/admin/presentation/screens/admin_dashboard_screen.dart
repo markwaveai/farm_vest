@@ -371,7 +371,10 @@ class _AdminHomeView extends ConsumerWidget {
                           onTap: () => _showLogoutDialog(context, ref),
                         ),
                         const SizedBox(width: 8),
-                        _buildHeaderIcon(Icons.notifications_active_outlined),
+                        _buildHeaderIcon(
+                          Icons.notifications_active_outlined,
+                          onTap: () => context.push('/notifications'),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),

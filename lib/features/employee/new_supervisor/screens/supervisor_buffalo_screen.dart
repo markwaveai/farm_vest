@@ -2,6 +2,7 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class SupervisorBuffaloScreen extends ConsumerStatefulWidget {
   const SupervisorBuffaloScreen({super.key});
@@ -42,6 +43,10 @@ class _SupervisorBuffaloScreenState
     return Scaffold(
       backgroundColor: AppTheme.grey,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/supervisor-dashboard'),
+        ),
         title: const Text('Animals List'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(110),

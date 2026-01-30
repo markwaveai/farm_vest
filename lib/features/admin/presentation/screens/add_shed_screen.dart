@@ -201,7 +201,20 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
   }
 
   Future<void> _handleCreateShed() async {
-    if (_formKey.currentState!.validate() && _selectedFarmId != null) {
+    if (_selectedFarmId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select a farm first'),
+            backgroundColor: AppTheme.warningOrange,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (_formKey.currentState!.validate()) {
       final timestamp = DateTime.now().millisecondsSinceEpoch % 10000;
       final autoShedId = 'SHED-${_selectedFarmId}-$timestamp';
 

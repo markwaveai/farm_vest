@@ -22,21 +22,32 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void initState() {
     super.initState();
     _notificationService.initializeSampleNotifications();
-    _notifications = _notificationService.notifications;
-    _notificationService.addListener(_onNotificationsChanged);
+
+    // Initial fetch
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateNotifications();
+    });
+
+    _notificationService.addListener(_onNotificationsChangedFull);
   }
 
   @override
   void dispose() {
-    _notificationService.removeListener(_onNotificationsChanged);
+    _notificationService.removeListener(_onNotificationsChangedFull);
     super.dispose();
   }
 
-  void _onNotificationsChanged(List<AppNotification> notifications) {
+  void _updateNotifications() {
     if (mounted) {
       setState(() {
-        _notifications = notifications;
+        _notifications = _notificationService.notifications;
       });
+    }
+  }
+
+  void _onNotificationsChangedFull(List<AppNotification> allNotifications) {
+    if (mounted) {
+      _updateNotifications();
     }
   }
 
@@ -93,64 +104,68 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                  // Summary
-                  if (_notifications.isNotEmpty) ...[
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppConstants.spacingM),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _buildSummaryItem(
-                                'Total',
-                                _notifications.length.toString(),
-                                Icons.notifications,
-                                AppTheme.primary,
+                    // Summary
+                    if (_notifications.isNotEmpty) ...[
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppConstants.spacingM),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: _buildSummaryItem(
+                                  'Total',
+                                  _notifications.length.toString(),
+                                  Icons.notifications,
+                                  AppTheme.primary,
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child: _buildSummaryItem(
-                                'Unread',
-                                unreadNotifications.length.toString(),
-                                Icons.mark_email_unread,
-                                AppTheme.warningOrange,
+                              Expanded(
+                                child: _buildSummaryItem(
+                                  'Unread',
+                                  unreadNotifications.length.toString(),
+                                  Icons.mark_email_unread,
+                                  AppTheme.warningOrange,
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child: _buildSummaryItem(
-                                'Read',
-                                readNotifications.length.toString(),
-                                Icons.mark_email_read,
-                                AppTheme.successGreen,
+                              Expanded(
+                                child: _buildSummaryItem(
+                                  'Read',
+                                  readNotifications.length.toString(),
+                                  Icons.mark_email_read,
+                                  AppTheme.successGreen,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingL),
-                  ],
+                      const SizedBox(height: AppConstants.spacingL),
+                    ],
 
-                  // Unread Notifications
-                  if (unreadNotifications.isNotEmpty) ...[
-                    const Text('Unread', style: AppTheme.headingMedium),
-                    const SizedBox(height: AppConstants.spacingM),
-                    ...unreadNotifications.map(
-                      (notification) =>
-                          _buildNotificationCard(notification, isUnread: true),
-                    ),
-                    const SizedBox(height: AppConstants.spacingL),
-                  ],
+                    // Unread Notifications
+                    if (unreadNotifications.isNotEmpty) ...[
+                      const Text('Unread', style: AppTheme.headingMedium),
+                      const SizedBox(height: AppConstants.spacingM),
+                      ...unreadNotifications.map(
+                        (notification) => _buildNotificationCard(
+                          notification,
+                          isUnread: true,
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingL),
+                    ],
 
-                  // Read Notifications
-                  if (readNotifications.isNotEmpty) ...[
-                    const Text('Read', style: AppTheme.headingMedium),
-                    const SizedBox(height: AppConstants.spacingM),
-                    ...readNotifications.map(
-                      (notification) =>
-                          _buildNotificationCard(notification, isUnread: false),
-                    ),
-                  ],
+                    // Read Notifications
+                    if (readNotifications.isNotEmpty) ...[
+                      const Text('Read', style: AppTheme.headingMedium),
+                      const SizedBox(height: AppConstants.spacingM),
+                      ...readNotifications.map(
+                        (notification) => _buildNotificationCard(
+                          notification,
+                          isUnread: false,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -265,11 +280,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ),
                     ),
                     const SizedBox(height: AppConstants.spacingS),
-                    Text(
-                      _formatTimestamp(notification.timestamp),
-                      style: AppTheme.bodySmall.copyWith(
-                        color: AppTheme.mediumGrey,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          _formatTimestamp(notification.timestamp),
+                          style: AppTheme.bodySmall.copyWith(
+                            color: AppTheme.mediumGrey,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

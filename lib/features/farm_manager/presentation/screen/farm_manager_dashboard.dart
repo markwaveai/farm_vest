@@ -394,6 +394,13 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                               ),
                               IconButton(
                                 icon: const Icon(
+                                  Icons.notifications_active_outlined,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () => context.push('/notifications'),
+                              ),
+                              IconButton(
+                                icon: const Icon(
                                   Icons.logout_rounded,
                                   color: Colors.white,
                                 ),

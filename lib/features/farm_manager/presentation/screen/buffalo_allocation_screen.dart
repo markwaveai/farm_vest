@@ -1338,6 +1338,70 @@ class _BuffaloAllocationScreenState
   }
 
   Future<void> _finalizeAllocations() async {
+    final authState = ref.read(authProvider);
+    final isUserAdmin = authState.role == UserType.admin;
+
+    // 1. Refined Validation for Farm and Shed (Admin only)
+    if (isUserAdmin) {
+      if (selectedFarmId == null && selectedShedId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please select farm and shed first'),
+              backgroundColor: AppTheme.warningOrange,
+            ),
+          );
+        }
+        return;
+      } else if (selectedFarmId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please select farm first'),
+              backgroundColor: AppTheme.warningOrange,
+            ),
+          );
+        }
+        return;
+      } else if (selectedShedId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please select shed first'),
+              backgroundColor: AppTheme.warningOrange,
+            ),
+          );
+        }
+        return;
+      }
+    } else {
+      // Non-Admin validation (only Shed is mandatory)
+      if (selectedShedId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please select shed first'),
+              backgroundColor: AppTheme.warningOrange,
+            ),
+          );
+        }
+        return;
+      }
+    }
+
+    // 3. Validate Animal Selection (Draft Allocations)
+    if (draftAllocations.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No animals selected for allocation'),
+            backgroundColor: AppTheme.warningOrange,
+          ),
+        );
+      }
+      return;
+    }
+
     final onboardedAnimals = ref.read(farmManagerProvider).onboardedAnimalIds;
 
     if (draftAllocations.length < onboardedAnimals.length) {
@@ -1364,14 +1428,14 @@ class _BuffaloAllocationScreenState
     }
 
     final dashboardState = ref.read(farmManagerProvider);
-    final selectedShed =
-        dashboardState.sheds.where((s) => s.id == selectedShedId).firstOrNull ??
-        (dashboardState.sheds.isNotEmpty ? dashboardState.sheds.first : null);
+    final selectedShed = dashboardState.sheds
+        .where((s) => s.id == selectedShedId)
+        .firstOrNull;
 
     if (selectedShed == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a shed first')),
+          const SnackBar(content: Text('Selected shed not found')),
         );
       }
       return;

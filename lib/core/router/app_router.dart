@@ -33,19 +33,19 @@ import 'package:farm_vest/features/investor/presentation/widgets/investor_shell.
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/presentation/screens/new_login_screen.dart';
-import '../../features/auth/presentation/screens/onboarding_screen.dart';
-import '../../features/auth/presentation/screens/splash_screen.dart';
-import '../../features/common/presentation/screens/notifications_screen.dart';
-import '../../features/employee/presentation/screens/assistant_dashboard_screen.dart';
-import '../../features/employee/presentation/screens/health_issues_screen.dart';
-import '../../features/employee/presentation/screens/milk_production_screen.dart';
-import '../../features/employee/presentation/screens/profile_screen.dart';
-import '../../features/employee/presentation/screens/raise_ticket_screen.dart';
+import 'package:farm_vest/features/auth/presentation/screens/new_login_screen.dart';
+import 'package:farm_vest/features/auth/presentation/screens/onboarding_screen.dart';
+import 'package:farm_vest/features/auth/presentation/screens/splash_screen.dart';
+import 'package:farm_vest/features/common/presentation/screens/notifications_screen.dart';
+import 'package:farm_vest/features/employee/presentation/screens/assistant_dashboard_screen.dart';
+import 'package:farm_vest/features/employee/presentation/screens/health_issues_screen.dart';
+import 'package:farm_vest/features/employee/presentation/screens/milk_production_screen.dart';
+import 'package:farm_vest/features/employee/presentation/screens/profile_screen.dart';
+import 'package:farm_vest/features/employee/presentation/screens/raise_ticket_screen.dart';
 
-import '../../features/investor/presentation/screens/investor_dashboard_screen.dart';
-import '../../features/investor/presentation/screens/profile_Screens/support_screen.dart';
-import '../../features/investor/presentation/screens/unit_details_screen.dart';
+import 'package:farm_vest/features/investor/presentation/screens/investor_dashboard_screen.dart';
+import 'package:farm_vest/features/investor/presentation/screens/profile_Screens/support_screen.dart';
+import 'package:farm_vest/features/investor/presentation/screens/unit_details_screen.dart';
 
 // 1. Define the GlobalKey for the navigator.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

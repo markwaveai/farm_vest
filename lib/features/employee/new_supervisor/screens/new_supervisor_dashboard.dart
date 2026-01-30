@@ -93,6 +93,11 @@ class NewSupervisorDashboard extends ConsumerWidget {
               tooltip: 'Switch Role',
             ),
           IconButton(
+            onPressed: () => context.push('/notifications'),
+            icon: const Icon(Icons.notifications_active_outlined),
+            tooltip: 'Notifications',
+          ),
+          IconButton(
             onPressed: () => _showLogoutDialog(context, ref),
             icon: const Icon(Icons.logout),
           ),

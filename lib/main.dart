@@ -7,10 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:farm_vest/core/services/api_services.dart';
-import 'core/router/app_router.dart';
-import 'core/theme/app_theme.dart';
-import 'core/theme/theme_provider.dart';
-import 'core/widgets/biometric_lock_screen.dart';
+import 'package:farm_vest/core/router/app_router.dart';
+import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/theme/theme_provider.dart';
+import 'package:farm_vest/core/widgets/biometric_lock_screen.dart';
 
 import 'package:farm_vest/core/services/remote_config_service.dart';
 
