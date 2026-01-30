@@ -19,6 +19,7 @@ class BuffaloCard extends StatelessWidget {
   final bool isGridView;
   final bool showLiveButton;
   final String? imageUrl; // Added imageUrl property
+  final String? animalType; // Added animalType property
   final VoidCallback? onTap;
   final VoidCallback? onCalvesTap;
   final VoidCallback? onInvoiceTap;
@@ -43,7 +44,8 @@ class BuffaloCard extends StatelessWidget {
     required this.breed,
     this.isGridView = true,
     this.showLiveButton = true,
-    this.imageUrl, // Added to constructor
+    this.imageUrl,
+    this.animalType, // Added to constructor
     this.onTap,
     this.onCalvesTap,
     this.onInvoiceTap,
@@ -367,6 +369,16 @@ class BuffaloCard extends StatelessWidget {
             SizedBox(height: rowGap),
           ],
 
+          if (animalType != null && animalType!.isNotEmpty) ...[
+            _buildInfoRow(
+              'Type',
+              animalType!,
+              isDark: isDark,
+              fontSize: fontSize,
+            ),
+            SizedBox(height: rowGap),
+          ],
+
           // Shed Name
           if (shedName.isNotEmpty && shedName.toLowerCase() != 'null') ...[
             _buildInfoRow('Shed', shedName, isDark: isDark, fontSize: fontSize),
@@ -374,8 +386,15 @@ class BuffaloCard extends StatelessWidget {
           ],
 
           // Age
-          _buildInfoRow('Age', age, isDark: isDark, fontSize: fontSize),
-          SizedBox(height: rowGap),
+          if (age != 'null') ...[
+            _buildInfoRow(
+              'Age (Month)',
+              age,
+              isDark: isDark,
+              fontSize: fontSize,
+            ),
+            SizedBox(height: rowGap),
+          ],
 
           // Farm (if available)
           if (farmName.isNotEmpty && farmName.toLowerCase() != 'null') ...[

@@ -95,13 +95,13 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
         final buffalo = buffalos[index];
         return BuffaloCard(
           rfid: buffalo.rfid ?? '',
-          shedName: buffalo.shedId.toString() ?? '',
+          shedName: buffalo.shedName ?? (buffalo.shedId?.toString() ?? ''),
+          animalType: buffalo.animalType,
 
           age: buffalo.age?.toString() ?? '-',
 
           farmName: buffalo.farmName ?? 'FarmVest Unit',
           location: buffalo.farmLocation ?? 'Location',
-          // ShedName: buffalo.ShedName ?? '-',
           imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
           isGridView: true,
           onTap: () {
@@ -159,7 +159,8 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
           age: buffalo.age?.toString() ?? kHyphen,
           farmName: buffalo.farmName ?? kHyphen,
           location: buffalo.farmLocation ?? kHyphen,
-          shedName: buffalo.shedId?.toString() ?? kHyphen,
+          shedName: buffalo.shedName ?? (buffalo.shedId?.toString() ?? kHyphen),
+          animalType: buffalo.animalType,
           imageUrl: buffalo.images.isNotEmpty ? buffalo.images.first : null,
           isGridView: false,
           onTap: () {

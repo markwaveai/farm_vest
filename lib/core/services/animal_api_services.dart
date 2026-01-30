@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/features/farm_manager/data/models/animalkart_order_model.dart';
@@ -43,16 +44,26 @@ class AnimalApiServices {
   static Future<List<Map<String, dynamic>>> getCalves({
     required String token,
     required String rfid,
+    String? animalId,
   }) async {
     try {
+      final queryParams = {'rfid': rfid};
+      if (animalId != null) {
+        queryParams['animal_id'] = animalId;
+      }
+
       final uri = Uri.parse(
         "${AppConstants.appLiveUrl}/animal/get_calves",
-      ).replace(queryParameters: {'rfid': rfid});
+      ).replace(queryParameters: queryParams);
+
+      debugPrint("getCalves URI: $uri");
 
       final response = await http.get(
         uri,
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
+
+      debugPrint("getCalves Response: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

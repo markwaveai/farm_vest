@@ -7,8 +7,9 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 class InvestorAnimal {
   /// Unique identifier for the animal
   final String animalId;
-final String? rfid;
-final int? age;
+  final String? rfid;
+  final int? age;
+
   /// List of image URLs for the animal
   final List<String> images;
   final int? shedId;
@@ -26,15 +27,16 @@ final int? age;
 
   /// Creates an instance of [InvestorAnimal].
   const InvestorAnimal({
-   required this.animalId,
-   this.rfid,
-   this.age,
-   required this.shedName,
-   required this.animalType,
-   
+    required this.animalId,
+    this.rfid,
+    this.age,
+    required this.shedName,
+    required this.animalType,
+
     required this.images,
     this.farmName,
-    this.farmLocation, required this.shedId,  
+    this.farmLocation,
+    required this.shedId,
     required this.healthStatus,
   });
 
@@ -52,24 +54,21 @@ final int? age;
   /// ```
   factory InvestorAnimal.fromJson(Map<String, dynamic> json) {
     return InvestorAnimal(
-       
       animalId: json['animal_id'] as String,
-     rfid: json['rfid_tag_number'] as String?,
-       age: json['age_months'] as int?,
+      rfid: json['rfid_tag_number'] as String?,
+      age: json['age_months'] as int?,
       images:
           (json['images'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
       farmName: json['farm_name'] as String?,
-      farmLocation: json['farm_location'] as String?, 
-       shedId: json['shed_id']as int?,
-       shedName: json['shed_name'] as String?,
+      farmLocation: json['farm_location'] as String?,
+      shedId: json['shed_id'] as int?,
+      shedName: json['shed_name'] as String?,
 
-       
-
-       healthStatus: json['health_status'] as String? ?? kHyphen, 
-       animalType: json['animal_type']as String,
+      healthStatus: json['health_status'] as String? ?? kHyphen,
+      animalType: json['animal_type'] as String,
     );
   }
 
@@ -78,18 +77,20 @@ final int? age;
     return {
       'rfid': rfid,
       'age': age,
-      'shed_name': shedId,
-       'animal_id': animalId,
+      'shed_name': shedName,
+      'shed_id': shedId,
+      'animal_id': animalId,
       'images': images,
       'farm_name': farmName,
       'farm_location': farmLocation,
       'health_status': healthStatus,
+      'animal_type': animalType,
     };
   }
 
   /// Creates a copy of this [InvestorAnimal] with the given fields replaced.
   InvestorAnimal copyWith({
-     String? rfid,
+    String? rfid,
     int? age,
     String? shedName,
     int? shedId,
@@ -103,16 +104,15 @@ final int? age;
     return InvestorAnimal(
       animalId: animalId ?? this.animalId,
       rfid: rfid ?? this.rfid,
-      animalType: animalType??this.animalType,
+      animalType: animalType ?? this.animalType,
       age: age ?? this.age,
       shedName: shedName ?? this.shedName,
       shedId: shedId ?? this.shedId,
-      
 
       images: images ?? this.images,
       farmName: farmName ?? this.farmName,
-      farmLocation: farmLocation ?? this.farmLocation, 
-       healthStatus: healthStatus ?? this.healthStatus,
+      farmLocation: farmLocation ?? this.farmLocation,
+      healthStatus: healthStatus ?? this.healthStatus,
     );
   }
 
@@ -136,7 +136,6 @@ final int? age;
   //   if (identical(this, other)) return true;
   //   return other is InvestorAnimal && other.rfid == rfid;
   // }
-
 
   @override
   int get hashCode => rfid.hashCode;
