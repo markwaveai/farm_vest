@@ -3,6 +3,7 @@ import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_dashboard_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:go_router/go_router.dart';
 
 class TransferTicketsScreen extends ConsumerStatefulWidget {
@@ -353,14 +354,13 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
   final _animalController = TextEditingController();
   final _reasonController = TextEditingController();
   int? _selectedAnimalId;
-  Map<String, dynamic>? _selectedAnimalData;
+  InvestorAnimal? _selectedAnimal;
   int? _selectedShedId;
-  int? _selectedQuarantineShedId;
+
   final _outController = TextEditingController();
   bool _isSubmitting = false;
   List<Map<String, dynamic>> _sheds = [];
   bool _isShedsLoading = false;
-  List<Map<String, dynamic>> _quarantineSheds = [];
 
   @override
   void initState() {
@@ -375,21 +375,7 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
       final data = await repo.getSheds();
       setState(() {
         _sheds = data;
-        _quarantineSheds = data
-            .where(
-              (s) =>
-                  (s['shed_name']?.toString().toLowerCase().contains(
-                        'quarantine',
-                      ) ??
-                      false) ||
-                  (s['shed_name']?.toString().toLowerCase().contains('iso') ??
-                      false),
-            )
-            .toList();
-        // If no specifically named quarantine sheds, show all sheds as options
-        if (_quarantineSheds.isEmpty) {
-          _quarantineSheds = data;
-        }
+        _sheds = data;
         _isShedsLoading = false;
       });
     } catch (e) {
@@ -496,22 +482,23 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
                   shrinkWrap: true,
                   itemCount: suggestions.length,
                   itemBuilder: (context, index) {
-                    final animal = suggestions[index]['animal_details'];
-                    final tag =
-                        animal['rfid_tag_number'] ??
-                        animal['ear_tag'] ??
-                        animal['animal_id'];
+                    final animal = suggestions[index];
+                    final tag = animal.rfid ?? animal.earTag ?? animal.animalId;
                     return ListTile(
                       dense: true,
                       title: Text(tag),
-                      subtitle: Text('Row: ${animal['row_number'] ?? 'N/A'}'),
+                      subtitle: Text('Row: ${animal.rowNumber ?? 'N/A'}'),
                       onTap: () {
                         setState(() {
-                          _selectedAnimalId = animal['id'];
-                          _selectedAnimalData = animal;
+                          _selectedAnimalId = animal.internalId;
+                          _selectedAnimal = animal;
                           _animalController.text = tag;
-                          _outController.text =
-                              animal['shed_details']?['shed_name'] ?? 'N/A';
+                          _outController.text = animal.shedName ?? 'N/A';
+
+                          // Reset destination shed if it matches the new animal's current shed
+                          if (_selectedShedId == animal.shedId) {
+                            _selectedShedId = null;
+                          }
                         });
                         ref
                             .read(supervisorDashboardProvider.notifier)
@@ -544,41 +531,6 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Quarantine dropdown
-            const Text(
-              'Quarantine',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
-            _isShedsLoading
-                ? const Center(child: LinearProgressIndicator())
-                : Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade400),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<int>(
-                        isExpanded: true,
-                        value: _selectedQuarantineShedId,
-                        hint: const Text('Select Quarantine Shed'),
-                        items: _quarantineSheds.map((shed) {
-                          return DropdownMenuItem<int>(
-                            value: shed['id'],
-                            child: Text(
-                              shed['shed_name'] ?? 'Shed ${shed['id']}',
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          setState(() => _selectedQuarantineShedId = val);
-                        },
-                      ),
-                    ),
-                  ),
-            const SizedBox(height: 16),
-
             const Text(
               'Destination Shed (Optional)',
               style: TextStyle(fontWeight: FontWeight.w500),
@@ -597,14 +549,19 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
                         isExpanded: true,
                         value: _selectedShedId,
                         hint: const Text('Select Shed'),
-                        items: _sheds.map((shed) {
-                          return DropdownMenuItem<int>(
-                            value: shed['id'],
-                            child: Text(
-                              shed['shed_name'] ?? 'Shed ${shed['id']}',
-                            ),
-                          );
-                        }).toList(),
+                        items: _sheds
+                            .where(
+                              (shed) => shed['id'] != _selectedAnimal?.shedId,
+                            )
+                            .map((shed) {
+                              return DropdownMenuItem<int>(
+                                value: shed['id'],
+                                child: Text(
+                                  shed['shed_name'] ?? 'Shed ${shed['id']}',
+                                ),
+                              );
+                            })
+                            .toList(),
                         onChanged: (val) {
                           setState(() => _selectedShedId = val);
                         },
@@ -724,8 +681,7 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
         'transfer_direction': _direction,
         'description': _reasonController.text,
         'destination_shed_id': _selectedShedId,
-        'quarantine_shed_id': _selectedQuarantineShedId,
-        'source_shed_id': _selectedAnimalData?['shed_details']?['id'],
+        'source_shed_id': _selectedAnimal?.shedId,
       };
 
       await ref

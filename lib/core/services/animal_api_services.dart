@@ -8,7 +8,7 @@ import 'package:farm_vest/features/investor/data/models/investor_animal_model.da
 import 'package:http/http.dart' as http;
 
 class AnimalApiServices {
-  static Future<List<Map<String, dynamic>>> searchAnimals({
+  static Future<List<InvestorAnimal>> searchAnimals({
     required String token,
     required String query,
     String? healthStatus,
@@ -34,7 +34,8 @@ class AnimalApiServices {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['data']);
+        final list = data['data'] as List;
+        return list.map((e) => InvestorAnimal.fromJson(e)).toList();
       }
       return [];
     } catch (e) {
@@ -145,6 +146,55 @@ class AnimalApiServices {
         }
       }
       return null;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getStaff({
+    required String token,
+    String? name,
+    String? role,
+    bool? isActive,
+    int? farmId,
+    int? page,
+    int? size,
+  }) async {
+    try {
+      final queryParams = <String, String>{
+        'query_str': name ?? '',
+        if (role != null && role.isNotEmpty && role != 'All') 'role': role,
+        if (isActive != null) 'is_active': isActive.toString(),
+        if (page != null) 'page': page.toString(),
+        if (size != null) 'size': size.toString(),
+      };
+
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/employee/search_employee",
+      ).replace(queryParameters: queryParams);
+
+      final response = await http.get(
+        uri,
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+          HttpHeaders.acceptHeader: AppConstants.applicationJson,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['data'] != null && data['data'] is List) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+        return [];
+      }
+      throw ServerException(
+        'Failed to load staff',
+        statusCode: response.statusCode,
+      );
+    } on SocketException {
+      throw NetworkException('No Internet connection');
     } catch (e) {
       throw AppException(e.toString());
     }

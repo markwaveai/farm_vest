@@ -1,5 +1,6 @@
 import 'package:farm_vest/features/employee/new_supervisor/data/repositories/supervisor_repository.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,7 +43,7 @@ class SupervisorDashboardState {
   final bool isLocatingAnimal;
   final String? error;
   final Map<String, dynamic>? animalLocation;
-  final List<Map<String, dynamic>> animalSuggestions;
+  final List<InvestorAnimal> animalSuggestions;
 
   // Checklist state
   final bool morningFeed;
@@ -80,7 +81,7 @@ class SupervisorDashboardState {
     bool? eveningMilking,
     String? error,
     Map<String, dynamic>? animalLocation,
-    List<Map<String, dynamic>>? animalSuggestions,
+    List<InvestorAnimal>? animalSuggestions,
     List<Map<String, dynamic>>? unallocatedAnimals,
   }) {
     return SupervisorDashboardState(
@@ -292,31 +293,19 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
       // 2. Extract location directly from search result
       // Prioritize exact match if multiple results found
       final q = query.trim().toLowerCase();
-      final animalData = animals.firstWhere((a) {
-        final d = a['animal_details'] ?? {};
-        final rfid = (d['rfid_tag_number'] ?? '').toString().toLowerCase();
-        final ear = (d['ear_tag'] ?? '').toString().toLowerCase();
-        final aid = (d['animal_id'] ?? '').toString().toLowerCase();
+      final animal = animals.firstWhere((a) {
+        final rfid = (a.rfid ?? '').toLowerCase();
+        final ear = (a.earTag ?? '').toLowerCase();
+        final aid = a.animalId.toLowerCase();
         return rfid == q || ear == q || aid == q;
       }, orElse: () => animals.first);
-      final animalDetails = animalData['animal_details'];
-      final shedDetails = animalData['shed_details'];
-
-      // Check if animal exists
-      if (animalDetails == null) {
-        state = state.copyWith(
-          isLocatingAnimal: false,
-          error: 'Invalid animal data structure.',
-        );
-        return;
-      }
 
       final Map<String, dynamic> locationData = {
-        'shed_id': animalDetails['shed_id'] ?? shedDetails?['id'],
-        'shed_name': shedDetails?['shed_name'],
-        'row_number': animalDetails['row_number'],
-        'parking_id': animalDetails['parking_id'],
-        'health_status': animalDetails['health_status'],
+        'shed_id': animal.shedId,
+        'shed_name': animal.shedName,
+        'row_number': animal.rowNumber,
+        'parking_id': animal.parkingId,
+        'health_status': animal.healthStatus,
       };
 
       state = state.copyWith(

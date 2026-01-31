@@ -10,6 +10,7 @@ import '../providers/admin_provider.dart';
 import 'package:farm_vest/features/farm_manager/data/models/farm_model.dart';
 import 'ticket_management_screen.dart';
 import 'staff_management_screen.dart';
+import 'search_animals_screen.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -368,6 +369,16 @@ class _AdminHomeView extends ConsumerWidget {
                         _buildHeaderIcon(
                           Icons.power_settings_new_rounded,
                           onTap: () => _showLogoutDialog(context, ref),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildHeaderIcon(
+                          Icons.search_rounded,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SearchAnimalsScreen(),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 8),
                         _buildHeaderIcon(

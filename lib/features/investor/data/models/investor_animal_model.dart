@@ -7,6 +7,7 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 class InvestorAnimal {
   /// Unique identifier for the animal
   final String animalId;
+  final int? internalId;
   final String? rfid;
   final int? age;
 
@@ -23,6 +24,12 @@ class InvestorAnimal {
   /// Location of the farm (e.g., 'KURNOOL', 'HYDERABAD')
   final String? farmLocation;
 
+  final String? parkingId;
+  final String? rowNumber;
+  final String? investorName;
+  final String? earTag;
+  final String? status;
+
   /// Current health status of the animal
   final String healthStatus;
 
@@ -32,6 +39,7 @@ class InvestorAnimal {
   /// Creates an instance of [InvestorAnimal].
   const InvestorAnimal({
     required this.animalId,
+    this.internalId,
     this.rfid,
     this.age,
     required this.shedName,
@@ -40,6 +48,11 @@ class InvestorAnimal {
     required this.images,
     this.farmName,
     this.farmLocation,
+    this.parkingId,
+    this.rowNumber,
+    this.investorName,
+    this.earTag,
+    this.status,
     required this.shedId,
     required this.healthStatus,
     this.breed,
@@ -65,10 +78,14 @@ class InvestorAnimal {
     final animalData = isNested ? json['animal_details'] : json;
     final farmData = isNested ? json['farm_details'] : json;
     final shedData = isNested ? json['shed_details'] : json;
+    final investorData = isNested
+        ? json['investor_details']
+        : json; // Assuming flat might have investor info too?
 
     return InvestorAnimal(
       animalId: (animalData['animal_id'] ?? animalData['id']?.toString() ?? '')
           .toString(),
+      internalId: animalData['id'] is int ? animalData['id'] : null,
       rfid: (animalData['rfid_tag_number'] ?? animalData['rfid'] ?? '')
           .toString(),
       age: animalData['age_months'] is int ? animalData['age_months'] : null,
@@ -80,12 +97,23 @@ class InvestorAnimal {
       farmName: (farmData['farm_name'] ?? farmData['name'] ?? '').toString(),
       farmLocation: (farmData['location'] ?? farmData['farm_location'] ?? '')
           .toString(),
+      parkingId: (animalData['parking_id'] != null)
+          ? animalData['parking_id'].toString()
+          : null,
+      rowNumber: (animalData['row_number'] != null)
+          ? animalData['row_number'].toString()
+          : null,
       shedId: shedData['id'] is int ? shedData['id'] : null,
       shedName: (shedData['shed_name'] ?? shedData['name'] ?? '').toString(),
       healthStatus: (animalData['health_status'] ?? kHyphen).toString(),
       animalType: (animalData['animal_type'] ?? 'Buffalo').toString(),
       breed: (animalData['breed_name'] ?? animalData['breed'] ?? 'Murrah')
           .toString(),
+      investorName: (investorData != null)
+          ? (investorData['full_name'] ?? investorData['name'])
+          : null,
+      earTag: animalData['ear_tag']?.toString(),
+      status: animalData['status']?.toString(),
       onboardedAt: animalData['onboarded_at'] != null
           ? DateTime.tryParse(animalData['onboarded_at'].toString())
           : null,
@@ -100,9 +128,15 @@ class InvestorAnimal {
       'shed_name': shedName,
       'shed_id': shedId,
       'animal_id': animalId,
+      'id': internalId, // useful for reconstruction if needed
       'images': images,
       'farm_name': farmName,
       'farm_location': farmLocation,
+      'parking_id': parkingId,
+      'row_number': rowNumber,
+      'investor_name': investorName,
+      'ear_tag': earTag,
+      'status': status,
       'health_status': healthStatus,
       'animal_type': animalType,
       'onboarded_at': onboardedAt?.toIso8601String(),
@@ -116,15 +150,22 @@ class InvestorAnimal {
     String? shedName,
     int? shedId,
     String? animalId,
+    int? internalId,
     List<String>? images,
     String? farmName,
     String? farmLocation,
+    String? parkingId,
+    String? rowNumber,
+    String? investorName,
+    String? earTag,
+    String? status,
     String? healthStatus,
     String? animalType,
     DateTime? onboardedAt,
   }) {
     return InvestorAnimal(
       animalId: animalId ?? this.animalId,
+      internalId: internalId ?? this.internalId,
       rfid: rfid ?? this.rfid,
       animalType: animalType ?? this.animalType,
       age: age ?? this.age,
@@ -134,6 +175,11 @@ class InvestorAnimal {
       images: images ?? this.images,
       farmName: farmName ?? this.farmName,
       farmLocation: farmLocation ?? this.farmLocation,
+      parkingId: parkingId ?? this.parkingId,
+      rowNumber: rowNumber ?? this.rowNumber,
+      investorName: investorName ?? this.investorName,
+      earTag: earTag ?? this.earTag,
+      status: status ?? this.status,
       healthStatus: healthStatus ?? this.healthStatus,
       onboardedAt: onboardedAt ?? this.onboardedAt,
     );

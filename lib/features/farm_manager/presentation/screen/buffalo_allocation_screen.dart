@@ -114,6 +114,30 @@ class _BuffaloAllocationScreenState
       previous,
       next,
     ) {
+      // Logic for Admin to auto-select farm from initialShedId response
+      if (authState.role == UserType.admin &&
+          selectedFarmId == null &&
+          selectedShedId != null &&
+          next.currentShedAvailability != null &&
+          next.currentShedAvailability!.farmDetails != null) {
+        final farmDetails = next.currentShedAvailability!.farmDetails!;
+        final farmId = farmDetails['id'] is int
+            ? farmDetails['id']
+            : int.tryParse(farmDetails['id'].toString());
+
+        if (farmId != null) {
+          setState(() {
+            selectedFarmId = farmId;
+          });
+          // Fetch sheds and animals for this discovered farm
+          // This allows the dropdowns to populate correctly
+          ref.read(farmManagerProvider.notifier).fetchSheds(farmId: farmId);
+          ref
+              .read(farmManagerProvider.notifier)
+              .fetchUnallocatedAnimals(farmId: farmId);
+        }
+      }
+
       if (selectedShedId == null && next.sheds.isNotEmpty && !next.isLoading) {
         final userShedId = int.tryParse(authState.userData?.shedId ?? '');
 
@@ -1069,8 +1093,8 @@ class _BuffaloAllocationScreenState
                 color: isBeingAllocated
                     ? AppTheme.secondary
                     : isTarget
-                    ? AppTheme
-                          .secondary // Highlight target with secondary color
+                    ? Colors
+                          .red // Highlight target with RED
                     : isOccupied
                     ? AppTheme.primary.withValues(alpha: 0.1)
                     : Colors.transparent,
@@ -1082,8 +1106,11 @@ class _BuffaloAllocationScreenState
                   ? [
                       BoxShadow(
                         color:
-                            (isBeingAllocated || isTarget
+                            (isBeingAllocated
                                     ? AppTheme.secondary
+                                    : isTarget
+                                    ? Colors
+                                          .red // RED shadow for target
                                     : AppTheme.primary)
                                 .withValues(
                                   alpha: 0.3,

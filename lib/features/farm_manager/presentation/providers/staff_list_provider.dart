@@ -1,3 +1,6 @@
+import 'package:farm_vest/core/services/animal_api_services.dart';
+import 'package:farm_vest/core/services/employee_api_services.dart';
+import 'package:farm_vest/core/services/farms_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -83,7 +86,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
       final token = prefs.getString('access_token');
       if (token == null) return null;
 
-      final farms = await ApiServices.getFarms(token: token);
+      final farms = await FarmsApiServices.getFarms(token: token);
       if (farms.isNotEmpty) {
         return farms.first.id;
       }
@@ -114,7 +117,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
       final token = prefs.getString('access_token');
       if (token == null) return [];
 
-      return await ApiServices.getStaff(token: token, role: 'DOCTOR');
+      return await AnimalApiServices.getStaff(token: token, role: 'DOCTOR');
     } catch (e) {
       return [];
     }
@@ -151,7 +154,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
         "is_test": false,
       };
 
-      final success = await ApiServices.createEmployee(
+      final success = await EmployeeApiServices.createEmployee(
         token: token,
         body: body,
       );
@@ -177,7 +180,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
       final token = prefs.getString('access_token');
       if (token == null) return false;
 
-      final success = await ApiServices.toggleEmployeeStatus(
+      final success = await EmployeeApiServices.toggleEmployeeStatus(
         token: token,
         mobile: mobile,
         isActive: isActive,
@@ -206,7 +209,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
       final token = prefs.getString('access_token');
       if (token == null) return false;
 
-      final success = await ApiServices.reassignEmployeeFarm(
+      final success = await EmployeeApiServices.reassignEmployeeFarm(
         token: token,
         staffId: staffId,
         newFarmId: newFarmId,

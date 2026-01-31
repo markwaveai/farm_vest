@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -102,16 +103,12 @@ class _SupervisorBuffaloScreenState
       body: animalsAsync.when(
         data: (animals) {
           final buffaloes = animals.where((a) {
-            final type =
-                a['animal_details']?['animal_type']?.toString().toLowerCase() ??
-                '';
+            final type = a.animalType?.toLowerCase() ?? '';
             return !type.contains('calf');
           }).toList();
 
           final calves = animals.where((a) {
-            final type =
-                a['animal_details']?['animal_type']?.toString().toLowerCase() ??
-                '';
+            final type = a.animalType?.toLowerCase() ?? '';
             return type.contains('calf');
           }).toList();
 
@@ -129,7 +126,7 @@ class _SupervisorBuffaloScreenState
     );
   }
 
-  Widget _buildAnimalList(List<dynamic> animals, String emptyMessage) {
+  Widget _buildAnimalList(List<InvestorAnimal> animals, String emptyMessage) {
     if (animals.isEmpty) {
       return Center(child: Text(emptyMessage));
     }
@@ -138,8 +135,6 @@ class _SupervisorBuffaloScreenState
       itemCount: animals.length,
       itemBuilder: (context, index) {
         final animal = animals[index];
-        final details = animal['animal_details'] ?? {};
-        final shed = animal['shed_details'] ?? {};
 
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
@@ -152,11 +147,11 @@ class _SupervisorBuffaloScreenState
               child: const Icon(Icons.pets, color: AppTheme.primary),
             ),
             title: Text(
-              details['rfid_tag_number']?.toString() ?? 'Unknown RFID',
+              animal.rfid ?? 'Unknown RFID',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-              'Tag: ${details['ear_tag'] ?? 'N/A'} | Shed: ${shed['shed_name'] ?? 'N/A'}',
+              'Tag: ${animal.earTag ?? 'N/A'} | Shed: ${animal.shedName ?? 'N/A'}',
               style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
             children: [
@@ -165,31 +160,20 @@ class _SupervisorBuffaloScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDetailRow('ID', details['animal_id']),
-                    _buildDetailRow('Breed', details['breed_name']),
-                    _buildDetailRow(
-                      'Age',
-                      '${details['age_months'] ?? 'N/A'} months',
-                    ),
-                    _buildDetailRow('Type', details['animal_type']),
-                    _buildDetailRow('Health', details['health_status']),
-                    _buildDetailRow('Status', details['status']),
-                    if (details['onboarded_at'] != null)
+                    _buildDetailRow('ID', animal.animalId),
+                    _buildDetailRow('Breed', animal.breed),
+                    _buildDetailRow('Age', '${animal.age ?? 'N/A'} months'),
+                    _buildDetailRow('Type', animal.animalType),
+                    _buildDetailRow('Health', animal.healthStatus),
+                    _buildDetailRow('Status', animal.status),
+                    if (animal.onboardedAt != null)
                       _buildDetailRow(
                         'Onboarded',
-                        DateFormat('dd MMM yyyy').format(
-                          DateTime.parse(details['onboarded_at'].toString()),
-                        ),
+                        DateFormat('dd MMM yyyy').format(animal.onboardedAt!),
                       ),
                     const Divider(),
-                    _buildDetailRow(
-                      'Farm',
-                      animal['farm_details']?['farm_name'],
-                    ),
-                    _buildDetailRow(
-                      'Investor',
-                      animal['investor_details']?['full_name'],
-                    ),
+                    _buildDetailRow('Farm', animal.farmName),
+                    _buildDetailRow('Investor', animal.investorName),
                   ],
                 ),
               ),

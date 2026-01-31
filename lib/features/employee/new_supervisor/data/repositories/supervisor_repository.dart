@@ -2,6 +2,8 @@ import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/core/services/api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
+import 'package:farm_vest/core/services/tickets_api_services.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SupervisorRepository {
@@ -27,9 +29,7 @@ class SupervisorRepository {
     return await ShedsApiServices.getUnallocatedAnimals(token: token);
   }
 
-  Future<List<Map<String, dynamic>>> searchAnimals({
-    String query = 'all',
-  }) async {
+  Future<List<InvestorAnimal>> searchAnimals({String query = 'all'}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
     if (token == null) {
@@ -140,7 +140,7 @@ class SupervisorRepository {
     if (token == null) {
       throw AuthException('Authentication token not found');
     }
-    final tickets = await ApiServices.getTickets(
+    final tickets = await TicketsApiServices.getTickets(
       token: token,
       status: status,
       ticketType: 'HEALTH',
@@ -157,7 +157,10 @@ class SupervisorRepository {
       throw AuthException('Authentication token not found');
     }
 
-    final success = await ApiServices.createTicket(token: token, body: body);
+    final success = await TicketsApiServices.createTicket(
+      token: token,
+      body: body,
+    );
     if (success) {
       return {'status': 'success', 'message': 'Ticket created successfully'};
     } else {
@@ -174,7 +177,7 @@ class SupervisorRepository {
       throw AuthException('Authentication token not found');
     }
 
-    final success = await ApiServices.createTransferTicket(
+    final success = await TicketsApiServices.createTransferTicket(
       token: token,
       body: body,
     );
@@ -191,7 +194,7 @@ class SupervisorRepository {
     if (token == null) {
       throw AuthException('Authentication token not found');
     }
-    final tickets = await ApiServices.getTransferTickets(
+    final tickets = await TicketsApiServices.getTransferTickets(
       token: token,
       status: 'PENDING',
     );
@@ -204,7 +207,7 @@ class SupervisorRepository {
     if (token == null) {
       throw AuthException('Authentication token not found');
     }
-    return await ApiServices.getTransferSummary(token: token);
+    return await TicketsApiServices.getTransferSummary(token: token);
   }
 
   Future<List<Map<String, dynamic>>> getSheds() async {

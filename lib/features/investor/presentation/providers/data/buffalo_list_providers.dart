@@ -24,7 +24,7 @@ final rawBuffaloListProvider = FutureProvider<List<InvestorAnimal>>((
     query: 'all', // Get everything initially
   );
 
-  return results.map((data) => InvestorAnimal.fromJson(data)).toList();
+  return results;
 });
 
 /// Provider for filtered buffalo list.

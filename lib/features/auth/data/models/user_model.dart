@@ -27,6 +27,8 @@ class UserModel {
   final String? shedId;
   final String? shedName;
 
+  final bool isActive;
+
   UserModel({
     required this.id,
     required this.mobile,
@@ -49,6 +51,7 @@ class UserModel {
     this.verified = false,
     this.otpVerified = false,
     this.isQuit = false,
+    this.isActive = true, // Default to true
     this.imageUrl,
     this.farmId,
     this.farmName,
@@ -65,8 +68,8 @@ class UserModel {
         parsedRoles = List<String>.from(json['roles'].map((e) => e.toString()));
       }
     } else if (json['role'] != null) {
-       // Fallback: if roles is missing but role exists, add it to list
-       parsedRoles = [json['role'].toString()];
+      // Fallback: if roles is missing but role exists, add it to list
+      parsedRoles = [json['role'].toString()];
     }
 
     return UserModel(
@@ -91,6 +94,7 @@ class UserModel {
       verified: json['verified'] ?? false,
       otpVerified: json['otp_verified'] ?? false,
       isQuit: json['isQuit'] ?? false,
+      isActive: json['is_active'] ?? true, // Map from is_active
       imageUrl: (json['imageUrl'] ?? json['image_url'])?.toString(),
       farmId: json['farm_id']?.toString(),
       farmName: json['farm_name']?.toString(),
@@ -123,6 +127,7 @@ class UserModel {
       'verified': verified,
       'otp_verified': otpVerified,
       'isQuit': isQuit,
+      'is_active': isActive,
       'image_url': imageUrl,
       'farm_id': farmId,
       'farm_name': farmName,
@@ -153,6 +158,7 @@ class UserModel {
     bool? isFormFilled,
     bool? verified,
     bool? otpVerified,
+    bool? isActive,
     String? imageUrl,
     String? farmId,
     String? farmName,
@@ -181,6 +187,7 @@ class UserModel {
       isFormFilled: isFormFilled ?? this.isFormFilled,
       verified: verified ?? this.verified,
       otpVerified: otpVerified ?? this.otpVerified,
+      isActive: isActive ?? this.isActive,
       imageUrl: imageUrl ?? this.imageUrl,
       farmId: farmId ?? this.farmId,
       farmName: farmName ?? this.farmName,
@@ -190,4 +197,3 @@ class UserModel {
     );
   }
 }
-

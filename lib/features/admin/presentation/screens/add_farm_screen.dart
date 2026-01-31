@@ -3,6 +3,7 @@ import 'package:farm_vest/core/widgets/primary_button.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:farm_vest/core/services/farms_api_services.dart';
 import '../providers/admin_provider.dart';
 
 class AddFarmScreen extends ConsumerStatefulWidget {
@@ -15,16 +16,43 @@ class AddFarmScreen extends ConsumerStatefulWidget {
 class _AddFarmScreenState extends ConsumerState<AddFarmScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  String _selectedLocation = 'KURNOOL';
+  String? _selectedLocation;
   bool _isTestAccount = false;
   bool _isFormValid = false;
 
-  final List<String> _locations = ['KURNOOL', 'HYDERABAD'];
+  List<String> _locations = [];
+  bool _isLoadingLocations = false;
 
   @override
   void initState() {
     super.initState();
     _nameController.addListener(_validateForm);
+    _fetchLocations();
+  }
+
+  Future<void> _fetchLocations() async {
+    setState(() => _isLoadingLocations = true);
+    try {
+      final locations = await FarmsApiServices.getFarmLocations();
+      if (mounted) {
+        setState(() {
+          _locations = locations;
+          if (_locations.isNotEmpty) {
+            _selectedLocation = _locations.first;
+          }
+          _isLoadingLocations = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingLocations = false;
+          // Fallback if API fails
+          _locations = ['KURNOOL', 'HYDERABAD'];
+          _selectedLocation = 'KURNOOL';
+        });
+      }
+    }
   }
 
   @override
@@ -36,7 +64,10 @@ class _AddFarmScreenState extends ConsumerState<AddFarmScreen> {
 
   void _validateForm() {
     final farmName = _nameController.text.trim();
-    final isValid = farmName.isNotEmpty && farmName.length >= 3;
+    final isValid =
+        farmName.isNotEmpty &&
+        farmName.length >= 3 &&
+        _selectedLocation != null;
 
     if (isValid != _isFormValid) {
       setState(() {
@@ -154,30 +185,48 @@ class _AddFarmScreenState extends ConsumerState<AddFarmScreen> {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.grey[300]!, width: 1),
                   ),
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedLocation,
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                    style: const TextStyle(
-                      color: AppTheme.dark,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    items: _locations
-                        .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                        .toList(),
-                    onChanged: (v) => setState(() => _selectedLocation = v!),
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(
-                        Icons.location_on_rounded,
-                        size: 20,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
+                  child: _isLoadingLocations
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        )
+                      : DropdownButtonFormField<String>(
+                          value: _selectedLocation,
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                          style: const TextStyle(
+                            color: AppTheme.dark,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          items: _locations
+                              .map(
+                                (s) =>
+                                    DropdownMenuItem(value: s, child: Text(s)),
+                              )
+                              .toList(),
+                          onChanged: (v) =>
+                              setState(() => _selectedLocation = v),
+                          hint: const Text('Select Location'),
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(
+                              Icons.location_on_rounded,
+                              size: 20,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                          validator: (v) =>
+                              v == null ? 'Please select a location' : null,
+                        ),
                 ),
                 const SizedBox(height: 32),
 
@@ -265,7 +314,7 @@ class _AddFarmScreenState extends ConsumerState<AddFarmScreen> {
                                 .read(adminProvider.notifier)
                                 .createFarm(
                                   name: _nameController.text.trim(),
-                                  location: _selectedLocation,
+                                  location: _selectedLocation!,
                                   isTest: _isTestAccount,
                                 );
                             if (success && mounted) {

@@ -1,7 +1,8 @@
 import 'dart:ui';
 import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-import 'package:farm_vest/core/services/api_services.dart';
+
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/farm_manager_provider.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/staff_list_provider.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
@@ -109,7 +110,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
 
   void _searchDialog(BuildContext context) {
     String query = "";
-    List<Map<String, dynamic>> results = [];
+    List<InvestorAnimal> results = [];
     bool isSearching = false;
 
     _baseDialog(
@@ -192,17 +193,10 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                     itemCount: results.length,
                     separatorBuilder: (_, __) => const Divider(height: 1),
                     itemBuilder: (context, index) {
-                      final item = results[index];
-                      final animal =
-                          item['animal_details'] as Map<String, dynamic>? ?? {};
-                      final shed =
-                          item['shed_details'] as Map<String, dynamic>? ?? {};
-                      final rfid =
-                          animal['rfid_tag_number'] ??
-                          animal['animal_id'] ??
-                          'N/A';
-                      final shedName = shed['shed_name'] ?? 'Not Allocated';
-                      final hasAllocation = animal['shed_id'] != null;
+                      final animal = results[index];
+                      final rfid = animal.rfid ?? animal.animalId;
+                      final shedName = animal.shedName ?? 'Not Allocated';
+                      final hasAllocation = animal.shedId != null;
 
                       return ListTile(
                         leading: CircleAvatar(
@@ -229,8 +223,8 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                             context.push(
                               '/buffalo-allocation',
                               extra: {
-                                'shedId': animal['shed_id'],
-                                'parkingId': animal['parking_id'],
+                                'shedId': animal.shedId,
+                                'parkingId': animal.parkingId,
                               },
                             );
                           }

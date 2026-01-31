@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:farm_vest/features/auth/data/models/user_model.dart';
 import '../providers/admin_provider.dart';
 
 class StaffManagementScreen extends ConsumerStatefulWidget {
@@ -494,19 +495,15 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
     // Apply client-side location filtering
     if (_selectedLocation != null) {
       staffList = staffList.where((s) {
-        final farmId = s['farm_id'];
-        if (farmId == null)
-          return true; // Keep staff without farm assignment? Or filter out? Usually better to keep if permissive.
-        // Actually, if filtering by location, staff without farm probably shouldn't be shown OR should be shown if location is 'Unassigned'
-        // Let's search if their farm matches.
+        final farmIdStr = s.farmId;
+        if (farmIdStr == null || farmIdStr.isEmpty) return true;
 
-        // We need efficient look up.
-        // Optimization: create a map of farm_id -> location? For now, list lookup is fine for N < 100.
         try {
+          final farmId = int.parse(farmIdStr);
           final farm = adminState.farms.firstWhere((f) => f.id == farmId);
           return farm.location == _selectedLocation;
         } catch (e) {
-          return false; // Farm not found, likely mismatch
+          return false;
         }
       }).toList();
     }
@@ -682,10 +679,18 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
 
     // Find the staff member to check their role
     final staff = allStaff.firstWhere(
-      (s) => s['id'] == staffId,
-      orElse: () => {},
+      (s) => s.id == staffId.toString(),
+      orElse: () => UserModel(
+        id: '',
+        mobile: '',
+        firstName: '',
+        lastName: '',
+        name: '',
+        email: '',
+        role: '',
+      ),
     );
-    final roles = (staff['roles'] as List?)?.cast<String>() ?? [];
+    final roles = staff.roles;
     final isSupervisor = roles.contains('SUPERVISOR');
 
     int? selectedFarmId;
@@ -794,9 +799,9 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
     );
   }
 
-  Widget _buildStaffTile(Map<String, dynamic> staff, int index) {
-    final roles = (staff['roles'] as List).cast<String>();
-    final isActive = staff['is_active'] ?? true;
+  Widget _buildStaffTile(UserModel staff, int index) {
+    final roles = staff.roles;
+    final isActive = staff.isActive;
     final roleDisplay = roles.isNotEmpty
         ? roles.map((r) => r.replaceAll('_', ' ')).join(', ')
         : 'No Role';
@@ -837,11 +842,9 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      staff['first_name']
-                              ?.toString()
-                              .substring(0, 1)
-                              .toUpperCase() ??
-                          'U',
+                      staff.firstName.isNotEmpty
+                          ? staff.firstName.substring(0, 1).toUpperCase()
+                          : 'U',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -860,7 +863,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              '${staff['first_name']} ${staff['last_name']}',
+                              '${staff.firstName} ${staff.lastName}',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -913,7 +916,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            staff['mobile'] ?? 'N/A',
+                            staff.mobile,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -921,7 +924,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                           ),
                         ],
                       ),
-                      if (staff['email'] != null)
+                      if (staff.email.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 2.0),
                           child: Row(
@@ -934,7 +937,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  staff['email']!,
+                                  staff.email,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
@@ -958,12 +961,14 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                       ),
                       onSelected: (value) async {
                         if (value == 'reassign') {
-                          _showReassignDialog(context, staff['id']);
+                          try {
+                            _showReassignDialog(context, int.parse(staff.id));
+                          } catch (_) {}
                         } else if (value == 'toggle_status') {
                           final success = await ref
                               .read(adminProvider.notifier)
                               .toggleEmployeeStatus(
-                                mobile: staff['mobile'],
+                                mobile: staff.mobile,
                                 isActive: !isActive,
                               );
                           if (success && mounted) {

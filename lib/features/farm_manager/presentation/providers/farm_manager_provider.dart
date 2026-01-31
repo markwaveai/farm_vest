@@ -1,5 +1,7 @@
+import 'package:farm_vest/core/services/employee_api_services.dart';
 import 'package:farm_vest/core/services/investor_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
+import 'package:farm_vest/core/services/tickets_api_services.dart';
 import 'package:farm_vest/features/auth/data/repositories/auth_repository.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,7 +40,9 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       final investorCount = investors.length;
 
       // 2. Fetch Staff Count
-      final employeesData = await ApiServices.getEmployees(token: token);
+      final employeesData = await EmployeeApiServices.getEmployees(
+        token: token,
+      );
       final totalStaff = employeesData.length;
 
       // 3. Fetch Pending Leaves
@@ -61,7 +65,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       //     .length;
 
       // 4. Fetch Pending Tickets
-      final ticketsData = await ApiServices.getTickets(
+      final ticketsData = await TicketsApiServices.getTickets(
         token: token,
         status: 'PENDING',
       );
@@ -505,7 +509,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
     final token = prefs.getString('access_token');
     if (token == null) throw Exception("Authentication token not found");
 
-    final response = await ApiServices.getTickets(
+    final response = await TicketsApiServices.getTickets(
       token: token,
       status: 'PENDING',
       ticketType: 'TRANSFER',
@@ -520,7 +524,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
     final token = prefs.getString('access_token');
     if (token == null) throw Exception("Authentication token not found");
 
-    await ApiServices.approveTransfer(token: token, ticketId: ticketId);
+    await TicketsApiServices.approveTransfer(token: token, ticketId: ticketId);
     await refreshDashboard();
   }
 
@@ -529,7 +533,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
     final token = prefs.getString('access_token');
     if (token == null) throw Exception("Authentication token not found");
 
-    await ApiServices.rejectTransfer(token: token, ticketId: ticketId);
+    await TicketsApiServices.rejectTransfer(token: token, ticketId: ticketId);
     await refreshDashboard();
   }
 }

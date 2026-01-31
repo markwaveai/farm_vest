@@ -4,6 +4,7 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_dashboard_provider.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -81,9 +82,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
             return const Center(child: Text('No animals found'));
           }
           final milkingAnimals = animals.where((a) {
-            final type =
-                a['animal_details']?['animal_type']?.toString().toLowerCase() ??
-                '';
+            final type = a.animalType?.toLowerCase() ?? '';
             return !type.contains('calf');
           }).toList();
 
@@ -91,11 +90,9 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
           final query = _searchController.text.trim().toLowerCase();
           final filteredAnimals = milkingAnimals.where((a) {
             if (query.isEmpty) return true;
-            final details = a['animal_details'];
-            final id = (details['animal_id'] ?? details['ear_tag'] ?? '')
-                .toString()
+            final id = (a.animalId.isNotEmpty ? a.animalId : a.earTag ?? '')
                 .toLowerCase();
-            final tag = (details['ear_tag'] ?? '').toString().toLowerCase();
+            final tag = (a.earTag ?? '').toLowerCase();
             return id.contains(query) || tag.contains(query);
           }).toList();
 
@@ -320,17 +317,20 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
     return (total / count).toStringAsFixed(2);
   }
 
-  Widget _buildDetailedList(List<Map<String, dynamic>> animals) {
+  Widget _buildDetailedList(List<InvestorAnimal> animals) {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: animals.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final animal = animals[index];
-        final details = animal['animal_details'];
-        final id = details['id'] as int;
-        final displayId = details['animal_id'] ?? details['ear_tag'] ?? 'N/A';
-        final breed = details['breed_name'] ?? 'Unknown';
+        final id =
+            animal.internalId ??
+            0; // Fallback to 0 if internalId is null, verify backend
+        final displayId = animal.animalId.isNotEmpty
+            ? animal.animalId
+            : animal.earTag ?? 'N/A';
+        final breed = animal.breed ?? 'Unknown';
 
         if (!_quantityControllers.containsKey(id)) {
           _quantityControllers[id] = TextEditingController();
@@ -406,7 +406,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
     );
   }
 
-  Widget _buildSubmitButton(List<Map<String, dynamic>> animals) {
+  Widget _buildSubmitButton(List<InvestorAnimal> animals) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
@@ -443,7 +443,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
     );
   }
 
-  Future<void> _submit(List<Map<String, dynamic>> animals) async {
+  Future<void> _submit(List<InvestorAnimal> animals) async {
     final dates = _getSelectedDates();
     if (dates.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -495,7 +495,8 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
       // Collect entries
       final perAnimalData = <int, String>{};
       for (final animal in animals) {
-        final id = animal['animal_details']['id'];
+        final id = animal.internalId;
+        if (id == null) continue; // Skip if no internal ID
         final txt = _quantityControllers[id]?.text.trim();
         if (txt != null && txt.isNotEmpty) {
           perAnimalData[id] = txt;

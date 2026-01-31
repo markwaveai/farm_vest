@@ -1,20 +1,27 @@
+import 'package:farm_vest/core/services/animal_api_services.dart';
+import 'package:farm_vest/core/services/employee_api_services.dart';
+import 'package:farm_vest/core/services/farms_api_services.dart';
 import 'package:farm_vest/core/services/investor_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
+import 'package:farm_vest/core/services/tickets_api_services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:farm_vest/core/error/exceptions.dart';
 import '../../../../core/services/api_services.dart';
 import 'package:farm_vest/features/farm_manager/data/models/farm_model.dart';
 import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
 import 'package:farm_vest/features/investor/data/models/investor_model.dart';
+import 'package:farm_vest/features/auth/data/models/user_model.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 
 class AdminState {
   final bool isLoading;
   final String? error;
   final List<Farm> farms;
-  final List<Map<String, dynamic>> staffList;
+  final List<UserModel> staffList;
   final List<Investor> investorList;
-  final List<Map<String, dynamic>> investorAnimals;
+  final List<InvestorAnimal> investorAnimals;
   final List<Ticket> tickets;
   final bool staffActiveFilter;
 
@@ -33,9 +40,9 @@ class AdminState {
     bool? isLoading,
     String? error,
     List<Farm>? farms,
-    List<Map<String, dynamic>>? staffList,
+    List<UserModel>? staffList,
     List<Investor>? investorList,
-    List<Map<String, dynamic>>? investorAnimals,
+    List<InvestorAnimal>? investorAnimals,
     List<Ticket>? tickets,
     bool? staffActiveFilter,
   }) {
@@ -67,7 +74,7 @@ class AdminNotifier extends Notifier<AdminState> {
         state = state.copyWith(isLoading: false, error: 'Token not found');
         return;
       }
-      final newFarms = await ApiServices.getFarms(
+      final newFarms = await FarmsApiServices.getFarms(
         token: token,
         query: query,
         page: page,
@@ -104,14 +111,37 @@ class AdminNotifier extends Notifier<AdminState> {
         state = state.copyWith(isLoading: false, error: 'Token not found');
         return;
       }
-      final staff = await ApiServices.getStaff(
-        token: token,
-        name: name,
-        role: role,
-        farmId: farmId,
-        isActive: isActive ?? state.staffActiveFilter,
-      );
-      state = state.copyWith(isLoading: false, staffList: staff);
+      List<Map<String, dynamic>> staffData;
+
+      // Handle "All" role check
+      final String? apiRole = (role != null && role.isNotEmpty && role != 'All')
+          ? role
+          : null;
+      final bool filterActive = isActive ?? state.staffActiveFilter;
+
+      if (name != null && name.trim().isNotEmpty) {
+        // Use search endpoint when specific name query provided
+        staffData = await AnimalApiServices.getStaff(
+          token: token,
+          name: name,
+          role: role,
+          farmId: farmId,
+          isActive: filterActive,
+        );
+      } else {
+        // Use get_all_employees endpoint for list filtering (supports farmId)
+        // Default page to 1, size to 100 to show more data for now
+        staffData = await EmployeeApiServices.getEmployees(
+          token: token,
+          role: apiRole,
+          farmId: farmId,
+          isActive: filterActive,
+          page: 1,
+          size: 100, // Fetch more items since pagination UI is basic
+        );
+      }
+      final staffModels = staffData.map((e) => UserModel.fromJson(e)).toList();
+      state = state.copyWith(isLoading: false, staffList: staffModels);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -128,7 +158,7 @@ class AdminNotifier extends Notifier<AdminState> {
       final token = prefs.getString('access_token');
       if (token == null) return false;
 
-      final success = await ApiServices.createFarm(
+      final success = await FarmsApiServices.createFarm(
         token: token,
         farmName: name,
         location: location,
@@ -249,7 +279,7 @@ class AdminNotifier extends Notifier<AdminState> {
       debugPrint("=== ADMIN PROVIDER: Adding Staff ===");
       debugPrint("Request Body: $body");
 
-      final success = await ApiServices.createEmployee(
+      final success = await EmployeeApiServices.createEmployee(
         token: token,
         body: body,
       );
@@ -258,26 +288,14 @@ class AdminNotifier extends Notifier<AdminState> {
       state = state.copyWith(isLoading: false, error: null);
       if (success) fetchStaff(); // Refresh staff list on success
       return success;
+    } on ServerException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+      return false;
+    } on NetworkException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+      return false;
     } catch (e) {
-      // Extract user-friendly error message
-      String errorMessage = 'Failed to add employee';
-
-      final errorStr = e.toString();
-      if (errorStr.contains('NetworkException')) {
-        errorMessage = 'No internet connection. Please check your network.';
-      } else if (errorStr.contains('ServerException')) {
-        // Extract the actual error message from ServerException
-        final match = RegExp(r'ServerException: (.+)').firstMatch(errorStr);
-        if (match != null && match.group(1) != null) {
-          errorMessage = match.group(1)!;
-        }
-      } else if (errorStr.contains('Unauthorized')) {
-        errorMessage = 'Session expired. Please login again.';
-      } else if (errorStr.contains('already exists')) {
-        errorMessage = 'An employee with this email or phone already exists.';
-      }
-
-      state = state.copyWith(isLoading: false, error: errorMessage);
+      state = state.copyWith(isLoading: false, error: e.toString());
       return false;
     }
   }
@@ -294,7 +312,7 @@ class AdminNotifier extends Notifier<AdminState> {
       final token = prefs.getString('access_token');
       if (token == null) return false;
 
-      final success = await ApiServices.reassignEmployeeFarm(
+      final success = await EmployeeApiServices.reassignEmployeeFarm(
         token: token,
         staffId: staffId,
         newFarmId: newFarmId,
@@ -324,7 +342,7 @@ class AdminNotifier extends Notifier<AdminState> {
       final token = prefs.getString('access_token');
       if (token == null) return false;
 
-      final success = await ApiServices.toggleEmployeeStatus(
+      final success = await EmployeeApiServices.toggleEmployeeStatus(
         token: token,
         mobile: mobile,
         isActive: isActive,
@@ -370,8 +388,7 @@ class AdminNotifier extends Notifier<AdminState> {
         token: token,
         investorId: investorId,
       );
-      final animals = response.data.map((e) => e.toJson()).toList();
-      state = state.copyWith(isLoading: false, investorAnimals: animals);
+      state = state.copyWith(isLoading: false, investorAnimals: response.data);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -390,7 +407,7 @@ class AdminNotifier extends Notifier<AdminState> {
         state = state.copyWith(isLoading: false, error: 'Token not found');
         return;
       }
-      final tickets = await ApiServices.getTickets(
+      final tickets = await TicketsApiServices.getTickets(
         token: token,
         ticketType: ticketType,
         status: status,
@@ -399,6 +416,45 @@ class AdminNotifier extends Notifier<AdminState> {
       state = state.copyWith(isLoading: false, tickets: tickets);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<bool> createTransferTicket({
+    required String rfidTag,
+    required String description,
+    required int destinationShedId,
+    String transferDirection = 'OUT',
+  }) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+      if (token == null) {
+        state = state.copyWith(isLoading: false, error: 'Token not found');
+        return false;
+      }
+
+      final body = {
+        "rfid_tag": rfidTag,
+        "ticket_type": "TRANSFER",
+        "description": description,
+        "transfer_direction": transferDirection,
+        "destination_shed_id": destinationShedId,
+      };
+
+      final success = await TicketsApiServices.createTicket(
+        token: token,
+        body: body,
+      );
+
+      state = state.copyWith(isLoading: false);
+      if (success) {
+        fetchTickets();
+      }
+      return success;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
     }
   }
 }
