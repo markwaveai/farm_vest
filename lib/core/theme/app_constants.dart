@@ -1,37 +1,48 @@
 // App constants
-import 'package:flutter/foundation.dart';
+
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const String kHyphen = '--';
 
 class AppConstants {
   static const String appName = 'FarmVest';
 
-  // Live and Staging URLs
-  static String get _defaultLiveUrl =>
+  static String stagingUrl =
+      'https://farmvest-staging-apis-jn6cma3vvq-el.a.run.app/api';
+  static String liveUrl =
       'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
-  static String get _defaultLocalUrl =>
-      'http://10.0.2.2:8000/api'; // Use 'http://10.0.2.2:8000/api' for Android Emulator or your local IP (e.g., 'http://192.168.1.XX:8000/api') for physical devices.
 
   static String animalKartStagingApiUrl =
       'https://animalkart-stagging-jn6cma3vvq-el.a.run.app';
-
   static String animalKartApiUrl =
       'https://animalkart-live-apis-jn6cma3vvq-el.a.run.app';
 
-  // static String appLiveUrl =
-  //     'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
-  static String appLiveUrl = 'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
-  
-  // static const String corsProxyUrl =
-  //     'https://cors-612299373064.asia-south1.run.app';
-  // static const Map<String, String> corsProxyHeaders = {
-  //   'X-Requested-With': 'XMLHttpRequest',
-  // };
+  static String appLiveUrl = liveUrl;
+  static String visitApiUrl = appLiveUrl;
+
   static const String authApiKey =
       'bWFya3dhdmUtZmFybXZlc3QtdGVzdHRpbmctYXBpa2V5';
 
-  static String visitApiUrl = appLiveUrl;
+  static void useStaging() {
+    appLiveUrl = stagingUrl;
+    visitApiUrl = stagingUrl;
+  }
+
+  static void useLive() {
+    appLiveUrl = liveUrl;
+    visitApiUrl = liveUrl;
+  }
+
+  static Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    final useStagingFlag = prefs.getBool('use_staging') ?? false;
+    if (useStagingFlag) {
+      useStaging();
+    } else {
+      useLive();
+    }
+  }
 
   static String storageBucketName = 'gs://markwave-481315.firebasestorage.app';
   static const String poweredBy = 'Powered by MarkWave';
@@ -77,7 +88,7 @@ class AppConstants {
       final raw = value.toString();
       final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
       amount = num.tryParse(cleaned);
-    } 
+    }
 
     if (amount == null) return '₹0';
 

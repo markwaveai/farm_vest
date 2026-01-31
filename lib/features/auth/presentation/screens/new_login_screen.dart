@@ -10,7 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinput/pinput.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
+import '../../../../core/theme/app_constants.dart';
 
 class NewLoginScreen extends ConsumerStatefulWidget {
   const NewLoginScreen({super.key});
@@ -27,6 +29,8 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   List<UserType> _availableRoles = [];
   Timer? _timer;
   int _remainingSeconds = 24;
+  int _logoTapCount = 0;
+  Timer? _tapResetTimer;
 
   @override
   void dispose() {
@@ -193,6 +197,86 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     }
   }
 
+  void _handleLogoTap() {
+    _tapResetTimer?.cancel();
+    _logoTapCount++;
+    if (_logoTapCount >= 5) {
+      _logoTapCount = 0;
+      _showDeveloperCodeDialog();
+    } else {
+      _tapResetTimer = Timer(const Duration(seconds: 2), () {
+        _logoTapCount = 0;
+      });
+    }
+  }
+
+  void _showDeveloperCodeDialog() {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Developer Mode'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          obscureText: true,
+          decoration: const InputDecoration(hintText: 'Enter Developer Code'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (controller.text == '5963') {
+                Navigator.pop(context);
+                _showEnvironmentSelection();
+              } else {
+                ToastUtils.showError(context, 'Invalid Code');
+              }
+            },
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEnvironmentSelection() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Environment'),
+        content: const Text('Choose which server to connect to:'),
+        actions: [
+          TextButton(
+            onPressed: () => _switchEnvironment(false),
+            child: const Text('LIVE'),
+          ),
+          TextButton(
+            onPressed: () => _switchEnvironment(true),
+            child: const Text('STAGING (Testing)'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _switchEnvironment(bool isStaging) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('use_staging', isStaging);
+
+    if (isStaging) {
+      AppConstants.useStaging();
+      if (mounted) ToastUtils.showSuccess(context, 'Switched to STAGING');
+    } else {
+      AppConstants.useLive();
+      if (mounted) ToastUtils.showSuccess(context, 'Switched to LIVE');
+    }
+    if (mounted) Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -280,14 +364,18 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                         ),
                       ],
                     ),
-                    child: Image.asset(
-                      'assets/images/farmvest_logo.png',
-                      height: 100,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.agriculture,
-                        size: 100,
-                        color: AppTheme.white,
+                    child: GestureDetector(
+                      onTap: _handleLogoTap,
+                      child: Image.asset(
+                        'assets/images/farmvest_logo.png',
+                        height: 100,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.agriculture,
+                              size: 100,
+                              color: AppTheme.white,
+                            ),
                       ),
                     ),
                   ),

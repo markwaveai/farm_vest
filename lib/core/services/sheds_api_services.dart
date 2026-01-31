@@ -23,6 +23,11 @@ class ShedsApiServices {
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
 
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
       print("Shed List Status: ${response.statusCode}");
       if (response.statusCode == 200) {
         print("Shed List Body: ${response.body}");
@@ -156,6 +161,11 @@ class ShedsApiServices {
         Uri.parse(url),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
+
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

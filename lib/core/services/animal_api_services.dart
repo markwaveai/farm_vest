@@ -8,6 +8,8 @@ import 'package:farm_vest/features/investor/data/models/investor_animal_model.da
 import 'package:http/http.dart' as http;
 
 class AnimalApiServices {
+  static VoidCallback? onUnauthorized;
+
   static Future<List<InvestorAnimal>> searchAnimals({
     required String token,
     required String query,
@@ -31,6 +33,11 @@ class AnimalApiServices {
         uri,
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
+
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

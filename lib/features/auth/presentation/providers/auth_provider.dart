@@ -69,6 +69,8 @@ class AuthController extends Notifier<AuthState> {
   final ImagePicker _picker = ImagePicker();
   @override
   AuthState build() {
+    // Load session from storage on initialization
+    Future.microtask(() => checkLoginStatus());
     return AuthState();
   }
 
@@ -159,11 +161,19 @@ class AuthController extends Notifier<AuthState> {
         availableRoles: availableRoles,
       );
 
+      // Fetch user data immediately after login to populate the session
+      try {
+        final userData = await _repository.getUserData(mobileNumber);
+        state = state.copyWith(userData: userData);
+      } catch (e) {
+        debugPrint("Error fetching user data after login: $e");
+      }
+
       await _repository.saveUserSession(
         mobile: mobileNumber,
         roles: availableRoles,
         activeRole: role,
-        userData: null,
+        userData: state.userData,
       );
 
       return {'roles': availableRoles, 'userData': null};
@@ -210,6 +220,11 @@ class AuthController extends Notifier<AuthState> {
         role: session['activeRole'],
         userData: session['userData'],
       );
+
+      // If userData is still null, try refreshing it once
+      if (state.userData == null && state.mobileNumber != null) {
+        refreshUserData();
+      }
     }
   }
 

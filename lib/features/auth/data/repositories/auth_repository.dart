@@ -217,6 +217,10 @@ class AuthRepository {
 
   Future<void> clearSession() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await prefs.remove('access_token');
+    await prefs.remove('mobile_number');
+    await prefs.remove('user_roles');
+    await prefs.remove('active_role');
+    await prefs.remove('user_data');
   }
 }

@@ -6,8 +6,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:farm_vest/core/services/auth_api_services.dart';
+import 'package:farm_vest/core/services/animal_api_services.dart';
+import 'package:farm_vest/core/services/sheds_api_services.dart';
+import 'package:farm_vest/core/services/tickets_api_services.dart';
 import 'package:farm_vest/core/services/api_services.dart';
+
 import 'package:farm_vest/core/router/app_router.dart';
+import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/theme/theme_provider.dart';
 import 'package:farm_vest/core/widgets/biometric_lock_screen.dart';
@@ -16,13 +22,23 @@ import 'package:farm_vest/core/services/remote_config_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppConstants.initialize();
 
   ApiServices.onUnauthorized = () async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Clear all user data
+    await prefs.remove('access_token');
+    await prefs.remove('mobile_number');
+    await prefs.remove('user_roles');
+    await prefs.remove('active_role');
+    await prefs.remove('user_data');
     print('here we logout unauthorised');
     AppRouter.router.go('/login');
   };
+
+  AuthApiServices.onUnauthorized = ApiServices.onUnauthorized;
+  AnimalApiServices.onUnauthorized = ApiServices.onUnauthorized;
+  ShedsApiServices.onUnauthorized = ApiServices.onUnauthorized;
+  TicketsApiServices.onUnauthorized = ApiServices.onUnauthorized;
 
   if (Firebase.apps.isEmpty) {
     try {
@@ -74,7 +90,7 @@ Future<void> main() async {
   // await RemoteConfigService.seedDefaultConfig();
 
   // Initialize Remote Config (URLs & Version)
-  // await RemoteConfigService.initialize();
+  await RemoteConfigService.initialize();
 
   runApp(
     DevicePreview(

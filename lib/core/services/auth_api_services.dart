@@ -123,6 +123,11 @@ class AuthApiServices {
 
       final response = await http.get(uri, headers: headers);
 
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success' && data['user'] != null) {
@@ -163,6 +168,11 @@ class AuthApiServices {
         headers: headers,
         body: jsonEncode(body),
       );
+
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

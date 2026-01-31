@@ -40,30 +40,24 @@ class RemoteConfigService {
     final String? akLiveUrl = data['animalkart_live_url'];
     final String? akStagingUrl = data['animalkart_staging_url'];
 
-    // Update URLs based on build mode
-    if (kReleaseMode) {
-      // Production Mode
-      if (liveUrl != null && liveUrl.isNotEmpty) {
-        AppConstants.appLiveUrl = liveUrl;
-        debugPrint("Updated AppLiveUrl (Prod): $liveUrl");
-      }
-      if (akLiveUrl != null && akLiveUrl.isNotEmpty) {
-        AppConstants.animalKartApiUrl = akLiveUrl;
-      }
-    } else {
-      // Debug/Profile Mode - Prefer Staging
-      if (stagingUrl != null && stagingUrl.isNotEmpty) {
-        AppConstants.appLiveUrl = stagingUrl;
-        debugPrint("Updated AppLiveUrl (Staging): $stagingUrl");
-      } else if (liveUrl != null && liveUrl.isNotEmpty) {
-        // Fallback to live URL from config if staging not set
-        AppConstants.appLiveUrl = liveUrl;
-      }
+    debugPrint("Firebase Config - Live: $liveUrl, Staging: $stagingUrl");
 
-      if (akStagingUrl != null && akStagingUrl.isNotEmpty) {
-        AppConstants.animalKartStagingApiUrl = akStagingUrl;
-      }
+    // Update the base source URLs in AppConstants
+    if (liveUrl != null && liveUrl.isNotEmpty) {
+      AppConstants.liveUrl = liveUrl;
     }
+    if (stagingUrl != null && stagingUrl.isNotEmpty) {
+      AppConstants.stagingUrl = stagingUrl;
+    }
+    if (akLiveUrl != null && akLiveUrl.isNotEmpty) {
+      AppConstants.animalKartApiUrl = akLiveUrl;
+    }
+    if (akStagingUrl != null && akStagingUrl.isNotEmpty) {
+      AppConstants.animalKartStagingApiUrl = akStagingUrl;
+    }
+
+    // Re-apply the user's selected environment using the new base URLs
+    AppConstants.initialize();
   }
 
   static Future<void> _checkVersion(Map<String, dynamic> data) async {

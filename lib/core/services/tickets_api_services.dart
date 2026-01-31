@@ -9,6 +9,8 @@ import 'package:http/http.dart' as http;
 import '../../features/admin/data/models/ticket_model.dart';
 
 class TicketsApiServices {
+  static VoidCallback? onUnauthorized;
+
   static Future<List<Ticket>> getTickets({
     required String token,
     String? status,
@@ -32,6 +34,10 @@ class TicketsApiServices {
         Uri.parse(url),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -56,6 +62,11 @@ class TicketsApiServices {
         Uri.parse(url),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
+
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
