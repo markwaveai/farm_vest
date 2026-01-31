@@ -15,6 +15,7 @@ class InvestorAnimal {
   final int? shedId;
   final String? shedName;
   final String? animalType;
+  final String? breed;
 
   /// Name of the farm where the animal is located
   final String? farmName;
@@ -24,6 +25,9 @@ class InvestorAnimal {
 
   /// Current health status of the animal
   final String healthStatus;
+
+  /// Date when the animal was onboarded
+  final DateTime? onboardedAt;
 
   /// Creates an instance of [InvestorAnimal].
   const InvestorAnimal({
@@ -38,6 +42,8 @@ class InvestorAnimal {
     this.farmLocation,
     required this.shedId,
     required this.healthStatus,
+    this.breed,
+    this.onboardedAt,
   });
 
   /// Creates an [InvestorAnimal] from JSON data.
@@ -78,6 +84,11 @@ class InvestorAnimal {
       shedName: (shedData['shed_name'] ?? shedData['name'] ?? '').toString(),
       healthStatus: (animalData['health_status'] ?? kHyphen).toString(),
       animalType: (animalData['animal_type'] ?? 'Buffalo').toString(),
+      breed: (animalData['breed_name'] ?? animalData['breed'] ?? 'Murrah')
+          .toString(),
+      onboardedAt: animalData['onboarded_at'] != null
+          ? DateTime.tryParse(animalData['onboarded_at'].toString())
+          : null,
     );
   }
 
@@ -86,13 +97,15 @@ class InvestorAnimal {
     return {
       'rfid': rfid,
       'age': age,
-      'shed_name': shedId,
+      'shed_name': shedName,
+      'shed_id': shedId,
       'animal_id': animalId,
       'images': images,
       'farm_name': farmName,
       'farm_location': farmLocation,
       'health_status': healthStatus,
       'animal_type': animalType,
+      'onboarded_at': onboardedAt?.toIso8601String(),
     };
   }
 
@@ -108,6 +121,7 @@ class InvestorAnimal {
     String? farmLocation,
     String? healthStatus,
     String? animalType,
+    DateTime? onboardedAt,
   }) {
     return InvestorAnimal(
       animalId: animalId ?? this.animalId,
@@ -121,6 +135,7 @@ class InvestorAnimal {
       farmName: farmName ?? this.farmName,
       farmLocation: farmLocation ?? this.farmLocation,
       healthStatus: healthStatus ?? this.healthStatus,
+      onboardedAt: onboardedAt ?? this.onboardedAt,
     );
   }
 
@@ -160,11 +175,17 @@ class InvestorAnimalsResponse {
   /// List of investor animals
   final List<InvestorAnimal> data;
 
+  /// Parent animal information (if applicable, e.g., from get_calves)
+  final String? parentAnimalId;
+  final String? parentRfid;
+
   /// Creates an instance of [InvestorAnimalsResponse].
   const InvestorAnimalsResponse({
     required this.status,
     required this.count,
     required this.data,
+    this.parentAnimalId,
+    this.parentRfid,
   });
 
   /// Creates an [InvestorAnimalsResponse] from JSON data.
@@ -181,6 +202,8 @@ class InvestorAnimalsResponse {
     return InvestorAnimalsResponse(
       status: json['status'] as String? ?? 'success',
       count: json['count'] as int? ?? 0,
+      parentAnimalId: json['parent_animal_id']?.toString(),
+      parentRfid: json['parent_rfid']?.toString(),
       data:
           (json['data'] as List<dynamic>?)
               ?.map((e) => InvestorAnimal.fromJson(e as Map<String, dynamic>))
@@ -194,6 +217,8 @@ class InvestorAnimalsResponse {
     return {
       'status': status,
       'count': count,
+      'parent_animal_id': parentAnimalId,
+      'parent_rfid': parentRfid,
       'data': data.map((e) => e.toJson()).toList(),
     };
   }

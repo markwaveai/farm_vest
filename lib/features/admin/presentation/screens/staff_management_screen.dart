@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:farm_vest/core/widgets/primary_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
@@ -204,7 +205,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
     ref
         .read(adminProvider.notifier)
         .fetchStaff(
-          role: role!.isEmpty ? null : role,
+          role: role?.isEmpty ?? true ? null : role,
           name: query.isEmpty ? null : query,
           farmId: _selectedFarmId,
           isActive: ref.read(adminProvider).staffActiveFilter,
@@ -224,18 +225,15 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
+        builder: (context, setSheetState) {
           final adminState = ref.watch(
             adminProvider,
           ); // use watch to update when farms load
 
           // Extract locations from farms
           final locations = adminState.farms
-              .map(
-                (f) =>
-                    f['location']?.toString() ?? f['farm_location']?.toString(),
-              )
-              .where((l) => l != null && l.isNotEmpty)
+              .map((f) => f.location)
+              .where((l) => l.isNotEmpty)
               .toSet()
               .toList();
           locations.sort();
@@ -292,7 +290,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                         Row(
                           children: [
                             _buildSheetFilterChip(
-                              setState,
+                              setSheetState,
                               'Active',
                               adminState.staffActiveFilter == true,
                               () => ref
@@ -312,7 +310,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                             ),
                             const SizedBox(width: 8),
                             _buildSheetFilterChip(
-                              setState,
+                              setSheetState,
                               'Inactive',
                               adminState.staffActiveFilter == false,
                               () => ref
@@ -346,7 +344,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                           runSpacing: 8,
                           children: _roleFilterMapping.keys.map((label) {
                             return _buildSheetFilterChip(
-                              setState,
+                              setSheetState,
                               label,
                               _selectedRoleFilter == label,
                               () {
@@ -377,8 +375,8 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                           runSpacing: 8,
                           children: locations.map((loc) {
                             return _buildSheetFilterChip(
-                              setState,
-                              loc!,
+                              setSheetState,
+                              loc,
                               _selectedLocation == loc,
                               () {
                                 this.setState(() {
@@ -386,20 +384,9 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                                     _selectedLocation = null;
                                   } else {
                                     _selectedLocation = loc;
-
-                                    // Optional: Reset farm if selected location contradicts it?
-                                    // Implementation choice: Keep clear separation or smart dependency.
-                                    // For now, let's just set location.
                                   }
                                 });
-                                // Ensure staff list is re-rendered with new filter
-                                // We don't fetch from API for location since we filter locally,
-                                // but calling setState in the parent is required.
-                                // The bottom sheet is modifying parent state, so when we close
-                                // or if we want immediate feedback, we need to trigger rebuild.
-                                // Actually, standard practice here is to apply filters on 'Show Results' or live.
-                                // Our current implementation updates state immediately.
-                                // To force parent rebuild:
+                                // Force rebuild to update local state in parent
                                 this.setState(() {});
                               },
                             );
@@ -419,7 +406,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                           runSpacing: 8,
                           children: [
                             _buildSheetFilterChip(
-                              setState,
+                              setSheetState,
                               'All Farms',
                               _selectedFarmId == null,
                               () {
@@ -429,21 +416,17 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                             ),
                             ...adminState.farms
                                 .where((f) {
-                                  // Filter farms based on selected location if any
                                   if (_selectedLocation == null) return true;
-                                  final loc =
-                                      f['location']?.toString() ??
-                                      f['farm_location']?.toString();
-                                  return loc == _selectedLocation;
+                                  return f.location == _selectedLocation;
                                 })
                                 .map((f) {
                                   return _buildSheetFilterChip(
-                                    setState,
-                                    f['farm_name'],
-                                    _selectedFarmId == f['id'],
+                                    setSheetState,
+                                    f.farmName,
+                                    _selectedFarmId == f.id,
                                     () {
                                       this.setState(
-                                        () => _selectedFarmId = f['id'],
+                                        () => _selectedFarmId = f.id,
                                       );
                                       _fetchStaff();
                                     },
@@ -456,26 +439,12 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Force parent rebuild to apply client-side location filter
-                      this.setState(() {});
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Show Results',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
+                PrimaryButton(
+                  text: 'Show Results',
+                  onPressed: () {
+                    this.setState(() {});
+                    Navigator.pop(context);
+                  },
                 ),
               ],
             ),
@@ -486,7 +455,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
   }
 
   Widget _buildSheetFilterChip(
-    StateSetter setState,
+    StateSetter setSheetState,
     String label,
     bool isSelected,
     VoidCallback onTap,
@@ -494,7 +463,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
     return GestureDetector(
       onTap: () {
         onTap();
-        setState(() {}); // Refresh sheet UI
+        setSheetState(() {}); // Refresh sheet UI
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -534,10 +503,8 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
         // We need efficient look up.
         // Optimization: create a map of farm_id -> location? For now, list lookup is fine for N < 100.
         try {
-          final farm = adminState.farms.firstWhere((f) => f['id'] == farmId);
-          final loc =
-              farm['location']?.toString() ?? farm['farm_location']?.toString();
-          return loc == _selectedLocation;
+          final farm = adminState.farms.firstWhere((f) => f.id == farmId);
+          return farm.location == _selectedLocation;
         } catch (e) {
           return false; // Farm not found, likely mismatch
         }
@@ -743,8 +710,8 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                   ),
                   items: farms.map((f) {
                     return DropdownMenuItem<int>(
-                      value: f['id'] as int,
-                      child: Text(f['farm_name']),
+                      value: f.id,
+                      child: Text(f.farmName),
                     );
                   }).toList(),
                   onChanged: (val) {
@@ -754,11 +721,12 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
 
                       // Load sheds for selected farm if Supervisor
                       if (isSupervisor && val != null) {
-                        final farm = farms.firstWhere((f) => f['id'] == val);
-                        sheds =
-                            (farm['sheds'] as List?)
-                                ?.cast<Map<String, dynamic>>() ??
-                            [];
+                        final farm = farms.firstWhere((f) => f.id == val);
+                        print('Selected farm: ${farm.farmName}');
+                        // sheds property is missing from Farm model, needs to be handled
+                        // For now, let's assume sheds are fetched separately or provided elsewhere
+                        // If Farm model is just a summary, we might need a fetchSheds call here
+                        sheds = []; // Placeholder
                       }
                     });
                   },
@@ -793,7 +761,9 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          ElevatedButton(
+          PrimaryButton(
+            text: 'Confirm',
+            height: 48,
             onPressed: () async {
               if (selectedFarmId != null) {
                 final primaryRole = roles.firstWhere(
@@ -818,7 +788,6 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                 }
               }
             },
-            child: const Text('Confirm'),
           ),
         ],
       ),

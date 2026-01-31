@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/admin/presentation/providers/admin_provider.dart';
+import 'package:farm_vest/features/farm_manager/data/models/farm_model.dart';
 
 class FarmSelectorInput extends ConsumerStatefulWidget {
   final int? selectedFarmId;
@@ -24,11 +25,11 @@ class _FarmSelectorInputState extends ConsumerState<FarmSelectorInput> {
   @override
   Widget build(BuildContext context) {
     final adminState = ref.watch(adminProvider);
-    final selectedFarm = adminState.farms.firstWhere(
-      (f) => f['id'] == widget.selectedFarmId,
-      orElse: () => {},
+    final Farm? selectedFarm = adminState.farms.cast<Farm?>().firstWhere(
+      (f) => f?.id == widget.selectedFarmId,
+      orElse: () => null,
     );
-    final selectedName = selectedFarm['farm_name'] as String? ?? '';
+    final selectedName = selectedFarm?.farmName ?? '';
 
     return InkWell(
       onTap: () => _showSelectionSheet(context),
@@ -222,20 +223,20 @@ class _FarmSelectionSheetState extends ConsumerState<FarmSelectionSheet> {
                             final farm = state.farms[index];
                             return ListTile(
                               title: Text(
-                                farm['farm_name'] ?? 'Unknown',
+                                farm.farmName,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               subtitle: Text(
-                                farm['location'] ?? '',
+                                farm.location,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey[600],
                                 ),
                               ),
                               onTap: () {
-                                Navigator.pop(context, farm['id']);
+                                Navigator.pop(context, farm.id);
                               },
                             );
                           },

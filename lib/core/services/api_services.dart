@@ -4,6 +4,9 @@ import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../theme/app_constants.dart';
+import 'package:farm_vest/features/farm_manager/data/models/farm_model.dart';
+import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
+// Removed unused import
 
 class ApiServices {
   // Global callback for handling unauthorized access
@@ -362,7 +365,7 @@ class ApiServices {
   /*                                Farm & Shed APIs                              */
   /* -------------------------------------------------------------------------- */
 
-  static Future<List<Map<String, dynamic>>> getFarms({
+  static Future<List<Farm>> getFarms({
     required String token,
     String? query,
     int? page,
@@ -388,7 +391,9 @@ class ApiServices {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['data']);
+        return (data['data'] as List<dynamic>)
+            .map((e) => Farm.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       throw ServerException(
         'Failed to load farms',
@@ -580,7 +585,7 @@ class ApiServices {
   /*                               Ticket & Transfer APIs                       */
   /* -------------------------------------------------------------------------- */
 
-  static Future<List<Map<String, dynamic>>> getTickets({
+  static Future<List<Ticket>> getTickets({
     required String token,
     String? status,
     String? ticketType,
@@ -606,7 +611,9 @@ class ApiServices {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['data']);
+        return (data['data'] as List<dynamic>)
+            .map((e) => Ticket.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       return [];
     } catch (e) {
@@ -614,7 +621,7 @@ class ApiServices {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getTransferTickets({
+  static Future<List<Ticket>> getTransferTickets({
     required String token,
     String status = 'PENDING',
   }) async {
@@ -628,7 +635,9 @@ class ApiServices {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['data']);
+        return (data['data'] as List<dynamic>)
+            .map((e) => Ticket.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       return [];
     } catch (e) {

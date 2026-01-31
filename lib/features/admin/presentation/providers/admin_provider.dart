@@ -4,15 +4,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/api_services.dart';
+import 'package:farm_vest/features/farm_manager/data/models/farm_model.dart';
+import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
+import 'package:farm_vest/features/investor/data/models/investor_model.dart';
 
 class AdminState {
   final bool isLoading;
   final String? error;
-  final List<Map<String, dynamic>> farms;
+  final List<Farm> farms;
   final List<Map<String, dynamic>> staffList;
-  final List<Map<String, dynamic>> investorList;
+  final List<Investor> investorList;
   final List<Map<String, dynamic>> investorAnimals;
-  final List<Map<String, dynamic>> tickets;
+  final List<Ticket> tickets;
   final bool staffActiveFilter;
 
   AdminState({
@@ -29,11 +32,11 @@ class AdminState {
   AdminState copyWith({
     bool? isLoading,
     String? error,
-    List<Map<String, dynamic>>? farms,
+    List<Farm>? farms,
     List<Map<String, dynamic>>? staffList,
-    List<Map<String, dynamic>>? investorList,
+    List<Investor>? investorList,
     List<Map<String, dynamic>>? investorAnimals,
-    List<Map<String, dynamic>>? tickets,
+    List<Ticket>? tickets,
     bool? staffActiveFilter,
   }) {
     return AdminState(

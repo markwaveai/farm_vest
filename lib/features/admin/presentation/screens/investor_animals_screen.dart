@@ -1,8 +1,10 @@
 import 'package:farm_vest/core/services/animal_api_services.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_theme.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import '../providers/admin_provider.dart';
 
 class InvestorAnimalsScreen extends ConsumerStatefulWidget {
@@ -77,7 +79,7 @@ class _InvestorAnimalsScreenState extends ConsumerState<InvestorAnimalsScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _showCalvesDialog(animal['rfid'], animal['animal_id']),
+          onTap: () => _showCalvesDialog(animal['animal_id']),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -163,6 +165,25 @@ class _InvestorAnimalsScreenState extends ConsumerState<InvestorAnimalsScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 4),
+                      if (animal['onboarded_at'] != null)
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.event_available,
+                              size: 14,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Onboarded: ${DateFormat('dd MMM yyyy').format(DateTime.parse(animal['onboarded_at']))}',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -197,10 +218,12 @@ class _InvestorAnimalsScreenState extends ConsumerState<InvestorAnimalsScreen> {
     );
   }
 
-  Future<void> _showCalvesDialog(String? rfid, String? animalId) async {
-    if (rfid == null) {
+  Future<void> _showCalvesDialog(String? animalId) async {
+    if (animalId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No RFID available for this animal')),
+        const SnackBar(
+          content: Text('No Animal ID available for this buffalo'),
+        ),
       );
       return;
     }
@@ -210,8 +233,8 @@ class _InvestorAnimalsScreenState extends ConsumerState<InvestorAnimalsScreen> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Calf Details'),
-          content: FutureBuilder<List<Map<String, dynamic>>>(
-            future: _fetchCalves(rfid, animalId),
+          content: FutureBuilder<List<InvestorAnimal>>(
+            future: _fetchCalves(animalId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SizedBox(
@@ -235,29 +258,12 @@ class _InvestorAnimalsScreenState extends ConsumerState<InvestorAnimalsScreen> {
                   separatorBuilder: (c, i) => const Divider(),
                   itemBuilder: (context, index) {
                     final calf = calves[index];
-                    // Handle nested structures if API returns simplified or full user view
-                    // The getCalves API might return flat or nested data, let's allow for both by checking keys
-                    // Typically similar to search_animal response
 
-                    // Helper to get nested value
-                    dynamic getValue(String key) {
-                      if (calf['animal_details'] != null &&
-                          calf['animal_details'][key] != null) {
-                        return calf['animal_details'][key];
-                      }
-                      return calf[key];
-                    }
-
-                    final calfRfid =
-                        getValue('rfid_tag_number') ??
-                        getValue('rfid') ??
-                        'N/A';
-                    final calfId =
-                        getValue('animal_id') ?? getValue('id') ?? 'N/A';
-                    final calfAge =
-                        getValue('age_months') ?? getValue('age') ?? 0;
-                    final calfHealth = getValue('health_status') ?? 'Unknown';
-                    final calfType = getValue('animal_type') ?? 'Calf';
+                    final calfRfid = calf.rfid ?? 'N/A';
+                    final calfId = calf.animalId;
+                    final calfAge = calf.age ?? 0;
+                    final calfHealth = calf.healthStatus;
+                    final calfType = calf.animalType ?? 'Calf';
 
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
@@ -275,6 +281,14 @@ class _InvestorAnimalsScreenState extends ConsumerState<InvestorAnimalsScreen> {
                         children: [
                           Text('ID: $calfId'),
                           Text('Age: $calfAge Months | Type: $calfType'),
+                          if (calf.onboardedAt != null)
+                            Text(
+                              'Onboarded: ${DateFormat('dd MMM yyyy').format(calf.onboardedAt!)}',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                            ),
                         ],
                       ),
                       trailing: Container(
@@ -314,20 +328,17 @@ class _InvestorAnimalsScreenState extends ConsumerState<InvestorAnimalsScreen> {
     );
   }
 
-  Future<List<Map<String, dynamic>>> _fetchCalves(
-    String rfid,
-    String? animalId,
-  ) async {
+  Future<List<InvestorAnimal>> _fetchCalves(String animalId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
     if (token == null) {
       throw Exception('Authentication token not found');
     }
-    return AnimalApiServices.getCalves(
+    final response = await AnimalApiServices.getCalves(
       token: token,
-      rfid: rfid,
       animalId: animalId,
     );
+    return response.data;
   }
 
   Color _getHealthStatusColor(String? status) {

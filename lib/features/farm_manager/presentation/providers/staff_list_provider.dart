@@ -85,7 +85,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
 
       final farms = await ApiServices.getFarms(token: token);
       if (farms.isNotEmpty) {
-        return farms.first['id'] as int?;
+        return farms.first.id;
       }
       return null;
     } catch (e) {

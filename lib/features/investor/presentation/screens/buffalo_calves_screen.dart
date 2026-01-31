@@ -33,11 +33,11 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
       // Create a dummy root if parent missing
       _rootNode = InvestorAnimal(
         animalId: widget.parentId,
-        rfid: widget.parentId,
+        rfid: kHyphen, // Don't use ID as RFID
         images: const [],
-        farmName: 'Unknown',
+        farmName: 'FarmVest Unit',
         farmLocation: '',
-        shedName: 'Unknown',
+        shedName: 'Checking...',
         shedId: 0,
         animalType: 'Buffalo',
         healthStatus: 'Unknown',
@@ -51,7 +51,6 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     // Determine children to show
-    // We treat 'calves' passed as direct children of the parent
     final List<InvestorAnimal> rootChildren = widget.calves;
 
     return Scaffold(
@@ -74,6 +73,7 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
           child: _RecursiveTreeBuilder(
             root: _rootNode,
             childrenOverride: rootChildren,
+            isAbsoluteRoot: true, // Only true for the top-level parent
           ),
         ),
       ),
@@ -84,29 +84,29 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
 class _RecursiveTreeBuilder extends StatelessWidget {
   final InvestorAnimal root;
   final List<InvestorAnimal>? childrenOverride;
+  final bool isAbsoluteRoot;
 
-  const _RecursiveTreeBuilder({required this.root, this.childrenOverride});
+  const _RecursiveTreeBuilder({
+    required this.root,
+    this.childrenOverride,
+    this.isAbsoluteRoot = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     // 1. Calculate the list of children to render
-    // InvestorAnimal doesn't strictly have a 'children' field in the model shown,
-    // so we rely on childrenOverride for the top level.
-    // For recursive lower levels, we assume 'children' would be fetched or passed.
-    // Currently, this visualizes 1 level deep (Parent -> Calves) unless we extend logic.
     final children = childrenOverride ?? [];
 
     // 2. Build the parent card
-    final parentWidget = _buildNode(context, root, isRoot: true);
+    final parentWidget = _buildNode(context, root, isRoot: isAbsoluteRoot);
 
     if (children.isEmpty) {
       return parentWidget;
     }
 
     // 3. Build children widgets recursively
-    // Note: Recursive children of calves are not fetched yet, so they will be leaf nodes
     final childrenWidgets = children.map((child) {
-      return _RecursiveTreeBuilder(root: child);
+      return _RecursiveTreeBuilder(root: child, isAbsoluteRoot: false);
     }).toList();
 
     // 4. Layout
@@ -173,16 +173,15 @@ class _RecursiveTreeBuilder extends StatelessWidget {
             healthStatus: animal.healthStatus,
             lastMilking: 'N/A', // Not relevant for tree view
             age: animal.age != null ? '${animal.age} M' : '-',
-            breed: animal.animalType ?? '-',
+            breed: animal.breed ?? '-',
+            animalType: animal.animalType,
+            onboardedAt: animal.onboardedAt,
             isGridView: true,
-
-            // showLiveButton: false, // Not Property on BuffaloCard anymore? Check logic.
-            // BuffaloCard logic for isGridView usually hides button or shows smaller.
             onTap: () {
-              // Show details?
+              // Show details if needed
             },
             onCalvesTap: () async {
-              // Could potentially fetch grandchildren?
+              // Future: fetch grandchildren
             },
             onInvoiceTap: () async {},
           ),

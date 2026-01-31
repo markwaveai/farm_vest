@@ -110,12 +110,14 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
             _handleInvoiceTap(context, ref, buffalo.rfid);
           },
           onCalvesTap: () async {
-            _handleCalvesTap(context, buffalo.rfid);
+            _handleCalvesTap(context, buffalo);
           },
           healthStatus: buffalo.healthStatus,
           lastMilking: '',
-          breed: '',
+          breed: buffalo.breed ?? '',
+          animalType: buffalo.animalType,
           id: buffalo.animalId,
+          onboardedAt: buffalo.onboardedAt,
         );
         // return BuffaloCard(
         //   farmName: buffalo.farmName ?? 'FarmVest Unit',
@@ -168,12 +170,14 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
             _handleInvoiceTap(context, ref, buffalo.rfid);
           },
           onCalvesTap: () async {
-            _handleCalvesTap(context, buffalo.rfid);
+            _handleCalvesTap(context, buffalo);
           },
           id: buffalo.animalId,
           healthStatus: buffalo.healthStatus,
           lastMilking: '',
-          breed: '',
+          breed: buffalo.breed ?? '',
+          animalType: buffalo.animalType,
+          onboardedAt: buffalo.onboardedAt,
         );
 
         // return BuffaloCard(
@@ -242,10 +246,8 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
 
   Future<void> _handleCalvesTap(
     BuildContext context,
-    String? buffaloRfid,
+    InvestorAnimal parent,
   ) async {
-    if (buffaloRfid == null) return;
-
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
     if (token == null) {
@@ -257,49 +259,28 @@ class _BuffaloListSectionState extends ConsumerState<BuffaloListSection> {
     ToastUtils.showInfo(context, "Fetching calves...");
 
     try {
-      final calvesData = await AnimalApiServices.getCalves(
+      final response = await AnimalApiServices.getCalves(
         token: token,
-        rfid: buffaloRfid,
+        animalId: parent.animalId,
       );
 
       if (!context.mounted) return;
 
-      if (calvesData.isEmpty) {
+      final List<InvestorAnimal> calves = response.data;
+
+      if (calves.isEmpty) {
         ToastUtils.showInfo(context, "No calves found for this buffalo.");
         return;
       }
 
-      // Map to InvestorAnimal
-      final List<InvestorAnimal> calves = calvesData.map((data) {
-        // Handle potentially nested or flat structure.
-        // If nested like search_animal response:
-        final animal = data['animal_details'] ?? data;
-        final farm = data['farm_details'] ?? {};
-        final shed = data['shed_details'] ?? {};
-
-        return InvestorAnimal(
-          animalId: (animal['animal_id'] ?? animal['id'] ?? '').toString(),
-          rfid: (animal['rfid_tag_number'] ?? animal['rfid'] ?? '').toString(),
-          age: animal['age_months'] is int ? animal['age_months'] : null,
-          shedName: shed['shed_name'],
-          shedId: shed['id'] is int ? shed['id'] : null,
-          animalType: animal['animal_type'] ?? 'Calf',
-          images:
-              (animal['images'] as List<dynamic>?)
-                  ?.map((e) => e.toString())
-                  .toList() ??
-              [],
-          farmName: farm['farm_name'],
-          farmLocation: farm['location'],
-          healthStatus: animal['health_status'] ?? 'Unknown',
-        );
-      }).toList();
-
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              BuffaloCalvesScreen(parentId: buffaloRfid, calves: calves),
+          builder: (context) => BuffaloCalvesScreen(
+            parentId: parent.animalId,
+            parent: parent,
+            calves: calves,
+          ),
         ),
       );
     } catch (e) {

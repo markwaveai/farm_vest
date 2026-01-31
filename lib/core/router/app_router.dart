@@ -17,6 +17,7 @@ import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_bu
 import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_more_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/supervisor_stats_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/transfer_tickets_screen.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_details_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_grid_screen.dart';
 import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_screen.dart';
@@ -27,6 +28,7 @@ import 'package:farm_vest/features/farm_manager/presentation/screen/onboard_anim
 import 'package:farm_vest/features/farm_manager/presentation/screen/reports_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/staff_list_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/widgets/investor_details.dart';
+import 'package:farm_vest/features/investor/presentation/screens/cctv_screens/cctv_main_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/monthly_visits/monthly_visits_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/profile_Screens/investor_profile_screen.dart';
 import 'package:farm_vest/features/investor/presentation/widgets/investor_shell.dart';
@@ -86,10 +88,10 @@ class AppRouter {
           //   path: '/asset-valuation',
           //   builder: (context, state) => const AssetValuationScreen(),
           // ),
-          // GoRoute(
-          //   path: '/cctv-live',
-          //   builder: (context, state) => const CCTVMainScreen(),
-          // ),
+          GoRoute(
+            path: '/cctv-live',
+            builder: (context, state) => const CCTVMainScreen(),
+          ),
           // GoRoute(
           //   path: '/revenue',
           //   builder: (context, state) => const RevenueScreen(),
@@ -102,7 +104,11 @@ class AppRouter {
       ),
       GoRoute(
         path: '/unit-details',
-        builder: (context, state) => const UnitDetailsScreen(),
+        builder: (context, state) {
+          final extras = state.extra as Map<String, dynamic>?;
+          final buffalo = extras?['buffalo'] as InvestorAnimal?;
+          return UnitDetailsScreen(animal: buffalo);
+        },
       ),
       GoRoute(
         path: '/monthly-visits',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,7 @@ class BuffaloCard extends StatelessWidget {
   final bool showLiveButton;
   final String? imageUrl; // Added imageUrl property
   final String? animalType; // Added animalType property
+  final DateTime? onboardedAt; // Added onboardedAt property
   final VoidCallback? onTap;
   final VoidCallback? onCalvesTap;
   final VoidCallback? onInvoiceTap;
@@ -46,6 +48,7 @@ class BuffaloCard extends StatelessWidget {
     this.showLiveButton = true,
     this.imageUrl,
     this.animalType, // Added to constructor
+    this.onboardedAt, // Added to constructor
     this.onTap,
     this.onCalvesTap,
     this.onInvoiceTap,
@@ -55,6 +58,8 @@ class BuffaloCard extends StatelessWidget {
     final index = id.hashCode.abs() % murrahImages.length;
     return murrahImages[index];
   }
+
+  bool get isCalf => animalType?.toLowerCase().contains('calf') ?? false;
 
   @override
   Widget build(BuildContext context) {
@@ -97,10 +102,8 @@ class BuffaloCard extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap:
-                onTap ??
-                () => context.push('/unit-details', extra: {'buffaloId': id}),
-
+            // onTap: onTap /* ??
+            //     () => context.push('/unit-details', extra: {'buffaloId': id}) */,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -294,8 +297,8 @@ class BuffaloCard extends StatelessWidget {
           ),
         ),
 
-        // Bottom Left: Calves Button
-        if (onCalvesTap != null)
+        // Bottom Left: Calves Button (Hide for calves)
+        if (onCalvesTap != null && !isCalf)
           Positioned(
             bottom: overlayPadding,
             left: overlayPadding,
@@ -305,8 +308,8 @@ class BuffaloCard extends StatelessWidget {
             ),
           ),
 
-        // Bottom Right: Live Button
-        if (showLiveButton)
+        // Bottom Right: Live Button (Hide for calves)
+        if (showLiveButton && !isCalf)
           Positioned(
             bottom: overlayPadding,
             right: overlayPadding,
@@ -369,13 +372,8 @@ class BuffaloCard extends StatelessWidget {
             SizedBox(height: rowGap),
           ],
 
-          if (animalType != null && animalType!.isNotEmpty) ...[
-            _buildInfoRow(
-              'Type',
-              animalType!,
-              isDark: isDark,
-              fontSize: fontSize,
-            ),
+          if (breed.isNotEmpty && breed.toLowerCase() != 'null') ...[
+            _buildInfoRow('Breed', breed, isDark: isDark, fontSize: fontSize),
             SizedBox(height: rowGap),
           ],
 
@@ -410,6 +408,17 @@ class BuffaloCard extends StatelessWidget {
               isDark: isDark,
               fontSize: fontSize,
             ),
+
+          // Onboarded At
+          if (onboardedAt != null) ...[
+            SizedBox(height: rowGap),
+            _buildInfoRow(
+              'Onboarded',
+              DateFormat('dd MMM yyyy').format(onboardedAt!),
+              isDark: isDark,
+              fontSize: fontSize,
+            ),
+          ],
         ],
       ),
     );
@@ -642,7 +651,7 @@ class BuffaloCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        context.go('/cctv-live', extra: {'buffaloId': id});
+        context.push('/cctv-live', extra: {'buffaloId': id});
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),

@@ -8,6 +8,7 @@ import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:farm_vest/features/investor/data/models/investor_summary_model.dart';
+import 'package:farm_vest/features/investor/data/models/investor_model.dart';
 
 /// Service class for investor-related API calls.
 ///
@@ -31,9 +32,7 @@ class InvestorApiServices {
   /// - [ServerException] if the server returns an error
   /// - [NetworkException] if there's no internet connection
   /// - [AuthException] if authentication fails
-  static Future<List<Map<String, dynamic>>> getInvestors({
-    required String token,
-  }) async {
+  static Future<List<Investor>> getInvestors({required String token}) async {
     try {
       final response = await http.get(
         Uri.parse("${AppConstants.appLiveUrl}/investors/get_all_investors"),
@@ -42,7 +41,9 @@ class InvestorApiServices {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['data']);
+        return (data['data'] as List<dynamic>)
+            .map((e) => Investor.fromJson(e as Map<String, dynamic>))
+            .toList();
       } else if (response.statusCode == 401) {
         throw AuthException('Authentication failed. Please login again.');
       } else {
@@ -64,9 +65,7 @@ class InvestorApiServices {
   /// Alias for [getInvestors].
   ///
   /// Provided for backward compatibility.
-  static Future<List<Map<String, dynamic>>> getAllInvestors({
-    required String token,
-  }) async {
+  static Future<List<Investor>> getAllInvestors({required String token}) async {
     return getInvestors(token: token);
   }
 

@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -173,6 +174,13 @@ class _SupervisorBuffaloScreenState
                     _buildDetailRow('Type', details['animal_type']),
                     _buildDetailRow('Health', details['health_status']),
                     _buildDetailRow('Status', details['status']),
+                    if (details['onboarded_at'] != null)
+                      _buildDetailRow(
+                        'Onboarded',
+                        DateFormat('dd MMM yyyy').format(
+                          DateTime.parse(details['onboarded_at'].toString()),
+                        ),
+                      ),
                     const Divider(),
                     _buildDetailRow(
                       'Farm',

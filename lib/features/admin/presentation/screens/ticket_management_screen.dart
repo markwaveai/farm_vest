@@ -5,6 +5,7 @@ import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dar
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/admin_provider.dart';
+import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
 
 class TicketManagementScreen extends ConsumerStatefulWidget {
   const TicketManagementScreen({super.key});
@@ -345,10 +346,10 @@ class _TicketManagementScreenState
     );
   }
 
-  Widget _buildTicketCard(Map<String, dynamic> ticket) {
-    final priority = ticket['priority']?.toString().toUpperCase() ?? 'LOW';
+  Widget _buildTicketCard(Ticket ticket) {
+    final priority = ticket.priority?.toUpperCase() ?? 'LOW';
     final bool isHighPriority = priority == 'HIGH' || priority == 'CRITICAL';
-    final status = ticket['status'] ?? 'PENDING';
+    final status = ticket.status;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -380,7 +381,7 @@ class _TicketManagementScreenState
           ),
         ),
         title: Text(
-          'Ticket #${ticket['id']}: ${ticket['ticket_type'] ?? 'TICKET'}',
+          'Ticket #${ticket.id}: ${ticket.ticketType}',
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         ),
         subtitle: Column(
@@ -388,16 +389,17 @@ class _TicketManagementScreenState
           children: [
             const SizedBox(height: 6),
             Text(
-              'Animal: ${ticket['animal_tag'] ?? 'Unknown'} • ${ticket['source_shed_name'] ?? 'No Shed'}',
+              'Animal: ${ticket.animalId ?? 'Unknown'} • ${ticket.rfid ?? 'No RFID'}',
               style: TextStyle(
                 color: AppTheme.slate.withOpacity(0.7),
                 fontSize: 13,
               ),
             ),
-            if (ticket['disease'] != null) ...[
+            if (ticket.metadata != null &&
+                ticket.metadata!['disease'] != null) ...[
               const SizedBox(height: 4),
               Text(
-                'Issue: ${(ticket['disease'] as List).join(", ")}',
+                'Issue: ${(ticket.metadata!['disease'] as List).join(", ")}',
                 style: const TextStyle(
                   color: Colors.redAccent,
                   fontSize: 12,
@@ -411,7 +413,7 @@ class _TicketManagementScreenState
                 _buildStatusTag(status),
                 const SizedBox(width: 8),
                 Text(
-                  _formatDate(ticket['created_at']),
+                  _formatDate(ticket.createdAt?.toIso8601String()),
                   style: TextStyle(
                     fontSize: 12,
                     color: AppTheme.slate.withOpacity(0.5),

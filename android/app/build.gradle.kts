@@ -33,7 +33,7 @@ android {
         applicationId = "com.markwave.farmvest"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 21
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -54,6 +54,15 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+
+    packaging {
+        jniLibs {
+            pickFirsts.add("**/libc++_shared.so")
+        }
+        resources {
+            pickFirsts.add("**/libc++_shared.so")
         }
     }
 }

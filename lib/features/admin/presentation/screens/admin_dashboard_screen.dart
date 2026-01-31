@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import '../providers/admin_provider.dart';
+import 'package:farm_vest/features/farm_manager/data/models/farm_model.dart';
 import 'ticket_management_screen.dart';
 import 'staff_management_screen.dart';
 
@@ -844,8 +845,12 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
     );
   }
 
-  Widget _buildFarmCard(Map<String, dynamic> farm) {
-    final sheds = (farm['sheds'] as List?) ?? [];
+  Widget _buildFarmCard(Farm farm) {
+    // Note: Farm model needs to be updated to include these fields for a complete refactor
+    // For now, using fallbacks or zero values to maintain UI layout
+    final shedsCount = farm.sheds.length;
+    final managerName = farm.farmManager?.name ?? 'Unassigned';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -890,7 +895,7 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
                   children: [
                     Expanded(
                       child: Text(
-                        farm['farm_name'] ?? 'Unknown Farm',
+                        farm.farmName,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -917,7 +922,7 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      farm['location'] ?? 'Unknown Location',
+                      farm.location,
                       style: const TextStyle(
                         color: AppTheme.slate,
                         fontSize: 13,
@@ -931,9 +936,7 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
                     const Icon(Icons.person, size: 14, color: AppTheme.slate),
                     const SizedBox(width: 4),
                     Text(
-                      farm['farm_manager'] != null
-                          ? 'Manager: ${farm['farm_manager']['name']}'
-                          : 'Manager: Unassigned',
+                      'Manager: $managerName',
                       style: const TextStyle(
                         color: AppTheme.slate,
                         fontSize: 13,
@@ -947,20 +950,17 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
                   children: [
                     _buildFarmMiniStat(
                       Icons.pets,
-                      '${farm['total_buffaloes_count'] ?? 0}',
+                      '${farm.totalBuffaloesCount}',
                       'Animals',
                     ),
                     _buildFarmMiniStat(
                       Icons.warehouse,
-                      '${sheds.length}',
+                      '$shedsCount',
                       'Sheds',
                       onTap: () {
                         context.push(
                           '/farm-sheds',
-                          extra: {
-                            'farmId': farm['id'],
-                            'farmName': farm['farm_name'],
-                          },
+                          extra: {'farmId': farm.id, 'farmName': farm.farmName},
                         );
                       },
                     ),

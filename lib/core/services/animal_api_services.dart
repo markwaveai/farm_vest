@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/features/farm_manager/data/models/animalkart_order_model.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:http/http.dart' as http;
 
 class AnimalApiServices {
@@ -41,16 +42,12 @@ class AnimalApiServices {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getCalves({
+  static Future<InvestorAnimalsResponse> getCalves({
     required String token,
-    required String rfid,
-    String? animalId,
+    required String animalId,
   }) async {
     try {
-      final queryParams = {'rfid': rfid};
-      if (animalId != null) {
-        queryParams['animal_id'] = animalId;
-      }
+      final queryParams = {'animal_id': animalId};
 
       final uri = Uri.parse(
         "${AppConstants.appLiveUrl}/animal/get_calves",
@@ -66,12 +63,9 @@ class AnimalApiServices {
       debugPrint("getCalves Response: ${response.body}");
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['data'] is List) {
-          return List<Map<String, dynamic>>.from(data['data']);
-        }
+        return InvestorAnimalsResponse.fromJson(jsonDecode(response.body));
       }
-      return [];
+      return const InvestorAnimalsResponse(status: 'error', count: 0, data: []);
     } catch (e) {
       throw AppException(e.toString());
     }

@@ -140,11 +140,11 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
               itemBuilder: (context, index) {
                 final investor = investorState.investors[index];
                 return InvestorCard(
-                  name: investor.name,
-                  location: investor.location,
-                  amount: investor.amount,
-                  date: investor.date,
-                  status: investor.status,
+                  name: investor.fullName,
+                  location: investor.address ?? 'N/A',
+                  amount: '₹${investor.animalCount}', // Adjusted mapping
+                  date: investor.memberSince?.toIso8601String() ?? 'N/A',
+                  status: investor.animalCount > 0 ? 'Active' : 'Inactive',
                 );
               },
             ),

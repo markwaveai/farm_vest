@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/admin_provider.dart';
+import 'package:farm_vest/features/investor/data/models/investor_model.dart';
 
 class InvestorManagementScreen extends ConsumerStatefulWidget {
   const InvestorManagementScreen({super.key});
@@ -32,10 +33,9 @@ class _InvestorManagementScreenState
   @override
   Widget build(BuildContext context) {
     final adminState = ref.watch(adminProvider);
-    final investors = adminState.investorList.where((investor) {
-      final fullName = '${investor['first_name']} ${investor['last_name']}'
-          .toLowerCase();
-      final phone = investor['phone_number']?.toString() ?? '';
+    final List<Investor> investors = adminState.investorList.where((investor) {
+      final fullName = investor.fullName.toLowerCase();
+      final phone = investor.phoneNumber;
       return fullName.contains(_searchQuery.toLowerCase()) ||
           phone.contains(_searchQuery);
     }).toList();
@@ -91,11 +91,9 @@ class _InvestorManagementScreenState
     );
   }
 
-  Widget _buildInvestorCard(Map<String, dynamic> investor) {
-    final firstName = investor['first_name'] ?? '';
-    final lastName = investor['last_name'] ?? '';
-    final fullName = '$firstName $lastName';
-    final animalCount = investor['animal_count'] ?? 0;
+  Widget _buildInvestorCard(Investor investor) {
+    final fullName = investor.fullName;
+    final animalCount = investor.animalCount;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -115,7 +113,9 @@ class _InvestorManagementScreenState
         leading: CircleAvatar(
           backgroundColor: AppTheme.primary.withOpacity(0.1),
           child: Text(
-            firstName.isNotEmpty ? firstName[0].toUpperCase() : '?',
+            investor.firstName.isNotEmpty
+                ? investor.firstName[0].toUpperCase()
+                : '?',
             style: const TextStyle(
               color: AppTheme.primary,
               fontWeight: FontWeight.bold,
@@ -130,7 +130,7 @@ class _InvestorManagementScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text(investor['phone_number'] ?? 'No phone'),
+            Text(investor.phoneNumber),
             const SizedBox(height: 4),
             Row(
               children: [
@@ -149,7 +149,7 @@ class _InvestorManagementScreenState
           context.pushNamed(
             'investor-animals',
             extra: {
-              'investorId': investor['investor_id'],
+              'investorId': investor.investorId,
               'investorName': fullName,
             },
           );

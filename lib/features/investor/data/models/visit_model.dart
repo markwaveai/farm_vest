@@ -16,7 +16,9 @@ class InvestorFarm {
       farmId: json['farm_id'] as int,
       farmName: json['farm_name'] as String,
       location: json['location'] as String,
-      investorBuffaloesCount: json['investor_buffaloes_count'] as int,
+      investorBuffaloesCount:
+          (json['buffaloes_count'] ?? json['investor_buffaloes_count'] ?? 0)
+              as int,
     );
   }
 }
