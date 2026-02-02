@@ -92,45 +92,48 @@ class _BiometricLockScreenState extends State<BiometricLockScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (!_checkedEnabled) {
-      return const SizedBox.shrink();
-    }
+    final showLock =
+        _checkedEnabled && _enabled && !BiometricService.isUnlocked;
 
-    if (!_enabled || BiometricService.isUnlocked) {
-      return widget.child;
-    }
+    return Stack(
+      children: [
+        // Always maintain the child to prevent state loss
+        widget.child,
 
-    return Material(
-      color: Theme.of(context).colorScheme.surface,
-      child: SafeArea(
-        child: Align(
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.lock, size: 52),
-                const SizedBox(height: 12),
-                const Text(
-                  ' FarmVest App Locked',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        // Overlay the lock screen when enabled
+        if (showLock)
+          Positioned.fill(
+            child: Material(
+              color: Theme.of(context).colorScheme.surface,
+              child: SafeArea(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.lock, size: 52),
+                        const SizedBox(height: 12),
+                        const Text(
+                          ' FarmVest App Locked',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton(
+                          onPressed: _isAuthenticating ? null : _authenticate,
+                          child: const Text('Unlock'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                // const SizedBox(height: 6),
-                // const Text(
-                //   'Authenticate to continue',
-                //   textAlign: TextAlign.center,
-                // ),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: _isAuthenticating ? null : _authenticate,
-                  child: Text('unlock'),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+      ],
     );
   }
 }

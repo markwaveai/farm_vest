@@ -3,6 +3,7 @@ import 'package:farm_vest/features/employee/new_supervisor/widgets/filter_chip.d
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_tickets_provider.dart';
 
+import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:flutter/material.dart';
 import '../../new_supervisor/widgets/alert_cards.dart';
 
@@ -96,29 +97,27 @@ class ActualAlertScreen extends ConsumerWidget {
                     itemCount: tickets.length,
                     itemBuilder: (context, index) {
                       final ticket = tickets[index];
-                      final type = ticket['ticket_type'] ?? 'GENERAL';
-                      final status = ticket['status'] ?? 'PENDING';
-                      final priority = ticket['priority'] ?? 'MEDIUM';
-                      final createdAt = ticket['created_at'] != null
-                          ? DateTime.parse(ticket['created_at']).toLocal()
-                          : DateTime.now();
+                      final type = ticket.ticketType;
+                      final status = ticket.status;
+                      final priority = ticket.priority ?? 'MEDIUM';
+                      final createdAt =
+                          ticket.createdAt?.toLocal() ?? DateTime.now();
 
                       Color headerColor = AppTheme.primary;
                       if (priority == 'CRITICAL' || priority == 'HIGH')
                         headerColor = Colors.red;
-                      if (type == 'HEALTH') headerColor = Colors.orange;
+                      if (type == TicketType.health.value)
+                        headerColor = Colors.orange;
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16.0),
                         child: AlertCardDivided(
-                          title: '$type Ticket #${ticket['id']}',
-                          subtitle:
-                              ticket['description'] ??
-                              'No description provided',
+                          title: '$type Ticket #${ticket.id}',
+                          subtitle: ticket.description,
                           time:
                               '${DateTime.now().difference(createdAt).inMinutes} min ago',
-                          ids: 'Animal ID: ${ticket['animal_id']}',
-                          actionText: status == 'PENDING'
+                          ids: 'Animal ID: ${ticket.animalId ?? 'N/A'}',
+                          actionText: status == TicketStatus.pending.value
                               ? 'Track Progress'
                               : 'View Details',
                           headerColor: headerColor,

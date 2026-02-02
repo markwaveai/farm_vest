@@ -195,6 +195,18 @@ class NewSupervisorDashboard extends ConsumerWidget {
                           Colors.pink,
                         ),
                       ),
+                      CustomCard(
+                        color: Colors.purple,
+                        type: DashboardCardType.priority,
+                        onTap: () => context.push('/ticket-management'),
+                        child: _buildStatContent(
+                          context,
+                          Icons.confirmation_number_outlined,
+                          dashboardState.stats.allTicketsCount,
+                          'Total Tickets',
+                          Colors.purple,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),

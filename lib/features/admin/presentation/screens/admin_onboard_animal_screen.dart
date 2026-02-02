@@ -27,6 +27,7 @@ class AdminOnboardAnimalScreen extends ConsumerStatefulWidget {
 class _AdminOnboardAnimalScreenState
     extends ConsumerState<AdminOnboardAnimalScreen> {
   final TextEditingController searchController = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
 
   List<AnimalOnboardingEntry> buffaloEntries = [];
   List<AnimalOnboardingEntry> calfEntries = [];
@@ -88,6 +89,7 @@ class _AdminOnboardAnimalScreenState
   @override
   void dispose() {
     searchController.dispose();
+    searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -227,6 +229,7 @@ class _AdminOnboardAnimalScreenState
                   child: CustomTextField(
                     hint: 'Investor Mobile',
                     controller: searchController,
+                    focusNode: searchFocusNode,
                     prefixIcon: const Icon(Icons.phone),
                     keyboardType: TextInputType.phone,
                   ),

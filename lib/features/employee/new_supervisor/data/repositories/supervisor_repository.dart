@@ -4,6 +4,7 @@ import 'package:farm_vest/core/services/api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:farm_vest/core/services/tickets_api_services.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SupervisorRepository {
@@ -143,13 +144,27 @@ class SupervisorRepository {
     final tickets = await TicketsApiServices.getTickets(
       token: token,
       status: status,
-      ticketType: 'HEALTH',
+      ticketType: TicketType.health.value,
     );
     return {'data': tickets};
   }
 
+  Future<int> getTicketsCount({String? status, String? ticketType}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token == null) {
+      throw AuthException('Authentication token not found');
+    }
+    return await TicketsApiServices.getTicketsCount(
+      token: token,
+      status: status,
+      ticketType: ticketType,
+    );
+  }
+
   Future<Map<String, dynamic>> createTicket({
     required Map<String, dynamic> body,
+    required String ticketType,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
@@ -160,6 +175,7 @@ class SupervisorRepository {
     final success = await TicketsApiServices.createTicket(
       token: token,
       body: body,
+      ticketType: ticketType,
     );
     if (success) {
       return {'status': 'success', 'message': 'Ticket created successfully'};
@@ -196,8 +212,9 @@ class SupervisorRepository {
     }
     final tickets = await TicketsApiServices.getTransferTickets(
       token: token,
-      status: 'PENDING',
+      status: TicketStatus.pending.value,
     );
+
     return {'data': tickets};
   }
 
@@ -210,12 +227,12 @@ class SupervisorRepository {
     return await TicketsApiServices.getTransferSummary(token: token);
   }
 
-  Future<List<Map<String, dynamic>>> getSheds() async {
+  Future<List<Map<String, dynamic>>> getSheds({int? farmId}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
     if (token == null) {
       throw AuthException('Authentication token not found');
     }
-    return await ShedsApiServices.getSheds(token: token);
+    return await ShedsApiServices.getSheds(token: token, farmId: farmId);
   }
 }

@@ -112,13 +112,42 @@ enum AppRoutes {
 
 /// Defines the different statuses a ticket can have
 enum TicketStatus {
-  open('Open'),
-  inProgress('In Progress'),
-  resolved('Resolved'),
-  closed('Closed');
+  pending('PENDING', 'Pending'),
+  open('OPEN', 'Open'),
+  inProgress('IN_PROGRESS', 'In Progress'),
+  resolved('RESOLVED', 'Resolved'),
+  closed('CLOSED', 'Closed');
 
+  final String value;
   final String displayName;
-  const TicketStatus(this.displayName);
+  const TicketStatus(this.value, this.displayName);
+
+  static TicketStatus fromString(String status) {
+    final normalized = status.toUpperCase().trim().replaceAll(' ', '_');
+    return TicketStatus.values.firstWhere(
+      (s) => s.value == normalized || s.displayName.toUpperCase() == normalized,
+      orElse: () => TicketStatus.open,
+    );
+  }
+}
+
+/// Defines the different types of tickets
+enum TicketType {
+  health('HEALTH', 'Health Issue'),
+  transfer('TRANSFER', 'Transfer Request'),
+  other('OTHER', 'Other');
+
+  final String value;
+  final String label;
+  const TicketType(this.value, this.label);
+
+  static TicketType fromString(String type) {
+    final normalized = type.toUpperCase().trim().replaceAll(' ', '_');
+    return TicketType.values.firstWhere(
+      (t) => t.value == normalized || t.label.toUpperCase() == normalized,
+      orElse: () => TicketType.other,
+    );
+  }
 }
 
 /// Defines the different types of notifications
@@ -133,6 +162,27 @@ enum NotificationType {
 }
 
 enum MessageType { user, ai, system, typing }
+
+/// Defines the different priorities a ticket can have
+enum TicketPriority {
+  low('LOW', 'Low'),
+  medium('MEDIUM', 'Medium'),
+
+  high('HIGH', 'High'),
+  critical('CRITICAL', 'Critical');
+
+  final String value;
+  final String label;
+  const TicketPriority(this.value, this.label);
+
+  static TicketPriority fromString(String priority) {
+    final normalized = priority.toUpperCase().trim();
+    return TicketPriority.values.firstWhere(
+      (p) => p.value == normalized || p.label.toUpperCase() == normalized,
+      orElse: () => TicketPriority.medium,
+    );
+  }
+}
 
 class ChatMessage {
   final String text;

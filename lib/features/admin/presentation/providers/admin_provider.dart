@@ -420,7 +420,7 @@ class AdminNotifier extends Notifier<AdminState> {
   }
 
   Future<bool> createTransferTicket({
-    required String rfidTag,
+    required String animalId,
     required String description,
     required int destinationShedId,
     String transferDirection = 'OUT',
@@ -435,8 +435,7 @@ class AdminNotifier extends Notifier<AdminState> {
       }
 
       final body = {
-        "rfid_tag": rfidTag,
-        "ticket_type": "TRANSFER",
+        "animal_id": animalId,
         "description": description,
         "transfer_direction": transferDirection,
         "destination_shed_id": destinationShedId,
@@ -445,6 +444,7 @@ class AdminNotifier extends Notifier<AdminState> {
       final success = await TicketsApiServices.createTicket(
         token: token,
         body: body,
+        ticketType: 'TRANSFER',
       );
 
       state = state.copyWith(isLoading: false);

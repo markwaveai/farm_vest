@@ -15,15 +15,12 @@ class SupervisorBuffaloScreen extends ConsumerStatefulWidget {
 }
 
 class _SupervisorBuffaloScreenState
-    extends ConsumerState<SupervisorBuffaloScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+    extends ConsumerState<SupervisorBuffaloScreen> {
   late TextEditingController _searchController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     _searchController = TextEditingController(
       text: ref.read(animalSearchQueryProvider) == 'all'
           ? ''
@@ -33,7 +30,6 @@ class _SupervisorBuffaloScreenState
 
   @override
   void dispose() {
-    _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -51,52 +47,34 @@ class _SupervisorBuffaloScreenState
         ),
         title: const Text('Animals List'),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(110),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search by Tag, RFID or ID',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        ref.read(animalSearchQueryProvider.notifier).state =
-                            'all';
-                      },
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  onSubmitted: (value) {
-                    ref.read(animalSearchQueryProvider.notifier).state =
-                        value.isEmpty ? 'all' : value;
+          preferredSize: const Size.fromHeight(70),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search by Tag, RFID or ID',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    ref.read(animalSearchQueryProvider.notifier).state = 'all';
                   },
                 ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.white,
               ),
-              TabBar(
-                controller: _tabController,
-                indicatorColor: AppTheme.primary,
-                labelColor: AppTheme.primary,
-                unselectedLabelColor: Colors.grey,
-                tabs: const [
-                  Tab(text: 'Buffaloes'),
-                  Tab(text: 'Calves'),
-                ],
-              ),
-            ],
+              onSubmitted: (value) {
+                ref.read(animalSearchQueryProvider.notifier).state =
+                    value.isEmpty ? 'all' : value;
+              },
+            ),
           ),
         ),
       ),
@@ -107,18 +85,7 @@ class _SupervisorBuffaloScreenState
             return !type.contains('calf');
           }).toList();
 
-          final calves = animals.where((a) {
-            final type = a.animalType?.toLowerCase() ?? '';
-            return type.contains('calf');
-          }).toList();
-
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              _buildAnimalList(buffaloes, 'No buffaloes found'),
-              _buildAnimalList(calves, 'No calves found'),
-            ],
-          );
+          return _buildAnimalList(buffaloes, 'No animals found');
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),

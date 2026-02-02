@@ -4,6 +4,8 @@ import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
+import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:go_router/go_router.dart';
 
 class TransferTicketsScreen extends ConsumerStatefulWidget {
@@ -18,8 +20,8 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isLoading = true;
-  List<Map<String, dynamic>> _outTransfers = [];
-  List<Map<String, dynamic>> _inTransfers = [];
+  List<Ticket> _outTransfers = [];
+  List<Ticket> _inTransfers = [];
 
   @override
   void initState() {
@@ -39,17 +41,17 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
     try {
       final repo = ref.read(supervisorRepositoryProvider);
       final response = await repo.getTransferTickets();
-      final tickets = response['data'] as List<dynamic>? ?? [];
+      final tickets = response['data'] as List<Ticket>? ?? [];
 
       setState(() {
-        _outTransfers = tickets
-            .where((t) => t['transfer_direction'] == 'OUT')
-            .map((t) => Map<String, dynamic>.from(t))
-            .toList();
-        _inTransfers = tickets
-            .where((t) => t['transfer_direction'] == 'IN')
-            .map((t) => Map<String, dynamic>.from(t))
-            .toList();
+        _outTransfers = tickets.where((t) {
+          final metadata = t.metadata;
+          return metadata?['transfer_direction'] == 'OUT';
+        }).toList();
+        _inTransfers = tickets.where((t) {
+          final metadata = t.metadata;
+          return metadata?['transfer_direction'] == 'IN';
+        }).toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -124,10 +126,7 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
     );
   }
 
-  Widget _buildTransferList(
-    List<Map<String, dynamic>> transfers, {
-    required bool isOut,
-  }) {
+  Widget _buildTransferList(List<Ticket> transfers, {required bool isOut}) {
     if (transfers.isEmpty) {
       return Center(
         child: Column(
@@ -163,16 +162,15 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
     );
   }
 
-  Widget _buildTransferCard(
-    Map<String, dynamic> transfer, {
-    required bool isOut,
-  }) {
-    final status = transfer['status'] as String? ?? 'PENDING';
-    final animalTag = transfer['animal_tag'] ?? 'Unknown';
-    final description = transfer['description'] ?? '';
-    final createdAt = transfer['created_at'] ?? '';
-    final sourceShed = transfer['source_shed_name'] ?? 'N/A';
-    final destShed = transfer['destination_shed_name'] ?? 'N/A';
+  Widget _buildTransferCard(Ticket transfer, {required bool isOut}) {
+    final status = transfer.status;
+    final metadata = transfer.metadata ?? {};
+    final animalTag = transfer.rfid ?? metadata['animal_tag'] ?? 'Unknown';
+    final description = transfer.description;
+    final createdAt = transfer.createdAt?.toIso8601String() ?? '';
+    final sourceShed = metadata['source_shed_name'] ?? 'N/A';
+    final destShed = metadata['destination_shed_name'] ?? 'N/A';
+    final animalId = transfer.animalId;
 
     Color statusColor;
     switch (status) {
@@ -303,7 +301,7 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
                       // Navigate to allocation screen for this animal
                       context.go(
                         '/buffalo-allocation',
-                        extra: {'animalId': transfer['animal_id']},
+                        extra: {'animalId': animalId},
                       );
                     },
                     child: const Text(
@@ -353,12 +351,17 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
   String _direction = 'OUT';
   final _animalController = TextEditingController();
   final _reasonController = TextEditingController();
-  int? _selectedAnimalId;
+  String? _selectedAnimalId;
   InvestorAnimal? _selectedAnimal;
   int? _selectedShedId;
 
   final _outController = TextEditingController();
+  final _focusNode = FocusNode();
+  final _reasonFocusNode = FocusNode();
+  String _priority = TicketPriority.medium.value;
+
   bool _isSubmitting = false;
+
   List<Map<String, dynamic>> _sheds = [];
   bool _isShedsLoading = false;
 
@@ -368,13 +371,22 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
     _loadSheds();
   }
 
-  Future<void> _loadSheds() async {
+  @override
+  void dispose() {
+    _animalController.dispose();
+    _reasonController.dispose();
+    _outController.dispose();
+    _focusNode.dispose();
+    _reasonFocusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadSheds({int? farmId}) async {
     setState(() => _isShedsLoading = true);
     try {
       final repo = ref.read(supervisorRepositoryProvider);
-      final data = await repo.getSheds();
+      final data = await repo.getSheds(farmId: farmId);
       setState(() {
-        _sheds = data;
         _sheds = data;
         _isShedsLoading = false;
       });
@@ -389,47 +401,60 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
         .watch(supervisorDashboardProvider)
         .animalSuggestions;
 
-    return Padding(
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
                   'Create Transfer Request',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1C1E),
+                  ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.close, size: 20),
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // Direction Toggle
-            const Text(
-              'Transfer Direction',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
+            _buildSectionLabel('Transfer Direction'),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: _buildDirectionButton(
                     'OUT',
                     'Send Out',
-                    Icons.arrow_upward,
-                    Colors.red,
+                    Icons.arrow_upward_rounded,
+                    const Color(0xFFF44336),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -437,186 +462,290 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
                   child: _buildDirectionButton(
                     'IN',
                     'Receive',
-                    Icons.arrow_downward,
-                    Colors.green,
+                    Icons.arrow_downward_rounded,
+                    const Color(0xFF4CAF50),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            // Animal Search
-            const Text(
-              'Select Animal',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
+            // Animal Selection
+            _buildSectionLabel('Select Animal'),
+            const SizedBox(height: 12),
             TextField(
               controller: _animalController,
-              decoration: InputDecoration(
-                hintText: 'Search by RFID or Ear Tag',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                suffixIcon: const Icon(Icons.search),
-              ),
+              focusNode: _focusNode,
               onChanged: (val) {
                 ref
                     .read(supervisorDashboardProvider.notifier)
                     .searchSuggestions(val);
                 if (_selectedAnimalId != null) {
-                  setState(() => _selectedAnimalId = null);
+                  setState(() {
+                    _selectedAnimalId = null;
+                    _selectedAnimal = null;
+                    _outController.clear();
+                  });
                 }
               },
+
+              decoration: InputDecoration(
+                hintText: 'Search by RFID or Ear Tag',
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  color: Colors.grey,
+                ),
+                filled: true,
+                fillColor: const Color(0xFFF8F9FA),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: AppTheme.primary,
+                    width: 2,
+                  ),
+                ),
+              ),
             ),
+
+            // Suggestions List
             if (suggestions.isNotEmpty && _selectedAnimalId == null)
               Container(
-                margin: const EdgeInsets.only(top: 4),
-                constraints: const BoxConstraints(maxHeight: 120),
+                margin: const EdgeInsets.only(top: 8),
+                constraints: const BoxConstraints(maxHeight: 200),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: ListView.builder(
                   shrinkWrap: true,
+                  padding: EdgeInsets.zero,
                   itemCount: suggestions.length,
                   itemBuilder: (context, index) {
                     final animal = suggestions[index];
                     final tag = animal.rfid ?? animal.earTag ?? animal.animalId;
                     return ListTile(
                       dense: true,
-                      title: Text(tag),
-                      subtitle: Text('Row: ${animal.rowNumber ?? 'N/A'}'),
+                      leading: const CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Color(0xFFE8F5E9),
+                        child: Icon(
+                          Icons.pets,
+                          size: 14,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                      title: Text(
+                        tag,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text('Shed: ${animal.shedName ?? 'N/A'}'),
                       onTap: () {
                         setState(() {
-                          _selectedAnimalId = animal.internalId;
+                          _selectedAnimalId = animal.animalId;
                           _selectedAnimal = animal;
                           _animalController.text = tag;
-                          _outController.text = animal.shedName ?? 'N/A';
-
-                          // Reset destination shed if it matches the new animal's current shed
-                          if (_selectedShedId == animal.shedId) {
+                          _outController.text =
+                              animal.shedName ?? 'Unknown Shed';
+                          if (_selectedShedId == animal.shedId)
                             _selectedShedId = null;
-                          }
                         });
+                        if (animal.farmId != null) {
+                          _loadSheds(farmId: animal.farmId);
+                        }
                         ref
                             .read(supervisorDashboardProvider.notifier)
                             .clearSuggestions();
+                        FocusScope.of(context).unfocus();
                       },
                     );
                   },
                 ),
               ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            // Out field
-            const Text('Out', style: TextStyle(fontWeight: FontWeight.w500)),
-            const SizedBox(height: 8),
+            // Current Location (Source)
+            _buildSectionLabel('Current Location'),
+            const SizedBox(height: 12),
             TextField(
               controller: _outController,
-              decoration: InputDecoration(
-                hintText: _selectedAnimalId == null
-                    ? 'Search animal to see current location'
-                    : 'Current location',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                filled: true,
-                fillColor: _selectedAnimalId == null
-                    ? Colors.grey.shade100
-                    : Colors.grey.shade50,
-              ),
               readOnly: true,
+              decoration: InputDecoration(
+                hintText: 'Select an animal first',
+                hintStyle: TextStyle(color: Colors.grey.shade400),
+                filled: true,
+                fillColor: const Color(0xFFF8F9FA),
+                prefixIcon: const Icon(
+                  Icons.location_on_rounded,
+                  color: Colors.grey,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            const Text(
-              'Destination Shed (Optional)',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
+            // Destination
+            _buildSectionLabel('Destination Shed (Optional)'),
+            const SizedBox(height: 12),
             _isShedsLoading
                 ? const Center(child: LinearProgressIndicator())
                 : Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade400),
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<int>(
                         isExpanded: true,
                         value: _selectedShedId,
-                        hint: const Text('Select Shed'),
+                        hint: const Text('Select target shed'),
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                        borderRadius: BorderRadius.circular(12),
                         items: _sheds
                             .where(
                               (shed) => shed['id'] != _selectedAnimal?.shedId,
                             )
                             .map((shed) {
                               return DropdownMenuItem<int>(
-                                value: shed['id'],
+                                value: shed['id'] as int,
                                 child: Text(
                                   shed['shed_name'] ?? 'Shed ${shed['id']}',
                                 ),
                               );
                             })
                             .toList(),
-                        onChanged: (val) {
-                          setState(() => _selectedShedId = val);
-                        },
+                        onChanged: (val) =>
+                            setState(() => _selectedShedId = val),
                       ),
                     ),
                   ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            _buildSectionLabel('Priority'),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F9FA),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: _priority,
+                  items: TicketPriority.values.map((p) {
+                    return DropdownMenuItem<String>(
+                      value: p.value,
+                      child: Text(p.label),
+                    );
+                  }).toList(),
 
-            // Reason
-            const Text(
-              'Reason for Transfer',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _reasonController,
-              maxLines: 2,
-              decoration: InputDecoration(
-                hintText: 'Enter reason...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  onChanged: (val) => setState(() => _priority = val!),
                 ),
               ),
             ),
             const SizedBox(height: 24),
 
+            // Reason
+            _buildSectionLabel('Reason for Transfer'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _reasonController,
+              focusNode: _reasonFocusNode,
+              maxLines: 3,
+
+              decoration: InputDecoration(
+                hintText: 'Describe why this animal is being moved...',
+                filled: true,
+                fillColor: const Color(0xFFF8F9FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: AppTheme.primary,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+
             // Submit Button
             SizedBox(
               width: double.infinity,
+              height: 54,
               child: ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitTransfer,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 child: _isSubmitting
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
+                        height: 24,
+                        width: 24,
                         child: CircularProgressIndicator(
                           color: Colors.white,
-                          strokeWidth: 2,
+                          strokeWidth: 2.5,
                         ),
                       )
                     : const Text(
-                        'Submit Transfer Request',
-                        style: TextStyle(color: Colors.white),
+                        'Confirm Transfer',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFF5F6368),
       ),
     );
   }
@@ -630,26 +759,33 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
     final isSelected = _direction == value;
     return InkWell(
       onTap: () => setState(() => _direction = value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(8),
+          color: isSelected ? color.withOpacity(0.08) : const Color(0xFFF8F9FA),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? color : Colors.grey.shade300,
-            width: 2,
+            color: isSelected ? color : Colors.grey.shade200,
+            width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: isSelected ? color : Colors.grey),
+            Icon(
+              icon,
+              color: isSelected ? color : Colors.grey.shade600,
+              size: 18,
+            ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? color : Colors.grey,
-                fontWeight: FontWeight.w600,
+                color: isSelected ? color : Colors.grey.shade600,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
               ),
             ),
           ],
@@ -660,15 +796,21 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
 
   Future<void> _submitTransfer() async {
     if (_selectedAnimalId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select an animal')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an animal'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       return;
     }
-    if (_reasonController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter a reason')));
+    if (_reasonController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a reason'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       return;
     }
 
@@ -677,30 +819,41 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
     try {
       final body = {
         'animal_id': _selectedAnimalId,
-        'ticket_type': 'TRANSFER',
         'transfer_direction': _direction,
-        'description': _reasonController.text,
+        'description': _reasonController.text.trim(),
         'destination_shed_id': _selectedShedId,
         'source_shed_id': _selectedAnimal?.shedId,
+        'priority': _priority,
       };
 
-      await ref
+      final response = await ref
           .read(supervisorDashboardProvider.notifier)
           .createTransferTicket(body);
 
       if (mounted) {
-        Navigator.pop(context);
+        if (response != null && response['status'] == 'success') {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Transfer request submitted successfully'),
+              backgroundColor: Color(0xFF4CAF50),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          throw Exception('Failed to create request');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Transfer request submitted for approval'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-      );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

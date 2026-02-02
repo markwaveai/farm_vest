@@ -10,6 +10,7 @@ class InvestorAnimal {
   final int? internalId;
   final String? rfid;
   final int? age;
+  final int? farmId;
 
   /// List of image URLs for the animal
   final List<String> images;
@@ -42,6 +43,7 @@ class InvestorAnimal {
     this.internalId,
     this.rfid,
     this.age,
+    this.farmId,
     required this.shedName,
     required this.animalType,
 
@@ -75,12 +77,10 @@ class InvestorAnimal {
     // Check if data is nested or flat
     final bool isNested = json.containsKey('animal_details');
 
-    final animalData = isNested ? json['animal_details'] : json;
-    final farmData = isNested ? json['farm_details'] : json;
-    final shedData = isNested ? json['shed_details'] : json;
-    final investorData = isNested
-        ? json['investor_details']
-        : json; // Assuming flat might have investor info too?
+    final animalData = (isNested ? json['animal_details'] : json) ?? {};
+    final farmData = (isNested ? json['farm_details'] : json) ?? {};
+    final shedData = (isNested ? json['shed_details'] : json) ?? {};
+    final investorData = (isNested ? json['investor_details'] : json) ?? {};
 
     return InvestorAnimal(
       animalId: (animalData['animal_id'] ?? animalData['id']?.toString() ?? '')
@@ -95,8 +95,10 @@ class InvestorAnimal {
               .toList() ??
           [],
       farmName: (farmData['farm_name'] ?? farmData['name'] ?? '').toString(),
+      farmId: farmData['farm_id'] ?? farmData['id'] ?? animalData['farm_id'],
       farmLocation: (farmData['location'] ?? farmData['farm_location'] ?? '')
           .toString(),
+
       parkingId: (animalData['parking_id'] != null)
           ? animalData['parking_id'].toString()
           : null,
@@ -109,9 +111,9 @@ class InvestorAnimal {
       animalType: (animalData['animal_type'] ?? 'Buffalo').toString(),
       breed: (animalData['breed_name'] ?? animalData['breed'] ?? 'Murrah')
           .toString(),
-      investorName: (investorData != null)
-          ? (investorData['full_name'] ?? investorData['name'])
-          : null,
+      investorName: (investorData['full_name'] ?? investorData['name'])
+          ?.toString(),
+
       earTag: animalData['ear_tag']?.toString(),
       status: animalData['status']?.toString(),
       onboardedAt: animalData['onboarded_at'] != null
@@ -131,7 +133,9 @@ class InvestorAnimal {
       'id': internalId, // useful for reconstruction if needed
       'images': images,
       'farm_name': farmName,
+      'farm_id': farmId,
       'farm_location': farmLocation,
+
       'parking_id': parkingId,
       'row_number': rowNumber,
       'investor_name': investorName,
@@ -153,7 +157,9 @@ class InvestorAnimal {
     int? internalId,
     List<String>? images,
     String? farmName,
+    int? farmId,
     String? farmLocation,
+
     String? parkingId,
     String? rowNumber,
     String? investorName,
@@ -174,7 +180,9 @@ class InvestorAnimal {
 
       images: images ?? this.images,
       farmName: farmName ?? this.farmName,
+      farmId: farmId ?? this.farmId,
       farmLocation: farmLocation ?? this.farmLocation,
+
       parkingId: parkingId ?? this.parkingId,
       rowNumber: rowNumber ?? this.rowNumber,
       investorName: investorName ?? this.investorName,
@@ -207,7 +215,7 @@ class InvestorAnimal {
   // }
 
   @override
-  int get hashCode => rfid.hashCode;
+  int get hashCode => animalId.hashCode;
 }
 
 /// Response model for /api/investors/animals endpoint.

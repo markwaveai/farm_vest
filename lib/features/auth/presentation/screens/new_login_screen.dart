@@ -31,10 +31,15 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   int _remainingSeconds = 24;
   int _logoTapCount = 0;
   Timer? _tapResetTimer;
+  final _phoneFocusNode = FocusNode();
+  final _otpFocusNode = FocusNode();
 
   @override
   void dispose() {
     _timer?.cancel();
+    _tapResetTimer?.cancel();
+    _phoneFocusNode.dispose();
+    _otpFocusNode.dispose();
     super.dispose();
   }
 
@@ -684,10 +689,13 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
               // Input
               Expanded(
                 child: TextField(
+                  focusNode: _phoneFocusNode,
                   keyboardType: TextInputType.phone,
                   maxLength: 10,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   onChanged: (value) => setState(() => _phoneNumber = value),
+                  onSubmitted: (_) => _handleContinue(),
+
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -750,9 +758,11 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     return Column(
       children: [
         Pinput(
+          focusNode: _otpFocusNode,
           length: 6,
           autofocus: true,
           keyboardType: TextInputType.number,
+
           defaultPinTheme: defaultPinTheme,
           focusedPinTheme: focusedPinTheme,
           separatorBuilder: (index) => const SizedBox(width: 8),

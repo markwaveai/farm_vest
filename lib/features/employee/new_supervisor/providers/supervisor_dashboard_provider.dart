@@ -1,6 +1,8 @@
 import 'package:farm_vest/features/employee/new_supervisor/data/repositories/supervisor_repository.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
+import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,6 +26,7 @@ class SupervisorDashboardStats {
   final String activeIssues;
   final String transfers;
   final String pendingAllocations;
+  final String allTicketsCount;
 
   SupervisorDashboardStats({
     required this.totalAnimals,
@@ -31,6 +34,7 @@ class SupervisorDashboardStats {
     required this.activeIssues,
     required this.transfers,
     required this.pendingAllocations,
+    required this.allTicketsCount,
   });
 }
 
@@ -121,6 +125,7 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
         activeIssues: '0',
         transfers: '0',
         pendingAllocations: '0',
+        allTicketsCount: '0',
       ),
     );
   }
@@ -135,6 +140,7 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
       final milkEntries = await supervisorRepo.getMilkEntries();
       final ticketsResponse = await supervisorRepo.getTickets();
       final transfersResponse = await supervisorRepo.getTransferTickets();
+      final allTicketsCount = await supervisorRepo.getTicketsCount();
 
       // Sum milk quantity for entries that match today's date
       final milkData = milkEntries['data'] as List<dynamic>? ?? [];
@@ -150,16 +156,21 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
           );
 
       // Filter tickets
-      final allTickets = ticketsResponse['data'] as List<dynamic>? ?? [];
+      final List<Ticket> allTickets = List<Ticket>.from(
+        ticketsResponse['data'] ?? [],
+      );
       final activeHealthIssues = allTickets.where((t) {
-        final type = (t['ticket_type'] ?? '').toString().toUpperCase();
-        final status = (t['status'] ?? '').toString().toUpperCase();
-        return type == 'HEALTH' && status == 'PENDING';
+        final type = TicketType.fromString(t.ticketType);
+        final status = TicketStatus.fromString(t.status);
+        return type == TicketType.health && status == TicketStatus.pending;
       }).length;
-      final transferTickets = transfersResponse['data'] as List<dynamic>? ?? [];
+
+      final List<Ticket> transferTickets = List<Ticket>.from(
+        transfersResponse['data'] ?? [],
+      );
       final transferRequests = transferTickets.where((t) {
-        final status = (t['status'] ?? '').toString().toUpperCase();
-        return status == 'PENDING';
+        final status = TicketStatus.fromString(t.status);
+        return status == TicketStatus.pending;
       }).length;
 
       // Fetch pending allocations
@@ -179,6 +190,7 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
         activeIssues: activeHealthIssues.toString(),
         transfers: transferRequests.toString(),
         pendingAllocations: pendingCount.toString(),
+        allTicketsCount: allTicketsCount.toString(),
       );
 
       state = state.copyWith(
@@ -196,10 +208,16 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
     }
   }
 
-  Future<Map<String, dynamic>?> createTicket(Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>?> createTicket(
+    Map<String, dynamic> body, {
+    String ticketType = 'HEALTH',
+  }) async {
     final supervisorRepo = ref.read(supervisorRepositoryProvider);
     try {
-      final response = await supervisorRepo.createTicket(body: body);
+      final response = await supervisorRepo.createTicket(
+        body: body,
+        ticketType: ticketType,
+      );
       if (response['status'] == 'success') {
         await _fetchData(); // Refresh data after successful entry
         return response;

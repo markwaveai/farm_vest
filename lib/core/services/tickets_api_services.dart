@@ -18,10 +18,11 @@ class TicketsApiServices {
     String? transferDirection,
   }) async {
     try {
-      var url = "${AppConstants.appLiveUrl}/ticket/";
+      var url = "${AppConstants.appLiveUrl}/ticket/get_tickets";
       final queryParams = <String, String>{};
       if (status != null) queryParams['status_filter'] = status;
-      if (ticketType != null) queryParams['type'] = ticketType;
+      if (ticketType != null) queryParams['ticket_type'] = ticketType;
+
       if (transferDirection != null) {
         queryParams['transfer_direction'] = transferDirection;
       }
@@ -83,10 +84,11 @@ class TicketsApiServices {
   static Future<bool> createTicket({
     required String token,
     required Map<String, dynamic> body,
+    required String ticketType,
   }) async {
     try {
       final response = await http.post(
-        Uri.parse("${AppConstants.appLiveUrl}/ticket/"),
+        Uri.parse("${AppConstants.appLiveUrl}/ticket/?ticket_type=$ticketType"),
         headers: {
           HttpHeaders.authorizationHeader: 'Bearer $token',
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
@@ -111,28 +113,7 @@ class TicketsApiServices {
     required String token,
     required Map<String, dynamic> body,
   }) async {
-    try {
-      debugPrint("Creating Transfer Ticket: ${jsonEncode(body)}");
-      final response = await http.post(
-        Uri.parse("${AppConstants.appLiveUrl}/ticket/transfer_ticket"),
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $token',
-          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
-        },
-        body: jsonEncode(body),
-      );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return true;
-      }
-      debugPrint(
-        "Create Transfer Ticket Failed (${response.statusCode}): ${response.body}",
-      );
-      return false;
-    } catch (e) {
-      debugPrint("Create Transfer Ticket Exception: $e");
-      return false;
-    }
+    return createTicket(token: token, body: body, ticketType: 'TRANSFER');
   }
 
   static Future<Map<String, dynamic>> getTransferSummary({
@@ -203,6 +184,36 @@ class TicketsApiServices {
       );
     } catch (e) {
       return false;
+    }
+  }
+
+  static Future<int> getTicketsCount({
+    required String token,
+    String? status,
+    String? ticketType,
+  }) async {
+    try {
+      var url = "${AppConstants.appLiveUrl}/ticket/get_tickets";
+      final queryParams = <String, String>{};
+      if (status != null) queryParams['status_filter'] = status;
+      if (ticketType != null) queryParams['ticket_type'] = ticketType;
+
+      if (queryParams.isNotEmpty) {
+        url += "?${Uri(queryParameters: queryParams).query}";
+      }
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['count'] ?? 0;
+      }
+      return 0;
+    } catch (e) {
+      return 0;
     }
   }
 }

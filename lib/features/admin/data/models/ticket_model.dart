@@ -33,7 +33,7 @@ class Ticket {
           ? DateTime.tryParse(json['created_at'])
           : null,
       priority: json['priority'],
-      metadata: json['metadata'],
+      metadata: json,
     );
   }
 

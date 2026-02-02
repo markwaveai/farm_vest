@@ -16,6 +16,7 @@ class CustomTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final TextStyle? style;
   final TextCapitalization textCapitalization;
+  final FocusNode? focusNode;
   final bool readOnly;
 
   const CustomTextField({
@@ -29,6 +30,7 @@ class CustomTextField extends StatelessWidget {
     this.maxLength,
     this.inputFormatters,
     this.controller,
+    this.focusNode,
     this.keyboardType = TextInputType.text,
     this.validator,
     this.prefixIcon,
@@ -41,7 +43,9 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
       initialValue: controller == null ? initialValue : null,
+
       enabled: enabled,
       readOnly: readOnly,
       enableInteractiveSelection:
