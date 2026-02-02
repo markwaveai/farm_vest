@@ -97,8 +97,33 @@ class UserModel {
       isActive: json['is_active'] ?? true, // Map from is_active
       imageUrl: (json['imageUrl'] ?? json['image_url'])?.toString(),
       farmId: json['farm_id']?.toString(),
-      farmName: json['farm_name']?.toString(),
-      farmLocation: json['farm_location']?.toString(),
+      farmName:
+          (json['farm_name'] ??
+                  json['farmName'] ??
+                  (json['farm'] is String ? json['farm'] : null) ??
+                  json['farm']?['farm_name'] ??
+                  json['farm']?['name'] ??
+                  json['farm_details']?['farm_name'] ??
+                  json['farm_details']?['name'])
+              ?.toString(),
+      farmLocation:
+          (json['farm_location'] ??
+                  json['location'] ??
+                  json['city'] ??
+                  json['district'] ??
+                  json['state'] ??
+                  json['area'] ??
+                  json['farm_area'] ??
+                  json['address'] ??
+                  json['farm']?['location'] ??
+                  json['farm']?['city'] ??
+                  json['farm']?['farm_location'] ??
+                  json['farm']?['address'] ??
+                  json['farm_details']?['location'] ??
+                  json['farm_details']?['city'] ??
+                  json['farm_details']?['farm_location'] ??
+                  json['farm_details']?['address'])
+              ?.toString(),
       shedId: json['shed_id']?.toString(),
       shedName: json['shed_name']?.toString(),
     );

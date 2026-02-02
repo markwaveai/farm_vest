@@ -7,6 +7,7 @@ import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dar
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/data/models/user_model.dart';
 import '../providers/admin_provider.dart';
+import 'package:farm_vest/core/widgets/farm_selector_input.dart';
 
 class StaffManagementScreen extends ConsumerStatefulWidget {
   final VoidCallback? onBackPressed;
@@ -708,17 +709,9 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
               children: [
                 const Text('Select the new farm for this employee:'),
                 const SizedBox(height: 16),
-                DropdownButtonFormField<int>(
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Select Farm',
-                  ),
-                  items: farms.map((f) {
-                    return DropdownMenuItem<int>(
-                      value: f.id,
-                      child: Text(f.farmName),
-                    );
-                  }).toList(),
+                FarmSelectorInput(
+                  selectedFarmId: selectedFarmId,
+                  label: 'Select Farm',
                   onChanged: (val) {
                     setState(() {
                       selectedFarmId = val;
@@ -726,12 +719,16 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
 
                       // Load sheds for selected farm if Supervisor
                       if (isSupervisor && val != null) {
-                        final farm = farms.firstWhere((f) => f.id == val);
-                        print('Selected farm: ${farm.farmName}');
-                        // sheds property is missing from Farm model, needs to be handled
-                        // For now, let's assume sheds are fetched separately or provided elsewhere
-                        // If Farm model is just a summary, we might need a fetchSheds call here
-                        sheds = []; // Placeholder
+                        try {
+                          final farm = farms.firstWhere((f) => f.id == val);
+                          print('Selected farm: ${farm.farmName}');
+                          // sheds property is missing from Farm model, needs to be handled
+                          // For now, let's assume sheds are fetched separately or provided elsewhere
+                          // If Farm model is just a summary, we might need a fetchSheds call here
+                          sheds = []; // Placeholder
+                        } catch (e) {
+                          print('Error finding farm: $e');
+                        }
                       }
                     });
                   },
@@ -906,6 +903,90 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      // Location Display
+                      () {
+                        final farms = ref.watch(adminProvider).farms;
+                        String? locationLabel;
+
+                        // Try to get farm name/location
+                        String? name = staff.farmName;
+                        String? loc = staff.farmLocation;
+
+                        // Fallback to ID lookup
+                        if ((name == null ||
+                                name.isEmpty ||
+                                name.toLowerCase() == "null") &&
+                            staff.farmId != null) {
+                          try {
+                            final fId = int.parse(staff.farmId!);
+                            final farm = farms.firstWhere((f) => f.id == fId);
+                            name = farm.farmName;
+                            loc = farm.location;
+                          } catch (_) {}
+                        }
+
+                        if (loc != null &&
+                            loc.isNotEmpty &&
+                            loc.toLowerCase() != "null") {
+                          locationLabel = loc;
+                          if (name != null &&
+                              name.isNotEmpty &&
+                              name.toLowerCase() != "null" &&
+                              name != loc) {
+                            locationLabel = "$loc • $name";
+                          }
+                        } else if (name != null &&
+                            name.isNotEmpty &&
+                            name.toLowerCase() != "null") {
+                          locationLabel = name;
+                        }
+
+                        // Add shed if available
+                        if (staff.shedName != null &&
+                            staff.shedName!.isNotEmpty &&
+                            staff.shedName!.toLowerCase() != "null") {
+                          locationLabel =
+                              (locationLabel != null
+                                  ? "$locationLabel • "
+                                  : "") +
+                              staff.shedName!;
+                        }
+
+                        if (locationLabel != null &&
+                            locationLabel.isNotEmpty &&
+                            locationLabel != "null") {
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              top: 2.0,
+                              bottom: 2.0,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on_outlined,
+                                  size: 12,
+                                  color: Colors.grey[600],
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    locationLabel
+                                        .toUpperCase(), // Highlight with uppercase
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.grey[700],
+                                      letterSpacing: 0.3,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }(),
                       const SizedBox(height: 2),
                       Row(
                         children: [

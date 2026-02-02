@@ -88,7 +88,14 @@ class _SupportScreenState extends State<SupportScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Quick Actions
-              const Text('Quick Actions', style: AppTheme.headingMedium),
+              Text(
+                'Quick Actions',
+                style: AppTheme.headingMedium.copyWith(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
+              ),
               const SizedBox(height: AppConstants.spacingM),
 
               GridView.count(
@@ -185,9 +192,13 @@ class _SupportScreenState extends State<SupportScreen> {
               const SizedBox(height: AppConstants.spacingL),
 
               // FAQs
-              const Text(
+              Text(
                 'Frequently Asked Questions',
-                style: AppTheme.headingMedium,
+                style: AppTheme.headingMedium.copyWith(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
               ),
               const SizedBox(height: AppConstants.spacingM),
 
@@ -202,9 +213,13 @@ class _SupportScreenState extends State<SupportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Contact Information',
-                        style: AppTheme.headingSmall,
+                        style: AppTheme.headingSmall.copyWith(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
                       ),
                       const SizedBox(height: AppConstants.spacingM),
 
@@ -234,11 +249,22 @@ class _SupportScreenState extends State<SupportScreen> {
               Center(
                 child: Column(
                   children: [
-                    const Text('FarmVest v1.0.0', style: AppTheme.bodySmall),
+                    Text(
+                      'FarmVest v1.0.0',
+                      style: AppTheme.bodySmall.copyWith(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white70
+                            : Colors.black54,
+                      ),
+                    ),
                     const SizedBox(height: AppConstants.spacingXS),
-                    const Text(
+                    Text(
                       AppConstants.poweredBy,
-                      style: AppTheme.bodySmall,
+                      style: AppTheme.bodySmall.copyWith(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white70
+                            : Colors.black54,
+                      ),
                     ),
                   ],
                 ),
@@ -257,7 +283,9 @@ class _SupportScreenState extends State<SupportScreen> {
     Color color,
     VoidCallback onTap,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
+      color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppConstants.radiusL),
@@ -272,15 +300,17 @@ class _SupportScreenState extends State<SupportScreen> {
                 title,
                 style: AppTheme.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppConstants.spacingXS),
               Text(
-                softWrap: true,
-
                 subtitle,
-                style: AppTheme.bodySmall,
+                softWrap: true,
+                style: AppTheme.bodySmall.copyWith(
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -291,18 +321,30 @@ class _SupportScreenState extends State<SupportScreen> {
   }
 
   Widget _buildFAQCard(FAQ faq) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
       child: ExpansionTile(
         leading: Icon(faq.icon, color: AppTheme.primary),
         title: Text(
           faq.question,
-          style: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+          style: AppTheme.bodyMedium.copyWith(
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
         ),
+        collapsedIconColor: isDark ? Colors.white70 : Colors.black54,
+        iconColor: AppTheme.primary,
         children: [
           Padding(
             padding: const EdgeInsets.all(AppConstants.spacingM),
-            child: Text(faq.answer, style: AppTheme.bodyMedium),
+            child: Text(
+              faq.answer,
+              style: AppTheme.bodyMedium.copyWith(
+                color: isDark ? Colors.white70 : Colors.black87,
+              ),
+            ),
           ),
         ],
       ),
@@ -310,6 +352,7 @@ class _SupportScreenState extends State<SupportScreen> {
   }
 
   Widget _buildContactInfo(IconData icon, String label, String value) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
       child: Row(
@@ -321,7 +364,9 @@ class _SupportScreenState extends State<SupportScreen> {
             children: [
               Text(
                 label,
-                style: AppTheme.bodySmall.copyWith(color: AppTheme.mediumGrey),
+                style: AppTheme.bodySmall.copyWith(
+                  color: isDark ? Colors.white70 : AppTheme.mediumGrey,
+                ),
               ),
               Text(
                 value,
@@ -329,6 +374,7 @@ class _SupportScreenState extends State<SupportScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: AppTheme.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ],

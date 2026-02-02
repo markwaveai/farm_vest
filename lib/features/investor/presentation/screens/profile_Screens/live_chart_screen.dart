@@ -71,6 +71,29 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  void _endChat() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('End Chat'),
+        content: const Text('Are you sure you want to end this session?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Close chat screen
+            },
+            child: const Text('End Chat', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,7 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
         title: const Text("Chat with us"),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: _endChat,
             child: const Text(
               "End Chat",
               style: TextStyle(color: Colors.orange),

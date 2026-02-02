@@ -10,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:farm_vest/features/auth/data/repositories/auth_repository.dart';
-import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 
 enum QuickActionType { milkEntry, healthTicket, transferRequest, locateAnimal }
 

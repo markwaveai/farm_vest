@@ -69,11 +69,11 @@ class InvestorListNotifier extends Notifier<InvestorListState> {
 
     // Apply status filter first
     List<model.Investor> filteredList;
-    if (currentStatus == 'all') {
-      filteredList = _sourceInvestors;
+    if (currentStatus == 'active') {
+      filteredList = _sourceInvestors.where((i) => i.animalCount > 0).toList();
+    } else if (currentStatus == 'exited') {
+      filteredList = _sourceInvestors.where((i) => i.animalCount == 0).toList();
     } else {
-      // Note: model.Investor doesn't have 'status' string, might need active_status from JSON or handling here
-      // Assuming 'Active' for all returned for now, or based on animal count
       filteredList = _sourceInvestors;
     }
 

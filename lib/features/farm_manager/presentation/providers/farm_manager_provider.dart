@@ -65,11 +65,11 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       //     .length;
 
       // 4. Fetch Pending Tickets
-      final ticketsData = await TicketsApiServices.getTickets(
-        token: token,
-        status: 'PENDING',
-      );
-      final pendingTickets = ticketsData.length;
+      // final ticketsData = await TicketsApiServices.getTickets(
+      //   token: token,
+      //   status: 'PENDING',
+      // );
+      // final pendingTickets = ticketsData.length;
 
       // 5. Fetch Sheds
       final farmIdStr = authState.userData?.farmId;
@@ -535,6 +535,16 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
 
     await TicketsApiServices.rejectTransfer(token: token, ticketId: ticketId);
     await refreshDashboard();
+  }
+
+  void resetAllocationState() {
+    state = state.copyWith(
+      sheds: [],
+      currentShedAvailability: null,
+      // onboardedAnimalIds: [], // Keep animals? No, better clear to force fresh fetch based on farm
+      onboardedAnimalIds: [],
+      error: null,
+    );
   }
 }
 

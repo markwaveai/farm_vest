@@ -29,6 +29,7 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
   int? _selectedShedId;
   bool _isTestAccount = false;
   List<Map<String, dynamic>> _sheds = [];
+  bool _isFormValid = false;
 
   @override
   void initState() {
@@ -36,6 +37,10 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
     if (widget.isOnboardingManager) {
       _selectedRole = UserType.farmManager;
     }
+
+    _nameController.addListener(_validateForm);
+    _emailController.addListener(_validateForm);
+    _phoneController.addListener(_validateForm);
 
     Future.microtask(() {
       final auth = ref.read(authProvider);
@@ -73,6 +78,28 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
           _sheds = sheds;
         });
       }
+    }
+  }
+
+  void _validateForm() {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+
+    // Basic validity check (fields are not empty and meet basic criteria)
+    final bool isValid =
+        name.isNotEmpty &&
+        email.isNotEmpty &&
+        phone.length == 10 &&
+        _selectedRole != null &&
+        _selectedFarmId != null &&
+        // For supervisors, shed must be selected
+        (_selectedRole != UserType.supervisor || _selectedShedId != null);
+
+    if (isValid != _isFormValid) {
+      setState(() {
+        _isFormValid = isValid;
+      });
     }
   }
 
@@ -129,6 +156,7 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
               CustomTextField(
                 controller: _nameController,
                 hint: 'e.g. John Doe',
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 inputFormatters: [
                   // Only allow letters and spaces
                   FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
@@ -166,6 +194,11 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                 controller: _emailController,
                 hint: 'e.g. john@farmvest.com',
                 keyboardType: TextInputType.emailAddress,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                inputFormatters: [
+                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // No spaces
+                  _EmailComFormatter(),
+                ],
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
                     return 'Email is required';
@@ -216,6 +249,13 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                 controller: _phoneController,
                 hint: 'e.g. 9876543210',
                 keyboardType: TextInputType.phone,
+                maxLength: 10,
+                showCounter: false,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
                     return 'Phone number is required';
@@ -261,7 +301,10 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                             ),
                           )
                           .toList(),
-                  onChanged: (v) => setState(() => _selectedRole = v),
+                  onChanged: (v) {
+                    setState(() => _selectedRole = v);
+                    _validateForm();
+                  },
                   validator: (v) => v == null ? 'Role is required' : null,
                 ),
                 const SizedBox(height: 20),
@@ -287,6 +330,7 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                             });
                             state.didChange(v);
                             if (v != null) _fetchSheds(v);
+                            _validateForm();
                           },
                           label: 'Select Farm',
                         ),
@@ -334,7 +378,10 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                       child: Text('${s['shed_name']} (${s['shed_id']})'),
                     );
                   }).toList(),
-                  onChanged: (v) => setState(() => _selectedShedId = v),
+                  onChanged: (v) {
+                    setState(() => _selectedShedId = v);
+                    _validateForm();
+                  },
                   validator: (v) => v == null
                       ? 'Shed assignment is required for Supervisors'
                       : null,
@@ -364,64 +411,68 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
 
               PrimaryButton(
                 isLoading: adminState.isLoading,
-                onPressed: () async {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    final fullName = _nameController.text.trim();
-                    final nameParts = fullName.split(' ');
-                    final firstName = nameParts[0];
-                    final lastName = nameParts.length > 1
-                        ? nameParts.sublist(1).join(' ')
-                        : '';
+                onPressed: _isFormValid
+                    ? () async {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          final fullName = _nameController.text.trim();
+                          final nameParts = fullName.split(' ');
+                          final firstName = nameParts[0];
+                          final lastName = nameParts.length > 1
+                              ? nameParts.sublist(1).join(' ')
+                              : '';
 
-                    debugPrint("=== ADD STAFF FORM DATA ===");
-                    debugPrint("First Name: $firstName");
-                    debugPrint("Last Name: $lastName");
-                    debugPrint("Email: ${_emailController.text.trim()}");
-                    debugPrint("Mobile: ${_phoneController.text.trim()}");
-                    debugPrint("Selected Role: $_selectedRole");
-                    debugPrint(
-                      "Role Backend Value: ${_selectedRole?.backendValue}",
-                    );
-                    debugPrint("Farm ID: $_selectedFarmId");
-                    debugPrint("Shed ID: $_selectedShedId");
-                    debugPrint("Is Test: $_isTestAccount");
+                          debugPrint("=== ADD STAFF FORM DATA ===");
+                          debugPrint("First Name: $firstName");
+                          debugPrint("Last Name: $lastName");
+                          debugPrint("Email: ${_emailController.text.trim()}");
+                          debugPrint("Mobile: ${_phoneController.text.trim()}");
+                          debugPrint("Selected Role: $_selectedRole");
+                          debugPrint(
+                            "Role Backend Value: ${_selectedRole?.backendValue}",
+                          );
+                          debugPrint("Farm ID: $_selectedFarmId");
+                          debugPrint("Shed ID: $_selectedShedId");
+                          debugPrint("Is Test: $_isTestAccount");
 
-                    final success = await ref
-                        .read(adminProvider.notifier)
-                        .addStaff(
-                          firstName: firstName,
-                          lastName: lastName,
-                          email: _emailController.text.trim(),
-                          mobile: _phoneController.text.trim(),
-                          roles: [_selectedRole!.backendValue],
-                          farmId: _selectedFarmId!,
-                          shedId: _selectedRole == UserType.supervisor
-                              ? _selectedShedId
-                              : null,
-                          isTest: _isTestAccount,
-                        );
+                          final success = await ref
+                              .read(adminProvider.notifier)
+                              .addStaff(
+                                firstName: firstName,
+                                lastName: lastName,
+                                email: _emailController.text.trim(),
+                                mobile: _phoneController.text.trim(),
+                                roles: [_selectedRole!.backendValue],
+                                farmId: _selectedFarmId!,
+                                shedId: _selectedRole == UserType.supervisor
+                                    ? _selectedShedId
+                                    : null,
+                                isTest: _isTestAccount,
+                              );
 
-                    if (success && mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Staff member added successfully!'),
-                          backgroundColor: AppTheme.successGreen,
-                        ),
-                      );
-                      Navigator.pop(context);
-                    } else if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            ref.read(adminProvider).error ??
-                                'Failed to add staff',
-                          ),
-                          backgroundColor: AppTheme.errorRed,
-                        ),
-                      );
-                    }
-                  }
-                },
+                          if (success && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Staff member added successfully!',
+                                ),
+                                backgroundColor: AppTheme.successGreen,
+                              ),
+                            );
+                            Navigator.pop(context);
+                          } else if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  ref.read(adminProvider).error ??
+                                      'Failed to add staff',
+                                ),
+                                backgroundColor: AppTheme.errorRed,
+                              ),
+                            );
+                          }
+                        }
+                      }
+                    : null,
                 text: widget.isOnboardingManager
                     ? 'Finish Onboarding'
                     : 'Add Staff Member',
@@ -456,5 +507,28 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
         ),
       ),
     );
+  }
+}
+
+class _EmailComFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text;
+    final comIndex = text.toLowerCase().indexOf('.com');
+
+    if (comIndex != -1) {
+      // If .com exists, truncate anything after it (com is 4 chars)
+      final restrictedText = text.substring(0, comIndex + 4);
+      if (restrictedText.length < text.length) {
+        return TextEditingValue(
+          text: restrictedText,
+          selection: TextSelection.collapsed(offset: comIndex + 4),
+        );
+      }
+    }
+    return newValue;
   }
 }

@@ -26,7 +26,8 @@ class FarmManagerApiServices {
     var url =
         "${AppConstants.appLiveUrl}/employee/search_employee?query_str=$query&size=100";
     if (role != null && role.isNotEmpty && role.toUpperCase() != 'ALL') {
-      url += "&role=${role.toUpperCase().replaceAll(' ', '_')}";
+      String r = role.toUpperCase().replaceAll(' ', '_');
+      url += "&role=$r";
     }
     if (isActive != null) {
       url += "&is_active=$isActive";
@@ -59,17 +60,43 @@ class FarmManagerApiServices {
     final data = decoded['data'] as List;
     List<Staff> staffList = [];
 
+    // To prevent "mixing", we'll determine the display role based on context
+    String? currentFilterRole =
+        (role != null && role.isNotEmpty && role.toUpperCase() != 'ALL')
+        ? role
+        : null;
+
     for (final item in data) {
       final roles = (item['roles'] as List?)?.cast<String>() ?? [];
-      String role = "Staff";
-      if (roles.contains("SUPERVISOR")) {
-        role = "Supervisor";
-      } else if (roles.contains("DOCTOR")) {
-        role = "Doctor";
-      } else if (roles.contains("ASSISTANT_DOCTOR")) {
-        role = "Assistant Doctor";
-      } else if (roles.contains("FARM_MANAGER")) {
-        role = "Farm Manager";
+      String displayRole = "Staff";
+
+      // If we filtered for a specific role and this person has it, show that role
+      if (currentFilterRole != null &&
+          roles.contains(
+            currentFilterRole.toUpperCase().replaceAll(' ', '_'),
+          )) {
+        displayRole = currentFilterRole;
+      } else {
+        // Fallback to priority logic
+        if (roles.contains("ASSISTANT_DOCTOR")) {
+          displayRole = "Assistant Doctor";
+        } else if (roles.contains("DOCTOR")) {
+          displayRole = "Doctor";
+        } else if (roles.contains("SUPERVISOR")) {
+          displayRole = "Supervisor";
+        } else if (roles.contains("FARM_MANAGER")) {
+          displayRole = "Farm Manager";
+        }
+      }
+
+      // Add strict client-side filtering if a role is selected
+      // This ensures that even if the API returns people with other roles,
+      // we only show the ones intended for this specific view.
+      if (currentFilterRole != null &&
+          !roles.contains(
+            currentFilterRole.toUpperCase().replaceAll(' ', '_'),
+          )) {
+        continue;
       }
 
       staffList.add(
@@ -79,7 +106,7 @@ class FarmManagerApiServices {
           'mobile': item['mobile'],
           'email': item['email'],
           'status': (item['is_active'] ?? false) ? 'On Duty' : 'Inactive',
-        }, role),
+        }, displayRole),
       );
     }
 

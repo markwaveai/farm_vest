@@ -90,7 +90,7 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
                 hintStyle: TextStyle(color: AppTheme.grey1),
                 border: InputBorder.none,
               ),
-              style: const TextStyle(color: Colors.white, fontSize: 18),
+              style: const TextStyle(color: Colors.black, fontSize: 18),
               onChanged: (query) {
                 ref.read(investorListProvider.notifier).setSearchQuery(query);
               },
@@ -144,7 +144,7 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
                   location: investor.address ?? 'N/A',
                   amount: '₹${investor.animalCount}', // Adjusted mapping
                   date: investor.memberSince?.toIso8601String() ?? 'N/A',
-                  status: investor.animalCount > 0 ? 'Active' : 'Inactive',
+                  status: investor.animalCount > 0 ? 'Active' : 'Exited',
                 );
               },
             ),

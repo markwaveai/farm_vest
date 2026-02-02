@@ -43,6 +43,9 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
     super.initState();
     // Initialize with empty entries
     _initializeEmptyEntries();
+    searchController.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   void _initializeEmptyEntries() {
@@ -387,6 +390,11 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
         return;
       }
 
+      if (animal.type == 'BUFFALO' && animal.ageMonths < 36) {
+        _showError('Buffalo age must be 36 months or above for $animalName');
+        return;
+      }
+
       if (animal.ageMonths <= 0 || animal.ageMonths > 300) {
         _showError('Valid Age (1-300 months) is required for $animalName');
         return;
@@ -549,6 +557,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
             SectionTitle('Find Investor Orders'),
             const SizedBox(height: 12),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: CustomTextField(
@@ -557,19 +566,25 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                     prefixIcon: const Icon(Icons.phone_android_rounded),
                     keyboardType: TextInputType.phone,
                     maxLength: 10,
+                    showCounter: false,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
                 ),
                 const SizedBox(width: 12),
-                SizedBox(
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: _showPaidOrdersDialog,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                ElevatedButton(
+                  onPressed: searchController.text.trim().length < 10
+                      ? null
+                      : _showPaidOrdersDialog,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 15,
                     ),
-                    child: const Text('Find Orders'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+                  child: const Text('Find Orders'),
                 ),
               ],
             ),

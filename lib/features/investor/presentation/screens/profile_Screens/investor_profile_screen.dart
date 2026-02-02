@@ -10,7 +10,6 @@ import 'package:farm_vest/features/investor/presentation/widgets/profile/profile
 import 'package:farm_vest/features/investor/presentation/widgets/profile/profile_info_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class InvestorProfileScreen extends ConsumerStatefulWidget {
   const InvestorProfileScreen({super.key});
@@ -122,11 +121,21 @@ class _CustomerProfileScreenState extends ConsumerState<InvestorProfileScreen> {
                 _removeProfileImage = false;
                 _isEditing = false;
               });
-              Fluttertoast.showToast(msg: "Profile updated successfully");
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Profile updated successfully"),
+                  backgroundColor: Colors.green,
+                ),
+              );
             }
           } else {
             if (mounted) {
-              Fluttertoast.showToast(msg: "Failed to update profile");
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Failed to update profile"),
+                  backgroundColor: Colors.red,
+                ),
+              );
             }
           }
         }

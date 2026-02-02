@@ -79,8 +79,25 @@ class ShedsApiServices {
     required int shedId,
     required Map<String, dynamic> body,
   }) async {
-    debugPrint("updateShed: Endpoint stub.");
-    return false;
+    try {
+      final response = await http.put(
+        Uri.parse("${AppConstants.appLiveUrl}/shed/update_shed/$shedId"),
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return true;
+      }
+      debugPrint("Update Shed Failed: ${response.statusCode} ${response.body}");
+      return false;
+    } catch (e) {
+      debugPrint("Update Shed Error: $e");
+      return false;
+    }
   }
 
   static Future<Map<String, dynamic>> getAvailablePositions({

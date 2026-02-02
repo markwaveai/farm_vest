@@ -75,7 +75,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
         Container(
           height: 48,
           decoration: BoxDecoration(
-            color: AppTheme.lightGrey.withValues(alpha: 0.5),
+            color: AppTheme.lightGrey.withOpacity(0.5),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.transparent),
           ),
@@ -102,13 +102,13 @@ class _ModernTextFieldState extends State<ModernTextField> {
               hintText: widget.hint,
               hintStyle: TextStyle(
                 fontSize: 14,
-                color: AppTheme.grey1.withValues(alpha: 0.5),
+                color: AppTheme.grey1.withOpacity(0.5),
                 fontWeight: FontWeight.normal,
               ),
               prefixIcon: Icon(
                 widget.icon,
                 size: 18,
-                color: AppTheme.primary.withValues(alpha: 0.6),
+                color: AppTheme.primary.withOpacity(0.6),
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(

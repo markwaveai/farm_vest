@@ -16,7 +16,7 @@ class CustomActionButton extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final double height;
   final double? width;
-final Widget? child;
+  final Widget? child;
   const CustomActionButton({
     super.key,
     this.label,
@@ -36,22 +36,25 @@ final Widget? child;
   @override
   Widget build(BuildContext context) {
     final isOutlined = variant == ButtonVariant.outlined;
+    final isEnabled = onPressed != null;
 
     return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(borderRadius),
-      child: Container(
-        height: height,
-        width: width,
-        alignment: Alignment.center,
-        padding: padding,
-        decoration: BoxDecoration(
-          color: isOutlined ? Colors.transparent : color,
-          borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(color: color, width: 1.5),
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.5,
+        child: Container(
+          height: height,
+          width: width,
+          alignment: Alignment.center,
+          padding: padding,
+          decoration: BoxDecoration(
+            color: isOutlined ? Colors.transparent : color,
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(color: color, width: 1.5),
+          ),
+          child: child,
         ),
-        child: child,
-        
       ),
     );
   }

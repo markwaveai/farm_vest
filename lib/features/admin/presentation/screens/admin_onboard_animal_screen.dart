@@ -40,6 +40,9 @@ class _AdminOnboardAnimalScreenState
   @override
   void initState() {
     super.initState();
+    searchController.addListener(() {
+      setState(() {});
+    });
     _initializeEmptyEntries();
   }
 
@@ -210,7 +213,7 @@ class _AdminOnboardAnimalScreenState
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Admin Animal Onboarding'),
+        title: const Text('Buffalo Onboarding'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () {
@@ -232,11 +235,17 @@ class _AdminOnboardAnimalScreenState
                     focusNode: searchFocusNode,
                     prefixIcon: const Icon(Icons.phone),
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: _showPaidOrdersDialog,
+                  onPressed: searchController.text.trim().length == 10
+                      ? _showPaidOrdersDialog
+                      : null,
                   child: const Text('Find'),
                 ),
               ],

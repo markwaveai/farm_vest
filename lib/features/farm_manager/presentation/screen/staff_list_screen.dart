@@ -89,10 +89,10 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.black),
                 decoration: const InputDecoration(
                   hintText: 'Search Staff...',
-                  hintStyle: TextStyle(color: Colors.white70),
+                  hintStyle: TextStyle(color: Colors.black),
                   border: InputBorder.none,
                 ),
                 onChanged: (val) {
@@ -940,21 +940,23 @@ class StaffCard extends ConsumerWidget {
             child: Icon(icon, size: 20, color: color ?? Colors.grey.shade600),
           ),
           const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-              ),
-              Text(
-                value ?? 'N/A',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                 ),
-              ),
-            ],
+                Text(
+                  value ?? 'N/A',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

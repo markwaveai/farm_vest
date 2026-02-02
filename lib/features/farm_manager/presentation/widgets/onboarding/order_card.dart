@@ -18,7 +18,7 @@ class OrderCard extends StatelessWidget {
         border: Border.all(color: AppTheme.lightGrey, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -42,8 +42,8 @@ class OrderCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            AppTheme.primary.withValues(alpha: 0.1),
-                            AppTheme.darkPrimary.withValues(alpha: 0.1),
+                            AppTheme.primary.withOpacity(0.1),
+                            AppTheme.darkPrimary.withOpacity(0.1),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(12),

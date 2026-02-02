@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:farm_vest/core/services/biometric_service.dart';
-import 'package:farm_vest/core/theme/app_constants.dart';
 
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_dialog.dart';
@@ -106,7 +105,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              Divider(color: AppTheme.grey1.withValues(alpha: 0.5)),
+              Divider(color: AppTheme.grey1.withOpacity(0.5)),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
                 title: const Text('Camera'),
@@ -195,8 +194,8 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
     final cardColor = Colors.white;
 
     final borderColor = isComplete
-        ? AppTheme.successGreen.withValues(alpha: 0.3)
-        : AppTheme.primary.withValues(alpha: 0.1);
+        ? AppTheme.successGreen.withOpacity(0.3)
+        : AppTheme.primary.withOpacity(0.1);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
@@ -206,7 +205,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
         border: Border.all(color: borderColor, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 20,
             offset: const Offset(0, 8),
             spreadRadius: -4,
@@ -227,7 +226,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
               ),
               border: Border(
                 bottom: BorderSide(
-                  color: AppTheme.lightGrey.withValues(alpha: 0.5),
+                  color: AppTheme.lightGrey.withOpacity(0.5),
                 ),
               ),
             ),
@@ -241,7 +240,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.primary.withValues(alpha: 0.15),
+                        color: AppTheme.primary.withOpacity(0.15),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -382,37 +381,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           },
                         ),
                       )
-                    else if (!isBuffalo) ...[
-                      // Age first for calf?
-                      // Wait, previous code had Age left, Parent right.
-                      // Buffalo code had Breed Left, Age Right.
-                    ] else
-                      const Spacer(),
-
-                    // Re-structuring to match inputs
-                    if (isBuffalo) const SizedBox(width: 20),
-
-                    Expanded(
-                      child: ModernTextField(
-                        label: 'Age (Months)',
-                        hint: '36',
-                        value: animal.ageMonths > 0
-                            ? animal.ageMonths.toString()
-                            : '',
-                        icon: Icons.cake_outlined,
-                        isNumber: true,
-                        maxLength: 3,
-                        onChanged: (val) {
-                          setState(
-                            () => animal.ageMonths = int.tryParse(val) ?? 0,
-                          );
-                          widget.onUpdate();
-                        },
-                      ),
-                    ),
-
-                    if (!isBuffalo) ...[
-                      const SizedBox(width: 20),
+                    else
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -461,7 +430,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                         }
                                         return 'Not Linked';
                                       }(),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                         color: AppTheme.darkGrey,
@@ -479,7 +448,27 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           ],
                         ),
                       ),
-                    ],
+
+                    const SizedBox(width: 20),
+
+                    Expanded(
+                      child: ModernTextField(
+                        label: 'Age (Months)',
+                        hint: isBuffalo ? '36' : '6',
+                        value: animal.ageMonths > 0
+                            ? animal.ageMonths.toString()
+                            : '',
+                        icon: Icons.cake_outlined,
+                        isNumber: true,
+                        maxLength: 3,
+                        onChanged: (val) {
+                          setState(
+                            () => animal.ageMonths = int.tryParse(val) ?? 0,
+                          );
+                          widget.onUpdate();
+                        },
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -611,7 +600,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                             child: Container(
                               width: 80,
                               decoration: BoxDecoration(
-                                color: AppTheme.primary.withValues(alpha: 0.08),
+                                color: AppTheme.primary.withOpacity(0.08),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: AppTheme.primary.withValues(

@@ -18,6 +18,8 @@ class CustomTextField extends StatelessWidget {
   final TextCapitalization textCapitalization;
   final FocusNode? focusNode;
   final bool readOnly;
+  final bool showCounter;
+  final AutovalidateMode? autovalidateMode;
 
   const CustomTextField({
     this.label,
@@ -26,6 +28,7 @@ class CustomTextField extends StatelessWidget {
     this.initialValue,
     this.enabled = true,
     this.readOnly = false,
+    this.showCounter = true,
     this.maxLines = 1,
     this.maxLength,
     this.inputFormatters,
@@ -37,13 +40,18 @@ class CustomTextField extends StatelessWidget {
     this.style,
     this.onChanged,
     this.textCapitalization = TextCapitalization.none,
+    this.autovalidateMode,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+
       focusNode: focusNode,
+
+      autovalidateMode: autovalidateMode,
+
       initialValue: controller == null ? initialValue : null,
 
       enabled: enabled,
@@ -63,6 +71,8 @@ class CustomTextField extends StatelessWidget {
       textCapitalization: textCapitalization,
       onChanged: onChanged,
       decoration: InputDecoration(
+        counter: showCounter ? null : const SizedBox.shrink(),
+       // counterText: showCounter ? null : '',
         hintText: hint,
         prefixIcon: prefixIcon,
         filled: true,

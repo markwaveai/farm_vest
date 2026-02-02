@@ -51,6 +51,9 @@ class _BuffaloAllocationScreenState
     }
 
     Future.microtask(() {
+      // Clear stale state from previous visits
+      ref.read(farmManagerProvider.notifier).resetAllocationState();
+
       final authState = ref.read(authProvider);
       final userRole = authState.role;
 
@@ -221,7 +224,7 @@ class _BuffaloAllocationScreenState
         leading: Container(
           margin: const EdgeInsets.only(left: 8),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: Colors.white.withOpacity(0.2),
             shape: BoxShape.circle,
           ),
           child: IconButton(
@@ -260,7 +263,7 @@ class _BuffaloAllocationScreenState
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -276,8 +279,8 @@ class _BuffaloAllocationScreenState
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppTheme.primary.withValues(alpha: 0.9),
-                AppTheme.primary.withValues(alpha: 0.0),
+                AppTheme.primary.withOpacity(0.9),
+                AppTheme.primary.withOpacity(0.0),
               ],
             ),
           ),
@@ -289,8 +292,8 @@ class _BuffaloAllocationScreenState
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppTheme.primary.withValues(alpha: 0.05),
-              Colors.blueGrey.shade50.withValues(alpha: 0.5),
+              AppTheme.primary.withOpacity(0.05),
+              Colors.blueGrey.shade50.withOpacity(0.5),
             ],
           ),
         ),
@@ -329,7 +332,7 @@ class _BuffaloAllocationScreenState
                       Icon(
                         Icons.warehouse_rounded,
                         size: 64,
-                        color: AppTheme.grey1.withValues(alpha: 0.3),
+                        color: AppTheme.grey1.withOpacity(0.3),
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -413,7 +416,7 @@ class _BuffaloAllocationScreenState
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -642,6 +645,14 @@ class _BuffaloAllocationScreenState
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('CCTV Configuration Updated'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      } else if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Failed to update configuration'),
+                            backgroundColor: Colors.red,
                           ),
                         );
                       }
@@ -679,12 +690,12 @@ class _BuffaloAllocationScreenState
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
+        color: Colors.white.withOpacity(0.7),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
+        border: Border.all(color: Colors.white.withOpacity(0.8)),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withValues(alpha: 0.1),
+            color: AppTheme.primary.withOpacity(0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -817,12 +828,12 @@ class _BuffaloAllocationScreenState
                       border: Border.all(
                         color: isSelected
                             ? AppTheme.primary
-                            : AppTheme.primary.withValues(alpha: 0.2),
+                            : AppTheme.primary.withOpacity(0.2),
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primary.withValues(alpha: 0.1),
+                          color: AppTheme.primary.withOpacity(0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -870,7 +881,7 @@ class _BuffaloAllocationScreenState
                           style: TextStyle(
                             fontSize: 9,
                             color: isSelected
-                                ? Colors.white.withValues(alpha: 0.8)
+                                ? Colors.white.withOpacity(0.8)
                                 : AppTheme.grey1,
                           ),
                           textAlign: TextAlign.center,
@@ -884,7 +895,7 @@ class _BuffaloAllocationScreenState
                             style: TextStyle(
                               fontSize: 8,
                               color: isSelected
-                                  ? Colors.white.withValues(alpha: 0.8)
+                                  ? Colors.white.withOpacity(0.8)
                                   : AppTheme.grey1,
                             ),
                           ),
@@ -918,7 +929,7 @@ class _BuffaloAllocationScreenState
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: AppTheme.dark.withValues(alpha: 0.9),
+                color: AppTheme.dark.withOpacity(0.9),
               ),
             ),
           ],
@@ -941,12 +952,12 @@ class _BuffaloAllocationScreenState
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.6),
+        color: Colors.white.withOpacity(0.6),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+        border: Border.all(color: Colors.white.withOpacity(0.4)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -957,7 +968,7 @@ class _BuffaloAllocationScreenState
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.08),
+              color: AppTheme.primary.withOpacity(0.08),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(24),
               ),
@@ -972,7 +983,7 @@ class _BuffaloAllocationScreenState
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.primary.withValues(alpha: 0.15),
+                        color: AppTheme.primary.withOpacity(0.15),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -1076,8 +1087,8 @@ class _BuffaloAllocationScreenState
               child: Container(
                 width: 2,
                 color: (isOccupied || isBeingAllocated)
-                    ? AppTheme.primary.withValues(alpha: 0.3)
-                    : Colors.grey.withValues(alpha: 0.2),
+                    ? AppTheme.primary.withOpacity(0.3)
+                    : Colors.grey.withOpacity(0.2),
               ),
             ),
           ),
@@ -1086,7 +1097,7 @@ class _BuffaloAllocationScreenState
             decoration: BoxDecoration(
               color: (isOccupied || isBeingAllocated)
                   ? Colors.white
-                  : Colors.white.withValues(alpha: 0.5),
+                  : Colors.white.withOpacity(0.5),
               borderRadius: BorderRadius.circular(16),
 
               border: Border.all(
@@ -1096,7 +1107,7 @@ class _BuffaloAllocationScreenState
                     ? Colors
                           .red // Highlight target with RED
                     : isOccupied
-                    ? AppTheme.primary.withValues(alpha: 0.1)
+                    ? AppTheme.primary.withOpacity(0.1)
                     : Colors.transparent,
                 width: (isBeingAllocated || isTarget)
                     ? 3
@@ -1231,7 +1242,7 @@ class _BuffaloAllocationScreenState
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.grey1.withValues(alpha: 0.5),
+                            color: AppTheme.grey1.withOpacity(0.5),
                           ),
                         ),
                       ],

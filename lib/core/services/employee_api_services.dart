@@ -93,9 +93,11 @@ class EmployeeApiServices {
         if (size != null) 'size': size.toString(),
       };
 
-      final uri = Uri.parse(
-        "${AppConstants.appLiveUrl}/employee/get_all_employees",
-      ).replace(queryParameters: queryParams);
+      final baseUrl = farmId != null
+          ? "${AppConstants.appLiveUrl}/farm/staff"
+          : "${AppConstants.appLiveUrl}/employee/get_all_employees";
+
+      final uri = Uri.parse(baseUrl).replace(queryParameters: queryParams);
 
       final response = await http.get(
         uri,

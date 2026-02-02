@@ -25,52 +25,59 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.lightGrey,
-      body: _buildBody(),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (index) => setState(() => _selectedIndex = index),
-          backgroundColor: AppTheme.white,
-          selectedItemColor: AppTheme.primary,
-          unselectedItemColor: AppTheme.slate.withOpacity(0.5),
-          type: BottomNavigationBarType.fixed,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          elevation: 0,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_outlined),
-              activeIcon: Icon(Icons.dashboard),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.agriculture_outlined),
-              activeIcon: Icon(Icons.agriculture),
-              label: 'Farms',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bug_report_outlined),
-              activeIcon: Icon(Icons.bug_report),
-              label: 'Tickets', // Medical/Tickets focus
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_search_outlined),
-              activeIcon: Icon(Icons.person_search),
-              label: 'Staff',
-            ),
-          ],
+    return PopScope(
+      canPop: _selectedIndex == 0,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        setState(() => _selectedIndex = 0);
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.lightGrey,
+        body: _buildBody(),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: AppTheme.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: (index) => setState(() => _selectedIndex = index),
+            backgroundColor: AppTheme.white,
+            selectedItemColor: AppTheme.primary,
+            unselectedItemColor: AppTheme.slate.withOpacity(0.5),
+            type: BottomNavigationBarType.fixed,
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            elevation: 0,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_outlined),
+                activeIcon: Icon(Icons.dashboard),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.agriculture_outlined),
+                activeIcon: Icon(Icons.agriculture),
+                label: 'Farms',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.bug_report_outlined),
+                activeIcon: Icon(Icons.bug_report),
+                label: 'Tickets', // Medical/Tickets focus
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_search_outlined),
+                activeIcon: Icon(Icons.person_search),
+                label: 'Staff',
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -85,7 +92,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       case 1:
         return _AdminFarmsView();
       case 2:
-        return _AdminGlobalTicketsView();
+        return _AdminGlobalTicketsView(
+          onBack: () => setState(() => _selectedIndex = 0),
+        );
       case 3:
         return _AdminStaffView(
           onBack: () => setState(() => _selectedIndex = 0),
@@ -1013,9 +1022,12 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
 }
 
 class _AdminGlobalTicketsView extends StatelessWidget {
+  final VoidCallback? onBack;
+  const _AdminGlobalTicketsView({this.onBack});
+
   @override
   Widget build(BuildContext context) {
-    return const TicketManagementScreen();
+    return TicketManagementScreen(onBackPressed: onBack);
   }
 }
 

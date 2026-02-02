@@ -18,11 +18,23 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
   int? _selectedFarmId;
   final _shedNameController = TextEditingController();
   final _capacityController = TextEditingController(text: '300');
+  bool _isFormValid = false;
 
   @override
   void initState() {
     super.initState();
+    _shedNameController.addListener(_updateFormValidity);
     Future.microtask(() => ref.read(adminProvider.notifier).fetchFarms());
+  }
+
+  void _updateFormValidity() {
+    final isValid =
+        _selectedFarmId != null && _shedNameController.text.trim().isNotEmpty;
+    if (isValid != _isFormValid) {
+      setState(() {
+        _isFormValid = isValid;
+      });
+    }
   }
 
   @override
@@ -94,7 +106,7 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
               PrimaryButton(
                 text: 'Initialize Shed',
                 isLoading: adminState.isLoading,
-                onPressed: _handleCreateShed,
+                onPressed: _isFormValid ? _handleCreateShed : null,
               ),
               const SizedBox(height: 32),
             ],
@@ -171,7 +183,12 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
   Widget _buildFarmDropdown(AdminState state) {
     return FarmSelectorInput(
       selectedFarmId: _selectedFarmId,
-      onChanged: (id) => setState(() => _selectedFarmId = id),
+      onChanged: (id) {
+        setState(() {
+          _selectedFarmId = id;
+        });
+        _updateFormValidity();
+      },
     );
   }
 
@@ -201,19 +218,6 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
   }
 
   Future<void> _handleCreateShed() async {
-    if (_selectedFarmId == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select a farm first'),
-            backgroundColor: AppTheme.warningOrange,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-      return;
-    }
-
     if (_formKey.currentState!.validate()) {
       final timestamp = DateTime.now().millisecondsSinceEpoch % 10000;
       final autoShedId = 'SHED-${_selectedFarmId}-$timestamp';

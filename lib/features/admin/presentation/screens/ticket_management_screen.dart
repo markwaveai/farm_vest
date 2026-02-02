@@ -8,7 +8,9 @@ import '../providers/admin_provider.dart';
 import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
 
 class TicketManagementScreen extends ConsumerStatefulWidget {
-  const TicketManagementScreen({super.key});
+  final VoidCallback? onBackPressed;
+
+  const TicketManagementScreen({super.key, this.onBackPressed});
 
   @override
   ConsumerState<TicketManagementScreen> createState() =>
@@ -195,6 +197,12 @@ class _TicketManagementScreenState
       backgroundColor: AppTheme.lightGrey,
       appBar: AppBar(
         title: const Text('Medical & Support Tickets'),
+        leading: widget.onBackPressed != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: widget.onBackPressed,
+              )
+            : null,
         actions: [
           if (authState.availableRoles.length > 1)
             IconButton(
@@ -237,92 +245,106 @@ class _TicketManagementScreenState
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Filter Tickets',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setSheetState(() {
-                        _selectedType = null;
-                        _selectedStatus = null;
-                      });
-                    },
-                    child: const Text('Clear All'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Ticket Type',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                children: ['MEDICAL', 'TRANSFER', 'FARM_VISIT', 'SUPPORT'].map((
-                  type,
-                ) {
-                  final isSelected = _selectedType == type;
-                  return ChoiceChip(
-                    label: Text(type),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setSheetState(
-                        () => _selectedType = selected ? type : null,
-                      );
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Status',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                children: ['PENDING', 'APPROVED', 'REJECTED', 'COMPLETED'].map((
-                  status,
-                ) {
-                  final isSelected = _selectedStatus == status;
-                  return ChoiceChip(
-                    label: Text(status),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setSheetState(
-                        () => _selectedStatus = selected ? status : null,
-                      );
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _fetchTickets();
-                  },
-                  child: const Text('Apply Filters'),
+      builder: (context) {
+        String? tempType = _selectedType;
+        String? tempStatus = _selectedStatus;
+
+        return StatefulBuilder(
+          builder: (context, setSheetState) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Filter Tickets',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setSheetState(() {
+                          tempType = null;
+                          tempStatus = null;
+                        });
+                      },
+                      child: const Text('Clear All'),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+                const Text(
+                  'Ticket Type',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  children: ['MEDICAL', 'TRANSFER', 'FARM_VISIT', 'SUPPORT']
+                      .map((type) {
+                        final isSelected = tempType == type;
+                        return ChoiceChip(
+                          label: Text(type),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setSheetState(
+                              () => tempType = selected ? type : null,
+                            );
+                          },
+                        );
+                      })
+                      .toList(),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Status',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  children: ['PENDING', 'APPROVED', 'REJECTED', 'COMPLETED']
+                      .map((status) {
+                        final isSelected = tempStatus == status;
+                        return ChoiceChip(
+                          label: Text(status),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setSheetState(
+                              () => tempStatus = selected ? status : null,
+                            );
+                          },
+                        );
+                      })
+                      .toList(),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: (tempType != null && tempStatus != null)
+                        ? () {
+                            setState(() {
+                              _selectedType = tempType;
+                              _selectedStatus = tempStatus;
+                            });
+                            Navigator.pop(context);
+                            _fetchTickets();
+                          }
+                        : null,
+                    child: const Text('Apply Filters'),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
