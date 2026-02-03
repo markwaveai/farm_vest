@@ -1,3 +1,4 @@
+import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/widgets/primary_button.dart';
@@ -6,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/data/models/user_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/admin_provider.dart';
 import 'package:farm_vest/core/widgets/farm_selector_input.dart';
 
@@ -674,127 +676,171 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
   }
 
   void _showReassignDialog(BuildContext context, int staffId) {
-    final adminState = ref.read(adminProvider);
+  final adminState = ref.read(adminProvider);
     final farms = adminState.farms;
-    final allStaff = adminState.staffList;
+  final allStaff = adminState.staffList;
 
     // Find the staff member to check their role
-    final staff = allStaff.firstWhere(
-      (s) => s.id == staffId.toString(),
-      orElse: () => UserModel(
-        id: '',
-        mobile: '',
-        firstName: '',
-        lastName: '',
-        name: '',
-        email: '',
-        role: '',
-      ),
-    );
-    final roles = staff.roles;
-    final isSupervisor = roles.contains('SUPERVISOR');
+  final staff = allStaff.firstWhere(
+    (s) => s.id == staffId.toString(),
+    orElse: () => UserModel(
+      id: '',
+      mobile: '',
+      firstName: '',
+      lastName: '',
+      name: '',
+      email: '',
+      role: '',
+    ),
+  );
+  final roles = staff.roles;
+  final bool isSupervisor = roles.contains('SUPERVISOR');
 
-    int? selectedFarmId;
-    int? selectedShedId;
-    List<Map<String, dynamic>> sheds = [];
+  int? selectedFarmId;
+  int? selectedShedId;
+  List<Map<String, dynamic>> sheds = [];
+  bool isLoadingSheds = false;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reassign Employee'),
-        content: StatefulBuilder(
-          builder: (context, setState) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+  showDialog(
+    context: context,
+    builder: (_) => StatefulBuilder(
+      builder: (context, setState) {
+        final bool isFormValid =
+            selectedFarmId != null &&
+            (!isSupervisor || selectedShedId != null);
+
+        return AlertDialog(
+          title: const Text('Reassign Employee'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
                 const Text('Select the new farm for this employee:'),
                 const SizedBox(height: 16),
-                FarmSelectorInput(
-                  selectedFarmId: selectedFarmId,
-                  label: 'Select Farm',
-                  onChanged: (val) {
-                    setState(() {
-                      selectedFarmId = val;
-                      selectedShedId = null;
+              FarmSelectorInput(
+                selectedFarmId: selectedFarmId,
+                label: 'Select Farm',
+                onChanged: (farmId) async {
+                  setState(() {
+                    selectedFarmId = farmId;
+                    selectedShedId = null;
+                    sheds.clear();
+                    isLoadingSheds = isSupervisor;
+                  });
 
-                      // Load sheds for selected farm if Supervisor
-                      if (isSupervisor && val != null) {
-                        try {
-                          final farm = farms.firstWhere((f) => f.id == val);
-                          print('Selected farm: ${farm.farmName}');
-                          // sheds property is missing from Farm model, needs to be handled
-                          // For now, let's assume sheds are fetched separately or provided elsewhere
-                          // If Farm model is just a summary, we might need a fetchSheds call here
-                          sheds = []; // Placeholder
-                        } catch (e) {
-                          print('Error finding farm: $e');
-                        }
+                  if (isSupervisor && farmId != null) {
+                    try {
+                      final prefs =
+                          await SharedPreferences.getInstance();
+                      final token =
+                          prefs.getString('access_token');
+
+                      if (token == null) return;
+
+                      final fetchedSheds =
+                          await ShedsApiServices.getSheds(
+                        token: token,
+                        farmId: farmId,
+                      );
+
+                      if (context.mounted) {
+                        setState(() => sheds = fetchedSheds);
                       }
-                    });
-                  },
-                ),
+                    } catch (e) {
+                      debugPrint('Shed fetch error: $e');
+                    } finally {
+                      if (context.mounted) {
+                        setState(() => isLoadingSheds = false);
+                      }
+                    }
+                  } else {
+                    setState(() => isLoadingSheds = false);
+                  }
+                },
+              ),
 
                 // Show shed selector for Supervisors
-                if (isSupervisor && selectedFarmId != null) ...[
-                  const SizedBox(height: 16),
-                  const Text('Select shed for supervisor:'),
+              if (isSupervisor && selectedFarmId != null) ...[
+                const SizedBox(height: 16),
+                const Text('Select shed for supervisor:'),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Select Shed',
-                    ),
                     value: selectedShedId,
+                    decoration: const InputDecoration(
+                      labelText: 'Select Shed',
+                      border: OutlineInputBorder(),
+                    ),
                     items: sheds.map((s) {
                       return DropdownMenuItem<int>(
-                        value: s['id'] as int,
-                        child: Text(s['shed_name'] ?? 'Shed ${s['shed_id']}'),
+                        value: s['id'],
+                        child: Text(
+                          '${s['shed_name']} (${s['shed_id']})',
+                        ),
                       );
                     }).toList(),
-                    onChanged: (val) => setState(() => selectedShedId = val),
+                    onChanged: (v) =>
+                        setState(() => selectedShedId = v),
                   ),
-                ],
-              ],
-            );
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          PrimaryButton(
-            text: 'Confirm',
-            height: 48,
-            onPressed: () async {
-              if (selectedFarmId != null) {
-                final primaryRole = roles.firstWhere(
-                  (r) => r == 'FARM_MANAGER' || r == 'SUPERVISOR',
-                  orElse: () => roles.isNotEmpty ? roles.first : '',
-                );
-                final success = await ref
-                    .read(adminProvider.notifier)
-                    .reassignEmployeeFarm(
-                      staffId: staffId,
-                      newFarmId: selectedFarmId!,
-                      role: primaryRole,
-                      shedId: selectedShedId,
-                    );
-                if (success && mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Employee reassigned successfully'),
+
+                if (!isLoadingSheds && sheds.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text(
+                      'No sheds found for this farm',
+                      style: TextStyle(color: Colors.red, fontSize: 12),
                     ),
-                  );
-                }
-              }
-            },
+                  ),
+              ],
+            ],
           ),
-        ],
-      ),
-    );
-  }
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+
+            /// CONFIRM BUTTON (SMART ENABLE)
+            PrimaryButton(
+              text: 'Confirm',
+              onPressed: isFormValid
+                  ? () async {
+                      final primaryRole = roles.firstWhere(
+                        (r) =>
+                            r == 'FARM_MANAGER' ||
+                            r == 'SUPERVISOR',
+                        orElse: () => roles.first,
+                      );
+
+                      final success = await ref
+                          .read(adminProvider.notifier)
+                          .reassignEmployeeFarm(
+                            staffId: staffId,
+                            newFarmId: selectedFarmId!,
+                            role: primaryRole,
+                            shedId:
+                                isSupervisor ? selectedShedId : null,
+                          );
+
+                      if (success && context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Employee reassigned successfully',
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                  : null,
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
+
 
   Widget _buildStaffTile(UserModel staff, int index) {
     final roles = staff.roles;
