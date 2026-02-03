@@ -187,6 +187,37 @@ class TicketsApiServices {
     }
   }
 
+  static Future<List<Ticket>> getHealthTickets({
+    required String token,
+    String? ticketType,
+  }) async {
+    try {
+      var url = "${AppConstants.appLiveUrl}/ticket/get_health_tickets";
+      if (ticketType != null) {
+        url += "?ticket_type=$ticketType";
+      }
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      );
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return (data['data'] as List<dynamic>)
+            .map((e) => Ticket.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
   static Future<int> getTicketsCount({
     required String token,
     String? status,
