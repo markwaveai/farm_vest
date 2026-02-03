@@ -68,10 +68,16 @@ class RemoteConfigService {
       String? latestVersion;
       bool forceUpdate = data['force_update'] ?? false;
 
-      if (Platform.isAndroid) {
-        latestVersion = data['android_version'];
-      } else if (Platform.isIOS) {
-        latestVersion = data['ios_version'];
+      // Skip platform-specific version checks on web
+      if (!kIsWeb) {
+        if (Platform.isAndroid) {
+          latestVersion = data['android_version'];
+        } else if (Platform.isIOS) {
+          latestVersion = data['ios_version'];
+        }
+      } else {
+        // For web, you can optionally check a web_version field
+        latestVersion = data['web_version'];
       }
 
       if (latestVersion != null) {

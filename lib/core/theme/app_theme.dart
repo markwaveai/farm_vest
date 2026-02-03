@@ -14,12 +14,11 @@ class AppTheme {
   static const Color lightPrimary = Color(0xFF4CAF50);
   static const Color darkSecondary = Color(0xFFE64A19);
   static const Color lightSecondary = Color(0xFFFF8A65);
-  
-  
+  static const Color lightGreen = Color(0xFF8BC284);
 
   // Standard Colors
   static const Color white = Color(0xFFFFFFFF);
- 
+
   static const Color grey1 = Color(0xFF9E9E9E);
   static const Color black = Color(0xFF000000);
   static const Color black87 = Color(0xDD000000);
@@ -37,7 +36,7 @@ class AppTheme {
   static const Color errorRed = Color(0xFFD32F2F);
   static const Color warningOrange = secondary;
   static const Color successGreen = primary;
-
+  static const Color orange = Color(0xFFFCA222);
   // Text styles (Light Mode)
   static const TextStyle headingLarge = TextStyle(
     fontSize: 24,
@@ -82,7 +81,7 @@ class AppTheme {
   );
 
   // Theme data
-  static ThemeData get lightTheme {   
+  static ThemeData get lightTheme {
     return ThemeData(
       primarySwatch: Colors.green,
       primaryColor: primary,
