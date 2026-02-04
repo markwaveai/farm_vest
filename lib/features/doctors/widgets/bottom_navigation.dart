@@ -16,10 +16,10 @@ class DoctorBottomNavigation extends StatelessWidget {
     return BottomAppBar(
       shape: const CircularNotchedRectangle(),
       notchMargin: 8.0,
-      color: Colors.white,
-      surfaceTintColor: Colors.white,
+      color: AppTheme.white,
+      surfaceTintColor: AppTheme.white,
       elevation: 20,
-      shadowColor: Colors.black.withOpacity(0.2),
+      shadowColor: AppTheme.black.withValues(alpha: 0.2),
       clipBehavior: Clip.antiAlias,
       height: 70,
       padding: EdgeInsets.zero,
@@ -40,13 +40,13 @@ class DoctorBottomNavigation extends StatelessWidget {
     final isSelected = currentIndex == index;
     final color = isSelected
         ? AppTheme.primary
-        : AppTheme.slate.withOpacity(0.5);
+        : AppTheme.slate.withValues(alpha: 0.5);
 
     return Expanded(
       child: InkWell(
         onTap: () => onTap(index),
-        overlayColor: MaterialStateProperty.all(
-          AppTheme.primary.withOpacity(0.1),
+        overlayColor: WidgetStateProperty.all(
+          AppTheme.primary.withValues(alpha: 0.1),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -57,7 +57,7 @@ class DoctorBottomNavigation extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isSelected
-                    ? AppTheme.primary.withOpacity(0.1)
+                    ? AppTheme.primary.withValues(alpha: 0.1)
                     : Colors.transparent,
               ),
               child: Image.asset(

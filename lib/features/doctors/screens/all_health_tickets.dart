@@ -3,13 +3,21 @@ import 'package:farm_vest/features/doctors/providers/doctors_provider.dart';
 import 'package:farm_vest/features/doctors/widgets/bottom_navigation.dart';
 import 'package:farm_vest/features/doctors/widgets/health_ticket_card.dart';
 import 'package:farm_vest/features/doctors/widgets/assignment_dialogs.dart';
-import 'package:farm_vest/features/doctors/screens/ticket_details_screen.dart';
+import 'package:farm_vest/features/doctors/widgets/ticket_details_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class HealthTicketScreen extends ConsumerStatefulWidget {
-  const HealthTicketScreen({super.key});
+  final String? initialFilter;
+  final String ticketType;
+
+  const HealthTicketScreen({
+    super.key,
+    this.initialFilter,
+    this.ticketType = 'HEALTH',
+  });
 
   @override
   ConsumerState<HealthTicketScreen> createState() => _HealthTicketScreenState();
@@ -30,6 +38,7 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
   @override
   void initState() {
     super.initState();
+    selectedFilter = widget.initialFilter ?? "All";
 
     Future.microtask(() {
       ref.read(doctorsProvider.notifier).fetchTickets();
@@ -39,7 +48,9 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
   @override
   Widget build(BuildContext context) {
     final healthState = ref.watch(doctorsProvider);
-    final tickets = healthState.healthTickets;
+    final tickets = widget.ticketType == 'VACCINATION'
+        ? healthState.vaccinationTickets
+        : healthState.healthTickets;
 
     final filteredTickets = tickets.where((ticket) {
       if (selectedFilter == "All") return true;
@@ -48,10 +59,15 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Health Tickets"),
-        actions: const [
-          Padding(padding: EdgeInsets.only(right: 16), child: Icon(Icons.menu)),
-        ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          widget.ticketType == 'VACCINATION'
+              ? "Vaccination Tickets"
+              : "Health Tickets",
+        ),
       ),
       body: Column(
         children: [
@@ -99,13 +115,7 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
                             );
                           },
                           onViewDetailsTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    TicketDetailsScreen(ticket: ticket),
-                              ),
-                            );
+                            TicketDetailsBottomSheet.show(context, ticket);
                           },
                         );
                       },
@@ -117,23 +127,33 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
       bottomNavigationBar: DoctorBottomNavigation(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          setState(() => _currentIndex = index);
+          if (index == 0) {
+            context.push(
+              '/all-health-tickets',
+              extra: {'filter': 'All', 'type': 'HEALTH'},
+            );
+          } else if (index == 1) {
+            context.push(
+              '/all-health-tickets',
+              extra: {'filter': 'All', 'type': 'VACCINATION'},
+            );
+          }
         },
       ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
       floatingActionButton: GestureDetector(
-        onTap: () => setState(() => _currentIndex = 4),
+        onTap: () {
+          setState(() => _currentIndex = 4);
+          context.go('/doctor-dashboard');
+        },
         child: Container(
           height: 68,
           width: 68,
           decoration: BoxDecoration(
             color: AppTheme.darkPrimary,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 4),
+            border: Border.all(color: AppTheme.white, width: 4),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.25),
@@ -144,7 +164,7 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(14),
-            child: Image.asset('assets/icons/home.png', color: Colors.white),
+            child: Image.asset('assets/icons/home.png', color: AppTheme.white),
           ),
         ),
       ),

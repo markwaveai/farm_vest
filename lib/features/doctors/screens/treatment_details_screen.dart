@@ -25,11 +25,11 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.white,
       appBar: AppBar(
         title: const Text('Treatment Details'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: AppTheme.white,
+        foregroundColor: AppTheme.black,
         elevation: 0,
         actions: [IconButton(icon: const Icon(Icons.menu), onPressed: () {})],
       ),
@@ -136,7 +136,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+        Text(label, style: const TextStyle(color: AppTheme.grey, fontSize: 13)),
         const SizedBox(height: 6),
         Container(
           width: double.infinity,
@@ -244,7 +244,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
                 'HEALTH SUCCESSFULLY COMPLETED',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.white,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -273,7 +273,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
                         child: const Icon(
                           Icons.pets,
                           size: 50,
-                          color: Colors.grey,
+                          color: AppTheme.grey,
                         ),
                       ),
                     ),
@@ -289,9 +289,18 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context); // Close dialog
-                        Navigator.pop(context); // Close form
-                        Navigator.pop(context); // Close details (back to list)
+                        // Close dialog
+                        Navigator.pop(context);
+                        // Return to the tickets list screen
+                        // We use popUntil to ensure we go back to the health tickets list
+                        Navigator.popUntil(context, (route) {
+                          return route.isFirst ||
+                              (route.settings.name == '/all-health-tickets');
+                        });
+
+                        // If we are not using named routes for the list, we might need a different approach
+                        // But since we are likely in a simple push stack now:
+                        // Navigator.pop(context); // This would close the treatment screen
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.darkPrimary,

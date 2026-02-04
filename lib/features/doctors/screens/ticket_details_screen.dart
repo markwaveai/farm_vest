@@ -156,14 +156,14 @@ class TicketDetailsScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: isSelected
             ? AppTheme.orange
-            : Colors.white, // Colors.transparent or white
+            : AppTheme.white, // Colors.transparent or white
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey.shade300),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: isSelected ? Colors.white : Colors.grey[600],
+          color: isSelected ? AppTheme.white : Colors.grey[600],
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -216,7 +216,7 @@ class TicketDetailsScreen extends StatelessWidget {
                     value,
                     style: TextStyle(
                       color: isStatus
-                          ? Colors.green
+                          ? AppTheme.lightPrimary
                           : Colors
                                 .black54, // Status color logic can be improved
                       fontWeight: isStatus

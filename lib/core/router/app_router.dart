@@ -228,7 +228,13 @@ class AppRouter {
       ),
       GoRoute(
         path: '/all-health-tickets',
-        builder: (context, state) => HealthTicketScreen(),
+        builder: (context, state) {
+          final extras = state.extra as Map<String, dynamic>?;
+          return HealthTicketScreen(
+            initialFilter: extras?['filter'] as String?,
+            ticketType: extras?['type'] as String? ?? 'HEALTH',
+          );
+        },
       ),
       GoRoute(
         path: '/assistant-dashboard',

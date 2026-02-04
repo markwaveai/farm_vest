@@ -18,6 +18,7 @@ class DoctorHomeScreen extends ConsumerStatefulWidget {
 
 class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
   int _currentIndex = 4;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -56,7 +57,9 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
     displayName = "$displayName,";
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F8),
+      key: _scaffoldKey,
+      backgroundColor: AppTheme.white,
+      drawer: const ProfileMenuScreen(),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: AppTheme.white,
@@ -86,11 +89,14 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
             color: AppTheme.black,
           ),
           onPressed: () {
-            // ✅ Proper back navigation
-            Navigator.of(context).canPop()
-                ? Navigator.pop(context)
-                : context.go('/admin-dashboard');
-          },),
+            if (Navigator.of(context).canPop()) {
+              Navigator.pop(context);
+            } else {
+              context.go('/admin-dashboard');
+            }
+          },
+        ),
+
         actions: [
           if (ref.watch(authProvider).availableRoles.length > 1)
             IconButton(
@@ -100,14 +106,8 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
             ),
           IconButton(
             icon: const Icon(Icons.menu, color: AppTheme.black),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const ProfileMenuScreen(),
-                ),
-              );
-            },
+
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ],
       ),
@@ -132,6 +132,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                   ),
                   backgroundColor: AppTheme.primary,
                   isLoading: healthState.isLoading,
+                  onTap: () => context.push(
+                    '/all-health-tickets',
+                    extra: {'filter': 'All', 'type': 'HEALTH'},
+                  ),
                 ),
                 DashboardStatCard(
                   title: 'Pending Tickets',
@@ -144,6 +148,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                   ),
                   backgroundColor: AppTheme.orange,
                   isLoading: healthState.isLoading,
+                  onTap: () => context.push(
+                    '/all-health-tickets',
+                    extra: {'filter': 'Pending', 'type': 'HEALTH'},
+                  ),
                 ),
                 DashboardStatCard(
                   title: 'In Progress Tickets',
@@ -156,6 +164,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                   ),
                   backgroundColor: AppTheme.lightPrimary,
                   isLoading: healthState.isLoading,
+                  onTap: () => context.push(
+                    '/all-health-tickets',
+                    extra: {'filter': 'In progress', 'type': 'HEALTH'},
+                  ),
                 ),
                 DashboardStatCard(
                   title: 'Completed Tickets',
@@ -168,6 +180,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                   ),
                   backgroundColor: AppTheme.lightGreen,
                   isLoading: healthState.isLoading,
+                  onTap: () => context.push(
+                    '/all-health-tickets',
+                    extra: {'filter': 'Completed', 'type': 'HEALTH'},
+                  ),
                 ),
               ]),
               const SizedBox(height: 24),
@@ -184,6 +200,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                   ),
                   backgroundColor: AppTheme.successGreen,
                   isLoading: healthState.isLoading,
+                  onTap: () => context.push(
+                    '/all-health-tickets',
+                    extra: {'filter': 'All', 'type': 'VACCINATION'},
+                  ),
                 ),
                 DashboardStatCard(
                   title: 'Pending Tickets',
@@ -198,6 +218,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                   ),
                   backgroundColor: AppTheme.orange,
                   isLoading: healthState.isLoading,
+                  onTap: () => context.push(
+                    '/all-health-tickets',
+                    extra: {'filter': 'Pending', 'type': 'VACCINATION'},
+                  ),
                 ),
                 DashboardStatCard(
                   title: 'In Progress Tickets',
@@ -212,6 +236,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                   ),
                   backgroundColor: AppTheme.lightPrimary,
                   isLoading: healthState.isLoading,
+                  onTap: () => context.push(
+                    '/all-health-tickets',
+                    extra: {'filter': 'In progress', 'type': 'VACCINATION'},
+                  ),
                 ),
                 DashboardStatCard(
                   title: 'Completed Tickets',
@@ -227,6 +255,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                   ),
                   backgroundColor: AppTheme.lightGreen,
                   isLoading: healthState.isLoading,
+                  onTap: () => context.push(
+                    '/all-health-tickets',
+                    extra: {'filter': 'Completed', 'type': 'VACCINATION'},
+                  ),
                 ),
               ]),
             ],
@@ -237,20 +269,32 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() => _currentIndex = index);
+          if (index == 0) {
+            context.push(
+              '/all-health-tickets',
+              extra: {'filter': 'All', 'type': 'HEALTH'},
+            );
+          } else if (index == 1) {
+            context.push(
+              '/all-health-tickets',
+              extra: {'filter': 'All', 'type': 'VACCINATION'},
+            );
+          }
         },
       ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
       floatingActionButton: GestureDetector(
-        onTap: () => setState(() => _currentIndex = 4),
+        onTap: () {
+          setState(() => _currentIndex = 4);
+          context.go('/doctor-dashboard');
+        },
         child: Container(
           height: 68,
           width: 68,
           decoration: BoxDecoration(
             color: AppTheme.darkPrimary,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 4),
+            border: Border.all(color: AppTheme.white, width: 4),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.25),
@@ -261,7 +305,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(14),
-            child: Image.asset('assets/icons/home.png', color: Colors.white),
+            child: Image.asset('assets/icons/home.png', color: AppTheme.white),
           ),
         ),
       ),
@@ -329,37 +373,37 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
         return {
           'label': 'Administrator',
           'icon': Icons.admin_panel_settings,
-          'color': Colors.blue,
+          'color': const Color.fromRGBO(33, 150, 243, 1),
         };
       case UserType.farmManager:
         return {
           'label': 'Farm Manager',
           'icon': Icons.agriculture,
-          'color': Colors.green,
+          'color': AppTheme.successGreen,
         };
       case UserType.supervisor:
         return {
           'label': 'Supervisor',
           'icon': Icons.assignment_ind,
-          'color': Colors.orange,
+          'color': AppTheme.orange,
         };
       case UserType.doctor:
         return {
           'label': 'Doctor',
           'icon': Icons.medical_services,
-          'color': Colors.red,
+          'color': const Color.fromRGBO(211, 47, 47, 1),
         };
       case UserType.assistant:
         return {
           'label': 'Assistant Doctor',
           'icon': Icons.health_and_safety,
-          'color': Colors.teal,
+          'color': const Color.fromRGBO(0, 150, 136, 1),
         };
       case UserType.customer:
         return {
           'label': 'Investor',
           'icon': Icons.trending_up,
-          'color': Colors.indigo,
+          'color': const Color.fromRGBO(63, 81, 181, 1),
         };
     }
   }
@@ -433,7 +477,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
                         color: isSelected
-                            ? info['color']
+                            ? info['color'] as Color
                             : Colors.grey.shade200,
                         width: isSelected ? 2 : 1,
                       ),
@@ -466,7 +510,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                         : const Icon(Icons.arrow_forward_ios, size: 14),
                   ),
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),
