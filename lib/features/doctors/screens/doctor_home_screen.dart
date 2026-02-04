@@ -32,6 +32,28 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
     final healthCounts = healthState.healthCounts;
     final vaccinationCounts = healthState.vaccinationCounts;
 
+    final authState = ref.watch(authProvider);
+    final user = authState.userData;
+
+    String displayName = "Dr. ";
+    if (user != null &&
+        (user.firstName.isNotEmpty || user.lastName.isNotEmpty)) {
+      final fname = user.firstName.isNotEmpty
+          ? user.firstName[0].toUpperCase() + user.firstName.substring(1)
+          : "";
+      final lname = user.lastName.isNotEmpty
+          ? user.lastName[0].toUpperCase() + user.lastName.substring(1)
+          : "";
+      displayName += "$fname $lname".trim();
+    } else if (user != null && user.name.isNotEmpty) {
+      displayName += user.name;
+    } else {
+      displayName += "Krishna"; // Fallback/Default
+    }
+
+    // Trailing comma for the text span
+    displayName = "$displayName,";
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
       appBar: AppBar(
@@ -40,13 +62,13 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
         title: Align(
           alignment: Alignment.centerLeft,
           child: RichText(
-            text: const TextSpan(
+            text: TextSpan(
               text: 'Hello ',
-              style: TextStyle(color: AppTheme.black, fontSize: 16),
+              style: const TextStyle(color: AppTheme.black, fontSize: 16),
               children: [
                 TextSpan(
-                  text: 'Dr. Krishna,',
-                  style: TextStyle(
+                  text: displayName,
+                  style: const TextStyle(
                     color: AppTheme.orange,
                     fontWeight: FontWeight.bold,
                   ),
