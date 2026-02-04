@@ -90,9 +90,9 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
           final query = _searchController.text.trim().toLowerCase();
           final filteredAnimals = milkingAnimals.where((a) {
             if (query.isEmpty) return true;
-            final id = (a.animalId.isNotEmpty ? a.animalId : a.earTag ?? '')
+            final id = (a.animalId.isNotEmpty ? a.animalId : a.earTagId ?? '')
                 .toLowerCase();
-            final tag = (a.earTag ?? '').toLowerCase();
+            final tag = (a.earTagId ?? '').toLowerCase();
             return id.contains(query) || tag.contains(query);
           }).toList();
 
@@ -329,7 +329,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
             0; // Fallback to 0 if internalId is null, verify backend
         final displayId = animal.animalId.isNotEmpty
             ? animal.animalId
-            : animal.earTag ?? 'N/A';
+            : animal.earTagId ?? 'N/A';
         final breed = animal.breed ?? 'Unknown';
 
         if (!_quantityControllers.containsKey(id)) {

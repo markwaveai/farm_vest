@@ -118,7 +118,7 @@ class _SupervisorBuffaloScreenState
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-              'Tag: ${animal.earTag ?? 'N/A'} | Shed: ${animal.shedName ?? 'N/A'}',
+              'Tag: ${animal.earTagId ?? 'N/A'} | Shed: ${animal.shedName ?? 'N/A'}',
               style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
             children: [

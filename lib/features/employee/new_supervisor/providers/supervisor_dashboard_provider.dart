@@ -313,7 +313,7 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
       final q = query.trim().toLowerCase();
       final animal = animals.firstWhere((a) {
         final rfid = (a.rfid ?? '').toLowerCase();
-        final ear = (a.earTag ?? '').toLowerCase();
+        final ear = (a.earTagId ?? '').toLowerCase();
         final aid = a.animalId.toLowerCase();
         return rfid == q || ear == q || aid == q;
       }, orElse: () => animals.first);

@@ -37,6 +37,7 @@ class AppTheme {
   static const Color warningOrange = secondary;
   static const Color successGreen = primary;
   static const Color orange = Color(0xFFFCA222);
+  static const Color transparent = Color(0x00000000);
   // Text styles (Light Mode)
   static const TextStyle headingLarge = TextStyle(
     fontSize: 24,

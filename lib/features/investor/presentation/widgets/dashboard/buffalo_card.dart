@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
@@ -7,66 +6,46 @@ import 'package:go_router/go_router.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
+
 class BuffaloCard extends StatelessWidget {
-  final String farmName;
-  final String location;
-  final String id;
-  final String rfid;
-  final String shedName;
-  final String healthStatus;
-  final String lastMilking;
-  final String age;
-  final String breed;
+  final InvestorAnimal animal;
   final bool isGridView;
   final bool showLiveButton;
-  final String? imageUrl; // Added imageUrl property
-  final String? animalType; // Added animalType property
-  final DateTime? onboardedAt; // Added onboardedAt property
   final VoidCallback? onTap;
   final VoidCallback? onCalvesTap;
   final VoidCallback? onInvoiceTap;
 
   // Sample Murrah buffalo images
-  static const List<String> murrahImages = [
-    'assets/images/buffalo4.jpeg',
-    'assets/images/murrah1.jpg',
-    'assets/images/murrah1.jpg',
-  ];
+  // static const List<String> murrahImages = [
+  //   'assets/images/buffalo4.jpeg',
+  //   'assets/images/murrah1.jpg',
+  //   'assets/images/murrah1.jpg',
+  //];
 
   const BuffaloCard({
     super.key,
-    required this.farmName,
-    required this.location,
-    required this.shedName,
-    required this.rfid,
-    required this.id,
-    required this.healthStatus,
-    required this.lastMilking,
-    required this.age,
-    required this.breed,
+    required this.animal,
     this.isGridView = true,
     this.showLiveButton = true,
-    this.imageUrl,
-    this.animalType, // Added to constructor
-    this.onboardedAt, // Added to constructor
     this.onTap,
     this.onCalvesTap,
     this.onInvoiceTap,
   });
 
-  static String getStableImage(String id) {
-    final index = id.hashCode.abs() % murrahImages.length;
-    return murrahImages[index];
-  }
+  // static String getStableImage(String id) {
+  //   final index = id.hashCode.abs() % murrahImages.length;
+  //   return murrahImages[index];
+  // }
 
-  bool get isCalf => animalType?.toLowerCase().contains('calf') ?? false;
+  bool get isCalf => animal.animalType?.toLowerCase().contains('calf') ?? false;
 
   @override
   Widget build(BuildContext context) {
     // Prioritize passed imageUrl, then fallback to stable asset image
-    final displayImageUrl = (imageUrl != null && imageUrl!.isNotEmpty)
-        ? imageUrl!
-        : getStableImage(id);
+    final displayImageUrl = (animal.images.isNotEmpty)
+        ? animal.images.first
+        : 'assets/images/buffalo4.jpeg';
 
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmallPhone = AppConstants.smallphoneheight < 600;
@@ -100,10 +79,9 @@ class BuffaloCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Material(
-          color: Colors.transparent,
+          color: AppTheme.transparent,
           child: InkWell(
-            // onTap: onTap /* ??
-            //     () => context.push('/unit-details', extra: {'buffaloId': id}) */,
+            onTap: onTap,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -117,55 +95,19 @@ class BuffaloCard extends StatelessWidget {
                     isMediumPhone: isMediumPhone,
                   ),
                 ),
-                // Flexible(
-                //   child: SingleChildScrollView(
-                //     physics: BouncingScrollPhysics(),
-                //     child: _buildInfoSection(
-                //       context,
-                //       isSmallPhone: isSmallPhone,
-                //       isMediumPhone: isMediumPhone,
-                //     ),
-                //   ),
-                // ),
 
-                // Flexible(
-                //   fit: FlexFit.loose,
-                //   child: _buildInfoSection(
-                //     context,
-                //     isSmallPhone: isSmallPhone,
-                //     isMediumPhone: isMediumPhone,
-                //   ),
-                // ),
-
-                // if (isGridView)
-                //   Expanded(
-                //     child: _buildInfoSection(
-                //       context,
-                //       isSmallPhone: isSmallPhone,
-                //       isMediumPhone: isMediumPhone,
-                //     ),
-                //   )
-                // else
-                //   _buildInfoSection(
-                //     context,
-                //     isSmallPhone: isSmallPhone,
-                //     isMediumPhone: isMediumPhone,
-                //   ),
                 if (isGridView)
                   Expanded(
                     child: Container(
                       color: isDark
-                          ? Colors.transparent
+                          ? AppTheme.transparent
                           : AppTheme.beige.withValues(alpha: 0.3),
-                      child: SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        child: _buildInfoSection(
-                          context,
-                          isSmallPhone: isSmallPhone,
-                          isMediumPhone: isMediumPhone,
-                          applyColor:
-                              false, // Pass flag to not apply color inside
-                        ),
+                      child: _buildInfoSection(
+                        context,
+                        isSmallPhone: isSmallPhone,
+                        isMediumPhone: isMediumPhone,
+                        applyColor:
+                            false, // Pass flag to not apply color inside
                       ),
                     ),
                   )
@@ -177,11 +119,6 @@ class BuffaloCard extends StatelessWidget {
                     applyColor: true,
                   ),
 
-                //  _buildInfoSection(
-                //     context,
-                //     isSmallPhone: isSmallPhone,
-                //     isMediumPhone: isMediumPhone,
-                //   ),
                 _buildFooter(
                   context: context,
                   isSmallPhone: isSmallPhone,
@@ -218,7 +155,7 @@ class BuffaloCard extends StatelessWidget {
               ],
             ),
           ),
-          child: imageUrl.startsWith('http')
+          child: imageUrl.contains('http')
               ? Image.network(
                   imageUrl,
 
@@ -243,16 +180,20 @@ class BuffaloCard extends StatelessWidget {
                     );
                   },
                   errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: AppTheme.lightGrey,
-                      child: Center(
-                        child: Icon(
-                          Icons.pets,
-                          size: 48,
-                          color: AppTheme.slate.withOpacity(0.3),
-                        ),
-                      ),
+                    return Image.asset(
+                      'assets/images/buffalo4.jpeg',
+                      fit: BoxFit.cover,
                     );
+                    // Container(
+                    //   color: AppTheme.lightGrey,
+                    //   child: Center(
+                    //     child: Icon(
+                    //       Icons.pets,
+                    //       size: 48,
+                    //       color: AppTheme.slate.withOpacity(0.3),
+                    //     ),
+                    //   ),
+                    // );
                   },
                 )
               : Image.asset(
@@ -332,12 +273,12 @@ class BuffaloCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final paddingH = isSmallPhone ? 8.0 : 10.0;
-    final paddingV = isSmallPhone ? 6.0 : (isMediumPhone ? 7.0 : 8.0);
-    final fontSize = isSmallPhone ? 10.0 : 11.0;
+    final paddingV = isSmallPhone ? 4.0 : (isMediumPhone ? 5.0 : 6.0);
+    final fontSize = isSmallPhone ? 9.0 : 10.0;
     //final fontSize = isSmallPhone ? 14.0 : 16.0;
     //final fontSize = isSmallPhone ? 12.0 : 14.0;
 
-    final rowGap = isSmallPhone ? 3.0 : 4.0;
+    final rowGap = isSmallPhone ? 2.0 : 3.0;
     //final rowGap = isSmallPhone ? 4.0 : 6.0;
 
     return Container(
@@ -352,73 +293,103 @@ class BuffaloCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // RFID
-          // if (breed.isNotEmpty) ...[
+          // if (rfid.isNotEmpty) ...[
+          _buildInfoRow(
+            'RFID',
+            (animal.rfid?.isNotEmpty ?? false)
+                ? animal.rfid!.toUpperCase()
+                : kHyphen,
+            isDark: isDark,
+            fontSize: fontSize,
+          ),
+          SizedBox(height: rowGap),
+          // ],
+
+          // Neck Band ID
+          // if (neckBandId.isNotEmpty) ...[
+          _buildInfoRow(
+            'Neck Band ID',
+            (animal.neckBandId?.isNotEmpty ?? false)
+                ? animal.neckBandId!.toUpperCase()
+                : kHyphen,
+            isDark: isDark,
+            fontSize: fontSize,
+          ),
+          SizedBox(height: rowGap),
+          // ],
+          _buildInfoRow(
+            'Ear Tag',
+            (animal.earTagId?.isNotEmpty ?? false)
+                ? animal.earTagId!.toUpperCase()
+                : kHyphen,
+            isDark: isDark,
+            fontSize: fontSize,
+          ),
+          // SizedBox(height: rowGap),
+          // // Age (Months)
+          // _buildInfoRow(
+          //   'Age (Months)',
+          //   (animal.age != null) ? animal.age.toString() : kHyphen,
+          //   isDark: isDark,
+          //   fontSize: fontSize,
+          // ),
+          SizedBox(height: rowGap),
+
+          // _buildInfoRow(
+          //   'Breed',
+          //   (breed.isNotEmpty && breed.toLowerCase() != 'null') ? breed : '-',
+          //   isDark: isDark,
+          //   fontSize: fontSize,
+          // ),
+          // SizedBox(height: rowGap),
+
+          // Farm
+          _buildInfoRow(
+            'Farm',
+            (animal.farmName?.isNotEmpty ?? false) ? animal.farmName! : kHyphen,
+            isDark: isDark,
+            fontSize: fontSize,
+          ),
+          SizedBox(height: rowGap),
+
+          // Shed
+          _buildInfoRow(
+            'Shed',
+            (animal.shedName?.isNotEmpty ?? false) ? animal.shedName! : kHyphen,
+            isDark: isDark,
+            fontSize: fontSize,
+          ),
+          SizedBox(height: rowGap),
+          //PARKING SLOT
+          _buildInfoRow(
+            'Parking Slot',
+            (animal.parkingId?.isNotEmpty ?? false)
+                ? animal.parkingId!.toUpperCase()
+                : kHyphen,
+            isDark: isDark,
+            fontSize: fontSize,
+          ),
+          SizedBox(height: rowGap),
+          // Location
+          _buildInfoRow(
+            'Location',
+            (animal.farmLocation?.isNotEmpty ?? false)
+                ? animal.farmLocation!.toUpperCase()
+                : kHyphen,
+            isDark: isDark,
+            fontSize: fontSize,
+          ),
+
+          // Onboarded At
+          // if (onboardedAt != null) ...[
+          //   SizedBox(height: rowGap),
           //   _buildInfoRow(
-          //     'RFID',
-          //     breed.toUpperCase(),
+          //     'Onboarded',
+          //     DateFormat('dd MMM yyyy').format(onboardedAt!),
           //     isDark: isDark,
           //     fontSize: fontSize,
           //   ),
-          //   SizedBox(height: rowGap),
-          // ],
-          // RFID
-          if (rfid.isNotEmpty) ...[
-            _buildInfoRow(
-              'RFID',
-              rfid.toUpperCase(),
-              isDark: isDark,
-              fontSize: fontSize,
-            ),
-            SizedBox(height: rowGap),
-          ],
-
-          if (breed.isNotEmpty && breed.toLowerCase() != 'null') ...[
-            _buildInfoRow('Breed', breed, isDark: isDark, fontSize: fontSize),
-            SizedBox(height: rowGap),
-          ],
-
-          // Shed Name
-          if (shedName.isNotEmpty && shedName.toLowerCase() != 'null') ...[
-            _buildInfoRow('Shed', shedName, isDark: isDark, fontSize: fontSize),
-            SizedBox(height: rowGap),
-          ],
-
-          // Age
-          if (age != 'null') ...[
-            _buildInfoRow(
-              'Age (Month)',
-              age,
-              isDark: isDark,
-              fontSize: fontSize,
-            ),
-            SizedBox(height: rowGap),
-          ],
-
-          // Farm (if available)
-          if (farmName.isNotEmpty && farmName.toLowerCase() != 'null') ...[
-            _buildInfoRow('Farm', farmName, isDark: isDark, fontSize: fontSize),
-            SizedBox(height: rowGap),
-          ],
-
-          // Location (if available)
-          if (location.isNotEmpty && location.toLowerCase() != 'null')
-            _buildInfoRow(
-              'Location',
-              location.toUpperCase(),
-              isDark: isDark,
-              fontSize: fontSize,
-            ),
-
-          // Onboarded At
-          if (onboardedAt != null) ...[
-            SizedBox(height: rowGap),
-            _buildInfoRow(
-              'Onboarded',
-              DateFormat('dd MMM yyyy').format(onboardedAt!),
-              isDark: isDark,
-              fontSize: fontSize,
-            ),
-          ],
+          //],
         ],
       ),
     );
@@ -470,10 +441,11 @@ class BuffaloCard extends StatelessWidget {
     final paddingV = isSmallPhone ? 6.0 : (isMediumPhone ? 7.0 : 8.0);
     final badgeFont = isSmallPhone ? 9.0 : 10.0;
     final valueFont = isSmallPhone ? 12.0 : 10.0;
+    final rfid = animal.rfid ?? '';
 
     return GestureDetector(
       onTap: () async {
-        await Clipboard.setData(ClipboardData(text: breed.toUpperCase()));
+        await Clipboard.setData(ClipboardData(text: rfid.toUpperCase()));
         Fluttertoast.showToast(
           msg: "ID Copied",
           toastLength: Toast.LENGTH_SHORT,
@@ -537,21 +509,6 @@ class BuffaloCard extends StatelessWidget {
                 maxLines: 1,
               ),
             ),
-            // Copy Icon
-            // Container(
-            //   padding: EdgeInsets.all(isSmallPhone ? 3 : 4),
-            //   decoration: BoxDecoration(
-            //     color: Colors.white.withValues(alpha: 0.2),
-            //     borderRadius: BorderRadius.circular(5),
-            //   ),
-            //   child: Icon(Icons.copy, size: copyIconSize, color: Colors.white),
-            // ),
-            // if (onInvoiceTap != null)
-            //   _buildInvoiceButton(
-            //     context,
-            //     isSmallPhone: isSmallPhone,
-            //     isMediumPhone: isMediumPhone,
-            //   ),
           ],
         ),
       ),
@@ -563,9 +520,10 @@ class BuffaloCard extends StatelessWidget {
     required bool isMediumPhone,
   }) {
     Color statusColor = AppTheme.successGreen;
-    if (healthStatus.toLowerCase().contains('warning')) {
+    final status = animal.healthStatus;
+    if (status.toLowerCase().contains('warning')) {
       statusColor = AppTheme.warningOrange;
-    } else if (healthStatus.toLowerCase().contains('critical')) {
+    } else if (status.toLowerCase().contains('critical')) {
       statusColor = AppTheme.errorRed;
     }
 
@@ -589,9 +547,9 @@ class BuffaloCard extends StatelessWidget {
         ],
       ),
       child: Text(
-        healthStatus,
+        status,
         style: TextStyle(
-          color: Colors.white,
+          color: AppTheme.white,
           fontSize: fontSize,
           fontWeight: FontWeight.bold,
         ),
@@ -613,22 +571,22 @@ class BuffaloCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.7),
+          color: AppTheme.black.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.3),
+            color: AppTheme.white.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.pets, size: iconSize, color: Colors.white),
+            Icon(Icons.pets, size: iconSize, color: AppTheme.white),
             SizedBox(width: isSmallPhone ? 3 : 4),
             Text(
               'Calves',
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.white,
                 fontSize: fontSize,
                 fontWeight: FontWeight.w600,
               ),
@@ -651,7 +609,7 @@ class BuffaloCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        context.push('/cctv-live', extra: {'buffaloId': id});
+        context.push('/cctv-live', extra: {'buffaloId': animal.animalId});
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
@@ -669,12 +627,12 @@ class BuffaloCard extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.videocam, size: iconSize, color: Colors.white),
+            Icon(Icons.videocam, size: iconSize, color: AppTheme.white),
             SizedBox(width: isSmallPhone ? 3 : 4),
             Text(
               'Live',
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.white,
                 fontSize: fontSize,
                 fontWeight: FontWeight.bold,
               ),

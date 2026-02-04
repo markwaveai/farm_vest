@@ -205,7 +205,7 @@ class _QuickActionDialogContentState
                                 final animal = suggestions[index];
                                 final tag =
                                     animal.rfid ??
-                                    animal.earTag ??
+                                    animal.earTagId ??
                                     animal.animalId;
                                 return ListTile(
                                   dense: true,

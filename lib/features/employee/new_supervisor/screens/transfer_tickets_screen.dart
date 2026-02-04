@@ -542,7 +542,8 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
                   itemCount: suggestions.length,
                   itemBuilder: (context, index) {
                     final animal = suggestions[index];
-                    final tag = animal.rfid ?? animal.earTag ?? animal.animalId;
+                    final tag =
+                        animal.rfid ?? animal.earTagId ?? animal.animalId;
                     return ListTile(
                       dense: true,
                       leading: const CircleAvatar(

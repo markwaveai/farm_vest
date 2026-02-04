@@ -1,4 +1,3 @@
-import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
@@ -132,15 +131,9 @@ class _InvestorDashboardScreenState
                             ),
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final buffalo = data[index];
+                          // Grid View
                           return BuffaloCard(
-                            rfid: buffalo.rfid ?? '',
-                            shedName: buffalo.shedName ?? '-',
-                            age: buffalo.age?.toString() ?? '-',
-                            farmName: buffalo.farmName ?? 'FarmVest Unit',
-                            location: buffalo.farmLocation ?? 'Location',
-                            imageUrl: buffalo.images.isNotEmpty
-                                ? buffalo.images.first
-                                : null,
+                            animal: buffalo,
                             isGridView: true,
                             onTap: () {
                               context.push(
@@ -154,12 +147,6 @@ class _InvestorDashboardScreenState
                             onCalvesTap: () async {
                               _handleCalvesTap(context, buffalo);
                             },
-                            healthStatus: buffalo.healthStatus,
-                            lastMilking: '',
-                            breed: buffalo.breed ?? '',
-                            animalType: buffalo.animalType,
-                            id: buffalo.animalId,
-                            onboardedAt: buffalo.onboardedAt,
                           );
                         }, childCount: data.length),
                       ),
@@ -173,15 +160,9 @@ class _InvestorDashboardScreenState
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final buffalo = data[index];
+                          // List View
                           return BuffaloCard(
-                            rfid: buffalo.rfid ?? kHyphen,
-                            age: buffalo.age?.toString() ?? kHyphen,
-                            farmName: buffalo.farmName ?? kHyphen,
-                            location: buffalo.farmLocation ?? kHyphen,
-                            shedName: buffalo.shedName ?? kHyphen,
-                            imageUrl: buffalo.images.isNotEmpty
-                                ? buffalo.images.first
-                                : null,
+                            animal: buffalo,
                             isGridView: false,
                             onTap: () {
                               context.push(
@@ -195,12 +176,6 @@ class _InvestorDashboardScreenState
                             onCalvesTap: () async {
                               _handleCalvesTap(context, buffalo);
                             },
-                            id: buffalo.animalId,
-                            healthStatus: buffalo.healthStatus,
-                            lastMilking: '',
-                            breed: buffalo.breed ?? '',
-                            animalType: buffalo.animalType,
-                            onboardedAt: buffalo.onboardedAt,
                           );
                         }, childCount: data.length),
                       ),

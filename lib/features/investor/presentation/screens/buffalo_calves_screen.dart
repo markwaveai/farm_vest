@@ -164,18 +164,7 @@ class _RecursiveTreeBuilder extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: [
           BuffaloCard(
-            imageUrl: animal.images.isNotEmpty ? animal.images.first : null,
-            farmName: animal.farmName ?? 'FarmVest Unit',
-            location: animal.farmLocation ?? 'Location',
-            shedName: animal.shedName ?? '-',
-            rfid: animal.rfid ?? kHyphen,
-            id: animal.animalId,
-            healthStatus: animal.healthStatus,
-            lastMilking: 'N/A', // Not relevant for tree view
-            age: animal.age != null ? '${animal.age} M' : '-',
-            breed: animal.breed ?? '-',
-            animalType: animal.animalType,
-            onboardedAt: animal.onboardedAt,
+            animal: animal,
             isGridView: true,
             onTap: () {
               // Show details if needed

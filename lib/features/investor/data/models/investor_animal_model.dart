@@ -18,6 +18,7 @@ class InvestorAnimal {
   final String? shedName;
   final String? animalType;
   final String? breed;
+  final String? neckBandId;
 
   /// Name of the farm where the animal is located
   final String? farmName;
@@ -28,7 +29,7 @@ class InvestorAnimal {
   final String? parkingId;
   final String? rowNumber;
   final String? investorName;
-  final String? earTag;
+  final String? earTagId;
   final String? status;
 
   /// Current health status of the animal
@@ -44,6 +45,7 @@ class InvestorAnimal {
     this.rfid,
     this.age,
     this.farmId,
+    this.neckBandId,
     required this.shedName,
     required this.animalType,
 
@@ -53,7 +55,7 @@ class InvestorAnimal {
     this.parkingId,
     this.rowNumber,
     this.investorName,
-    this.earTag,
+    this.earTagId,
     this.status,
     required this.shedId,
     required this.healthStatus,
@@ -85,6 +87,12 @@ class InvestorAnimal {
     return InvestorAnimal(
       animalId: (animalData['animal_id'] ?? animalData['id']?.toString() ?? '')
           .toString(),
+      neckBandId:
+          (animalData['neckband_id'] ??
+                  animalData['neckband_id']?.toString() ??
+                  '')
+              .toString(),
+
       internalId: animalData['id'] is int ? animalData['id'] : null,
       rfid: (animalData['rfid_tag_number'] ?? animalData['rfid'] ?? '')
           .toString(),
@@ -114,7 +122,7 @@ class InvestorAnimal {
       investorName: (investorData['full_name'] ?? investorData['name'])
           ?.toString(),
 
-      earTag: animalData['ear_tag']?.toString(),
+      earTagId: animalData['ear_tag']?.toString(),
       status: animalData['status']?.toString(),
       onboardedAt: animalData['onboarded_at'] != null
           ? DateTime.tryParse(animalData['onboarded_at'].toString())
@@ -135,11 +143,12 @@ class InvestorAnimal {
       'farm_name': farmName,
       'farm_id': farmId,
       'farm_location': farmLocation,
+      'neck_band_id': neckBandId,
 
       'parking_id': parkingId,
       'row_number': rowNumber,
       'investor_name': investorName,
-      'ear_tag': earTag,
+      'ear_tag': earTagId,
       'status': status,
       'health_status': healthStatus,
       'animal_type': animalType,
@@ -186,7 +195,7 @@ class InvestorAnimal {
       parkingId: parkingId ?? this.parkingId,
       rowNumber: rowNumber ?? this.rowNumber,
       investorName: investorName ?? this.investorName,
-      earTag: earTag ?? this.earTag,
+      earTagId: earTag ?? this.earTagId,
       status: status ?? this.status,
       healthStatus: healthStatus ?? this.healthStatus,
       onboardedAt: onboardedAt ?? this.onboardedAt,
