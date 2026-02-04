@@ -2,6 +2,7 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/features/doctors/providers/doctors_provider.dart';
+import 'package:farm_vest/features/doctors/screens/profile_menu.dart';
 import 'package:farm_vest/features/doctors/widgets/bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,6 +60,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: AppTheme.white,
+        automaticallyImplyLeading: false,
         title: Align(
           alignment: Alignment.centerLeft,
           child: RichText(
@@ -77,6 +79,18 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
             ),
           ),
         ),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            size: 18,
+            color: AppTheme.black,
+          ),
+          onPressed: () {
+            // ✅ Proper back navigation
+            Navigator.of(context).canPop()
+                ? Navigator.pop(context)
+                : context.go('/admin-dashboard');
+          },),
         actions: [
           if (ref.watch(authProvider).availableRoles.length > 1)
             IconButton(
@@ -86,7 +100,14 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
             ),
           IconButton(
             icon: const Icon(Icons.menu, color: AppTheme.black),
-            onPressed: () => context.go('/login'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ProfileMenuScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),

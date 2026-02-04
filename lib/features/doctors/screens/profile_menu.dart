@@ -1,5 +1,7 @@
+import 'package:flutter/services.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+
 
 class ProfileMenuScreen extends StatefulWidget {
   const ProfileMenuScreen({super.key});
@@ -14,12 +16,10 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
   final _nameController = TextEditingController(text: 'Umasankar');
   final _emailController = TextEditingController(text: 'umaa@markwave.ai');
   final _phoneController = TextEditingController(text: '6305447441');
-  final _addressController = TextEditingController(
-    text: 'Westgodavari district, Andhra Pradesh',
-  );
-  final _dateController = TextEditingController(text: '11/05/2016');
+  final _addressController =
+      TextEditingController(text: 'Westgodavari district, Andhra Pradesh');
+  final _dateController = TextEditingController(text: '30/01/2026');
 
-  static const Color green = Color(0xFF2E7D32);
   static const Color orange = Color(0xFFFCA222);
 
   @override
@@ -39,42 +39,45 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SizedBox(
-        width: size.width * 0.75,
+        width: size.width * 0.75, // ✅ SIDE DRAWER WIDTH
         height: size.height,
         child: Container(
-
-        color: AppTheme.primary,
-       child: SingleChildScrollView(
-
+          color: AppTheme.primary,
+          child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
-              20,
+              16,
               MediaQuery.of(context).padding.top + 12,
-              20,
+              16,
               30,
             ),
             child: Form(
               key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final logoWidth = constraints.maxWidth * 0.55; // ~140px on normal phones
-                      final logoHeight = logoWidth * (55 / 140); // maintain aspect ratio
-
-                      return Image.asset(
+                  // 🔙 BACK + LOGO (SAME ROW)
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const SizedBox(width: 4),
+                      Image.asset(
                         'assets/images/farmvestlogo(1).png',
-                        width: logoWidth,
-                        height: logoHeight,
+                        height: 26,
                         fit: BoxFit.contain,
-                      );
-                    },
+                      ),
+                    ],
                   ),
 
-                  
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
+                  // PROFILE HEADER
                   Center(
                     child: Column(
                       children: const [
@@ -88,44 +91,35 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
                         ),
                         SizedBox(height: 12),
                         CircleAvatar(
-                          radius: 31,
+                          radius: 30,
                           backgroundColor: Colors.white,
                           child: Icon(
                             Icons.person,
-                            size: 24,
-                            // color: Colors.grey,
-                            color:  Color(0xFF30572B),
+                            size: 26,
+                            color: Color(0xFF30572B),
                           ),
                         ),
                         SizedBox(height: 10),
                         Text(
                           'Umasankar',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w200,
-                            fontSize: 15,
-                          ),
+                          style: TextStyle(color: Colors.white, fontSize: 14),
                         ),
                         Text(
                           'umaa@markwave.ai',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w200,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 24),
 
                   _label('Full Name'),
                   _inputField(
                     _nameController,
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) {
-                        return 'Full name is required';
+                        return 'Full name required';
                       }
                       if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(v)) {
                         return 'Only letters allowed';
@@ -138,45 +132,53 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
                   _inputField(
                     _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'[a-z0-9@._]'),
+                      ),
+                    ],
                     validator: (v) {
                       if (v == null || v.isEmpty) {
-                        return 'Email is required';
+                        return 'Email required';
+                      }
+                      if (v != v.toLowerCase()) {
+                        return 'Only lowercase letters allowed';
                       }
                       if (!RegExp(
-                        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                        r'^[a-z0-9._]+@[a-z0-9]+\.[a-z]{2,}$',
                       ).hasMatch(v)) {
-                        return 'Enter valid email';
+                        return 'Invalid email format';
                       }
                       return null;
                     },
                   ),
-
-                  _label('Phone'),
+                _label('Phone'),
                   _inputField(
                     _phoneController,
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
                     validator: (v) {
                       if (v == null || v.isEmpty) {
                         return 'Phone number required';
                       }
-                      if (!RegExp(r'^\d{10}$').hasMatch(v)) {
+                      if (v.length != 10) {
                         return 'Enter valid 10 digit number';
                       }
                       return null;
                     },
                   ),
 
+
                   _label('Address'),
                   _inputField(
                     _addressController,
                     maxLines: 2,
-                    height: 60,
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) {
-                        return 'Address is required';
-                      }
-                      if (v.length < 5) {
-                        return 'Address too short';
+                        return 'Address required';
                       }
                       return null;
                     },
@@ -185,17 +187,13 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
                   _label('As a User Since'),
                   _inputField(
                     _dateController,
-                    // readOnly: true,
+                    readOnly: true,
                     onTap: _pickDate,
-                    validator: (v) {
-                      if (v == null || v.isEmpty) {
-                        return 'Please select a date';
-                      }
-                      return null;
-                    },
+                    validator: (v) =>
+                        v == null || v.isEmpty ? 'Select date' : null,
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 20),
 
                   const Text(
                     'Inventory',
@@ -204,7 +202,7 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
 
                   _simpleRow(title: 'Buffalo Profile'),
 
@@ -230,48 +228,35 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
                     title: 'Help & Support',
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 24),
 
-                  // 🔥 LOGOUT BUTTON (IMAGE ICON USED)
-  Center(
-  child: SizedBox(
-    width: 220,
-    height: 48,
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: orange,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(60),
-        ),
-      ),
-      onPressed: () {
-        if (_formKey.currentState!.validate()) {
-          // logout logic
-        }
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Logout',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Image.asset(
-            'assets/icons/logout-rounded-icon.png',
-            width: 18,
-            height: 18,
-            fit: BoxFit.contain,
-          ),
-        ],
-      ),
-    ),
-  ),
-),
-
+                  // LOGOUT
+                  Center(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: orange,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40),
+                          ),
+                        ),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            // logout
+                          }
+                        },
+                        child: const Text(
+                          'Logout',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -281,73 +266,55 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
     );
   }
 
-  // ================= HELPERS =================
-Widget _label(String text) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Text(
-      text,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 15,
-        fontWeight: FontWeight.w500,
-      ),
-    ),
-  );
-}Widget _inputField(
-  TextEditingController controller, {
-  String? Function(String?)? validator,
-  TextInputType keyboardType = TextInputType.text,
-  bool readOnly = false,
-  VoidCallback? onTap,
-  int maxLines = 1,
-  double height = 38,
-}) {
-  return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    child: TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      validator: validator,
-      readOnly: readOnly,
-      onTap: onTap,
-      maxLines: maxLines,
+  // ===== HELPERS =====
 
-      style: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w500,
-        color: Colors.black,
-      ),
-
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.65),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        errorStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 11,
+  Widget _label(String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Text(
+          text,
+          style: const TextStyle(color: Colors.white, fontSize: 13),
         ),
+      );
 
-        // ✅ REMOVE OutlineInputBorder COMPLETELY
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        errorBorder: InputBorder.none,
-        focusedErrorBorder: InputBorder.none,
+  Widget _inputField(
+    TextEditingController controller, {
+    String? Function(String?)? validator,
+    TextInputType keyboardType = TextInputType.text,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    int maxLines = 1,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        validator: validator,
+        readOnly: readOnly,
+        onTap: onTap,
+        maxLines: maxLines,
+        inputFormatters: inputFormatters,
+        style: const TextStyle(color: Colors.black),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.75),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          errorStyle: const TextStyle(color: Colors.white),
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _menuItem({
-    IconData? icon,
+    required IconData icon,
     required String title,
     String? subtitle,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Icon(icon, color: Colors.white, size: 18),
@@ -359,10 +326,7 @@ Widget _label(String text) {
               if (subtitle != null)
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 11),
                 ),
             ],
           ),
@@ -370,53 +334,24 @@ Widget _label(String text) {
       ),
     );
   }
-  Widget _simpleRow({required String title}) {
-    
-    return Row(
-      children: [
-        // const Icon(color: Colors.white70, size: 18),
-        const SizedBox(width: 2),
-        Text(
-          title,
-          style: const TextStyle(color: Colors.white),
-        ),
-      ],
-    );
-  }
+
+  Widget _simpleRow({required String title}) => Text(
+        title,
+        style: const TextStyle(color: Colors.white),
+      );
 
   Future<void> _pickDate() async {
-  final Size screenSize = MediaQuery.of(context).size;
-
-  final DateTime? picked = await showDatePicker(
-    context: context,
-    initialDate: DateTime.now(),
-    firstDate: DateTime(2000),
-    lastDate: DateTime.now(),
-
-    // ✅ RESPONSIVE BUILDER
-    builder: (context, child) {
-      return MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          // Controls dialog size relative to SCREEN
-          textScaleFactor: screenSize.width < 400 ? 0.9 : 1.0,
-        ),
-        child: Center(
-          child: SizedBox(
-            width: screenSize.width * 0.8,   // 90% of screen width
-            height: screenSize.height * 0.8, // 70% of screen height
-            child: child,
-          ),
-        ),
-      );
-    },
-  );
-
-  if (picked != null) {
-    _dateController.text =
-        '${picked.day.toString().padLeft(2, '0')}/'
-        '${picked.month.toString().padLeft(2, '0')}/'
-        '${picked.year}';
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      _dateController.text =
+          '${picked.day.toString().padLeft(2, '0')}/'
+          '${picked.month.toString().padLeft(2, '0')}/'
+          '${picked.year}';
+    }
   }
-}
-
 }
