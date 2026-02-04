@@ -15,14 +15,16 @@ class DoctorBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 110,
+      height: 70,
+      
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
+          
           ClipPath(
             clipper: DoctorNavClipper(),
             child: Container(
-              height: 70,
+              height: 110,
               color: AppTheme.darkPrimary,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -37,35 +39,37 @@ class DoctorBottomNavigation extends StatelessWidget {
             ),
           ),
 
-          Positioned(
-            bottom: 40,
-            child: GestureDetector(
-              onTap: () => onTap(4),
-              child: Container(
-                height: 68,
-                width: 68,
-                decoration: BoxDecoration(
-                  color: AppTheme.darkPrimary,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppTheme.white, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Image.asset(
-                    'assets/icons/home.png',
-                    color: AppTheme.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Positioned(
+          //   bottom: 40,
+          //   child: GestureDetector(
+          //     onTap: () => onTap(4),
+          //     child: Container(
+          //       height: 68,
+          //       width: 68,
+          //       decoration: BoxDecoration(
+          //         color: AppTheme.darkPrimary,
+          //         shape: BoxShape.circle,
+          //         border: Border.all(
+          //           color: AppTheme.white, 
+          //           width: 4),
+          //         // boxShadow: [
+          //         //   BoxShadow(
+          //         //     color: Colors.black.withOpacity(0.15),
+          //         //     blurRadius: 10,
+          //         //     offset: const Offset(0, 4),
+          //         //   ),
+          //         // ],
+          //       ),
+          //       child: Padding(
+          //         padding: const EdgeInsets.all(14),
+          //         child: Image.asset(
+          //           'assets/icons/home.png',
+          //           color: AppTheme.white,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

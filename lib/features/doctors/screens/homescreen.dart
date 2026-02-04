@@ -93,7 +93,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                       height: 24,
                       color: AppTheme.white,
                     ),
-                    backgroundColor: const Color(0xFFFCA222),
+                    backgroundColor: AppTheme.orange,
                   ),
                   DashboardStatCard(
                     title: 'In Progress Tickets',
@@ -194,6 +194,36 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           setState(() => _currentIndex = index);
         },
       ),
+      
+  floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+  floatingActionButton: GestureDetector(
+    onTap: () => setState(() => _currentIndex = 4),
+    child: Container(
+      height: 68,
+      width: 68,
+      decoration: BoxDecoration(
+        color: AppTheme.darkPrimary,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 4),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Image.asset(
+          'assets/icons/home.png',
+          color: Colors.white,
+        ),
+      ),
+    ),
+  ),
+
     );
   }
 
@@ -221,7 +251,9 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           ],
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            context.push('/all-health-tickets');
+          },
           style: TextButton.styleFrom(
             backgroundColor: AppTheme.darkPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

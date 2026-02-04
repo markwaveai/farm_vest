@@ -13,7 +13,7 @@ class DoctorNavClipper extends CustomClipper<Path> {
 
     path.lineTo(center - notchRadius - s, 0);
 
-    // Left curve leading into the notch
+    
     path.cubicTo(
       center - notchRadius,
       0,
@@ -23,14 +23,14 @@ class DoctorNavClipper extends CustomClipper<Path> {
       depth,
     );
 
-    // Bottom of the notch
+   
     path.arcToPoint(
       Offset(center + notchRadius - s, depth),
       radius: Radius.circular(notchRadius),
       clockwise: false,
     );
 
-    // Right curve exiting the notch
+   
     path.cubicTo(
       center + notchRadius + (s / 2),
       depth,
