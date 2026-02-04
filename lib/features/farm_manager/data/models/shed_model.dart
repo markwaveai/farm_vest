@@ -33,7 +33,7 @@ class Shed {
     return Shed(
       id: json['id'] is num ? (json['id'] as num).toInt() : 0,
       farmId: json['farm_id'] is num ? (json['farm_id'] as num).toInt() : 0,
-      shedId: json['shed_id'] ?? '',
+      shedId: json['sheds.id'] ?? '',
       shedName: json['shed_name'] ?? '',
       farmName: json['farm_name'] ?? '',
       currentBuffaloes: json['current_buffaloes'] is num
@@ -93,7 +93,7 @@ class ShedPositionResponse {
 
     return ShedPositionResponse(
       message: json['message'] ?? '',
-      shedId: json['shed_id'] ?? '',
+      shedId: json['sheds.id'] ?? '',
       shedName: json['shed_name'] ?? '',
       supervisorName: json['supervisor_name'] ?? '',
       supervisorMobile: json['supervisor_mobile'] ?? '',

@@ -101,7 +101,7 @@ class ShedInfo {
   factory ShedInfo.fromJson(Map<String, dynamic> json) {
     return ShedInfo(
       id: json['id'] is num ? (json['id'] as num).toInt() : 0,
-      shedId: json['shed_id'] ?? '',
+      shedId: json['sheds.id'] ?? '',
       shedName: json['shed_name'] ?? '',
       capacity: json['capacity'] is num ? (json['capacity'] as num).toInt() : 0,
       buffaloesCount: json['buffaloes_count'] is num

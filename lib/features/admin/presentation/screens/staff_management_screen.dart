@@ -773,7 +773,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
                       return DropdownMenuItem<int>(
                         value: s['id'],
                         child: Text(
-                          '${s['shed_name']} (${s['shed_id']})',
+                          '${s['shed_name']} (${s['sheds.id']})',
                         ),
                       );
                     }).toList(),

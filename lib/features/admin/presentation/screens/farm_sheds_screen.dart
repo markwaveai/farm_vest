@@ -158,7 +158,7 @@ class _FarmShedsScreenState extends State<FarmShedsScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    shed['shed_id'] ?? '',
+                    shed['sheds.id'] ?? '',
                     style: const TextStyle(
                       color: AppTheme.primary,
                       fontWeight: FontWeight.bold,

@@ -149,7 +149,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
         "mobile": mobile,
         "roles": [roleEnum],
         "farm_id": farmId,
-        "shed_id": shedId,
+        "sheds.id": shedId,
         "senior_doctor_id": seniorDoctorId,
         "is_test": false,
       };

@@ -726,7 +726,7 @@ Widget _buildLocationResult(
       context.go(
         '/buffalo-allocation',
         extra: {
-          'shedId': location['shed_id'],
+          'shedId': location['sheds.id'],
           'parkingId': location['parking_id'],
         },
       );

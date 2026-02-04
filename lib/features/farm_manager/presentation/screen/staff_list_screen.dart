@@ -407,7 +407,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                               (s) => DropdownMenuItem(
                                 value: s['id'] as int,
                                 child: Text(
-                                  '${s['shed_name']} (${s['shed_id']})',
+                                  '${s['shed_name']} (${s['sheds.id']})',
                                 ),
                               ),
                             )

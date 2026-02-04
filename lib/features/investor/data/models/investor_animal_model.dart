@@ -128,7 +128,7 @@ class InvestorAnimal {
       'rfid': rfid,
       'age': age,
       'shed_name': shedName,
-      'shed_id': shedId,
+      'sheds.id': shedId,
       'animal_id': animalId,
       'id': internalId, // useful for reconstruction if needed
       'images': images,

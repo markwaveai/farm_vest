@@ -375,7 +375,7 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                   items: _sheds.map<DropdownMenuItem<int>>((s) {
                     return DropdownMenuItem(
                       value: s['id'] as int,
-                      child: Text('${s['shed_name']} (${s['shed_id']})'),
+                      child: Text('${s['shed_name']} (${s['sheds.id']})'),
                     );
                   }).toList(),
                   onChanged: (v) {

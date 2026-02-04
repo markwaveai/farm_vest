@@ -149,7 +149,7 @@ class EmployeeApiServices {
         "user_id": staffId,
         "farm_id": newFarmId,
         "role": role,
-        "shed_id": shedId,
+        "sheds.id": shedId,
       };
 
       debugPrint("Reassigning: $body");

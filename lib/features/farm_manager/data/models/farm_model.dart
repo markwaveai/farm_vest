@@ -110,7 +110,7 @@ class ShedSummary {
   factory ShedSummary.fromJson(Map<String, dynamic> json) {
     return ShedSummary(
       id: json['id'] is num ? (json['id'] as num).toInt() : 0,
-      shedId: json['shed_id']?.toString() ?? '',
+      shedId: json['sheds.id']?.toString() ?? '',
       shedName: json['shed_name'],
       capacity: json['capacity'] is num ? (json['capacity'] as num).toInt() : 0,
       buffaloesCount: json['buffaloes_count'] is num
@@ -122,7 +122,7 @@ class ShedSummary {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'shed_id': shedId,
+      'sheds.id': shedId,
       'shed_name': shedName,
       'capacity': capacity,
       'buffaloes_count': buffaloesCount,

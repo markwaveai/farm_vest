@@ -191,7 +191,7 @@ class AdminNotifier extends Notifier<AdminState> {
 
       final body = {
         "farm_id": farmId,
-        "shed_id": shedId,
+        "sheds.id": shedId,
         "shed_name": shedName,
         "capacity": capacity,
         "cctv_url": cctvUrl,
@@ -270,7 +270,7 @@ class AdminNotifier extends Notifier<AdminState> {
 
       // Only add optional fields if they're not null
       if (shedId != null) {
-        body["shed_id"] = shedId;
+        body["sheds.id"] = shedId;
       }
       if (seniorDoctorId != null) {
         body["senior_doctor_id"] = seniorDoctorId;
