@@ -6,6 +6,8 @@ class HealthTicketCard extends StatelessWidget {
   final String description;
   final String timeAgo;
   final String status;
+  final VoidCallback? onAssignTap;
+  final VoidCallback? onViewDetailsTap;
 
   const HealthTicketCard({
     super.key,
@@ -13,6 +15,8 @@ class HealthTicketCard extends StatelessWidget {
     required this.description,
     required this.timeAgo,
     required this.status,
+    this.onAssignTap,
+    this.onViewDetailsTap,
   });
 
   @override
@@ -27,16 +31,15 @@ class HealthTicketCard extends StatelessWidget {
       child: Column(
         children: [
           _cardHeader(),
-         
+
           _cardBody(),
-          Divider(thickness: 0.5,color: AppTheme.grey1,),
+          Divider(thickness: 0.5, color: AppTheme.grey1),
           _cardBottom(),
         ],
       ),
     );
   }
 
-  
   Widget _cardHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -46,7 +49,6 @@ class HealthTicketCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-
           const CircleAvatar(
             backgroundColor: Colors.white24,
             child: Icon(Icons.pets, color: Colors.white),
@@ -62,28 +64,20 @@ class HealthTicketCard extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            timeAgo,
-            style: const TextStyle(color: Colors.white70),
-          )
+          Text(timeAgo, style: const TextStyle(color: Colors.white70)),
         ],
       ),
     );
   }
 
-  
   Widget _cardBody() {
     return Padding(
       padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            description,
-            style:TextStyle(color: AppTheme.mediumGrey),
-           
-          ),
-          Divider(thickness: 0.5,color: AppTheme.grey1,),
+          Text(description, style: TextStyle(color: AppTheme.mediumGrey)),
+          Divider(thickness: 0.5, color: AppTheme.grey1),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -99,15 +93,17 @@ class HealthTicketCard extends StatelessWidget {
     );
   }
 
-  
   Widget _cardBottom() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
       child: Row(
         children: [
-          _iconText(Icons.confirmation_num_outlined, "Ticket Details"),
+          GestureDetector(
+            onTap: onViewDetailsTap,
+            child: _iconText(Icons.confirmation_num_outlined, "Ticket Details"),
+          ),
           // const Spacer(),
-          SizedBox(width: 20,),
+          SizedBox(width: 20),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.darkPrimary,
@@ -115,9 +111,9 @@ class HealthTicketCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            onPressed: () {},
+            onPressed: onAssignTap,
             child: const Text("Assign"),
-          )
+          ),
         ],
       ),
     );
@@ -145,15 +141,11 @@ class HealthTicketCard extends StatelessWidget {
       ),
       child: Text(
         status,
-        style: TextStyle(
-          color: bgColor,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TextStyle(color: bgColor, fontWeight: FontWeight.w600),
       ),
     );
   }
 
-  
   Widget _iconText(IconData icon, String text) {
     return Row(
       children: [
@@ -162,7 +154,7 @@ class HealthTicketCard extends StatelessWidget {
         Text(
           text,
           style: const TextStyle(
-            color:AppTheme.darkPrimary,
+            color: AppTheme.darkPrimary,
             fontWeight: FontWeight.w500,
           ),
         ),

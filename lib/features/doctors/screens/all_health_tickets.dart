@@ -2,6 +2,8 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/doctors/providers/doctors_provider.dart';
 import 'package:farm_vest/features/doctors/widgets/bottom_navigation.dart';
 import 'package:farm_vest/features/doctors/widgets/health_ticket_card.dart';
+import 'package:farm_vest/features/doctors/widgets/assignment_dialogs.dart';
+import 'package:farm_vest/features/doctors/screens/ticket_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -28,7 +30,7 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
   @override
   void initState() {
     super.initState();
-  
+
     Future.microtask(() {
       ref.read(doctorsProvider.notifier).fetchTickets();
     });
@@ -39,7 +41,6 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
     final healthState = ref.watch(doctorsProvider);
     final tickets = healthState.healthTickets;
 
-    
     final filteredTickets = tickets.where((ticket) {
       if (selectedFilter == "All") return true;
       return ticket.status.toLowerCase() == selectedFilter.toLowerCase();
@@ -77,6 +78,35 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
                               ? DateFormat('hh:mm a').format(ticket.createdAt!)
                               : "Recently",
                           status: ticket.status,
+                          onAssignTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AssignTicketDialog(
+                                ticketId: ticket.id.toString(),
+                                buffaloId: ticket.animalId ?? 'Unknown',
+                                onAssign: (assistantName) {
+                                  // TODO: Call API to assign assistant
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        AssignmentSuccessDialog(
+                                          ticketId: '#${ticket.id}',
+                                          assignedTo: assistantName,
+                                        ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          onViewDetailsTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TicketDetailsScreen(ticket: ticket),
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
@@ -92,35 +122,32 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
           });
         },
       ),
-      
-  floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
-  floatingActionButton: GestureDetector(
-    onTap: () => setState(() => _currentIndex = 4),
-    child: Container(
-      height: 68,
-      width: 68,
-      decoration: BoxDecoration(
-        color: AppTheme.darkPrimary,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 4),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      floatingActionButton: GestureDetector(
+        onTap: () => setState(() => _currentIndex = 4),
+        child: Container(
+          height: 68,
+          width: 68,
+          decoration: BoxDecoration(
+            color: AppTheme.darkPrimary,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 4),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Image.asset(
-          'assets/icons/home.png',
-          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Image.asset('assets/icons/home.png', color: Colors.white),
+          ),
         ),
       ),
-    ),
-  ),
     );
   }
 

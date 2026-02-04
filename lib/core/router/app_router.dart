@@ -8,7 +8,7 @@ import 'package:farm_vest/features/admin/presentation/screens/investor_animals_s
 import 'package:farm_vest/features/admin/presentation/screens/investor_management_screen.dart';
 import 'package:farm_vest/features/admin/presentation/screens/ticket_management_screen.dart';
 import 'package:farm_vest/features/doctors/screens/all_health_tickets.dart';
-import 'package:farm_vest/features/doctors/screens/homescreen.dart';
+import 'package:farm_vest/features/doctors/screens/doctor_home_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/actual_alert_Screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/create_leave_request_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/leave_requests_screen.dart';
@@ -227,8 +227,8 @@ class AppRouter {
         // DoctorDashboardScreen(),
       ),
       GoRoute(
-      path: '/all-health-tickets',
-      builder:(context,state)=>HealthTicketScreen(),
+        path: '/all-health-tickets',
+        builder: (context, state) => HealthTicketScreen(),
       ),
       GoRoute(
         path: '/assistant-dashboard',
