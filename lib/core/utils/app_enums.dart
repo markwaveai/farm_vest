@@ -1,6 +1,7 @@
 // Enums for the FarmVest application
 
 import 'dart:io';
+import 'package:flutter/material.dart';
 
 /// Defines the different types of users in the application
 enum UserType {
@@ -70,6 +71,41 @@ enum UserType {
         return 'Assistant';
       case UserType.admin:
         return 'Administrator';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case UserType.admin:
+        return Icons.admin_panel_settings;
+      case UserType.farmManager:
+        return Icons.agriculture;
+      case UserType.supervisor:
+        return Icons.assignment_ind;
+      case UserType.doctor:
+        return Icons.medical_services;
+      case UserType.assistant:
+        return Icons.health_and_safety;
+      case UserType.customer:
+        return Icons.trending_up;
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case UserType.admin:
+        // Using explicit RGBO to match requested Colors.blue
+        return Colors.blue;
+      case UserType.farmManager:
+        return Colors.green;
+      case UserType.supervisor:
+        return Colors.orange;
+      case UserType.doctor:
+        return Colors.red;
+      case UserType.assistant:
+        return Colors.teal;
+      case UserType.customer:
+        return Colors.indigo;
     }
   }
 }

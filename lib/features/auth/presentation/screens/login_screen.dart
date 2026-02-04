@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinput/pinput.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../../../../core/theme/app_constants.dart';
@@ -158,47 +157,6 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           ToastUtils.showError(context, 'Failed to resend OTP');
         }
       }
-    }
-  }
-
-  Map<String, dynamic> _getRoleInfo(UserType role) {
-    switch (role) {
-      case UserType.admin:
-        return {
-          'label': 'Administrator',
-          'icon': Icons.admin_panel_settings,
-          'color': Colors.blue,
-        };
-      case UserType.farmManager:
-        return {
-          'label': 'Farm Manager',
-          'icon': Icons.agriculture,
-          'color': Colors.green,
-        };
-      case UserType.supervisor:
-        return {
-          'label': 'Supervisor',
-          'icon': Icons.assignment_ind,
-          'color': Colors.orange,
-        };
-      case UserType.doctor:
-        return {
-          'label': 'Doctor',
-          'icon': Icons.medical_services,
-          'color': Colors.red,
-        };
-      case UserType.assistant:
-        return {
-          'label': 'Assistant Doctor',
-          'icon': Icons.health_and_safety,
-          'color': Colors.teal,
-        };
-      case UserType.customer:
-        return {
-          'label': 'Investor',
-          'icon': Icons.trending_up,
-          'color': Colors.indigo,
-        };
     }
   }
 
@@ -504,7 +462,6 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
       itemCount: _availableRoles.length,
       itemBuilder: (context, index) {
         final role = _availableRoles[index];
-        final info = _getRoleInfo(role);
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
@@ -521,14 +478,11 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: (info['color'] as Color).withOpacity(0.2),
+                    color: role.color.withOpacity(0.2),
                     width: 2,
                   ),
                   gradient: LinearGradient(
-                    colors: [
-                      (info['color'] as Color).withOpacity(0.05),
-                      Colors.white,
-                    ],
+                    colors: [role.color.withOpacity(0.05), Colors.white],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -538,14 +492,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: (info['color'] as Color).withOpacity(0.1),
+                        color: role.color.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        info['icon'] as IconData,
-                        color: info['color'] as Color,
-                        size: 28,
-                      ),
+                      child: Icon(role.icon, color: role.color, size: 28),
                     ),
                     const SizedBox(width: 20),
                     Expanded(
@@ -553,7 +503,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            info['label'] as String,
+                            role.label,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -562,7 +512,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Log in as ${info['label']}',
+                            'Log in as ${role.label}',
                             style: TextStyle(
                               fontSize: 14,
                               color: AppTheme.slate.withOpacity(0.6),
@@ -703,9 +653,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     letterSpacing: 2.0,
                   ),
                   decoration: const InputDecoration(
-                    hintText: '00000 00000',
+                    hintText: 'Enter Your Phone Number',
+
                     hintStyle: TextStyle(
-                      fontSize: 18,
+                      fontSize: 12,
                       fontWeight: FontWeight.normal,
                       color: Colors.black26,
                       letterSpacing: 2.0,

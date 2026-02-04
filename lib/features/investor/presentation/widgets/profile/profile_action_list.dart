@@ -138,7 +138,6 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
               ),
               const SizedBox(height: 24),
               ...availableRoles.map((role) {
-                final info = _getRoleInfo(role);
                 final isSelected = role == currentRole;
 
                 return Padding(
@@ -177,26 +176,17 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: isSelected
-                            ? info['color']
-                            : Colors.grey.shade200,
+                        color: isSelected ? role.color : Colors.grey.shade200,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
-                    tileColor: isSelected
-                        ? (info['color'] as Color).withOpacity(0.05)
-                        : null,
+                    tileColor: isSelected ? role.color.withOpacity(0.05) : null,
                     leading: CircleAvatar(
-                      backgroundColor: (info['color'] as Color).withOpacity(
-                        0.1,
-                      ),
-                      child: Icon(
-                        info['icon'] as IconData,
-                        color: info['color'] as Color,
-                      ),
+                      backgroundColor: role.color.withOpacity(0.1),
+                      child: Icon(role.icon, color: role.color),
                     ),
                     title: Text(
-                      info['label'] as String,
+                      role.label,
                       style: TextStyle(
                         fontWeight: isSelected
                             ? FontWeight.bold
@@ -204,60 +194,16 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
                       ),
                     ),
                     trailing: isSelected
-                        ? Icon(
-                            Icons.check_circle,
-                            color: info['color'] as Color,
-                          )
+                        ? Icon(Icons.check_circle, color: role.color)
                         : const Icon(Icons.arrow_forward_ios, size: 14),
                   ),
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),
       ),
     );
-  }
-
-  Map<String, dynamic> _getRoleInfo(UserType role) {
-    switch (role) {
-      case UserType.admin:
-        return {
-          'label': 'Administrator',
-          'icon': Icons.admin_panel_settings,
-          'color': Colors.blue,
-        };
-      case UserType.farmManager:
-        return {
-          'label': 'Farm Manager',
-          'icon': Icons.agriculture,
-          'color': Colors.green,
-        };
-      case UserType.supervisor:
-        return {
-          'label': 'Supervisor',
-          'icon': Icons.assignment_ind,
-          'color': Colors.orange,
-        };
-      case UserType.doctor:
-        return {
-          'label': 'Doctor',
-          'icon': Icons.medical_services,
-          'color': Colors.red,
-        };
-      case UserType.assistant:
-        return {
-          'label': 'Assistant Doctor',
-          'icon': Icons.health_and_safety,
-          'color': Colors.teal,
-        };
-      case UserType.customer:
-        return {
-          'label': 'Investor',
-          'icon': Icons.trending_up,
-          'color': Colors.indigo,
-        };
-    }
   }
 
   @override
@@ -276,7 +222,7 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
             leading: const Icon(Icons.swap_horiz, color: AppTheme.primary),
             title: const Text('Switch Role'),
             subtitle: Text(
-              'Currently as ${_getRoleInfo(authState.role ?? UserType.customer)['label']}',
+              'Currently as ${(authState.role ?? UserType.customer).label}',
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: _showSwitchRoleBottomSheet,

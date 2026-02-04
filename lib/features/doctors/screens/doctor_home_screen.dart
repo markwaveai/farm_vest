@@ -50,7 +50,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
     } else if (user != null && user.name.isNotEmpty) {
       displayName += user.name;
     } else {
-      displayName += "Krishna"; // Fallback/Default
+      displayName += "Sankar"; // Fallback/Default
     }
 
     // Trailing comma for the text span
@@ -367,47 +367,6 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
     );
   }
 
-  Map<String, dynamic> _getRoleInfo(UserType role) {
-    switch (role) {
-      case UserType.admin:
-        return {
-          'label': 'Administrator',
-          'icon': Icons.admin_panel_settings,
-          'color': const Color.fromRGBO(33, 150, 243, 1),
-        };
-      case UserType.farmManager:
-        return {
-          'label': 'Farm Manager',
-          'icon': Icons.agriculture,
-          'color': AppTheme.successGreen,
-        };
-      case UserType.supervisor:
-        return {
-          'label': 'Supervisor',
-          'icon': Icons.assignment_ind,
-          'color': AppTheme.orange,
-        };
-      case UserType.doctor:
-        return {
-          'label': 'Doctor',
-          'icon': Icons.medical_services,
-          'color': const Color.fromRGBO(211, 47, 47, 1),
-        };
-      case UserType.assistant:
-        return {
-          'label': 'Assistant Doctor',
-          'icon': Icons.health_and_safety,
-          'color': const Color.fromRGBO(0, 150, 136, 1),
-        };
-      case UserType.customer:
-        return {
-          'label': 'Investor',
-          'icon': Icons.trending_up,
-          'color': const Color.fromRGBO(63, 81, 181, 1),
-        };
-    }
-  }
-
   void _showSwitchRoleBottomSheet() {
     final authState = ref.read(authProvider);
     final availableRoles = authState.availableRoles;
@@ -437,7 +396,6 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
               ),
               const SizedBox(height: 24),
               ...availableRoles.map((role) {
-                final info = _getRoleInfo(role);
                 final isSelected = role == currentRole;
 
                 return Padding(
@@ -476,26 +434,17 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: isSelected
-                            ? info['color'] as Color
-                            : Colors.grey.shade200,
+                        color: isSelected ? role.color : Colors.grey.shade200,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
-                    tileColor: isSelected
-                        ? (info['color'] as Color).withOpacity(0.05)
-                        : null,
+                    tileColor: isSelected ? role.color.withOpacity(0.05) : null,
                     leading: CircleAvatar(
-                      backgroundColor: (info['color'] as Color).withOpacity(
-                        0.1,
-                      ),
-                      child: Icon(
-                        info['icon'] as IconData,
-                        color: info['color'] as Color,
-                      ),
+                      backgroundColor: role.color.withOpacity(0.1),
+                      child: Icon(role.icon, color: role.color),
                     ),
                     title: Text(
-                      info['label'] as String,
+                      role.label,
                       style: TextStyle(
                         fontWeight: isSelected
                             ? FontWeight.bold
@@ -503,10 +452,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                       ),
                     ),
                     trailing: isSelected
-                        ? Icon(
-                            Icons.check_circle,
-                            color: info['color'] as Color,
-                          )
+                        ? Icon(Icons.check_circle, color: role.color)
                         : const Icon(Icons.arrow_forward_ios, size: 14),
                   ),
                 );

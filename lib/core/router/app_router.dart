@@ -22,7 +22,6 @@ import 'package:farm_vest/features/employee/new_supervisor/screens/transfer_tick
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_details_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/buffalo_grid_screen.dart';
-import 'package:farm_vest/features/employee/presentation/screens/doctor_dashboard_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/buffalo_allocation_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/farm_manager_dashboard.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/manager_transfer_approval_screen.dart';
@@ -36,17 +35,14 @@ import 'package:farm_vest/features/investor/presentation/screens/profile_Screens
 import 'package:farm_vest/features/investor/presentation/widgets/investor_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-import 'package:farm_vest/features/auth/presentation/screens/new_login_screen.dart';
+import 'package:farm_vest/features/auth/presentation/screens/login_screen.dart';
 import 'package:farm_vest/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:farm_vest/features/auth/presentation/screens/splash_screen.dart';
 import 'package:farm_vest/features/common/presentation/screens/notifications_screen.dart';
 import 'package:farm_vest/features/employee/presentation/screens/assistant_dashboard_screen.dart';
 import 'package:farm_vest/features/employee/presentation/screens/health_issues_screen.dart';
 import 'package:farm_vest/features/employee/presentation/screens/milk_production_screen.dart';
-import 'package:farm_vest/features/employee/presentation/screens/profile_screen.dart';
 import 'package:farm_vest/features/employee/presentation/screens/raise_ticket_screen.dart';
-
 import 'package:farm_vest/features/investor/presentation/screens/investor_dashboard_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/profile_Screens/support_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/unit_details_screen.dart';
@@ -251,10 +247,6 @@ class AppRouter {
       GoRoute(
         path: '/raise-ticket',
         builder: (context, state) => const RaiseTicketScreen(),
-      ),
-      GoRoute(
-        path: '/profile',
-        builder: (context, state) => const ProfileScreen(),
       ),
 
       // Admin Routes
