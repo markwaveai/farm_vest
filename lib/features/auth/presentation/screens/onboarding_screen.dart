@@ -75,9 +75,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isSmallPhone = size.height < 700;
-    final isMediumPhone = size.height >= 700 && size.height < 820;
     return Scaffold(
       backgroundColor: AppTheme.white,
       body: SafeArea(
