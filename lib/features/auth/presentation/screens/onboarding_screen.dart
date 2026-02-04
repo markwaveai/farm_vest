@@ -76,8 +76,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-  final isSmallPhone = size.height < 700;
-  final isMediumPhone = size.height >= 700 && size.height < 820;
+    final isSmallPhone = size.height < 700;
+    final isMediumPhone = size.height >= 700 && size.height < 820;
     return Scaffold(
       backgroundColor: AppTheme.white,
       body: SafeArea(
@@ -158,90 +158,90 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
- Widget _buildPage(OnboardingPage page) {
-  final size = MediaQuery.of(context).size;
-  final isSmallPhone = size.height < 700;
-  final isMediumPhone = size.height < 820;
+  Widget _buildPage(OnboardingPage page) {
+    final size = MediaQuery.of(context).size;
+    final isSmallPhone = size.height < 700;
+    final isMediumPhone = size.height < 820;
 
-  return SingleChildScrollView(
-    physics: isSmallPhone
-        ? const BouncingScrollPhysics()
-        : const NeverScrollableScrollPhysics(),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          SizedBox(height: isSmallPhone ? 16 : 32),
+    return SingleChildScrollView(
+      physics: isSmallPhone
+          ? const BouncingScrollPhysics()
+          : const NeverScrollableScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          children: [
+            SizedBox(height: isSmallPhone ? 16 : 32),
 
-          // Title
-          Text(
-            page.title,
-            style: AppTheme.headingLarge.copyWith(
-              fontSize: isSmallPhone ? 22 : 28,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: 12),
-
-          // Description
-          Text(
-            page.description,
-            style: AppTheme.bodyMedium.copyWith(
-              fontSize: isSmallPhone ? 13 : 15,
-              height: 1.4,
-              color: AppTheme.slate,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          SizedBox(height: isSmallPhone ? 24 : 48),
-
-          // Image container (responsive height)
-          Container(
-            height: isSmallPhone
-                ? 220
-                : isMediumPhone
-                    ? 300
-                    : 380,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppTheme.white,
-                  AppTheme.primary.withValues(alpha: 0.08),
-                ],
+            // Title
+            Text(
+              page.title,
+              style: AppTheme.headingLarge.copyWith(
+                fontSize: isSmallPhone ? 22 : 28,
+                fontWeight: FontWeight.bold,
               ),
-              borderRadius: BorderRadius.circular(24),
+              textAlign: TextAlign.center,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Image.asset(
-                page.imagePath,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) {
-                  return Center(
-                    child: Icon(
-                      _getIconForPage(page.title),
-                      size: isSmallPhone ? 120 : 180,
-                      color: AppTheme.primary.withValues(alpha: 0.3),
-                    ),
-                  );
-                },
+
+            const SizedBox(height: 12),
+
+            // Description
+            Text(
+              page.description,
+              style: AppTheme.bodyMedium.copyWith(
+                fontSize: isSmallPhone ? 13 : 15,
+                height: 1.4,
+                color: AppTheme.slate,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            SizedBox(height: isSmallPhone ? 24 : 48),
+
+            // Image container (responsive height)
+            Container(
+              height: isSmallPhone
+                  ? 220
+                  : isMediumPhone
+                  ? 300
+                  : 380,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppTheme.white,
+                    AppTheme.primary.withValues(alpha: 0.08),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Image.asset(
+                  page.imagePath,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) {
+                    return Center(
+                      child: Icon(
+                        _getIconForPage(page.title),
+                        size: isSmallPhone ? 120 : 180,
+                        color: AppTheme.primary.withValues(alpha: 0.3),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
 
-          SizedBox(height: isSmallPhone ? 24 : 48),
-        ],
+            SizedBox(height: isSmallPhone ? 24 : 48),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   IconData _getIconForPage(String title) {
     if (title.contains('Asset')) {
