@@ -353,21 +353,26 @@ class _BuffaloAllocationScreenState
               if (onboardedAnimals.isNotEmpty)
                 _buildPendingAnimalsTray(onboardedAnimals),
 
-              // Shed Grid
+              // Shed Grid - Row Carousel
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
-                  child: Row(
-                    children: dashboardState
-                        .currentShedAvailability!
-                        .rows
-                        .entries
-                        .map((entry) {
-                          return Expanded(
-                            child: _buildGlassColumn(entry.key, entry.value),
-                          );
-                        })
-                        .toList(),
+                  padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    itemCount:
+                        dashboardState.currentShedAvailability!.rows.length,
+                    itemBuilder: (context, index) {
+                      final entry = dashboardState
+                          .currentShedAvailability!
+                          .rows
+                          .entries
+                          .elementAt(index);
+                      return SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        child: _buildGlassColumn(entry.key, entry.value),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -388,98 +393,138 @@ class _BuffaloAllocationScreenState
         ? state.sheds.where((s) => s.id == userShedId).toList()
         : state.sheds;
 
-    if (authState.role == UserType.supervisor && displayedSheds.length <= 1) {
-      return const SizedBox.shrink();
-    }
+    if (displayedSheds.isEmpty) return const SizedBox.shrink();
 
-    final selectedShed = displayedSheds.isEmpty
-        ? null
-        : displayedSheds.firstWhere(
-            (s) =>
-                s.id ==
-                (selectedShedId ??
-                    (displayedSheds.isNotEmpty
-                        ? displayedSheds.first.id
-                        : null)),
-            orElse: () => displayedSheds.first,
-          );
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<int>(
-                  isExpanded: true,
-                  hint: const Text('Select Shed'),
-                  value: selectedShedId,
-                  items: displayedSheds.map((shed) {
-                    return DropdownMenuItem(
-                      value: shed.id,
-                      child: Row(
-                        children: [
-                          const Icon(Icons.warehouse_rounded, size: 20),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              '${shed.farmName} - ${shed.shedName}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${shed.availablePositions} left',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.grey1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged:
-                      (authState.role == UserType.supervisor &&
-                          displayedSheds.length <= 1)
-                      ? null // Disable if only one assigned shed
-                      : _onShedSelected,
-                ),
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Text(
+            'SELECT SHED UNIT',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.grey1,
+              letterSpacing: 1.2,
             ),
           ),
-          if (selectedShedId != null && selectedShed != null) ...[
-            const SizedBox(width: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: AppTheme.primary,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.videocam_rounded, color: Colors.white),
-                onPressed: () => _showCctvUrlDialog(selectedShed),
-                tooltip: 'Set CCTV URL',
-              ),
-            ),
-          ],
-        ],
-      ),
+        ),
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: displayedSheds.length,
+            itemBuilder: (context, index) {
+              final shed = displayedSheds[index];
+              final isSelected = selectedShedId == shed.id;
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: GestureDetector(
+                  onTap: () => _onShedSelected(shed.id),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: 180,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppTheme.primary : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isSelected ? AppTheme.primary : Colors.black)
+                              .withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: isSelected
+                            ? AppTheme.primary
+                            : Colors.grey.shade200,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                shed.shedName,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : AppTheme.dark,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isSelected) ...[
+                              IconButton(
+                                constraints: const BoxConstraints(),
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(
+                                  Icons.videocam_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                onPressed: () => _showCctvUrlDialog(shed),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.check_circle,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ],
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${shed.availablePositions} positions left',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: isSelected
+                                    ? Colors.white.withOpacity(0.8)
+                                    : AppTheme.grey1,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: LinearProgressIndicator(
+                                value: (shed.capacity > 0)
+                                    ? (shed.currentBuffaloes / shed.capacity)
+                                    : 0,
+                                backgroundColor: isSelected
+                                    ? Colors.white.withOpacity(0.3)
+                                    : Colors.grey.shade100,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  isSelected ? Colors.white : AppTheme.primary,
+                                ),
+                                minHeight: 4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -966,7 +1011,7 @@ class _BuffaloAllocationScreenState
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               color: AppTheme.primary.withOpacity(0.08),
               borderRadius: const BorderRadius.vertical(
@@ -976,27 +1021,59 @@ class _BuffaloAllocationScreenState
             width: double.infinity,
             child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primary.withOpacity(0.15),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    rowName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.videocam_rounded,
+                      size: 14,
                       color: AppTheme.primary,
-                      fontSize: 14,
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primary.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        'ROW $rowName',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.primary,
+                          fontSize: 12,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircleAvatar(backgroundColor: Colors.red, radius: 3),
+                    SizedBox(width: 6),
+                    Text(
+                      'LIVE FEED',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.grey1,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

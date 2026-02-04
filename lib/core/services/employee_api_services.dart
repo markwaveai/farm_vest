@@ -106,7 +106,38 @@ class EmployeeApiServices {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['data']);
+        final rawData = data['data'];
+
+        // Handle categorized response from /farm/staff
+        if (rawData is Map<String, dynamic>) {
+          if (role == 'DOCTOR' || role == 'Doctor') {
+            return List<Map<String, dynamic>>.from(rawData['doctors'] ?? []);
+          } else if (role == 'SUPERVISOR' || role == 'Supervisor') {
+            return List<Map<String, dynamic>>.from(
+              rawData['supervisors'] ?? [],
+            );
+          } else if (role == 'ASSISTANT_DOCTOR' || role == 'Assistant') {
+            return List<Map<String, dynamic>>.from(
+              rawData['assistant_doctors'] ?? [],
+            );
+          } else if (role == 'FARM_MANAGER' || role == 'Farm Manager') {
+            return List<Map<String, dynamic>>.from(
+              rawData['farm_managers'] ?? [],
+            );
+          } else {
+            // Flatten all categorized lists if no specific role requested
+            final List<Map<String, dynamic>> allStaff = [];
+            rawData.forEach((key, value) {
+              if (value is List) {
+                allStaff.addAll(List<Map<String, dynamic>>.from(value));
+              }
+            });
+            return allStaff;
+          }
+        }
+
+        // Standard flat list from /get_all_employees
+        return List<Map<String, dynamic>>.from(rawData ?? []);
       }
       return [];
     } catch (e) {

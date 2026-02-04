@@ -23,6 +23,7 @@ class AdminState {
   final List<Investor> investorList;
   final List<InvestorAnimal> investorAnimals;
   final List<Ticket> tickets;
+  final List<UserModel> doctors;
   final bool staffActiveFilter;
 
   AdminState({
@@ -33,6 +34,7 @@ class AdminState {
     this.investorList = const [],
     this.investorAnimals = const [],
     this.tickets = const [],
+    this.doctors = const [],
     this.staffActiveFilter = true,
   });
 
@@ -44,6 +46,7 @@ class AdminState {
     List<Investor>? investorList,
     List<InvestorAnimal>? investorAnimals,
     List<Ticket>? tickets,
+    List<UserModel>? doctors,
     bool? staffActiveFilter,
   }) {
     return AdminState(
@@ -54,6 +57,7 @@ class AdminState {
       investorList: investorList ?? this.investorList,
       investorAnimals: investorAnimals ?? this.investorAnimals,
       tickets: tickets ?? this.tickets,
+      doctors: doctors ?? this.doctors,
       staffActiveFilter: staffActiveFilter ?? this.staffActiveFilter,
     );
   }
@@ -142,6 +146,29 @@ class AdminNotifier extends Notifier<AdminState> {
       }
       final staffModels = staffData.map((e) => UserModel.fromJson(e)).toList();
       state = state.copyWith(isLoading: false, staffList: staffModels);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> fetchDoctors({int? farmId}) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+      if (token == null) return;
+
+      final staffData = await EmployeeApiServices.getEmployees(
+        token: token,
+        role: 'DOCTOR',
+        farmId: farmId,
+        isActive: true,
+        page: 1,
+        size: 100,
+      );
+
+      final doctorModels = staffData.map((e) => UserModel.fromJson(e)).toList();
+      state = state.copyWith(isLoading: false, doctors: doctorModels);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -270,7 +297,7 @@ class AdminNotifier extends Notifier<AdminState> {
 
       // Only add optional fields if they're not null
       if (shedId != null) {
-        body["sheds.id"] = shedId;
+        body["shed_id"] = shedId;
       }
       if (seniorDoctorId != null) {
         body["senior_doctor_id"] = seniorDoctorId;

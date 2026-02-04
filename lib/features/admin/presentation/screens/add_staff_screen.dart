@@ -27,6 +27,7 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
   UserType? _selectedRole;
   int? _selectedFarmId;
   int? _selectedShedId;
+  int? _selectedSeniorDoctorId;
   bool _isTestAccount = false;
   List<Map<String, dynamic>> _sheds = [];
   bool _isFormValid = false;
@@ -94,7 +95,10 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
         _selectedRole != null &&
         _selectedFarmId != null &&
         // For supervisors, shed must be selected
-        (_selectedRole != UserType.supervisor || _selectedShedId != null);
+        (_selectedRole != UserType.supervisor || _selectedShedId != null) &&
+        // For assistants, senior doctor must be selected
+        (_selectedRole != UserType.assistant ||
+            _selectedSeniorDoctorId != null);
 
     if (isValid != _isFormValid) {
       setState(() {
@@ -118,10 +122,9 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
   @override
   Widget build(BuildContext context) {
     final adminState = ref.watch(adminProvider);
-    final currentUserRole = ref.watch(authProvider).userData?.role;
-    final isFM =
-        currentUserRole != null &&
-        UserType.fromString(currentUserRole) == UserType.farmManager;
+    final authState = ref.watch(authProvider);
+    final currentUserRole = authState.role;
+    final isFM = currentUserRole == UserType.farmManager;
 
     return Scaffold(
       appBar: AppBar(
@@ -289,7 +292,13 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                   hint: const Text('Select Role'),
                   items:
                       [
+                            // // Only Admin can add other Admins
+                            // if (!isFM && currentUserRole == UserType.admin)
+                            //   UserType.admin,
+
+                            // Everyone except FM can add Farm Managers
                             if (!isFM) UserType.farmManager,
+
                             UserType.supervisor,
                             UserType.doctor,
                             UserType.assistant,
@@ -302,7 +311,15 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                           )
                           .toList(),
                   onChanged: (v) {
-                    setState(() => _selectedRole = v);
+                    setState(() {
+                      _selectedRole = v;
+                      _selectedSeniorDoctorId = null;
+                    });
+                    if (v == UserType.assistant) {
+                      ref
+                          .read(adminProvider.notifier)
+                          .fetchDoctors(farmId: _selectedFarmId);
+                    }
                     _validateForm();
                   },
                   validator: (v) => v == null ? 'Role is required' : null,
@@ -326,10 +343,18 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                             setState(() {
                               _selectedFarmId = v;
                               _selectedShedId = null;
+                              _selectedSeniorDoctorId = null;
                               _sheds = [];
                             });
                             state.didChange(v);
-                            if (v != null) _fetchSheds(v);
+                            if (v != null) {
+                              _fetchSheds(v);
+                              if (_selectedRole == UserType.assistant) {
+                                ref
+                                    .read(adminProvider.notifier)
+                                    .fetchDoctors(farmId: v);
+                              }
+                            }
                             _validateForm();
                           },
                           label: 'Select Farm',
@@ -352,7 +377,8 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                 const SizedBox(height: 20),
               ],
 
-              if (_selectedRole == UserType.supervisor &&
+              if ((_selectedRole == UserType.supervisor ||
+                      _selectedRole == UserType.assistant) &&
                   _selectedFarmId != null) ...[
                 _buildLabel('Assigned Shed', isRequired: true),
                 DropdownButtonFormField<int>(
@@ -375,16 +401,55 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                   items: _sheds.map<DropdownMenuItem<int>>((s) {
                     return DropdownMenuItem(
                       value: s['id'] as int,
-                      child: Text('${s['shed_name']} (${s['sheds.id']})'),
+                      child: Text('${s['shed_name']}'),
                     );
                   }).toList(),
                   onChanged: (v) {
                     setState(() => _selectedShedId = v);
                     _validateForm();
                   },
-                  validator: (v) => v == null
-                      ? 'Shed assignment is required for Supervisors'
-                      : null,
+                  validator: (v) =>
+                      v == null ? 'Shed assignment is required' : null,
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              if (_selectedRole == UserType.assistant &&
+                  _selectedFarmId != null) ...[
+                _buildLabel('Senior Doctor', isRequired: true),
+                DropdownButtonFormField<int>(
+                  value: _selectedSeniorDoctorId,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppTheme.mediumGrey),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppTheme.mediumGrey),
+                    ),
+                  ),
+                  hint: const Text('Select Senior Doctor'),
+                  items: adminState.doctors.map<DropdownMenuItem<int>>((doc) {
+                    final displayName =
+                        (doc.firstName.isEmpty && doc.lastName.isEmpty)
+                        ? doc.name
+                        : '${doc.firstName} ${doc.lastName}';
+                    return DropdownMenuItem(
+                      value: int.tryParse(doc.id),
+                      child: Text(displayName),
+                    );
+                  }).toList(),
+                  onChanged: (v) {
+                    setState(() => _selectedSeniorDoctorId = v);
+                    _validateForm();
+                  },
+                  validator: (v) =>
+                      v == null ? 'Senior Doctor assignment is required' : null,
                 ),
                 const SizedBox(height: 20),
               ],
@@ -443,8 +508,14 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                                 mobile: _phoneController.text.trim(),
                                 roles: [_selectedRole!.backendValue],
                                 farmId: _selectedFarmId!,
-                                shedId: _selectedRole == UserType.supervisor
+                                shedId:
+                                    (_selectedRole == UserType.supervisor ||
+                                        _selectedRole == UserType.assistant)
                                     ? _selectedShedId
+                                    : null,
+                                seniorDoctorId:
+                                    _selectedRole == UserType.assistant
+                                    ? _selectedSeniorDoctorId
                                     : null,
                                 isTest: _isTestAccount,
                               );
