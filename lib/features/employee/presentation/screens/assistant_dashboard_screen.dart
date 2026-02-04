@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
+import 'package:farm_vest/features/auth/presentation/widgets/profile_menu_drawer.dart';
 import '../widgets/employee_dashboard_card.dart';
 
 class AssignedTask {
@@ -165,7 +166,7 @@ class _AssistantDashboardScreenState
             ),
           ],
         ),
-        drawer: _buildDrawer(),
+        drawer: const ProfileMenuDrawer(),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(AppConstants.spacingM),
           child: Column(
@@ -302,106 +303,6 @@ class _AssistantDashboardScreenState
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(color: AppTheme.primary),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppTheme.white,
-                  child: Icon(
-                    Icons.support_agent,
-                    size: 30,
-                    color: AppTheme.primary,
-                  ),
-                ),
-                const SizedBox(height: AppConstants.spacingM),
-                const Text(
-                  'Ravi Kumar',
-                  style: TextStyle(
-                    color: AppTheme.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Text(
-                  'Assistant',
-                  style: TextStyle(color: AppTheme.white, fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.dashboard),
-            title: const Text('Dashboard'),
-            onTap: () => Navigator.pop(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.assignment),
-            title: const Text('Assigned Tasks'),
-            onTap: () {
-              Navigator.pop(context);
-              _showAssignedTasks();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.monitor_heart),
-            title: const Text('Daily Monitoring'),
-            onTap: () {
-              Navigator.pop(context);
-              _showDailyMonitoring();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.medication),
-            title: const Text('Treatment Execution'),
-            onTap: () {
-              Navigator.pop(context);
-              _showTreatmentExecution();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.check_circle),
-            title: const Text('Completed Updates'),
-            onTap: () {
-              Navigator.pop(context);
-              _showCompletedUpdates();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Profile'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/profile');
-            },
-          ),
-          // if (ref.watch(authProvider).availableRoles.length > 1)
-          ListTile(
-            leading: const Icon(Icons.swap_horiz),
-            title: const Text('Switch Role'),
-            onTap: () {
-              Navigator.pop(context);
-              _showSwitchRoleBottomSheet();
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
-            onTap: () => _showLogoutDialog(),
-          ),
-        ],
       ),
     );
   }
@@ -921,32 +822,6 @@ class _AssistantDashboardScreenState
               );
             },
             child: const Text('Update'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) {
-                Navigator.pop(context);
-                context.go('/login');
-              }
-            },
-            child: const Text('Logout'),
           ),
         ],
       ),

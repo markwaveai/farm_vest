@@ -1517,7 +1517,10 @@ class _BuffaloAllocationScreenState
 
     final success = await ref
         .read(farmManagerProvider.notifier)
-        .allocateAnimals(shedId: selectedShed.shedId, allocations: allocations);
+        .allocateAnimals(
+          shedId: selectedShed.id.toString(),
+          allocations: allocations,
+        );
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

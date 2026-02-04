@@ -131,7 +131,7 @@ class AnimalApiServices {
     try {
       final queryParams = {
         'farm_id': farmId.toString(),
-        'sheds.id': shedId.toString(),
+        'shed_id': shedId.toString(),
         'row_number': rowNumber,
         'parking_id': parkingId,
       };

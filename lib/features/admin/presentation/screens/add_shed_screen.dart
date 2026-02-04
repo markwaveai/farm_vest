@@ -86,10 +86,10 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
                         v?.isEmpty ?? true ? 'Name is required' : null,
                   ),
                   const SizedBox(height: 20),
-                  _buildLabel('Capacity (Standard 300)'),
+                  _buildLabel('Capacity'),
                   CustomTextField(
                     controller: _capacityController,
-                    enabled: false,
+                    enabled: true,
                     keyboardType: TextInputType.number,
                     prefixIcon: const Icon(Icons.group_work_rounded, size: 20),
                     hint: '300',

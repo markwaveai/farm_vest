@@ -10,7 +10,9 @@ import '../providers/admin_provider.dart';
 import 'package:farm_vest/features/farm_manager/data/models/farm_model.dart';
 import 'ticket_management_screen.dart';
 import 'staff_management_screen.dart';
-import 'search_animals_screen.dart';
+import '../widgets/admin_bottom_navigation.dart';
+import 'package:farm_vest/features/admin/presentation/screens/investor_management_screen.dart';
+import 'package:farm_vest/features/auth/presentation/widgets/profile_menu_drawer.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -22,6 +24,7 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
 
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   int _selectedIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -32,51 +35,41 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         setState(() => _selectedIndex = 0);
       },
       child: Scaffold(
-        backgroundColor: AppTheme.lightGrey,
+        key: _scaffoldKey,
+        backgroundColor: AppTheme.white,
+        drawer: const ProfileMenuDrawer(),
         body: _buildBody(),
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: AppTheme.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 20,
-                offset: const Offset(0, -5),
+        bottomNavigationBar: AdminBottomNavigation(
+          currentIndex: _selectedIndex,
+          onTap: (index) => setState(() => _selectedIndex = index),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: GestureDetector(
+          onTap: () {
+            setState(() => _selectedIndex = 0);
+          },
+          child: Container(
+            height: 68,
+            width: 68,
+            decoration: BoxDecoration(
+              color: AppTheme.darkPrimary,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.white, width: 4),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Image.asset(
+                'assets/icons/home.png',
+                color: AppTheme.white,
               ),
-            ],
-          ),
-          child: BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: (index) => setState(() => _selectedIndex = index),
-            backgroundColor: AppTheme.white,
-            selectedItemColor: AppTheme.primary,
-            unselectedItemColor: AppTheme.slate.withOpacity(0.5),
-            type: BottomNavigationBarType.fixed,
-            showSelectedLabels: true,
-            showUnselectedLabels: true,
-            elevation: 0,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard_outlined),
-                activeIcon: Icon(Icons.dashboard),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.agriculture_outlined),
-                activeIcon: Icon(Icons.agriculture),
-                label: 'Farms',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.bug_report_outlined),
-                activeIcon: Icon(Icons.bug_report),
-                label: 'Tickets', // Medical/Tickets focus
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_search_outlined),
-                activeIcon: Icon(Icons.person_search),
-                label: 'Staff',
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -99,6 +92,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         return _AdminStaffView(
           onBack: () => setState(() => _selectedIndex = 0),
         );
+      case 4:
+        return const InvestorManagementScreen();
       default:
         return _AdminHomeView(
           onNavigate: (index) => setState(() => _selectedIndex = index),
@@ -266,195 +261,72 @@ class _AdminHomeView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return CustomScrollView(
-      physics: const BouncingScrollPhysics(),
-      slivers: [
-        _buildSliverAppBar(context, ref),
-        SliverToBoxAdapter(
-          child: Transform.translate(
-            offset: const Offset(0, -28),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionHeader('Management Operations'),
-                  const SizedBox(height: 16),
-                  _buildQuickActionGrid(context),
-                  const SizedBox(height: 100),
-                ],
-              ),
+    final authState = ref.watch(authProvider);
+    final user = authState.userData;
+
+    String displayName = "Admin";
+    if (user != null &&
+        (user.firstName.isNotEmpty || user.lastName.isNotEmpty)) {
+      final fname = user.firstName.isNotEmpty
+          ? user.firstName[0].toUpperCase() + user.firstName.substring(1)
+          : "";
+      final lname = user.lastName.isNotEmpty
+          ? user.lastName[0].toUpperCase() + user.lastName.substring(1)
+          : "";
+      displayName = "$fname $lname".trim();
+    } else if (user != null && user.name.isNotEmpty) {
+      displayName = user.name;
+    }
+    displayName = "$displayName,";
+
+    return Scaffold(
+      backgroundColor: AppTheme.white,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: AppTheme.white,
+        automaticallyImplyLeading: false,
+        title: Align(
+          alignment: Alignment.centerLeft,
+          child: RichText(
+            text: TextSpan(
+              text: 'Hello ',
+              style: const TextStyle(color: AppTheme.black, fontSize: 16),
+              children: [
+                TextSpan(
+                  text: displayName,
+                  style: const TextStyle(
+                    color: AppTheme.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ],
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: AppTheme.black),
+          onPressed: () => Scaffold.of(context).openDrawer(),
+        ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) {
-                context.go('/login');
-              }
-            },
-            child: const Text('Logout', style: TextStyle(color: Colors.red)),
+          IconButton(
+            onPressed: () => _showSwitchRoleBottomSheet(context, ref),
+            icon: const Icon(Icons.swap_horiz_rounded, color: AppTheme.black),
+            tooltip: 'Switch Role',
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSliverAppBar(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-    return SliverAppBar(
-      expandedHeight: 180.0,
-      pinned: true,
-      elevation: 0,
-      stretch: true,
-      backgroundColor: AppTheme.dark,
-      systemOverlayStyle: SystemUiOverlayStyle.light,
-      flexibleSpace: FlexibleSpaceBar(
-        stretchModes: const [
-          StretchMode.blurBackground,
-          StretchMode.zoomBackground,
-        ],
-        background: Stack(
-          fit: StackFit.expand,
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF00382F), AppTheme.dark, Color(0xFF1B5E20)],
-                ),
-              ),
-            ),
-            Positioned(
-              top: -60,
-              right: -60,
-              child: Container(
-                width: 250,
-                height: 250,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.04),
-                ),
-              ),
-            ),
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 40),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Image.asset(
-                          'assets/images/farmvest_logo.png',
-                          height: 48,
-                          fit: BoxFit.contain,
-                        ),
-                        const Spacer(),
-                        // Role Switcher
-                        _buildHeaderIcon(
-                          Icons.swap_horiz_rounded,
-                          onTap: () => _showSwitchRoleBottomSheet(context, ref),
-                        ),
-                        const SizedBox(width: 8),
-                        _buildHeaderIcon(
-                          Icons.power_settings_new_rounded,
-                          onTap: () => _showLogoutDialog(context, ref),
-                        ),
-                        const SizedBox(width: 8),
-                        _buildHeaderIcon(
-                          Icons.search_rounded,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SearchAnimalsScreen(),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        _buildHeaderIcon(
-                          Icons.notifications_active_outlined,
-                          onTap: () => context.push('/notifications'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _getRoleInfo(
-                                  authState.role ?? UserType.admin,
-                                )['icon']
-                                as IconData,
-                            size: 14,
-                            color: Colors.white.withOpacity(0.9),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            _getRoleInfo(
-                              authState.role ?? UserType.admin,
-                            )['label'],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            _buildSectionHeader('Management Operations'),
+            const SizedBox(height: 16),
+            _buildQuickActionGrid(context),
+            const SizedBox(height: 100),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderIcon(IconData icon, {VoidCallback? onTap}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white, size: 20),
-        onPressed: onTap,
       ),
     );
   }
@@ -774,7 +646,7 @@ class _AdminFarmsViewState extends ConsumerState<_AdminFarmsView> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      backgroundColor: AppTheme.lightGrey,
+      backgroundColor: AppTheme.white,
       appBar: AppBar(
         title: _isSearching
             ? TextField(

@@ -194,8 +194,11 @@ class _TicketManagementScreenState
     final tickets = adminState.tickets;
 
     return Scaffold(
-      backgroundColor: AppTheme.lightGrey,
+      backgroundColor: AppTheme.white,
       appBar: AppBar(
+        backgroundColor: AppTheme.white,
+        elevation: 0,
+        centerTitle: true,
         title: const Text('Medical & Support Tickets'),
         leading: widget.onBackPressed != null
             ? IconButton(

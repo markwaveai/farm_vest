@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:farm_vest/features/auth/presentation/widgets/profile_menu_drawer.dart';
 
 class FarmManagerDashboard extends ConsumerStatefulWidget {
   const FarmManagerDashboard({super.key});
@@ -22,6 +23,7 @@ class FarmManagerDashboard extends ConsumerStatefulWidget {
 }
 
 class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   void initState() {
     super.initState();
@@ -30,36 +32,6 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       ref.read(farmManagerProvider.notifier).refreshDashboard();
       ref.read(staffListProvider.notifier).loadStaff();
     });
-  }
-
-  void _logout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) {
-                context.go('/login');
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _baseDialog(
@@ -253,11 +225,14 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
   Widget build(BuildContext context) {
     final ds = ref.watch(farmManagerProvider);
     final ss = ref.watch(staffListProvider);
-    final user = ref.watch(authProvider);
-    final name = user.userData?.name ?? "Manager";
+    final authState = ref.watch(authProvider);
+    final user = authState.userData;
+    final name = user?.name ?? "Manager";
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: const Color(0xFFF8FAF9),
+      drawer: const ProfileMenuDrawer(),
       body: ds.isLoading
           ? const Center(
               child: CircularProgressIndicator(color: AppTheme.primary),
@@ -273,8 +248,8 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                 slivers: [
                   _buildAppBar(
                     name,
-                    user.userData?.farmName ?? "Assigned Farm",
-                    user.userData?.farmLocation ?? "Loading location...",
+                    user?.farmName ?? "Assigned Farm",
+                    user?.farmLocation ?? "Loading location...",
                   ),
                   SliverPadding(
                     padding: const EdgeInsets.all(20),
@@ -342,25 +317,38 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
                             children: [
-                              Text(
-                                "Farm Manager",
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                "Dashboard",
-                                style: TextStyle(
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.menu,
                                   color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
                                 ),
+                                onPressed: () =>
+                                    _scaffoldKey.currentState?.openDrawer(),
+                              ),
+                              const SizedBox(width: 8),
+                              const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Farm Manager",
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Dashboard",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -392,13 +380,6 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                                   color: Colors.white,
                                 ),
                                 onPressed: () => context.push('/notifications'),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.logout_rounded,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () => _logout(context),
                               ),
                             ],
                           ),

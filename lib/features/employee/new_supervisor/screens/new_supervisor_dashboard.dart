@@ -13,31 +13,6 @@ import 'package:shimmer/shimmer.dart';
 class NewSupervisorDashboard extends ConsumerWidget {
   const NewSupervisorDashboard({super.key});
 
-  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) {
-                context.go('/login');
-              }
-            },
-            child: const Text('Logout', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -57,6 +32,12 @@ class NewSupervisorDashboard extends ConsumerWidget {
       appBar: AppBar(
         toolbarHeight: screenWidth * 0.22,
         centerTitle: false,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -95,10 +76,6 @@ class NewSupervisorDashboard extends ConsumerWidget {
             onPressed: () => context.push('/notifications'),
             icon: const Icon(Icons.notifications_active_outlined),
             tooltip: 'Notifications',
-          ),
-          IconButton(
-            onPressed: () => _showLogoutDialog(context, ref),
-            icon: const Icon(Icons.logout),
           ),
         ],
       ),

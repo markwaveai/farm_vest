@@ -225,9 +225,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                 top: Radius.circular(18),
               ),
               border: Border(
-                bottom: BorderSide(
-                  color: AppTheme.lightGrey.withOpacity(0.5),
-                ),
+                bottom: BorderSide(color: AppTheme.lightGrey.withOpacity(0.5)),
               ),
             ),
             child: Row(
@@ -367,7 +365,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                 // Second Row: Age, Breed/Parent
                 Row(
                   children: [
-                    if (isBuffalo)
+                    if (isBuffalo) ...[
                       Expanded(
                         child: ModernTextField(
                           label: 'Breed Name',
@@ -380,77 +378,9 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                             widget.onUpdate();
                           },
                         ),
-                      )
-                    else
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Parent Buffalo',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.grey1,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              height: 48,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.lightGrey.withValues(
-                                  alpha: 0.5,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.link_rounded,
-                                    size: 18,
-                                    color: AppTheme.primary.withValues(
-                                      alpha: 0.6,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      () {
-                                        if (widget.buffaloEntries.isNotEmpty &&
-                                            widget.index <
-                                                widget.buffaloEntries.length) {
-                                          final p = widget
-                                              .buffaloEntries[widget.index];
-                                          return p.rfidTag.isNotEmpty
-                                              ? p.rfidTag
-                                              : 'Buffalo #${widget.index + 1} (No RFID)';
-                                        }
-                                        return 'Not Linked';
-                                      }(),
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppTheme.darkGrey,
-                                      ),
-                                    ),
-                                  ),
-                                  const Icon(
-                                    Icons.lock,
-                                    size: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
-
-                    const SizedBox(width: 20),
-
+                      const SizedBox(width: 20),
+                    ],
                     Expanded(
                       child: ModernTextField(
                         label: 'Age (Months)',

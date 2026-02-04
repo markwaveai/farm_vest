@@ -41,11 +41,11 @@ class _InvestorManagementScreenState
     }).toList();
 
     return Scaffold(
-      backgroundColor: AppTheme.lightGrey,
+      backgroundColor: AppTheme.white,
       appBar: AppBar(
         title: const Text('Investor Management'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppTheme.primary,
+        backgroundColor: AppTheme.white,
+        centerTitle: true,
         elevation: 0,
       ),
       body: Column(

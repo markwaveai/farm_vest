@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:farm_vest/features/auth/presentation/widgets/profile_menu_drawer.dart';
 
 class NewSupervisorShell extends StatefulWidget {
   final Widget child;
@@ -58,6 +59,7 @@ class _NewSupervisorShellState extends State<NewSupervisorShell> {
     return Scaffold(
       extendBody: false,
       resizeToAvoidBottomInset: true,
+      drawer: const ProfileMenuDrawer(),
       body: widget.child,
       bottomNavigationBar: _NewSupervisorBottomNav(
         selectedIndex: _currentIndex,
