@@ -200,6 +200,7 @@ class AppRouter {
         builder: (context, state) {
           final extras = state.extra as Map<String, dynamic>?;
           return BuffaloAllocationScreen(
+            initialFarmId: extras?['farmId'] as int?, 
             initialShedId: extras?['shedId'] as int?,
             targetParkingId: extras?['parkingId'] as String?,
             initialAnimalId: extras?['animalId'] as String?,

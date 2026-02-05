@@ -167,6 +167,7 @@ class _QuickActionDialogContentState
                             controller: idController,
                             focusNode: idFocusNode,
                             onChanged: (val) {
+                              setState(() {}); // Rebuild to update button state
                               ref
                                   .read(supervisorDashboardProvider.notifier)
                                   .searchSuggestions(val);

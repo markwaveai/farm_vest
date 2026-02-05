@@ -153,6 +153,40 @@ class _AdminOnboardAnimalScreenState
     );
   }
 
+  bool _isAnimalBaseValid(AnimalOnboardingEntry entry) {
+    return entry.rfidTag.isNotEmpty &&
+        entry.earTag.isNotEmpty &&
+        entry.ageMonths > 0 &&
+        entry.images.isNotEmpty;
+  }
+
+  bool _isBuffaloValid(AnimalOnboardingEntry entry) {
+    return _isAnimalBaseValid(entry) &&
+        entry.breedName.isNotEmpty &&
+        entry.status.isNotEmpty;
+  }
+
+  bool _isCalfValid(AnimalOnboardingEntry entry) {
+    return _isAnimalBaseValid(entry) && entry.parentAnimalId.isNotEmpty;
+  }
+
+  bool get _isFormValid {
+    final dashboardState = ref.read(farmManagerProvider);
+
+    if (dashboardState.currentOrder == null) return false;
+    if (selectedFarmId == null) return false;
+
+    for (final buffalo in buffaloEntries) {
+      if (!_isBuffaloValid(buffalo)) return false;
+    }
+
+    for (final calf in calfEntries) {
+      if (!_isCalfValid(calf)) return false;
+    }
+
+    return true;
+  }
+
   Future<void> _submit() async {
     final dashboardState = ref.read(farmManagerProvider);
     final order = dashboardState.currentOrder;
@@ -181,7 +215,11 @@ class _AdminOnboardAnimalScreenState
             backgroundColor: AppTheme.successGreen,
           ),
         );
-        context.go('/buffalo-allocation');
+        context.go('/buffalo-allocation',
+  extra: {
+    'farmId': selectedFarmId,
+  },
+);
       } else if (mounted) {
         _showError(dashboardState.error ?? 'Failed to submit');
       }
@@ -386,7 +424,7 @@ class _AdminOnboardAnimalScreenState
                 ),
               const SizedBox(height: 16),
               CustomActionButton(
-                onPressed: _submit,
+                onPressed: _isFormValid && !_isSubmitting ? _submit : null,
                 color: AppTheme.primary,
                 child: _isSubmitting
                     ? const CircularProgressIndicator(color: Colors.white)

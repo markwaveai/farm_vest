@@ -679,6 +679,7 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
               focusNode: _reasonFocusNode,
               maxLines: 3,
 
+              onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Describe why this animal is being moved...',
                 filled: true,
@@ -707,7 +708,12 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
               width: double.infinity,
               height: 54,
               child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitTransfer,
+                onPressed:
+                    (_isSubmitting ||
+                        _selectedAnimalId == null ||
+                        _reasonController.text.trim().isEmpty)
+                    ? null
+                    : _submitTransfer,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,

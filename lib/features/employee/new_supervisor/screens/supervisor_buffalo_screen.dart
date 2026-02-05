@@ -38,57 +38,75 @@ class _SupervisorBuffaloScreenState
   Widget build(BuildContext context) {
     final animalsAsync = ref.watch(searchedAnimalsProvider);
 
-    return Scaffold(
-      backgroundColor: AppTheme.grey,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/supervisor-dashboard'),
-        ),
-        title: const Text('Animals List'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(70),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search by Tag, RFID or ID',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    ref.read(animalSearchQueryProvider.notifier).state = 'all';
-                  },
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        context.go('/supervisor-dashboard');
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.grey,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go('/supervisor-dashboard'),
+          ),
+          title: const Text('Animals List'),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(70),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search by Tag, RFID or ID',
+                  prefixIcon: IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      final value = _searchController.text.trim();
+                      ref.read(animalSearchQueryProvider.notifier).state =
+                          value.isEmpty ? 'all' : value;
+                    },
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _searchController.clear();
+                      ref.read(animalSearchQueryProvider.notifier).state = 'all';
+                    },
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.white,
+                onSubmitted: (value) {
+                  ref.read(animalSearchQueryProvider.notifier).state =
+                      value.isEmpty ? 'all' : value;
+                },
+                onChanged: (value) {
+                  ref.read(animalSearchQueryProvider.notifier).state =
+                      value.isEmpty ? 'all' : value;
+                },
               ),
-              onSubmitted: (value) {
-                ref.read(animalSearchQueryProvider.notifier).state =
-                    value.isEmpty ? 'all' : value;
-              },
             ),
           ),
         ),
-      ),
-      body: animalsAsync.when(
-        data: (animals) {
-          final buffaloes = animals.where((a) {
-            final type = a.animalType?.toLowerCase() ?? '';
-            return !type.contains('calf');
-          }).toList();
+        body: animalsAsync.when(
+          data: (animals) {
+            final buffaloes = animals.where((a) {
+              final type = a.animalType?.toLowerCase() ?? '';
+              return !type.contains('calf');
+            }).toList();
 
-          return _buildAnimalList(buffaloes, 'No animals found');
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+            return _buildAnimalList(buffaloes, 'No animals found');
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text('Error: $err')),
+        ),
       ),
     );
   }

@@ -540,7 +540,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Animal Onboarding'),
+        title: const Text('Buffalo Onboarding'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () {

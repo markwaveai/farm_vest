@@ -14,6 +14,7 @@ import '../../data/models/shed_model.dart';
 import 'package:farm_vest/features/farm_manager/data/models/allocated_animal_details.dart';
 
 class BuffaloAllocationScreen extends ConsumerStatefulWidget {
+  final int? initialFarmId;
   final int? initialShedId;
   final String? targetParkingId;
   final String? initialAnimalId;
@@ -23,6 +24,7 @@ class BuffaloAllocationScreen extends ConsumerStatefulWidget {
     this.initialShedId,
     this.targetParkingId,
     this.initialAnimalId,
+    this.initialFarmId,
   });
 
   @override
@@ -42,6 +44,9 @@ class _BuffaloAllocationScreenState
   @override
   void initState() {
     super.initState();
+    if (widget.initialFarmId != null) {
+      selectedFarmId = widget.initialFarmId;
+    }
 
     if (widget.initialShedId != null) {
       selectedShedId = widget.initialShedId;
@@ -65,6 +70,20 @@ class _BuffaloAllocationScreenState
         ref
             .read(farmManagerProvider.notifier)
             .fetchUnallocatedAnimals(farmId: farmId);
+
+        if (selectedShedId != null) {
+          ref
+              .read(farmManagerProvider.notifier)
+              .fetchShedPositions(selectedShedId!);
+        }
+      } else if (widget.initialFarmId != null) {
+        ref
+            .read(farmManagerProvider.notifier)
+            .fetchSheds(farmId: widget.initialFarmId);
+
+        ref
+            .read(farmManagerProvider.notifier)
+            .fetchUnallocatedAnimals(farmId: widget.initialFarmId);
 
         if (selectedShedId != null) {
           ref
