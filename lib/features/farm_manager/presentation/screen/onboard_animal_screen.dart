@@ -41,7 +41,19 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize with empty entries
+    Future.microtask(() {
+      final auth = ref.read(authProvider);
+      if (auth.role == UserType.farmManager) {
+        final fId = int.tryParse(auth.userData?.farmId ?? '');
+        debugPrint("OnboardAnimalScreen: FM Farm ID initialization: $fId");
+        if (mounted) {
+          setState(() {
+            _selectedFarmId = fId;
+          });
+        }
+      }
+    });
+
     _initializeEmptyEntries();
     searchController.addListener(() {
       if (mounted) setState(() {});

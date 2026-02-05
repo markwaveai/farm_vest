@@ -513,10 +513,11 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       token: token,
       status: 'PENDING',
       ticketType: 'TRANSFER',
+      // transferDirection: 'IN', // Or filter by logic? Logic is in backend.
     );
-    return (response as List<dynamic>)
-        .map((t) => Map<String, dynamic>.from(t))
-        .toList();
+    // getTickets returns List<Ticket>. Convert to List<Map<String, dynamic>> for UI or change UI to use Ticket model.
+    // The previous code cast response as List<dynamic> which is wrong if getTickets returns List<Ticket>.
+    return response.map((t) => t.toJson()).toList();
   }
 
   Future<void> approveTransfer(int ticketId) async {

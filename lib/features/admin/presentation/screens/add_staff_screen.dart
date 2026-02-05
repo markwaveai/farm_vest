@@ -380,7 +380,12 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
               if ((_selectedRole == UserType.supervisor ||
                       _selectedRole == UserType.assistant) &&
                   _selectedFarmId != null) ...[
-                _buildLabel('Assigned Shed', isRequired: true),
+                _buildLabel(
+                  _selectedRole == UserType.assistant
+                      ? 'Assigned Shed (Optional)'
+                      : 'Assigned Shed',
+                  isRequired: _selectedRole == UserType.supervisor,
+                ),
                 DropdownButtonFormField<int>(
                   value: _selectedShedId,
                   decoration: InputDecoration(
@@ -409,7 +414,9 @@ class _AddStaffScreenState extends ConsumerState<AddStaffScreen> {
                     _validateForm();
                   },
                   validator: (v) =>
-                      v == null ? 'Shed assignment is required' : null,
+                      (_selectedRole == UserType.supervisor && v == null)
+                      ? 'Shed assignment is required for Supervisors'
+                      : null,
                 ),
                 const SizedBox(height: 20),
               ],

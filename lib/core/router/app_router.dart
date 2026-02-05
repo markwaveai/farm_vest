@@ -26,6 +26,7 @@ import 'package:farm_vest/features/farm_manager/presentation/screen/buffalo_allo
 import 'package:farm_vest/features/farm_manager/presentation/screen/farm_manager_dashboard.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/manager_transfer_approval_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/onboard_animal_screen.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/create_transfer_ticket_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/reports_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/staff_list_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/widgets/investor_details.dart';
@@ -247,6 +248,10 @@ class AppRouter {
       GoRoute(
         path: '/raise-ticket',
         builder: (context, state) => const RaiseTicketScreen(),
+      ),
+      GoRoute(
+        path: '/create-transfer-ticket',
+        builder: (context, state) => const CreateTransferTicketScreen(),
       ),
 
       // Admin Routes

@@ -124,8 +124,19 @@ class UserModel {
                   json['farm_details']?['farm_location'] ??
                   json['farm_details']?['address'])
               ?.toString(),
-      shedId: json['sheds.id']?.toString(),
-      shedName: json['shed_name']?.toString(),
+      shedId:
+          (json['sheds.id'] ??
+                  json['shed_id'] ??
+                  json['shed']?['id'] ??
+                  json['sheds']?['id'])
+              ?.toString(),
+      shedName:
+          (json['shed_name'] ??
+                  json['shedName'] ??
+                  json['shed']?['name'] ??
+                  json['shed']?['shed_name'] ??
+                  json['sheds']?['name'])
+              ?.toString(),
     );
   }
 

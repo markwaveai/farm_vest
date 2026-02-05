@@ -185,13 +185,33 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                     ),
                   )
                 : staffState.staff.isEmpty
-                ? const Center(child: Text("No staff found"))
-                : ListView.builder(
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.people_outline,
+                          size: 64,
+                          color: Colors.grey[300],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'No staff members found',
+                          style: TextStyle(color: AppTheme.slate, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: staffState.staff.length,
+                    separatorBuilder: (c, i) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final staffMember = staffState.staff[index];
-                      return StaffCard(staff: staffMember);
+                      return StaffCard(
+                        staff: staffMember,
+                        onTap: () => _showStaffDetailsDialog(staffMember),
+                      );
                     },
                   ),
           ),
@@ -199,9 +219,84 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddStaffBottomSheet,
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: AppTheme.primary,
+        child: const Icon(Icons.person_add_alt_1, color: Colors.white),
       ),
+    );
+  }
+
+  void _showStaffDetailsDialog(Staff staff) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 40,
+                backgroundColor: AppTheme.primary.withOpacity(0.1),
+                child: Text(
+                  staff.name?.substring(0, 1).toUpperCase() ?? '?',
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                staff.name ?? 'Unknown',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                staff.role ?? 'No Role',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 24),
+              _buildDetailRow(Icons.email, staff.email ?? 'N/A'),
+              const SizedBox(height: 12),
+              _buildDetailRow(Icons.phone, staff.phone ?? 'N/A'),
+              const SizedBox(height: 12),
+              _buildDetailRow(
+                Icons.assignment_ind,
+                'Status: ${staff.status ?? "Unknown"}',
+              ),
+              if (staff.assignedSheds.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _buildDetailRow(
+                  Icons.warehouse,
+                  'Sheds: ${staff.assignedSheds.join(", ")}',
+                ),
+              ],
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: PrimaryButton(
+                  text: 'Close',
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey[600]),
+        const SizedBox(width: 12),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 15))),
+      ],
     );
   }
 }
@@ -230,6 +325,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
 
   bool _isLoadingData = true;
   bool _isSubmitting = false;
+  bool _isTestAccount = false;
   String? _localError;
 
   final List<String> _allowedRoles = [
@@ -263,10 +359,12 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
       _localError = null;
     });
 
-    if (role == 'Supervisor') {
+    if (role == 'Supervisor' || role == 'Assistant Doctor') {
       final sheds = await ref.read(staffListProvider.notifier).fetchMySheds();
       if (mounted) setState(() => _sheds = sheds);
-    } else if (role == 'Assistant Doctor') {
+    }
+
+    if (role == 'Assistant Doctor') {
       final doctors = await ref.read(staffListProvider.notifier).fetchDoctors();
       if (mounted) setState(() => _doctors = doctors);
     }
@@ -397,8 +495,13 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                       validator: (v) => v == null ? 'Role is required' : null,
                     ),
                     const SizedBox(height: 16),
-                    if (_selectedRole == 'Supervisor') ...[
-                      _buildLabel('Assigned Shed'),
+                    if (_selectedRole == 'Supervisor' ||
+                        _selectedRole == 'Assistant Doctor') ...[
+                      _buildLabel(
+                        _selectedRole == 'Assistant Doctor'
+                            ? 'Assigned Shed (Optional)'
+                            : 'Assigned Shed',
+                      ),
                       DropdownButtonFormField<int>(
                         value: _selectedShedId,
                         decoration: _dropdownDecoration('Select Shed'),
@@ -406,14 +509,15 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                             .map(
                               (s) => DropdownMenuItem(
                                 value: s['id'] as int,
-                                child: Text(
-                                  '${s['shed_name']} (${s['sheds.id']})',
-                                ),
+                                child: Text('${s['shed_name']} (${s['id']})'),
                               ),
                             )
                             .toList(),
                         onChanged: (v) => setState(() => _selectedShedId = v),
-                        validator: (v) => v == null ? 'Shed is required' : null,
+                        validator: (v) =>
+                            (_selectedRole == 'Supervisor' && v == null)
+                            ? 'Shed is required for Supervisors'
+                            : null,
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -422,22 +526,33 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                       DropdownButtonFormField<int>(
                         value: _selectedDoctorId,
                         decoration: _dropdownDecoration('Select Doctor'),
-                        items: _doctors
-                            .map(
-                              (d) => DropdownMenuItem(
-                                value: d['id'] as int,
-                                child: Text(
-                                  '${d['first_name']} ${d['last_name']}',
-                                ),
-                              ),
-                            )
-                            .toList(),
+                        items: _doctors.map((d) {
+                          final firstName = d['first_name'] ?? '';
+                          final lastName = d['last_name'] ?? '';
+                          final fullName =
+                              (firstName.isEmpty && lastName.isEmpty)
+                              ? (d['name'] ?? 'Unknown Doctor')
+                              : '$firstName $lastName'.trim();
+                          return DropdownMenuItem(
+                            value: d['id'] as int,
+                            child: Text(fullName),
+                          );
+                        }).toList(),
                         onChanged: (v) => setState(() => _selectedDoctorId = v),
                         validator: (v) =>
                             v == null ? 'Senior Doctor is required' : null,
                       ),
                       const SizedBox(height: 16),
                     ],
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Is Test Employee'),
+                      value: _isTestAccount,
+                      onChanged: (val) =>
+                          setState(() => _isTestAccount = val ?? false),
+                      controlAffinity: ListTileControlAffinity.leading,
+                      activeColor: Colors.green,
+                    ),
                     const SizedBox(height: 8),
                     PrimaryButton(
                       isLoading: _isSubmitting,
@@ -507,6 +622,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
             farmId: _myFarmId!,
             shedId: _selectedShedId,
             seniorDoctorId: _selectedDoctorId,
+            isTest: _isTestAccount,
           );
 
       if (mounted) {
@@ -528,8 +644,9 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
 
 class StaffCard extends ConsumerWidget {
   final Staff staff;
+  final VoidCallback? onTap;
 
-  const StaffCard({super.key, required this.staff});
+  const StaffCard({super.key, required this.staff, this.onTap});
 
   Color _getRoleColor(String? role) {
     switch (role?.toUpperCase()) {
@@ -570,7 +687,7 @@ class StaffCard extends ConsumerWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _showStaffDetailsDialog(context),
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -778,184 +895,6 @@ class StaffCard extends ConsumerWidget {
                 fontWeight: FontWeight.w600,
               ),
               overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showStaffDetailsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              decoration: BoxDecoration(
-                color: _getRoleColor(staff.role).withOpacity(0.1),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
-                ),
-              ),
-              child: Center(
-                child: Hero(
-                  tag: 'staff-${staff.role}-${staff.id}',
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundColor: _getRoleColor(staff.role),
-                    child: Text(
-                      (staff.name?.isNotEmpty ?? false)
-                          ? staff.name!.substring(0, 1).toUpperCase()
-                          : '?',
-                      style: const TextStyle(
-                        fontSize: 32,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          staff.name ?? 'Unknown Staff',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getRoleColor(staff.role).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            staff.role ?? 'No Role',
-                            style: TextStyle(
-                              color: _getRoleColor(staff.role),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  if (staff.assignedFarms.isNotEmpty)
-                    _buildDetailItem(
-                      Icons.agriculture_rounded,
-                      "Assigned Farms",
-                      staff.assignedFarms.join(", "),
-                      color: Colors.orange,
-                    ),
-                  if (staff.assignedSheds.isNotEmpty)
-                    _buildDetailItem(
-                      Icons.warehouse_rounded,
-                      "Assigned Sheds",
-                      staff.assignedSheds.join(", "),
-                      color: Colors.blueGrey,
-                    ),
-                  if (staff.assignedFarms.isEmpty &&
-                      staff.assignedSheds.isEmpty)
-                    _buildDetailItem(
-                      Icons.home_outlined,
-                      "Shed Name",
-                      staff.shedName,
-                    ),
-                  _buildDetailItem(Icons.phone_outlined, "Mobile", staff.phone),
-                  _buildDetailItem(Icons.email_outlined, "Email", staff.email),
-                  if (staff.seniorDoctorName != null)
-                    _buildDetailItem(
-                      Icons.person_pin_outlined,
-                      "Senior Doctor",
-                      staff.seniorDoctorName,
-                    ),
-                  _buildDetailItem(
-                    Icons.lens,
-                    "Current Status",
-                    staff.status,
-                    color: staff.status == 'On Duty'
-                        ? Colors.green
-                        : Colors.red,
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _getRoleColor(staff.role),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: const Text("Close Profile"),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailItem(
-    IconData icon,
-    String label,
-    String? value, {
-    Color? color,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, size: 20, color: color ?? Colors.grey.shade600),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                ),
-                Text(
-                  value ?? 'N/A',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
             ),
           ),
         ],

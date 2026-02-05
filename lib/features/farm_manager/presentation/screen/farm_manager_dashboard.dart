@@ -227,12 +227,72 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     final ss = ref.watch(staffListProvider);
     final authState = ref.watch(authProvider);
     final user = authState.userData;
-    final name = user?.name ?? "Manager";
+
+    String displayName = "Manager";
+    if (user != null &&
+        (user.firstName.isNotEmpty || user.lastName.isNotEmpty)) {
+      final fname = user.firstName.isNotEmpty
+          ? user.firstName[0].toUpperCase() + user.firstName.substring(1)
+          : "";
+      final lname = user.lastName.isNotEmpty
+          ? user.lastName[0].toUpperCase() + user.lastName.substring(1)
+          : "";
+      displayName = "$fname $lname".trim();
+    } else if (user != null && user.name.isNotEmpty) {
+      displayName = user.name;
+    }
+    displayName = "$displayName,";
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF8FAF9),
+      backgroundColor: AppTheme.white,
       drawer: const ProfileMenuDrawer(),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: AppTheme.white,
+        automaticallyImplyLeading: false,
+        title: Align(
+          alignment: Alignment.centerLeft,
+          child: RichText(
+            text: TextSpan(
+              text: 'Hello ',
+              style: const TextStyle(color: AppTheme.black, fontSize: 16),
+              children: [
+                TextSpan(
+                  text: displayName,
+                  style: const TextStyle(
+                    color: AppTheme.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: AppTheme.black),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
+        actions: [
+          if (ref.watch(authProvider).availableRoles.length > 1)
+            IconButton(
+              onPressed: () => _showSwitchRoleBottomSheet(),
+              icon: const Icon(Icons.swap_horiz_rounded, color: AppTheme.black),
+              tooltip: 'Switch Role',
+            ),
+          IconButton(
+            icon: const Icon(Icons.search, color: AppTheme.black),
+            onPressed: () => _searchDialog(context),
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.notifications_active_outlined,
+              color: AppTheme.black,
+            ),
+            onPressed: () => context.push('/notifications'),
+          ),
+        ],
+      ),
       body: ds.isLoading
           ? const Center(
               child: CircularProgressIndicator(color: AppTheme.primary),
@@ -244,238 +304,40 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                 await ref.read(farmManagerProvider.notifier).refreshDashboard();
                 await ref.read(staffListProvider.notifier).loadStaff();
               },
-              child: CustomScrollView(
-                slivers: [
-                  _buildAppBar(
-                    name,
-                    user?.farmName ?? "Assigned Farm",
-                    user?.farmLocation ?? "Loading location...",
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.all(20),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        _buildSectionHeader(
-                          "Overview",
-                          "Live metrics from your farm",
-                        ),
-                        const SizedBox(height: 16),
-                        _buildStatsGrid(ds, ss),
-                        const SizedBox(height: 32),
-                        _buildSectionHeader("Operations", "Quick access tasks"),
-                        const SizedBox(height: 16),
-                        _buildActionGrid(),
-                        const SizedBox(height: 32),
-                        _buildSectionHeader(
-                          "Pending Allocation",
-                          "Onboarded animals needing sheds",
-                        ),
-                        const SizedBox(height: 16),
-                        _buildRecentActivity(ds),
-                        const SizedBox(height: 120),
-                      ]),
-                    ),
-                  ),
-                ],
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader("Overview Management"),
+                    const SizedBox(height: 16),
+                    _buildStatsGrid(ds, ss),
+                    const SizedBox(height: 32),
+                    _buildSectionHeader("Operations"),
+                    const SizedBox(height: 16),
+                    _buildQuickActionGrid(),
+                    const SizedBox(height: 32),
+                    _buildSectionHeader("Pending Allocation"),
+                    const SizedBox(height: 16),
+                    _buildRecentActivity(ds),
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
             ),
     );
   }
 
-  Widget _buildAppBar(String name, String farmName, String farmLocation) {
-    return SliverAppBar(
-      expandedHeight: 280,
-      pinned: true,
-      backgroundColor: AppTheme.primary,
-      elevation: 0,
-      automaticallyImplyLeading: false,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: -60,
-                top: -60,
-                child: CircleAvatar(
-                  radius: 120,
-                  backgroundColor: Colors.white.withOpacity(0.05),
-                ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.menu,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () =>
-                                    _scaffoldKey.currentState?.openDrawer(),
-                              ),
-                              const SizedBox(width: 8),
-                              const Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Farm Manager",
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    "Dashboard",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              if (ref
-                                      .watch(authProvider)
-                                      .availableRoles
-                                      .length >
-                                  1)
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.swap_horiz_rounded,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: _showSwitchRoleBottomSheet,
-                                  tooltip: 'Switch Role',
-                                ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.search,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () => _searchDialog(context),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.notifications_active_outlined,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () => context.push('/notifications'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 28,
-                                  backgroundColor: Colors.white,
-                                  child: Text(
-                                    name.isNotEmpty ? name[0] : "M",
-                                    style: const TextStyle(
-                                      color: AppTheme.primary,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Welcome, $name",
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Opacity(
-                                        opacity: 0.8,
-                                        child: Text(
-                                          "$farmName${farmLocation.isNotEmpty ? ' - $farmLocation' : ''}",
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 19,
+        fontWeight: FontWeight.w900,
+        color: AppTheme.dark,
+        letterSpacing: -0.3,
       ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title, String subtitle) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
-          ),
-        ),
-        Text(
-          subtitle,
-          style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-        ),
-      ],
     );
   }
 
@@ -581,41 +443,63 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     );
   }
 
-  Widget _buildActionGrid() {
-    return Row(
+  Widget _buildQuickActionGrid() {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 1.3,
       children: [
-        Expanded(
-          child: _buildActionTile(
-            "Manage\nStaff",
-            Icons.people_outline,
-            const Color(0xFF673AB7),
-            () => context.go('/staff-list'),
-          ),
+        _buildActionItem(
+          'Manage Staff',
+          Icons.people_outline,
+          const Color(0xFF673AB7),
+          () => context.go('/staff-list'),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildActionTile(
-            "Onboard\nAnimal",
-            Icons.add_box_outlined,
-            const Color(0xFF009688),
-            () => context.go('/onboard-animal'),
-          ),
+        _buildActionItem(
+          'Reports',
+          Icons.bar_chart_rounded,
+          const Color(0xFF3F51B5),
+          () => context.push('/reports'),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildActionTile(
-            "Search\nAnimal",
-            Icons.search_rounded,
-            const Color(0xFFFF9800),
-            () => _searchDialog(context),
-          ),
+        _buildActionItem(
+          'Onboard Animal',
+          Icons.add_box_outlined,
+          const Color(0xFF009688),
+          () => context.go('/onboard-animal'),
+        ),
+        _buildActionItem(
+          'Create Transfer',
+          Icons.move_up_rounded,
+          const Color(0xFF607D8B),
+          () => context.push('/create-transfer-ticket'),
+        ),
+        _buildActionItem(
+          'Transfers List',
+          Icons.compare_arrows_rounded,
+          const Color(0xFF9C27B0),
+          () => context.push('/manager-transfer-approvals'),
+        ),
+        _buildActionItem(
+          'Search Animal',
+          Icons.search_rounded,
+          const Color(0xFFFF9800),
+          () => _searchDialog(context),
+        ),
+        _buildActionItem(
+          'Health Tickets',
+          Icons.medical_services_outlined,
+          const Color(0xFFF44336),
+          () => context.push('/all-health-tickets'),
         ),
       ],
     );
   }
 
-  Widget _buildActionTile(
-    String title,
+  Widget _buildActionItem(
+    String label,
     IconData icon,
     Color color,
     VoidCallback onTap,
@@ -624,24 +508,23 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        height: 110,
+        padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.2)),
+          color: color.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: color.withOpacity(0.15), width: 1.5),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
+            Icon(icon, color: color, size: 30),
+            const SizedBox(height: 10),
             Text(
-              title,
+              label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: color,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
+                color: color,
               ),
             ),
           ],

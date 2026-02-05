@@ -33,7 +33,8 @@ class Ticket {
           ? DateTime.tryParse(json['created_at'])
           : null,
       priority: json['priority'],
-      metadata: json,
+      metadata:
+          json, // Capture full JSON to access extra fields like source_shed_name
     );
   }
 

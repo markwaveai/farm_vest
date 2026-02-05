@@ -88,11 +88,16 @@ class _ManagerTransferApprovalScreenState
   }
 
   Widget _buildTransferCard(Map<String, dynamic> transfer) {
-    final animalTag = transfer['animal_tag'] ?? 'Unknown';
+    final animalTag = transfer['rfid'] ?? transfer['animal_id'] ?? 'Unknown';
     final description = transfer['description'] ?? '';
     final createdAt = transfer['created_at'] ?? '';
-    final sourceShed = transfer['source_shed_name'] ?? 'N/A';
-    final destShed = transfer['destination_shed_name'] ?? 'N/A';
+    final metadata = transfer['metadata'] ?? {};
+    final sourceShed =
+        metadata['source_shed_name'] ?? transfer['source_shed_name'] ?? 'N/A';
+    final destShed =
+        metadata['destination_shed_name'] ??
+        transfer['destination_shed_name'] ??
+        'N/A';
     final direction = transfer['transfer_direction'] ?? 'OUT';
     final isOut = direction == 'OUT';
 

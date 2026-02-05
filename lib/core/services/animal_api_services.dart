@@ -172,6 +172,7 @@ class AnimalApiServices {
         'query_str': name ?? '',
         if (role != null && role.isNotEmpty && role != 'All') 'role': role,
         if (isActive != null) 'is_active': isActive.toString(),
+        if (farmId != null) 'farm_id': farmId.toString(),
         if (page != null) 'page': page.toString(),
         if (size != null) 'size': size.toString(),
       };

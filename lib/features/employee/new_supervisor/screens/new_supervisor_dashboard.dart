@@ -135,7 +135,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                       CustomCard(
                         color: AppTheme.darkGrey,
                         type: DashboardCardType.priority,
-                        onTap: () => context.go('/transfer-tickets'),
+                        onTap: () => context.push('/transfer-tickets'),
                         child: _buildStatContent(
                           context,
                           Icons.move_down,
@@ -257,7 +257,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                       ),
                       CustomCard(
                         type: DashboardCardType.quickAction,
-                        onTap: () => context.go('/transfer-tickets'),
+                        onTap: () => context.push('/transfer-tickets'),
                         child: _buildQuickActionContent(
                           context,
                           Icons.compare_arrows,

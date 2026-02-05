@@ -18,7 +18,7 @@ class TicketsApiServices {
     String? transferDirection,
   }) async {
     try {
-      var url = "${AppConstants.appLiveUrl}/ticket/get_tickets";
+      var url = "${AppConstants.appLiveUrl}/ticket/get_health_tickets";
       final queryParams = <String, String>{};
       if (status != null) queryParams['status_filter'] = status;
       if (ticketType != null) queryParams['ticket_type'] = ticketType;
@@ -58,7 +58,7 @@ class TicketsApiServices {
   }) async {
     try {
       final url =
-          "${AppConstants.appLiveUrl}/ticket/transfer_tickets?status=$status";
+          "${AppConstants.appLiveUrl}/ticket/get_health_tickets?ticket_type=TRANSFER&status_filter=$status";
       final response = await http.get(
         Uri.parse(url),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
@@ -224,7 +224,7 @@ class TicketsApiServices {
     String? ticketType,
   }) async {
     try {
-      var url = "${AppConstants.appLiveUrl}/ticket/get_tickets";
+      var url = "${AppConstants.appLiveUrl}/ticket/get_health_tickets";
       final queryParams = <String, String>{};
       if (status != null) queryParams['status_filter'] = status;
       if (ticketType != null) queryParams['ticket_type'] = ticketType;
@@ -240,7 +240,8 @@ class TicketsApiServices {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['count'] ?? 0;
+        final list = data['data'] as List<dynamic>?;
+        return list?.length ?? 0;
       }
       return 0;
     } catch (e) {

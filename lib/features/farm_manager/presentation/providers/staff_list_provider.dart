@@ -4,8 +4,8 @@ import 'package:farm_vest/core/services/farms_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:farm_vest/core/services/api_services.dart';
 import 'package:farm_vest/core/services/farm_manager_api_services.dart';
+import 'package:farm_vest/core/services/milk_api_services.dart';
 import '../models/staff_model.dart';
 
 class StaffListState {
@@ -117,7 +117,13 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
       final token = prefs.getString('access_token');
       if (token == null) return [];
 
-      return await AnimalApiServices.getStaff(token: token, role: 'DOCTOR');
+      final farmId = await fetchMyFarmId();
+
+      return await AnimalApiServices.getStaff(
+        token: token,
+        role: 'DOCTOR',
+        farmId: farmId,
+      );
     } catch (e) {
       return [];
     }
@@ -132,6 +138,7 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
     required int farmId,
     int? shedId,
     int? seniorDoctorId,
+    bool isTest = false,
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -139,8 +146,23 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
       if (token == null) return false;
 
       // Map role to Enum string
-      String roleEnum = role.toUpperCase().replaceAll(' ', '_');
-      if (roleEnum == 'ASSISTANT') roleEnum = 'ASSISTANT_DOCTOR';
+      String roleEnum;
+      switch (role) {
+        case 'Assistant Doctor':
+          roleEnum = 'ASSISTANT_DOCTOR';
+          break;
+        case 'Supervisor':
+          roleEnum = 'SUPERVISOR';
+          break;
+        case 'Doctor':
+          roleEnum = 'DOCTOR';
+          break;
+        case 'Farm Manager':
+          roleEnum = 'FARM_MANAGER';
+          break;
+        default:
+          roleEnum = role.toUpperCase().replaceAll(' ', '_');
+      }
 
       final body = {
         "first_name": firstName,
@@ -149,9 +171,9 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
         "mobile": mobile,
         "roles": [roleEnum],
         "farm_id": farmId,
-        "sheds.id": shedId,
+        "shed_id": shedId,
         "senior_doctor_id": seniorDoctorId,
-        "is_test": false,
+        "is_test": isTest,
       };
 
       final success = await EmployeeApiServices.createEmployee(
@@ -266,14 +288,23 @@ class MilkReportNotifier extends StateNotifier<MilkReportState> {
   }) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
 
-      final result = await FarmManagerApiServices.fetchMilkReport(
-        reportDate: date,
+      if (token == null) {
+        state = state.copyWith(isLoading: false, error: "Not authenticated");
+        return;
+      }
+
+      final dateObj = DateTime.parse(date);
+      final result = await MilkApiServices.getMilkReport(
+        token: token,
+        reportDate: dateObj,
         timing: timing,
-        entryFrequency: "DAILY",
       );
 
-      state = state.copyWith(isLoading: false, data: result);
+      // result is List<dynamic>
+      state = state.copyWith(isLoading: false, data: {'data': result});
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -282,13 +313,24 @@ class MilkReportNotifier extends StateNotifier<MilkReportState> {
   Future<void> getWeeklyReport({required String date}) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
 
-      final result = await FarmManagerApiServices.fetchMilkReport(
-        reportDate: date,
-        entryFrequency: "WEEKLY",
+      if (token == null) {
+        state = state.copyWith(isLoading: false, error: "Not authenticated");
+        return;
+      }
+
+      final dateObj = DateTime.parse(date);
+      // Backend doesn't support "WEEKLY" param, but returns entries covering this date.
+      // We assume weekly entries are those with longer duration, or we just show all.
+      // For now, we just fetch for the date.
+      final result = await MilkApiServices.getMilkReport(
+        token: token,
+        reportDate: dateObj,
       );
 
-      state = state.copyWith(isLoading: false, data: result);
+      state = state.copyWith(isLoading: false, data: {'data': result});
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
