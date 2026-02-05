@@ -325,42 +325,44 @@ class NewSupervisorDashboard extends ConsumerWidget {
   }
 
   Widget _buildLoadingShimmer(BuildContext context) {
-    return Column(
-      children: [
-        GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1.2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          children: List.generate(4, (index) => const ShimmerCard()),
-        ),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-        Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
-          child: Container(
-            height: 10,
-            width: MediaQuery.of(context).size.width - 10,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            children: List.generate(4, (index) => const ShimmerCard()),
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+          Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              height: 10,
+              width: MediaQuery.of(context).size.width - 10,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
           ),
-        ),
-        GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1.2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          children: List.generate(4, (index) => const ShimmerCard()),
-        ),
-      ],
+          GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            children: List.generate(4, (index) => const ShimmerCard()),
+          ),
+        ],
+      ),
     );
   }
 

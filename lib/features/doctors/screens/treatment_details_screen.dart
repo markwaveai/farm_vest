@@ -38,12 +38,19 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildReadOnlyField(
+            const Text(
               'Buffalo ID',
-              widget.ticket.animalId ?? 'Unknown',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            const SizedBox(height: 16),
-            _buildReadOnlyField('Shed Location', 'Shed 04'), // Mock or fetch
+            const SizedBox(height: 8),
+            _buildReadOnlyField('', widget.ticket.animalId ?? 'Unknown'),
+            const SizedBox(height: 24),
+            const Text(
+              'Shed Location',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            _buildReadOnlyField('', 'Shed 04'), // Mock or fetch
 
             const SizedBox(height: 24),
             const Text(
@@ -136,8 +143,13 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: AppTheme.grey, fontSize: 13)),
-        const SizedBox(height: 6),
+        if (label.isNotEmpty) ...[
+          Text(
+            label,
+            style: const TextStyle(color: AppTheme.grey, fontSize: 13),
+          ),
+          const SizedBox(height: 6),
+        ],
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

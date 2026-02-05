@@ -102,8 +102,16 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
                       child: ElevatedButton(
                         onPressed: _selectedAssistant != null
                             ? () {
-                                widget.onAssign(_selectedAssistant!);
+                                final selected = _selectedAssistant!;
+                                widget.onAssign(selected);
                                 Navigator.pop(context);
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AssignmentSuccessDialog(
+                                    ticketId: widget.ticketId,
+                                    assignedTo: selected,
+                                  ),
+                                );
                               }
                             : null,
                         style: ElevatedButton.styleFrom(

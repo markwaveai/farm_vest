@@ -15,23 +15,35 @@ class ApiServices {
 
   static Future<Map<String, dynamic>> getMilkEntries(String token) async {
     try {
-      // final response = await http.get(
-      //   Uri.parse("${AppConstants.appLiveUrl}/milk/milk_entries"),
-      //   headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
-      // );
-      // if (response.statusCode == 401) {
-      //   onUnauthorized?.call();
-      //   throw ServerException('Unauthorized', statusCode: 401);
-      // }
-      // if (response.statusCode == 200) {
-      //   return jsonDecode(response.body);
-      // } else {
-      //   throw ServerException(
-      //     'Failed to load milk entries',
-      //     statusCode: response.statusCode,
-      //   );
-      // }
-      return {};
+      final response = await http.get(
+        Uri.parse("${AppConstants.appLiveUrl}/milk/milk_entries"),
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      );
+
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        // Ensure we always return a Map
+        if (data is Map<String, dynamic>) {
+          return data;
+        } else if (data is List) {
+          return {'data': data, 'status': 'success'};
+        }
+        return {
+          'data': [],
+          'status': 'success',
+          'message': 'Unexpected format',
+        };
+      } else {
+        throw ServerException(
+          'Failed to load milk entries: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {

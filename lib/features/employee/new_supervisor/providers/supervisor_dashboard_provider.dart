@@ -149,11 +149,22 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
           "${todayDate.year}-${todayDate.month.toString().padLeft(2, '0')}-${todayDate.day.toString().padLeft(2, '0')}";
 
       final milkToday = milkData
-          .where((entry) => entry['entry_date'] == todayDateString)
-          .fold<double>(
-            0.0,
-            (previous, current) => previous + (current['quantity'] ?? 0),
-          );
+          .where((entry) {
+            final entryDate = entry['entry_date'];
+            if (entryDate == null) return false;
+            // Check if entryDate (likely String) starts with YYYY-MM-DD
+            return entryDate.toString().startsWith(todayDateString);
+          })
+          .fold<double>(0.0, (previous, current) {
+            final val = current['quantity'];
+            double qty = 0.0;
+            if (val is num) {
+              qty = val.toDouble();
+            } else if (val is String) {
+              qty = double.tryParse(val) ?? 0.0;
+            }
+            return previous + qty;
+          });
 
       // Filter tickets
       final List<Ticket> allTickets = List<Ticket>.from(
