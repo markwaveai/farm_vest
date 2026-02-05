@@ -65,6 +65,7 @@ class _QuickActionDialogContentState
   int? _selectedAnimalId;
   String? _selectedAnimalTag;
   String? _selectedAnimalIdString;
+  bool _isSearchEnabled = false;
 
   @override
   void dispose() {
@@ -169,6 +170,8 @@ class _QuickActionDialogContentState
                               ref
                                   .read(supervisorDashboardProvider.notifier)
                                   .searchSuggestions(val);
+                                 _isSearchEnabled = val.trim().isNotEmpty;
+
                               if (_selectedAnimalId != null &&
                                   val != _selectedAnimalTag) {
                                 setState(() {
@@ -294,14 +297,20 @@ class _QuickActionDialogContentState
                   if (widget.type == QuickActionType.locateAnimal) ...[
                     CustomActionButton(
                       width: double.infinity,
-                      color: AppTheme.lightPrimary,
-                      onPressed: () {
+                      color:
+                       _isSearchEnabled
+      ?AppTheme.lightPrimary
+      :Colors.grey,
+                      onPressed:  _isSearchEnabled?
+                      () {
                         final query = idController.text.trim();
                         if (query.isNotEmpty) {
                           ref
                               .read(supervisorDashboardProvider.notifier)
                               .locateAnimal(query);
-                        } else {
+
+                        } 
+                        else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
@@ -311,7 +320,7 @@ class _QuickActionDialogContentState
                             ),
                           );
                         }
-                      },
+                      } : null,
                       child: const Text(
                         'Search',
                         style: TextStyle(color: Colors.white),

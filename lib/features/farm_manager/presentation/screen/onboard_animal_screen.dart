@@ -588,10 +588,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                       ? null
                       : _showPaidOrdersDialog,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 15,
-                    ),
+                   
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

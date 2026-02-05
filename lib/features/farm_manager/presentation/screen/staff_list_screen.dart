@@ -144,8 +144,8 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                           .setIsActiveFilter(true);
                     }
                   },
-                  selectedColor: Colors.green.withOpacity(0.2),
-                  checkmarkColor: Colors.green,
+                  selectedColor: Colors.green,
+                  checkmarkColor: Colors.white,
                 ),
                 const SizedBox(width: 8),
                 FilterChip(
@@ -158,8 +158,8 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                           .setIsActiveFilter(false);
                     }
                   },
-                  selectedColor: Colors.red.withOpacity(0.2),
-                  checkmarkColor: Colors.red,
+                  selectedColor: Colors.red,
+                  checkmarkColor: Colors.white,
                 ),
               ],
             ),
