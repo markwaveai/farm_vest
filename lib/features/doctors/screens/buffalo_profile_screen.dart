@@ -1,0 +1,715 @@
+import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/widgets/custom_Textfield.dart';
+import 'package:flutter/material.dart';
+
+class BuffaloProfileScreen extends StatefulWidget {
+  const BuffaloProfileScreen({super.key});
+
+  @override
+  State<BuffaloProfileScreen> createState() => _BuffaloProfileScreenState();
+}
+
+class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
+  String selectedTab = "Buffalo Profile";
+  final List<String> tabs = [
+    "Buffalo Profile",
+    "Milk Production",
+    "Heat Cycle",
+  ];
+
+  String milkFilter = "Today";
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _eveningMilkController = TextEditingController();
+  final TextEditingController _morningMilkController = TextEditingController();
+  final TextEditingController _todayMilkController = TextEditingController();
+
+  final List<Map<String, dynamic>> buffalos = [
+    {
+      "rfid": "RFID-10001",
+      "tag": "RFID-10001",
+      "shed": "KUR_F1_S1",
+      "id": "4e13286-0900e-29287b-67199r-900901p-2445r",
+      "breed": "Murrah Buffalo",
+      "age": "40 months",
+      "type": "BUFFALO",
+      "health": "HEALTHY",
+      "status": "high_yield",
+      "onboarded": "30 Jan 2026",
+      "farm": "KUR_F1",
+      "investor": "Ch Laxman",
+      "isExpanded": true,
+    },
+    {
+      "rfid": "RFID-Test-59593",
+      "tag": "ET-RFID-Test-59593",
+      "shed": "KUR_F1_S1",
+      "isExpanded": false,
+    },
+    {
+      "rfid": "RFID-Test-59593",
+      "tag": "RFID-10001",
+      "shed": "KUR_F1_S1",
+      "isExpanded": false,
+    },
+    {
+      "rfid": "RFID-Test-8196",
+      "tag": "ET-RFID-TEst-8196",
+      "shed": "KUR_F1_S1",
+      "isExpanded": false,
+    },
+    {
+      "rfid": "RFID-Test-31992",
+      "tag": "ET-RFID-31993",
+      "shed": "KUR_F1_S1",
+      "isExpanded": false,
+    },
+  ];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _eveningMilkController.dispose();
+    _morningMilkController.dispose();
+    _todayMilkController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.white,
+      appBar: AppBar(
+        title: const Text(
+          "Buffalo Profile",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        backgroundColor: AppTheme.white,
+        elevation: 0,
+        foregroundColor: AppTheme.black,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.menu, color: AppTheme.darkPrimary),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          _buildTabs(),
+          const SizedBox(height: 16),
+          Expanded(child: _buildTabContent()),
+          const SizedBox(height: 80),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabContent() {
+    switch (selectedTab) {
+      case "Milk Production":
+        return _buildMilkProductionTab();
+      case "Heat Cycle":
+        return _buildHeatCycleTab();
+      case "Buffalo Profile":
+      default:
+        return _buildBuffaloProfileTab();
+    }
+  }
+
+  Widget _buildBuffaloProfileTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: CustomTextField(
+                    controller: _searchController,
+                    hint: "Enter Buffalo ID",
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  height: 54,
+                  width: 54,
+                  decoration: BoxDecoration(
+                    color: AppTheme.darkPrimary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.search, color: Colors.white),
+                    onPressed: () {},
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ...buffalos.map((buffalo) => _buildBuffaloCard(buffalo)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMilkProductionTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppTheme.white,
+                    borderRadius: BorderRadius.circular(8),
+                    // border: Border.all(color: AppTheme.darkPrimary),
+                  ),
+                  child: Row(
+                    children: ["Today", "Month", "Year"].map((filter) {
+                      final isSelected = milkFilter == filter;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => milkFilter = filter),
+                          child: Container(
+                            alignment: Alignment.center,
+                            margin: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppTheme.darkPrimary
+                                  : AppTheme.transparent,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              filter,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected
+                                    ? AppTheme.white
+                                    : AppTheme.darkPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        controller: _searchController,
+                        hint: "Enter Buffalo ID",
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      height: 54,
+                      width: 54,
+                      decoration: BoxDecoration(
+                        color: AppTheme.darkPrimary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.search, color: Colors.white),
+                        onPressed: () {},
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                _buildMilkEntryRow(
+                  "Evening milk",
+                  _eveningMilkController,
+                  "100 Litre",
+                ),
+                const SizedBox(height: 12),
+                _buildMilkEntryRow(
+                  "Morning milk",
+                  _morningMilkController,
+                  "120 Litre",
+                ),
+                const SizedBox(height: 12),
+                _buildMilkEntryRow(
+                  "Today's milk",
+                  _todayMilkController,
+                  "220 Litre",
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          SizedBox(
+            width: 220,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.darkPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              child: const Text(
+                "Save",
+                style: TextStyle(fontSize: 16, color: AppTheme.white),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: 220,
+            height: 48,
+            child: OutlinedButton(
+              onPressed: () {},
+              style: OutlinedButton.styleFrom(
+                backgroundColor: AppTheme.darkPrimary,
+                //side: BorderSide(color: AppTheme.darkPrimary, width: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              child: const Text(
+                "Cancel",
+                style: TextStyle(fontSize: 16, color: AppTheme.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMilkEntryRow(
+    String label,
+    TextEditingController controller,
+    String hint,
+  ) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ),
+        Expanded(
+          child: CustomTextField(
+            controller: controller,
+            hint: hint,
+            keyboardType: TextInputType.number,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeatCycleTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 8),
+
+          _buildHeatCard(
+            "Buffalo #32 (TAG - 8889)",
+            "Shed 02 / Row 04",
+            "Supervisor's Message:\nInitiate to AI Protocol.",
+          ),
+          const SizedBox(height: 12),
+          _buildHeatCard(
+            "Buffalo #32 (TAG - 8889)",
+            "Shed 02 / Row 03",
+            "Supervisor's Message:\nInitiate to AI Protocol.",
+          ),
+          const SizedBox(height: 12),
+          _buildHeatCard(
+            "Shed 04 / Row 04",
+            "",
+            "Supervisor's Message:\nInitiate to AI Protocol.",
+          ),
+          const SizedBox(height: 24),
+
+          const Text(
+            "Buffalo Profiles",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildBuffaloProfileImage("#65", "View Profile"),
+              const SizedBox(width: 12),
+              _buildBuffaloProfileImage("#66", "View Profile"),
+              const SizedBox(width: 12),
+              _buildBuffaloProfileImage("#67", "View Profile"),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.white,
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: AppTheme.darkPrimary,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "Mark Heat Details",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppTheme.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _buildDetailRow("ID", "BUF-082"),
+                      const SizedBox(height: 12),
+                      _buildDetailRow("Date of Observation", "28-01-2026"),
+                      const SizedBox(height: 12),
+                      _buildDetailRow("Heat Intensity", "High"),
+                      const SizedBox(height: 12),
+                      _buildDetailRow(
+                        "Observation Notes",
+                        "Bellowing, clear discharge, restless.",
+                      ),
+                      const SizedBox(height: 12),
+                      _buildDetailRow("Recorded By", "Breed"),
+                      const SizedBox(height: 12),
+                      _buildDetailRow("Rakesh Kumar", "Murrah"),
+                      const SizedBox(height: 20),
+
+                      SizedBox(
+                        width: 220,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.darkPrimary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                          ),
+                          child: const Text(
+                            "See all",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppTheme.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeatCard(String title, String subtitle, String message) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.white,
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'assets/images/buffalo.png',
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 30),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.black,
+                  ),
+                ),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 12, color: AppTheme.mediumGrey),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Text(
+                  message,
+                  style: const TextStyle(fontSize: 12, color: AppTheme.black87),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.orange,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    "Action Required",
+                    style: TextStyle(
+                      color: AppTheme.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBuffaloProfileImage(String id, String status) {
+    return Expanded(
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'assets/images/buffalo.png',
+              height: 90,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            id,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.black,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppTheme.darkPrimary,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              status,
+              style: const TextStyle(
+                color: AppTheme.white,
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            ),
+          ),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 13))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabs() {
+    return Container(
+      height: 40,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: tabs.map((tab) {
+          final isSelected = selectedTab == tab;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => selectedTab = tab),
+              child: Container(
+                alignment: Alignment.center,
+                margin: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppTheme.darkPrimary
+                      : AppTheme.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  tab,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? AppTheme.white : AppTheme.darkPrimary,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildBuffaloCard(Map<String, dynamic> buffalo) {
+    bool isExpanded = buffalo['isExpanded'] == true;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: AppTheme.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: isExpanded,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          iconColor: AppTheme.darkPrimary,
+          collapsedIconColor: AppTheme.darkPrimary,
+          title: Text(
+            buffalo['rfid'],
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.darkPrimary,
+              fontSize: 14,
+            ),
+          ),
+          subtitle: Text(
+            "Tag: ${buffalo['tag']} | Shed\n${buffalo['shed']}",
+            style: const TextStyle(fontSize: 12, color: AppTheme.black87),
+          ),
+          onExpansionChanged: (val) {
+            setState(() {
+              buffalo['isExpanded'] = val;
+            });
+          },
+          children: [
+            if (isExpanded && buffalo.containsKey('breed')) ...[
+              const SizedBox(height: 8),
+              _buildBuffaloDetailRow("ID", buffalo['id']),
+              _buildBuffaloDetailRow("Breed", buffalo['breed']),
+              _buildBuffaloDetailRow("Age", buffalo['age']),
+              _buildBuffaloDetailRow("Type", buffalo['type']),
+              _buildBuffaloDetailRow("Health", buffalo['health']),
+              _buildBuffaloDetailRow("Status", buffalo['status']),
+              _buildBuffaloDetailRow("Onboarded", buffalo['onboarded']),
+              Divider(height: 24, thickness: 1, color: Colors.grey.shade300),
+              _buildBuffaloDetailRow("Farm", buffalo['farm']),
+              _buildBuffaloDetailRow("Investor", buffalo['investor']),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBuffaloDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppTheme.black87,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppTheme.black,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -8,6 +8,8 @@ class HealthTicketCard extends StatelessWidget {
   final String status;
   final VoidCallback? onAssignTap;
   final VoidCallback? onViewDetailsTap;
+  final VoidCallback? onActionTap; // For "Treatment" or "Add Vaccine"
+  final bool isVaccination; // To toggle between Treatment and Add Vaccine
 
   const HealthTicketCard({
     super.key,
@@ -17,6 +19,8 @@ class HealthTicketCard extends StatelessWidget {
     required this.status,
     this.onAssignTap,
     this.onViewDetailsTap,
+    this.onActionTap,
+    this.isVaccination = false,
   });
 
   @override
@@ -83,7 +87,15 @@ class HealthTicketCard extends StatelessWidget {
             children: [
               _iconText(Icons.remove_red_eye, "View Profile"),
               const SizedBox(width: 20),
-              _iconText(Icons.medical_services_outlined, "Treatment"),
+              GestureDetector(
+                onTap: onActionTap,
+                child: _iconText(
+                  isVaccination
+                      ? Icons.vaccines_outlined
+                      : Icons.medical_services_outlined,
+                  isVaccination ? "Add Vaccine" : "Treatment",
+                ),
+              ),
               const Spacer(),
               _statusChip(),
             ],
@@ -103,17 +115,19 @@ class HealthTicketCard extends StatelessWidget {
             child: _iconText(Icons.confirmation_num_outlined, "Ticket Details"),
           ),
           // const Spacer(),
-          SizedBox(width: 20),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.darkPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+          if (onAssignTap != null) ...[
+            SizedBox(width: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.darkPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
+              onPressed: onAssignTap,
+              child: const Text("Assign"),
             ),
-            onPressed: onAssignTap,
-            child: const Text("Assign"),
-          ),
+          ],
         ],
       ),
     );
@@ -121,16 +135,50 @@ class HealthTicketCard extends StatelessWidget {
 
   Widget _statusChip() {
     Color bgColor;
+    Color textColor = Colors.white;
+    bool isSolid = false;
 
     switch (status.toLowerCase()) {
+      case "approved":
+        bgColor = Colors.green;
+        isSolid = true;
+        break;
       case "completed":
         bgColor = Colors.green;
         break;
       case "pending":
         bgColor = Colors.orange;
+        isSolid = true; // Make pending solid based on design
+        break;
+      case "in progress":
+        bgColor = Colors.amber;
+        isSolid = true;
         break;
       default:
         bgColor = Colors.grey;
+    }
+
+    // Adapt to existing style vs design style
+    // Design has solid chips. Existing has transparent bg with colored text.
+    // We will use solid if isVaccination is true to match design preference, or mix.
+
+    // Using the 'design' style for the specified statuses
+    if (isSolid) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          status,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
+        ),
+      );
     }
 
     return Container(

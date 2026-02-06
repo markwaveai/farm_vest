@@ -9,6 +9,8 @@ import 'package:farm_vest/features/admin/presentation/screens/investor_managemen
 import 'package:farm_vest/features/admin/presentation/screens/ticket_management_screen.dart';
 import 'package:farm_vest/features/doctors/screens/all_health_tickets.dart';
 import 'package:farm_vest/features/doctors/screens/doctor_home_screen.dart';
+import 'package:farm_vest/features/doctors/screens/vaccination_tickets.dart';
+import 'package:farm_vest/features/doctors/screens/buffalo_profile_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/actual_alert_Screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/create_leave_request_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/leave_requests_screen.dart';
@@ -200,7 +202,7 @@ class AppRouter {
         builder: (context, state) {
           final extras = state.extra as Map<String, dynamic>?;
           return BuffaloAllocationScreen(
-            initialFarmId: extras?['farmId'] as int?, 
+            initialFarmId: extras?['farmId'] as int?,
             initialShedId: extras?['shedId'] as int?,
             targetParkingId: extras?['parkingId'] as String?,
             initialAnimalId: extras?['animalId'] as String?,
@@ -233,6 +235,15 @@ class AppRouter {
             ticketType: extras?['type'] as String? ?? 'HEALTH',
           );
         },
+      ),
+
+      GoRoute(
+        path: '/vaccination-screen',
+        builder: (context, state) => const VaccineTicketsScreen(),
+      ),
+      GoRoute(
+        path: '/buffalo-profile',
+        builder: (context, state) => const BuffaloProfileScreen(),
       ),
       GoRoute(
         path: '/assistant-dashboard',

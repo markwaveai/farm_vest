@@ -119,7 +119,12 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionHeader(title: 'Buffalo Health Tickets'),
+              _sectionHeader(
+                title: 'Buffalo Health Tickets',
+                ticketType: 'HEALTH',
+              ),
+
+              // _sectionHeader(title: 'Buffalo Health Tickets'),
               const SizedBox(height: 12),
               _grid([
                 DashboardStatCard(
@@ -187,7 +192,12 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 ),
               ]),
               const SizedBox(height: 24),
-              _sectionHeader(title: 'Vaccination Tickets'),
+              _sectionHeader(
+                title: 'Vaccination Tickets',
+                ticketType: 'VACCINATION',
+              ),
+
+              // _sectionHeader(title: 'Vaccination Tickets'),
               const SizedBox(height: 12),
               _grid([
                 DashboardStatCard(
@@ -275,10 +285,9 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
               extra: {'filter': 'All', 'type': 'HEALTH'},
             );
           } else if (index == 1) {
-            context.push(
-              '/all-health-tickets',
-              extra: {'filter': 'All', 'type': 'VACCINATION'},
-            );
+            context.push('/vaccination-screen');
+          } else if (index == 3) {
+            context.push('/buffalo-profile');
           }
         },
       ),
@@ -312,7 +321,11 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
     );
   }
 
-  Widget _sectionHeader({required String title, String? badge}) {
+  Widget _sectionHeader({
+    required String title,
+    String? badge,
+    required String ticketType,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -322,23 +335,20 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
               title,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            if (badge != null) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(badge, style: const TextStyle(fontSize: 12)),
-              ),
-            ],
           ],
         ),
         TextButton(
           onPressed: () {
-            context.push('/all-health-tickets');
+            if (ticketType == 'VACCINATION') {
+              context.push('/vaccination-screen');
+            } else {
+              context.push(
+                '/all-health-tickets',
+                extra: {'filter': 'All', 'type': 'HEALTH'},
+              );
+            }
           },
+
           style: TextButton.styleFrom(
             backgroundColor: AppTheme.darkPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
