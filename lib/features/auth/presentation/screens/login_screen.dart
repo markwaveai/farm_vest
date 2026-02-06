@@ -272,7 +272,12 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     IconButton(
                       onPressed: () {
                         if (_showRoleSelection) {
-                          setState(() => _showRoleSelection = false);
+                          setState(() {
+                            _showRoleSelection = false;
+                            _isOtpSent = false;
+                            _otp = '';
+                            _timer?.cancel();
+                          });
                         } else if (_isOtpSent) {
                           setState(() {
                             _isOtpSent = false;
@@ -608,32 +613,31 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppTheme.primary.withOpacity(0.1)),
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
               // Country code picker style
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    const Text('🇮🇳', style: TextStyle(fontSize: 22)),
-                    const SizedBox(width: 8),
-                    Text(
-                      '+91',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.dark,
-                      ),
+Row(
+                children: [
+                  const Text('🇮🇳', style: TextStyle(fontSize: 22)),
+                  const SizedBox(width: 8),
+                  Text(
+                    '+91',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.dark,
                     ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.keyboard_arrow_down,
-                      size: 18,
-                      color: AppTheme.slate,
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 18,
+                    color: AppTheme.slate,
+                  ),
+                ],
               ),
+              const SizedBox(width: 12),
               Container(height: 30, width: 1, color: Colors.black12),
               const SizedBox(width: 16),
               // Input
@@ -665,7 +669,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     counterText: '',
-                    contentPadding: EdgeInsets.symmetric(vertical: 20),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 0,
+                    ),
                   ),
                 ),
               ),

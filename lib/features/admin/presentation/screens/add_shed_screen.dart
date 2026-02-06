@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/farm_selector_input.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/widgets/primary_button.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
@@ -91,6 +92,7 @@ class _AddShedScreenState extends ConsumerState<AddShedScreen> {
                     controller: _capacityController,
                     enabled: true,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     prefixIcon: const Icon(Icons.group_work_rounded, size: 20),
                     hint: '300',
                   ),

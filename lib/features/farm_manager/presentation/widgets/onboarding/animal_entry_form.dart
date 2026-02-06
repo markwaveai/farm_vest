@@ -364,6 +364,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
 
                 // Second Row: Age, Breed/Parent
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (isBuffalo) ...[
                       Expanded(
@@ -391,6 +392,17 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                         icon: Icons.cake_outlined,
                         isNumber: true,
                         maxLength: 3,
+                        validator: (val) {
+                          if (isBuffalo) {
+                            if (val != null && val.isNotEmpty) {
+                              final age = int.tryParse(val);
+                              if (age != null && age < 36) {
+                                return 'Age should be greater than 35 months';
+                              }
+                            }
+                          }
+                          return null;
+                        },
                         onChanged: (val) {
                           setState(
                             () => animal.ageMonths = int.tryParse(val) ?? 0,
