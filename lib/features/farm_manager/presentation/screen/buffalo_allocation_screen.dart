@@ -288,7 +288,7 @@ class _BuffaloAllocationScreenState
             child: IconButton(
               icon: const Icon(Icons.check_rounded),
               onPressed: _finalizeAllocations,
-              color: Colors.white,
+              color: Colors.blueGrey,
             ),
           ),
         ],

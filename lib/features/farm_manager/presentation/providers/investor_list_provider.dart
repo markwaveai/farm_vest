@@ -68,14 +68,21 @@ class InvestorListNotifier extends Notifier<InvestorListState> {
     final currentQuery = query ?? state.searchQuery;
 
     // Apply status filter first
-    List<model.Investor> filteredList;
-    if (currentStatus == 'active') {
-      filteredList = _sourceInvestors.where((i) => i.animalCount > 0).toList();
-    } else if (currentStatus == 'exited') {
-      filteredList = _sourceInvestors.where((i) => i.animalCount == 0).toList();
-    } else {
-      filteredList = _sourceInvestors;
-    }
+   List<model.Investor> filteredList;
+
+if (currentStatus == 'active') {
+  filteredList =
+      _sourceInvestors.where((i) => i.animalCount > 0).toList();
+} else if (currentStatus == 'inactive') {
+  filteredList =
+      _sourceInvestors.where((i) => i.animalCount == 0).toList();
+} else if (currentStatus == 'exited') {
+  filteredList =
+      _sourceInvestors.where((i) => i.animalCount < 0).toList(); 
+} else {
+  filteredList = _sourceInvestors;
+}
+
 
     // Then apply search query on the result
     if (currentQuery.isNotEmpty) {

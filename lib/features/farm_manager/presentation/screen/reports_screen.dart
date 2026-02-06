@@ -17,6 +17,7 @@ class ReportsScreen extends ConsumerStatefulWidget {
 class _ReportsScreenState extends ConsumerState<ReportsScreen> {
   DateTime? _selectedDate;
   String _selectedSession = 'Morning';
+  bool get _isDateSelected => _selectedDate != null;
 
   final TextEditingController _dateController = TextEditingController();
   double getResponsiveFontSize(BuildContext context, double fontSize) {
@@ -105,8 +106,8 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
                   const SizedBox(height: 24),
 
-                  _getReportButton(() {
-                    if (_selectedDate == null) return;
+                  _getReportButton(_isDateSelected
+      ? () {
 
                     final date =
                         "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
@@ -117,7 +118,8 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                           date: date,
                           timing: _selectedSession.toUpperCase(),
                         );
-                  }),
+                  }
+                  : null),
                   const SizedBox(height: 16),
 
                   Consumer(
@@ -168,8 +170,8 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   // _getReportButton(() {
 
                   // }),
-                  _getReportButton(() {
-                    if (_selectedDate == null) return;
+                  _getReportButton(_isDateSelected
+      ? () {
 
                     final date =
                         "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
@@ -177,7 +179,8 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                     ref
                         .read(milkReportProvider.notifier)
                         .getWeeklyReport(date: date);
-                  }),
+                  }
+                  : null),
                   const SizedBox(height: 16),
                   Consumer(
                     builder: (context, ref, _) {
@@ -255,22 +258,34 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     );
   }
 
-  Widget _getReportButton(VoidCallback onTap) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green,
-          shape: RoundedRectangleBorder(
+ Widget _getReportButton(VoidCallback? onPressed) {
+  return SizedBox(
+    width: double.infinity,
+    height: 48,
+    child: ElevatedButton(
+      onPressed: onPressed,
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+          (states) {
+            if (states.contains(MaterialState.disabled)) {
+              return Colors.grey.shade400;
+            }
+            return Colors.green;
+          },
+        ),
+        shape: MaterialStateProperty.all(
+          RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        onPressed: onTap,
-        child: const Text("Get Report", style: TextStyle(fontSize: 16)),
       ),
-    );
-  }
+      child: const Text(
+        "Get Report",
+        style: TextStyle(fontSize: 16),
+      ),
+    ),
+  );
+}
 
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(

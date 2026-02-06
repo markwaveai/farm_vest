@@ -49,6 +49,13 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
             ),
             SimpleDialogOption(
               onPressed: () {
+                notifier.setStatusFilter('inactive');
+                Navigator.pop(context);
+              },
+              child: const Text('Inactive'),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
                 notifier.setStatusFilter('exited');
                 Navigator.pop(context);
               },
@@ -124,6 +131,19 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
       ],
     );
   }
+String _getEmptyMessage(String status) {
+  switch (status) {
+    case 'active':
+      return 'No active investors found';
+    case 'inactive':
+      return 'No inactive investors found';
+    case 'exited':
+      return 'No exited investors found';
+    default:
+      return 'No investors found';
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -132,8 +152,20 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
       appBar: _buildAppBar(),
-      body: investorState.isLoading
-          ? const Center(child: CircularProgressIndicator())
+     body: investorState.isLoading
+    ? const Center(child: CircularProgressIndicator())
+    : investorState.investors.isEmpty
+        ? Center(
+            child: Text(
+              _getEmptyMessage(investorState.statusFilter),
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          )
+
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: investorState.investors.length,
@@ -142,9 +174,9 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
                 return InvestorCard(
                   name: investor.fullName,
                   location: investor.address ?? 'N/A',
-                  amount: '₹${investor.animalCount}', // Adjusted mapping
+                  amount: '₹${investor.animalCount}', 
                   date: investor.memberSince?.toIso8601String() ?? 'N/A',
-                  status: investor.animalCount > 0 ? 'Active' : 'Exited',
+                  status: investor.animalCount > 0 ? 'Active' :'Inactive' 'Exited',
                 );
               },
             ),
