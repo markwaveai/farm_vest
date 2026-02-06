@@ -92,10 +92,11 @@ Future<void> main() async {
   await RemoteConfigService.initialize();
 
   runApp(
-    DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context) => const ProviderScope(child: FarmVestApp()),
-    ),
+    // DevicePreview(
+    //   enabled: !kReleaseMode,
+    //   builder: (context) => 
+    const ProviderScope(child: FarmVestApp()),
+    // ),
   );
 }
 

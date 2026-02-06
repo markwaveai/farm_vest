@@ -1,8 +1,10 @@
+import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileMenuDrawer extends ConsumerStatefulWidget {
   const ProfileMenuDrawer({super.key});
@@ -62,6 +64,41 @@ class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
               }
             },
             child: const Text('Logout', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'Are you sure you want to delete your account? This action is permanent and will remove all your data. You will be redirected to our website to complete the process.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _launchURL(AppConstants.deleteAccountUrl);
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -161,6 +198,12 @@ class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
                     Navigator.pop(context);
                     context.push('/support');
                   },
+                ),
+                _buildMenuItem(
+                  icon: Icons.delete,
+                  title: 'Delete Account',
+                 
+                  onTap: _showDeleteAccountDialog,
                 ),
                 const SizedBox(height: 40),
                 SizedBox(

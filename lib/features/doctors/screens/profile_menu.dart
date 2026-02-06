@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileMenuScreen extends StatefulWidget {
   const ProfileMenuScreen({super.key});
@@ -21,6 +23,41 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
   final _dateController = TextEditingController(text: '30/01/2026');
 
   static const Color orange = Color(0xFFFCA222);
+
+  Future<void> _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'Are you sure you want to delete your account? This action is permanent and will remove all your data. You will be redirected to our website to complete the process.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _launchURL(AppConstants.deleteAccountUrl);
+            },
+            child: const Text(
+              'Delete',
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -234,6 +271,11 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
                         icon: Icons.help_outline,
                         title: 'Help & Support',
                       ),
+                      _menuItem(
+                        icon: Icons.delete,
+                        title: 'Delete Account',
+                        onTap: _showDeleteAccountDialog,
+                      ),
 
                       const SizedBox(height: 25),
 
@@ -347,26 +389,32 @@ class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
     );
   }
 
-  Widget _menuItem({IconData? icon, required String title, String? subtitle}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 18),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: Colors.white)),
-              if (subtitle != null)
-                Text(
-                  subtitle,
-
-                  style: const TextStyle(color: Colors.white, fontSize: 11),
-                ),
-            ],
-          ),
-        ],
+  Widget _menuItem(
+      {IconData? icon,
+      required String title,
+      String? subtitle,
+      VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white, size: 18),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white)),
+                if (subtitle != null)
+                  Text(
+                    subtitle,
+                    style: const TextStyle(color: Colors.white, fontSize: 11),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -7,6 +7,7 @@ const String kHyphen = '--';
 
 class AppConstants {
   static const String appName = 'FarmVest';
+  static const String deleteAccountUrl = 'https://dashboard.farmvest.in/farmvest/account-deletion';
 
   static String stagingUrl =
       'https://farmvest-staging-apis-jn6cma3vvq-el.a.run.app/api';

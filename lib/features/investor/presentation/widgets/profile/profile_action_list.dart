@@ -4,10 +4,12 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/theme/theme_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
+import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileActionList extends ConsumerStatefulWidget {
   const ProfileActionList({super.key});
@@ -102,6 +104,43 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
             },
             child: const Text(
               'Logout',
+              style: TextStyle(color: AppTheme.errorRed),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      Fluttertoast.showToast(msg: 'Could not launch $url');
+    }
+  }
+
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'Are you sure you want to delete your account? This action is permanent and will remove all your data. You will be redirected to our website to complete the process.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _launchURL(AppConstants.deleteAccountUrl);
+            },
+            child: const Text(
+              'Delete',
               style: TextStyle(color: AppTheme.errorRed),
             ),
           ),
@@ -283,6 +322,19 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
             style: TextStyle(color: AppTheme.errorRed),
           ),
           onTap: _showLogoutDialog,
+        ),
+        const SizedBox(height: 8),
+        ListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          tileColor: theme.colorScheme.surface,
+          leading: const Icon(Icons.delete, color: AppTheme.errorRed),
+          title: const Text(
+            'Delete Account',
+            style: TextStyle(color: AppTheme.errorRed),
+          ),
+          
+         // trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          onTap: _showDeleteAccountDialog,
         ),
       ],
     );

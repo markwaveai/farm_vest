@@ -1,8 +1,10 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SupervisorMoreScreen extends ConsumerWidget {
   const SupervisorMoreScreen({super.key});
@@ -26,6 +28,41 @@ class SupervisorMoreScreen extends ConsumerWidget {
               }
             },
             child: const Text('Logout', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'Are you sure you want to delete your account? This action is permanent and will remove all your data. You will be redirected to our website to complete the process.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _launchURL(AppConstants.deleteAccountUrl);
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -121,6 +158,13 @@ class SupervisorMoreScreen extends ConsumerWidget {
               title: 'Logout',
               color: Colors.red,
               onTap: () => _showLogoutDialog(context, ref),
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.delete,
+              title: 'Delete Account',
+              color: Colors.red,
+              onTap: () => _showDeleteAccountDialog(context),
             ),
 
             const SizedBox(height: 100), // Spacing for bottom nav
