@@ -457,19 +457,20 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
       },
     );
   }
+Widget _buildCategoryCard(
+  BuildContext context,
+  String label,
+  IconData icon, {
+  required bool isOrange,
+}) {
+  final baseColor = isOrange ? AppTheme.secondary : AppTheme.primary;
+  final gradientColors = isOrange
+      ? [AppTheme.secondary, AppTheme.lightSecondary]
+      : [AppTheme.primary, AppTheme.lightGreen];
 
-  Widget _buildCategoryCard(
-    BuildContext context,
-    String label,
-    IconData icon, {
-    required bool isOrange,
-  }) {
-    final baseColor = isOrange ? AppTheme.secondary : AppTheme.primary;
-    final gradientColors = isOrange
-        ? [AppTheme.secondary, AppTheme.lightSecondary]
-        : [AppTheme.primary, AppTheme.lightGreen];
-
-    return Container(
+  return Opacity(
+    opacity: 0.8, 
+    child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppConstants.radiusL),
         gradient: LinearGradient(
@@ -479,35 +480,90 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: baseColor.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: baseColor.withValues(alpha: 0.15), 
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppConstants.radiusL),
-          onTap: () {},
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.white, size: 32),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 32),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
+        
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
+}
+
+
+
+
+///// TODO: After implementing Health Summary features, enable this code for interaction.
+
+
+//   Widget _buildCategoryCard(
+//     BuildContext context,
+//     String label,
+//     IconData icon, {
+//     required bool isOrange,
+//   }) {
+//     final baseColor = isOrange ? AppTheme.secondary : AppTheme.primary;
+//     final gradientColors = isOrange
+//         ? [AppTheme.secondary, AppTheme.lightSecondary]
+//         : [AppTheme.primary, AppTheme.lightGreen];
+
+//     return Container(
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(AppConstants.radiusL),
+//         gradient: LinearGradient(
+//           begin: Alignment.topLeft,
+//           end: Alignment.bottomRight,
+//           colors: gradientColors,
+//         ),
+//         boxShadow: [
+//           BoxShadow(
+//             color: baseColor.withValues(alpha: 0.3),
+//             blurRadius: 8,
+//             offset: const Offset(0, 4),
+//           ),
+//         ],
+//       ),
+//       child: Material(
+//         color: Colors.transparent,
+//         child: InkWell(
+//           borderRadius: BorderRadius.circular(AppConstants.radiusL),
+//           onTap: () {},
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: [
+//               Icon(icon, color: Colors.white, size: 32),
+//               const SizedBox(height: 8),
+//               Text(
+//                 label,
+//                 style: const TextStyle(
+//                   color: Colors.white,
+//                   fontWeight: FontWeight.bold,
+//                   fontSize: 14,
+//                 ),
+//                 textAlign: TextAlign.center,
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
