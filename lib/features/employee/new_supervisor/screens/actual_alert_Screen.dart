@@ -16,10 +16,10 @@ class ActualAlertScreen extends ConsumerWidget {
     final currentFilter = ref.watch(ticketStatusFilterProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xffF6F7F9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: AppTheme.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         title: const Text(
           'ALERTS',
           style: TextStyle(
@@ -30,7 +30,10 @@ class ActualAlertScreen extends ConsumerWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none, color: AppTheme.black),
+            icon: Icon(
+              Icons.notifications_none,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             onPressed: () => ref.refresh(supervisorTicketsProvider),
           ),
         ],
@@ -40,9 +43,13 @@ class ActualAlertScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Farm Alerts',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 12),
             SizedBox(
@@ -82,9 +89,12 @@ class ActualAlertScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Active Alerts',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 12),
             Expanded(
@@ -131,9 +141,12 @@ class ActualAlertScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Completed Alerts',
-              style: TextStyle(fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).hintColor,
+              ),
             ),
             const SizedBox(height: 100), // Spacing for bottom nav
           ],

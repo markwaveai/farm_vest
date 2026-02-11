@@ -6,10 +6,7 @@ import 'package:flutter/material.dart';
 class CustomDialog extends StatelessWidget {
   final Widget child;
 
-  const CustomDialog({
-    super.key,
-    required this.child,
-  });
+  const CustomDialog({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +15,7 @@ class CustomDialog extends StatelessWidget {
       backgroundColor: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
         ),
         padding: const EdgeInsets.all(16),
@@ -26,13 +23,9 @@ class CustomDialog extends StatelessWidget {
       ),
     );
   }
-
 }
 
-Future<void> showSuccessDialog(
-  BuildContext context,
-  String message,
-) async {
+Future<void> showSuccessDialog(BuildContext context, String message) async {
   await showDialog(
     context: context,
     barrierDismissible: false,
@@ -41,19 +34,12 @@ Future<void> showSuccessDialog(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 64,
-            ),
+            const Icon(Icons.check_circle, color: Colors.green, size: 64),
             const SizedBox(height: 16),
 
             const Text(
               'Success',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 8),
@@ -63,13 +49,11 @@ Future<void> showSuccessDialog(
             const SizedBox(height: 24),
 
             CustomActionButton(
-              child: Text('OK',style: TextStyle(color: AppTheme.white),),
+              child: Text('OK', style: TextStyle(color: AppTheme.white)),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (_) => NewSupervisorDashboard(),
-                  ),
+                  MaterialPageRoute(builder: (_) => NewSupervisorDashboard()),
                 );
               },
             ),
@@ -79,7 +63,3 @@ Future<void> showSuccessDialog(
     },
   );
 }
-
-
-
-

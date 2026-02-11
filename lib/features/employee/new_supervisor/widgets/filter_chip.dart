@@ -19,10 +19,14 @@ class FilterChipWidget extends StatelessWidget {
       child: ChoiceChip(
         label: Text(label),
         selected: selected,
-        selectedColor: Colors.green,
-        side: const BorderSide(color: Colors.green, width: 1.2),
-        labelStyle: TextStyle(color: selected ? Colors.white : Colors.green),
-        backgroundColor: Colors.white,
+        selectedColor: Theme.of(context).primaryColor,
+        side: BorderSide(color: Theme.of(context).primaryColor, width: 1.2),
+        labelStyle: TextStyle(
+          color: selected
+              ? Colors.white
+              : Theme.of(context).colorScheme.onSurface,
+        ),
+        backgroundColor: Theme.of(context).cardColor,
         onSelected: (_) {
           if (onTap != null) onTap!();
         },

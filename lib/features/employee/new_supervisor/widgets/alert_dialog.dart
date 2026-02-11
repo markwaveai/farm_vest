@@ -111,9 +111,10 @@ class _QuickActionDialogContentState
             children: [
               Text(
                 dialogTitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               IconButton(
@@ -137,6 +138,7 @@ class _QuickActionDialogContentState
                 children: [
                   if (widget.type == QuickActionType.milkEntry) ...[
                     helperTextField(
+                      context,
                       helperText: 'Please enter quantity in liters',
                       field: CustomTextField(
                         hint: 'Enter quantity',
@@ -146,6 +148,7 @@ class _QuickActionDialogContentState
                     ),
                     const SizedBox(height: 12),
                     _buildTimingDropdown(
+                      context,
                       selectedTiming,
                       (val) => setState(() => selectedTiming = val!),
                     ),
@@ -158,6 +161,7 @@ class _QuickActionDialogContentState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         helperTextField(
+                          context,
                           helperText:
                               widget.type == QuickActionType.locateAnimal
                               ? 'Search Animal by ID or Tag'
@@ -171,7 +175,7 @@ class _QuickActionDialogContentState
                               ref
                                   .read(supervisorDashboardProvider.notifier)
                                   .searchSuggestions(val);
-                                 _isSearchEnabled = val.trim().isNotEmpty;
+                              _isSearchEnabled = val.trim().isNotEmpty;
 
                               if (_selectedAnimalId != null &&
                                   val != _selectedAnimalTag) {
@@ -187,9 +191,11 @@ class _QuickActionDialogContentState
                           Container(
                             margin: const EdgeInsets.only(top: 4),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey.shade300),
+                              border: Border.all(
+                                color: Theme.of(context).dividerColor,
+                              ),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.05),
@@ -213,7 +219,14 @@ class _QuickActionDialogContentState
                                     animal.animalId;
                                 return ListTile(
                                   dense: true,
-                                  title: Text(tag),
+                                  title: Text(
+                                    tag,
+                                    style: TextStyle(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                    ),
+                                  ),
                                   subtitle: Text(
                                     'ID: ${animal.animalId} • Row: ${animal.rowNumber ?? 'N/A'}',
                                   ),
@@ -242,6 +255,7 @@ class _QuickActionDialogContentState
                   if (widget.type == QuickActionType.healthTicket ||
                       widget.type == QuickActionType.transferRequest) ...[
                     helperTextField(
+                      context,
                       helperText: 'Description / Reason',
                       field: CustomTextField(
                         hint: 'Enter detail here...',
@@ -253,16 +267,19 @@ class _QuickActionDialogContentState
                     const SizedBox(height: 12),
                     if (widget.type == QuickActionType.healthTicket) ...[
                       _buildPriorityDropdown(
+                        context,
                         selectedPriority,
                         (val) => setState(() => selectedPriority = val!),
                       ),
                       const SizedBox(height: 12),
                       _buildDiseaseDropdown(
+                        context,
                         selectedDisease,
                         (val) => setState(() => selectedDisease = val!),
                       ),
                       const SizedBox(height: 16),
                       _buildMultiImagePicker(
+                        context,
                         _pickedImages,
                         onCameraPick: () async {
                           final picker = ImagePicker();
@@ -298,30 +315,28 @@ class _QuickActionDialogContentState
                   if (widget.type == QuickActionType.locateAnimal) ...[
                     CustomActionButton(
                       width: double.infinity,
-                      color:
-                       _isSearchEnabled
-      ?AppTheme.lightPrimary
-      :Colors.grey,
-                      onPressed:  _isSearchEnabled?
-                      () {
-                        final query = idController.text.trim();
-                        if (query.isNotEmpty) {
-                          ref
-                              .read(supervisorDashboardProvider.notifier)
-                              .locateAnimal(query);
-
-                        } 
-                        else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Please enter a tag or ID to search',
-                              ),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      } : null,
+                      color: _isSearchEnabled
+                          ? AppTheme.lightPrimary
+                          : Colors.grey,
+                      onPressed: _isSearchEnabled
+                          ? () {
+                              final query = idController.text.trim();
+                              if (query.isNotEmpty) {
+                                ref
+                                    .read(supervisorDashboardProvider.notifier)
+                                    .locateAnimal(query);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Please enter a tag or ID to search',
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          : null,
                       child: const Text(
                         'Search',
                         style: TextStyle(color: Colors.white),
@@ -512,16 +527,20 @@ class _QuickActionDialogContentState
   }
 }
 
-Widget _buildTimingDropdown(String current, ValueChanged<String?> onChanged) {
+Widget _buildTimingDropdown(
+  BuildContext context,
+  String current,
+  ValueChanged<String?> onChanged,
+) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text(
+      Text(
         'Select Timing',
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: AppTheme.grey1,
+          color: Theme.of(context).hintColor,
         ),
       ),
       const SizedBox(height: 6),
@@ -545,16 +564,20 @@ Widget _buildTimingDropdown(String current, ValueChanged<String?> onChanged) {
   );
 }
 
-Widget _buildPriorityDropdown(String current, ValueChanged<String?> onChanged) {
+Widget _buildPriorityDropdown(
+  BuildContext context,
+  String current,
+  ValueChanged<String?> onChanged,
+) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text(
+      Text(
         'Select Priority',
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: AppTheme.grey1,
+          color: Theme.of(context).hintColor,
         ),
       ),
       const SizedBox(height: 6),
@@ -578,16 +601,20 @@ Widget _buildPriorityDropdown(String current, ValueChanged<String?> onChanged) {
   );
 }
 
-Widget _buildDiseaseDropdown(String current, ValueChanged<String?> onChanged) {
+Widget _buildDiseaseDropdown(
+  BuildContext context,
+  String current,
+  ValueChanged<String?> onChanged,
+) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text(
+      Text(
         'Identify Disease',
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: AppTheme.grey1,
+          color: Theme.of(context).hintColor,
         ),
       ),
       const SizedBox(height: 6),
@@ -616,6 +643,7 @@ Widget _buildDiseaseDropdown(String current, ValueChanged<String?> onChanged) {
 }
 
 Widget _buildMultiImagePicker(
+  BuildContext context,
   List<File> pickedImages, {
   required VoidCallback onCameraPick,
   required VoidCallback onGalleryPick,
@@ -624,12 +652,12 @@ Widget _buildMultiImagePicker(
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text(
+      Text(
         'Evidence Images (Optional, max 5)',
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: AppTheme.grey1,
+          color: Theme.of(context).hintColor,
         ),
       ),
       const SizedBox(height: 8),
@@ -681,12 +709,14 @@ Widget _buildMultiImagePicker(
               Row(
                 children: [
                   _buildAddImageButton(
+                    context,
                     Icons.camera_alt,
                     'Camera',
                     onCameraPick,
                   ),
                   const SizedBox(width: 8),
                   _buildAddImageButton(
+                    context,
                     Icons.photo_library,
                     'Gallery',
                     onGalleryPick,
@@ -700,16 +730,23 @@ Widget _buildMultiImagePicker(
   );
 }
 
-Widget _buildAddImageButton(IconData icon, String label, VoidCallback onTap) {
+Widget _buildAddImageButton(
+  BuildContext context,
+  IconData icon,
+  String label,
+  VoidCallback onTap,
+) {
   return InkWell(
     onTap: onTap,
     child: Container(
       width: 80,
       height: 100,
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).dividerColor.withOpacity(0.1)
+            : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -752,18 +789,25 @@ Widget _buildLocationResult(
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Current Location',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
-                const Icon(Icons.directions, color: AppTheme.primary),
+                Icon(Icons.directions, color: Theme.of(context).primaryColor),
               ],
             ),
             const Divider(),
-            _buildLocationRow('Shed', location['shed_name']),
-            _buildLocationRow('Row', location['row_number']?.toString()),
-            _buildLocationRow('Slot', location['parking_id']),
-            _buildLocationRow('Health', location['health_status']),
+            _buildLocationRow(context, 'Shed', location['shed_name']),
+            _buildLocationRow(
+              context,
+              'Row',
+              location['row_number']?.toString(),
+            ),
+            _buildLocationRow(context, 'Slot', location['parking_id']),
+            _buildLocationRow(context, 'Health', location['health_status']),
           ],
         ),
       ),
@@ -771,32 +815,39 @@ Widget _buildLocationResult(
   );
 }
 
-Widget _buildLocationRow(String label, String? value) {
+Widget _buildLocationRow(BuildContext context, String label, String? value) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label),
+        Text(label, style: TextStyle(color: Theme.of(context).hintColor)),
         Text(
           value ?? 'N/A',
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
       ],
     ),
   );
 }
 
-Widget helperTextField({required String helperText, required Widget field}) {
+Widget helperTextField(
+  BuildContext context, {
+  required String helperText,
+  required Widget field,
+}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
         helperText,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: AppTheme.grey1,
+          color: Theme.of(context).hintColor,
         ),
       ),
       const SizedBox(height: 6),

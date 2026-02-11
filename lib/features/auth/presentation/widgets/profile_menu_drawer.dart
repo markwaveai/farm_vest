@@ -110,7 +110,9 @@ class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
 
     return Drawer(
       width: size.width * 0.8,
-      backgroundColor: AppTheme.primary,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? Theme.of(context).cardColor
+          : AppTheme.primary,
       child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),

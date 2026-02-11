@@ -12,7 +12,7 @@ class SupervisorStatsScreen extends ConsumerWidget {
     final stats = dashboardState.stats;
 
     return Scaffold(
-      backgroundColor: AppTheme.grey,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Farm Statistics')),
       body: dashboardState.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -22,6 +22,7 @@ class SupervisorStatsScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildStatCard(
+                    context,
                     'Total Animals',
                     stats.totalAnimals,
                     Icons.pets,
@@ -29,6 +30,7 @@ class SupervisorStatsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   _buildStatCard(
+                    context,
                     'Daily Milk Content',
                     stats.milkToday,
                     Icons.water_drop,
@@ -36,6 +38,7 @@ class SupervisorStatsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   _buildStatCard(
+                    context,
                     'Active Health Issues',
                     stats.activeIssues,
                     Icons.warning,
@@ -43,6 +46,7 @@ class SupervisorStatsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   _buildStatCard(
+                    context,
                     'Pending Transfers',
                     stats.transfers,
                     Icons.move_down,
@@ -56,6 +60,7 @@ class SupervisorStatsScreen extends ConsumerWidget {
   }
 
   Widget _buildStatCard(
+    BuildContext context,
     String title,
     String value,
     IconData icon,
@@ -64,7 +69,7 @@ class SupervisorStatsScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -90,19 +95,19 @@ class SupervisorStatsScreen extends ConsumerWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey,
+                  color: Theme.of(context).hintColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],

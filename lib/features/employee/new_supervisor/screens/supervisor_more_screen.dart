@@ -59,10 +59,7 @@ class SupervisorMoreScreen extends ConsumerWidget {
               Navigator.pop(context);
               _launchURL(AppConstants.deleteAccountUrl);
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -74,7 +71,7 @@ class SupervisorMoreScreen extends ConsumerWidget {
     final user = ref.watch(authProvider).userData;
 
     return Scaffold(
-      backgroundColor: AppTheme.grey,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Menu')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -84,7 +81,7 @@ class SupervisorMoreScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -184,7 +181,7 @@ class SupervisorMoreScreen extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
@@ -193,7 +190,9 @@ class SupervisorMoreScreen extends ConsumerWidget {
           title,
           style: TextStyle(
             fontWeight: FontWeight.w500,
-            color: color == Colors.red ? Colors.red : Colors.black87,
+            color: color == Colors.red
+                ? Colors.red
+                : Theme.of(context).colorScheme.onSurface,
           ),
         ),
         trailing: const Icon(Icons.chevron_right, size: 20),

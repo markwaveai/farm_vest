@@ -1,4 +1,3 @@
-import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:intl/intl.dart';
@@ -45,7 +44,7 @@ class _SupervisorBuffaloScreenState
         context.go('/supervisor-dashboard');
       },
       child: Scaffold(
-        backgroundColor: AppTheme.grey,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
@@ -72,7 +71,8 @@ class _SupervisorBuffaloScreenState
                     icon: const Icon(Icons.clear),
                     onPressed: () {
                       _searchController.clear();
-                      ref.read(animalSearchQueryProvider.notifier).state = 'all';
+                      ref.read(animalSearchQueryProvider.notifier).state =
+                          'all';
                     },
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 0),
@@ -81,7 +81,7 @@ class _SupervisorBuffaloScreenState
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).cardColor,
                 ),
                 onSubmitted: (value) {
                   ref.read(animalSearchQueryProvider.notifier).state =
@@ -128,8 +128,8 @@ class _SupervisorBuffaloScreenState
           ),
           child: ExpansionTile(
             leading: CircleAvatar(
-              backgroundColor: AppTheme.primary.withOpacity(0.1),
-              child: const Icon(Icons.pets, color: AppTheme.primary),
+              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+              child: Icon(Icons.pets, color: Theme.of(context).primaryColor),
             ),
             title: Text(
               animal.rfid ?? 'Unknown RFID',
@@ -137,7 +137,10 @@ class _SupervisorBuffaloScreenState
             ),
             subtitle: Text(
               'Tag: ${animal.earTagId ?? 'N/A'} | Shed: ${animal.shedName ?? 'N/A'}',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              style: TextStyle(
+                color: Theme.of(context).hintColor,
+                fontSize: 12,
+              ),
             ),
             children: [
               Padding(
@@ -177,8 +180,8 @@ class _SupervisorBuffaloScreenState
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.grey,
+            style: TextStyle(
+              color: Theme.of(context).hintColor,
               fontWeight: FontWeight.w500,
             ),
           ),

@@ -21,14 +21,14 @@ class CustomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (type == DashboardCardType.priority) {
-      return _buildPriorityCard();
+      return _buildPriorityCard(context);
     } else if (type == DashboardCardType.quickAction) {
-      return _buildQuickActionCard();
+      return _buildQuickActionCard(context);
     }
-    return _buildStatsCard();
+    return _buildStatsCard(context);
   }
 
-  Widget _buildStatsCard() {
+  Widget _buildStatsCard(BuildContext context) {
     return InkWell(
       onTap: onTap,
       child: Stack(
@@ -52,7 +52,7 @@ class CustomCard extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 4),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -69,7 +69,7 @@ class CustomCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPriorityCard() {
+  Widget _buildPriorityCard(BuildContext context) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -94,7 +94,7 @@ class CustomCard extends StatelessWidget {
             width: double.infinity,
             margin: const EdgeInsets.only(left: 4),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: const BorderRadius.all(Radius.circular(16)),
               boxShadow: [
                 BoxShadow(
@@ -112,15 +112,15 @@ class CustomCard extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActionCard() {
+  Widget _buildQuickActionCard(BuildContext context) {
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: Theme.of(context).dividerColor),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.09),

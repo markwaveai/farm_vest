@@ -12,10 +12,17 @@ class LoginResponse {
   });
 
   factory LoginResponse.fromMap(Map<String, dynamic> map) {
+    List<String> rolesList = [];
+    if (map['roles'] != null) {
+      rolesList = List<String>.from(map['roles']);
+    } else if (map['user'] != null && map['user']['roles'] != null) {
+      rolesList = List<String>.from(map['user']['roles']);
+    }
+
     return LoginResponse(
       accessToken: map['access_token'] ?? '',
       tokenType: map['token_type'] ?? '',
-      roles: List<String>.from(map['roles'] ?? []),
+      roles: rolesList,
     );
   }
 

@@ -95,7 +95,7 @@ class _NewSupervisorBottomNav extends StatelessWidget {
         margin: const EdgeInsets.all(16),
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
@@ -117,14 +117,18 @@ class _NewSupervisorBottomNav extends StatelessWidget {
                 children: [
                   Icon(
                     icons[index],
-                    color: isActive ? Colors.blue : Colors.grey,
+                    color: isActive
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).hintColor,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     labels[index],
                     style: TextStyle(
                       fontSize: 11,
-                      color: isActive ? Colors.blue : Colors.grey,
+                      color: isActive
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).hintColor,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -133,7 +137,7 @@ class _NewSupervisorBottomNav extends StatelessWidget {
                     height: 3,
                     width: isActive ? 18 : 0,
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: Theme.of(context).primaryColor,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),

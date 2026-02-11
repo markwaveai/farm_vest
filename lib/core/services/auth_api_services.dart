@@ -21,7 +21,7 @@ class AuthApiServices {
         uri,
         headers: {
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
-          "Authorization": AppConstants.authApiKey,
+          //  "Authorization": AppConstants.authApiKey,
         },
       );
 
@@ -79,7 +79,7 @@ class AuthApiServices {
         Uri.parse("${AppConstants.appLiveUrl}/auth/token"),
         headers: {
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
-          HttpHeaders.authorizationHeader: AppConstants.authApiKey,
+          //  HttpHeaders.authorizationHeader: AppConstants.authApiKey,
         },
         body: jsonEncode({"mobile_number": mobileNumber, "otp": otp}),
       );
@@ -113,9 +113,10 @@ class AuthApiServices {
 
       if (token != null && token.isNotEmpty) {
         headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
-      } else {
-        headers["Authorization"] = AppConstants.authApiKey;
       }
+      // else {
+      //   headers["Authorization"] = AppConstants.authApiKey;
+      // }
 
       final uri = Uri.parse(
         "${AppConstants.appLiveUrl}/users/get_user_data",
@@ -159,9 +160,10 @@ class AuthApiServices {
 
       if (token != null && token.isNotEmpty) {
         headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
-      } else {
-        headers["Authorization"] = AppConstants.authApiKey;
       }
+      // else {
+      //   headers["Authorization"] = AppConstants.authApiKey;
+      // }
 
       final response = await http.put(
         Uri.parse(url),

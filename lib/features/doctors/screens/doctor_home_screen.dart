@@ -424,103 +424,110 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Switch Active Role',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+        return SingleChildScrollView(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Choose which portal you want to access',
-                style: TextStyle(color: Theme.of(context).hintColor),
-              ),
-              const SizedBox(height: 24),
-              ...availableRoles.map((role) {
-                final isSelected = role == currentRole;
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    onTap: isSelected
-                        ? null
-                        : () async {
-                            Navigator.pop(context);
-                            await ref
-                                .read(authProvider.notifier)
-                                .selectRole(role);
-
-                            if (!mounted) return;
-                            switch (role) {
-                              case UserType.admin:
-                                context.go('/admin-dashboard');
-                                break;
-                              case UserType.farmManager:
-                                context.go('/farm-manager-dashboard');
-                                break;
-                              case UserType.supervisor:
-                                context.go('/supervisor-dashboard');
-                                break;
-                              case UserType.doctor:
-                                context.go('/doctor-dashboard');
-                                break;
-                              case UserType.assistant:
-                                context.go('/assistant-dashboard');
-                                break;
-                              case UserType.customer:
-                                context.go('/customer-dashboard');
-                                break;
-                            }
-                          },
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: isSelected
-                            ? role.color
-                            : (Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white12
-                                  : Colors.grey.shade200),
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    tileColor: isSelected ? role.color.withOpacity(0.05) : null,
-                    leading: CircleAvatar(
-                      backgroundColor: role.color.withOpacity(0.1),
-                      child: Icon(role.icon, color: role.color),
-                    ),
-                    title: Text(
-                      role.label,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                    trailing: isSelected
-                        ? Icon(Icons.check_circle, color: role.color)
-                        : const Icon(Icons.arrow_forward_ios, size: 14),
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Switch Active Role',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
-                );
-              }),
-            ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Choose which portal you want to access',
+                  style: TextStyle(color: Theme.of(context).hintColor),
+                ),
+                const SizedBox(height: 24),
+                ...availableRoles.map((role) {
+                  final isSelected = role == currentRole;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      onTap: isSelected
+                          ? null
+                          : () async {
+                              Navigator.pop(context);
+                              await ref
+                                  .read(authProvider.notifier)
+                                  .selectRole(role);
+
+                              if (!mounted) return;
+                              switch (role) {
+                                case UserType.admin:
+                                  context.go('/admin-dashboard');
+                                  break;
+                                case UserType.farmManager:
+                                  context.go('/farm-manager-dashboard');
+                                  break;
+                                case UserType.supervisor:
+                                  context.go('/supervisor-dashboard');
+                                  break;
+                                case UserType.doctor:
+                                  context.go('/doctor-dashboard');
+                                  break;
+                                case UserType.assistant:
+                                  context.go('/assistant-dashboard');
+                                  break;
+                                case UserType.customer:
+                                  context.go('/customer-dashboard');
+                                  break;
+                              }
+                            },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: isSelected
+                              ? role.color
+                              : (Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white12
+                                    : Colors.grey.shade200),
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      tileColor: isSelected
+                          ? role.color.withOpacity(0.05)
+                          : null,
+                      leading: CircleAvatar(
+                        backgroundColor: role.color.withOpacity(0.1),
+                        child: Icon(role.icon, color: role.color),
+                      ),
+                      title: Text(
+                        role.label,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? Icon(Icons.check_circle, color: role.color)
+                          : const Icon(Icons.arrow_forward_ios, size: 14),
+                    ),
+                  );
+                }),
+              ],
+            ),
           ),
         );
       },
