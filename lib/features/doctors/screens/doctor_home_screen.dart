@@ -2,7 +2,7 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/features/doctors/providers/doctors_provider.dart';
-import 'package:farm_vest/features/doctors/screens/profile_menu.dart';
+import 'package:farm_vest/features/auth/presentation/widgets/profile_menu_drawer.dart';
 import 'package:farm_vest/features/doctors/widgets/bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,18 +58,21 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: AppTheme.white,
-      drawer: const ProfileMenuScreen(),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      drawer: const ProfileMenuDrawer(),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: AppTheme.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         automaticallyImplyLeading: false,
         title: Align(
           alignment: Alignment.centerLeft,
           child: RichText(
             text: TextSpan(
               text: 'Hello ',
-              style: const TextStyle(color: AppTheme.black, fontSize: 16),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 16,
+              ),
               children: [
                 TextSpan(
                   text: displayName,
@@ -83,10 +86,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
             size: 18,
-            color: AppTheme.black,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
@@ -101,11 +104,17 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           if (ref.watch(authProvider).availableRoles.length > 1)
             IconButton(
               onPressed: () => _showSwitchRoleBottomSheet(),
-              icon: const Icon(Icons.swap_horiz_rounded, color: AppTheme.black),
+              icon: Icon(
+                Icons.swap_horiz_rounded,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               tooltip: 'Switch Role',
             ),
           IconButton(
-            icon: const Icon(Icons.menu, color: AppTheme.black),
+            icon: Icon(
+              Icons.menu,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
 
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
@@ -282,10 +291,12 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           if (index == 0) {
             context.push(
               '/all-health-tickets',
-              extra: {'filter': 'All', 'type': 'HEALTH'},
+              extra: {'filter': 'All', 'type': 'VACCINATION'},
             );
           } else if (index == 1) {
             context.push('/vaccination-screen');
+          } else if (index == 2) {
+            context.push('/transfer-tickets');
           } else if (index == 3) {
             context.push('/buffalo-profile');
           }
@@ -301,9 +312,16 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           height: 68,
           width: 68,
           decoration: BoxDecoration(
-            color: AppTheme.darkPrimary,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).cardColor
+                : AppTheme.darkPrimary,
             shape: BoxShape.circle,
-            border: Border.all(color: AppTheme.white, width: 4),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.darkPrimary
+                  : AppTheme.white,
+              width: 4,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.25),
@@ -314,7 +332,12 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(14),
-            child: Image.asset('assets/icons/home.png', color: AppTheme.white),
+            child: Image.asset(
+              'assets/icons/home.png',
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.primary
+                  : AppTheme.white,
+            ),
           ),
         ),
       ),
@@ -333,7 +356,11 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
           ],
         ),
@@ -350,15 +377,28 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           },
 
           style: TextButton.styleFrom(
-            backgroundColor: AppTheme.darkPrimary,
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.05)
+                : AppTheme.darkPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white12
+                    : Colors.transparent,
+              ),
             ),
           ),
-          child: const Text(
-            'View All Tickets',
-            style: TextStyle(color: AppTheme.white, fontSize: 12),
+          child: Text(
+            'View All',
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -384,25 +424,33 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
+      backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => SingleChildScrollView(
-        child: Container(
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Switch Active Role',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Choose which portal you want to access',
-                style: TextStyle(color: AppTheme.mediumGrey),
+                style: TextStyle(color: Theme.of(context).hintColor),
               ),
               const SizedBox(height: 24),
               ...availableRoles.map((role) {
@@ -444,7 +492,11 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: isSelected ? role.color : Colors.grey.shade200,
+                        color: isSelected
+                            ? role.color
+                            : (Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white12
+                                  : Colors.grey.shade200),
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -456,6 +508,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                     title: Text(
                       role.label,
                       style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -469,8 +522,8 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
               }),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

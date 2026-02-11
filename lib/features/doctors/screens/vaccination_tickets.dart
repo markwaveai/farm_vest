@@ -29,7 +29,23 @@ class _VaccineTicketsScreenState extends State<VaccineTicketsScreen> {
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Vaccine Tickets")),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          "Vaccine Tickets",
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        elevation: 0,
+      ),
 
       body: Column(
         children: [
@@ -85,14 +101,26 @@ class _VaccineTicketsScreenState extends State<VaccineTicketsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 18),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? AppTheme.darkPrimary : AppTheme.white,
+                color: isSelected
+                    ? AppTheme.darkPrimary
+                    : (Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.05)
+                          : Theme.of(context).cardColor),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppTheme.darkPrimary),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? (isSelected ? AppTheme.darkPrimary : Colors.white12)
+                      : AppTheme.darkPrimary,
+                ),
               ),
               child: Text(
                 filter,
                 style: TextStyle(
-                  color: isSelected ? AppTheme.white : AppTheme.darkPrimary,
+                  color: isSelected
+                      ? AppTheme.white
+                      : (Theme.of(context).brightness == Brightness.dark
+                            ? Theme.of(context).colorScheme.onSurface
+                            : AppTheme.darkPrimary),
                   fontWeight: FontWeight.w500,
                 ),
               ),

@@ -11,12 +11,15 @@ class TicketDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50], // F4F6F8
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Health Tickets'),
+        title: Text(
+          'Health Tickets',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -27,18 +30,19 @@ class TicketDetailsScreen extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildTab('All', false),
+                  _buildTab(context, 'All', false),
                   const SizedBox(width: 8),
-                  _buildTab('Pending', false),
+                  _buildTab(context, 'Pending', false),
                   const SizedBox(width: 8),
                   _buildTab(
+                    context,
                     'Approved',
                     true,
                   ), // Highlights current status roughly
                   const SizedBox(width: 8),
-                  _buildTab('In Progress', false),
+                  _buildTab(context, 'In Progress', false),
                   const SizedBox(width: 8),
-                  _buildTab('Completed', false),
+                  _buildTab(context, 'Completed', false),
                 ],
               ),
             ),
@@ -47,11 +51,13 @@ class TicketDetailsScreen extends StatelessWidget {
             // Card
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.black.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -85,32 +91,42 @@ class TicketDetailsScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         _buildDetailRow(
+                          context,
                           'Buffalo ID :',
                           ticket.animalId ?? 'Unknown',
                         ),
                         _buildDetailRow(
+                          context,
                           'Request Type :',
                           ticket.ticketType,
                         ), // 'Health Ticket + Medical Assistance'
                         _buildDetailRow(
+                          context,
                           'Reason :',
                           ticket.description,
                         ), // 'Persistent coughing...'
                         _buildDetailRow(
+                          context,
                           'Status :',
                           ticket.status,
                           isStatus: true,
                         ),
                         _buildDetailRow(
+                          context,
                           'Requested By :',
                           'Supervisor Shed 03',
                         ), // Mock or metadata
                         _buildDetailRow(
+                          context,
                           'Date Of Incident :',
                           ticket.createdAt?.toString().split(' ')[0] ?? 'N/A',
                         ),
-                        _buildDetailRow('RFID Tag ID :', ticket.rfid ?? 'N/A'),
-                        _buildDetailRow('Photo :', '', isImage: true),
+                        _buildDetailRow(
+                          context,
+                          'RFID Tag ID :',
+                          ticket.rfid ?? 'N/A',
+                        ),
+                        _buildDetailRow(context, 'Photo :', '', isImage: true),
                       ],
                     ),
                   ),
@@ -150,20 +166,30 @@ class TicketDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTab(String text, bool isSelected) {
+  Widget _buildTab(BuildContext context, String text, bool isSelected) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: isSelected
             ? AppTheme.orange
-            : AppTheme.white, // Colors.transparent or white
+            : (Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withOpacity(0.05)
+                  : AppTheme.white),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white12
+              : Colors.grey.shade300,
+        ),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: isSelected ? AppTheme.white : Colors.grey[600],
+          color: isSelected
+              ? AppTheme.white
+              : (Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white70
+                    : Colors.grey[600]),
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -171,6 +197,7 @@ class TicketDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildDetailRow(
+    BuildContext context,
     String label,
     String value, {
     bool isStatus = false,
@@ -185,8 +212,8 @@ class TicketDetailsScreen extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(
-                color: Colors.black87,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
               ),
@@ -204,7 +231,9 @@ class TicketDetailsScreen extends StatelessWidget {
                         width: 80,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          color: Colors.grey[200],
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white.withOpacity(0.05)
+                              : Colors.grey[200],
                           height: 60,
                           width: 80,
                           child: const Icon(Icons.broken_image),
@@ -217,8 +246,9 @@ class TicketDetailsScreen extends StatelessWidget {
                     style: TextStyle(
                       color: isStatus
                           ? AppTheme.lightPrimary
-                          : Colors
-                                .black54, // Status color logic can be improved
+                          : Theme.of(context).colorScheme.onSurface.withOpacity(
+                              0.7,
+                            ), // Status color logic can be improved
                       fontWeight: isStatus
                           ? FontWeight.bold
                           : FontWeight.normal,

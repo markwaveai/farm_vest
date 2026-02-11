@@ -58,16 +58,24 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
     }).toList();
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           widget.ticketType == 'VACCINATION'
               ? "Vaccination Tickets"
               : "Health Tickets",
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        elevation: 0,
       ),
       body: Column(
         children: [
@@ -78,7 +86,12 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
                 : healthState.error != null
                 ? Center(child: Text('Error: ${healthState.error}'))
                 : filteredTickets.isEmpty
-                ? const Center(child: Text("No health tickets found"))
+                ? Center(
+                    child: Text(
+                      "No health tickets found",
+                      style: TextStyle(color: Theme.of(context).hintColor),
+                    ),
+                  )
                 : RefreshIndicator(
                     onRefresh: () =>
                         ref.read(doctorsProvider.notifier).fetchTickets(),
@@ -191,7 +204,11 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 18),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? AppTheme.darkPrimary : AppTheme.white,
+                color: isSelected
+                    ? AppTheme.darkPrimary
+                    : (Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.05)
+                          : AppTheme.white),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppTheme.darkPrimary),
               ),

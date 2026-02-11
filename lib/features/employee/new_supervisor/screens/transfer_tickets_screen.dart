@@ -70,16 +70,25 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/supervisor-dashboard'),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          onPressed: () => context.go('/doctor-dashboard'),
         ),
-        title: const Text('Transfer Tickets'),
+        title: Text(
+          'Transfer Tickets',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        elevation: 0,
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppTheme.primary,
-          unselectedLabelColor: Colors.grey,
+          unselectedLabelColor: Theme.of(context).hintColor,
           indicatorColor: AppTheme.primary,
           tabs: [
             Tab(
@@ -135,14 +144,17 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
             Icon(
               isOut ? Icons.outbox_outlined : Icons.inbox_outlined,
               size: 64,
-              color: Colors.grey.shade400,
+              color: Theme.of(context).hintColor,
             ),
             const SizedBox(height: 16),
             Text(
               isOut
                   ? 'No outgoing transfer requests'
                   : 'No incoming transfer requests',
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+              style: TextStyle(
+                color: Theme.of(context).hintColor,
+                fontSize: 16,
+              ),
             ),
           ],
         ),
@@ -187,6 +199,7 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -206,9 +219,10 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
                     const SizedBox(width: 8),
                     Text(
                       animalTag,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -244,13 +258,16 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
                       Text(
                         'From',
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context).hintColor,
                           fontSize: 12,
                         ),
                       ),
                       Text(
                         sourceShed,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ],
                   ),
@@ -263,13 +280,16 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
                       Text(
                         'To',
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context).hintColor,
                           fontSize: 12,
                         ),
                       ),
                       Text(
                         destShed,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ],
                   ),
@@ -280,7 +300,11 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
               const SizedBox(height: 12),
               Text(
                 description,
-                style: TextStyle(color: Colors.grey.shade700),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.8),
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -291,7 +315,10 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
               children: [
                 Text(
                   _formatDate(createdAt),
-                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  style: TextStyle(
+                    color: Theme.of(context).hintColor,
+                    fontSize: 12,
+                  ),
                 ),
                 if (status == 'APPROVED' && !isOut)
                   CustomActionButton(
@@ -334,6 +361,7 @@ class _TransferTicketsScreenState extends ConsumerState<TransferTicketsScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      backgroundColor: Theme.of(context).cardColor,
       builder: (context) => const _CreateTransferSheet(),
     ).then((_) => _loadTransfers());
   }
@@ -402,9 +430,9 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
         .animalSuggestions;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         left: 24,
@@ -421,22 +449,28 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Create Transfer Request',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1C1E),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 IconButton(
                   icon: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white12
+                          : Colors.grey.shade100,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close, size: 20),
+                    child: Icon(
+                      Icons.close,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -489,14 +523,18 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
                 }
               },
 
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: 'Search by RFID or Ear Tag',
-                prefixIcon: const Icon(
+                hintStyle: TextStyle(color: Theme.of(context).hintColor),
+                prefixIcon: Icon(
                   Icons.search_rounded,
-                  color: Colors.grey,
+                  color: Theme.of(context).hintColor,
                 ),
                 filled: true,
-                fillColor: const Color(0xFFF8F9FA),
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withOpacity(0.05)
+                    : const Color(0xFFF8F9FA),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 14,
@@ -507,7 +545,11 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white12
+                        : Colors.grey.shade200,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -525,9 +567,13 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
                 margin: const EdgeInsets.only(top: 8),
                 constraints: const BoxConstraints(maxHeight: 200),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white12
+                        : Colors.grey.shade200,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -557,9 +603,15 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
                       ),
                       title: Text(
                         tag,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
-                      subtitle: Text('Shed: ${animal.shedName ?? 'N/A'}'),
+                      subtitle: Text(
+                        'Shed: ${animal.shedName ?? 'N/A'}',
+                        style: TextStyle(color: Theme.of(context).hintColor),
+                      ),
                       onTap: () {
                         setState(() {
                           _selectedAnimalId = animal.animalId;
@@ -590,18 +642,33 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
             TextField(
               controller: _outController,
               readOnly: true,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: 'Select an animal first',
-                hintStyle: TextStyle(color: Colors.grey.shade400),
+                hintStyle: TextStyle(color: Theme.of(context).hintColor),
                 filled: true,
-                fillColor: const Color(0xFFF8F9FA),
-                prefixIcon: const Icon(
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withOpacity(0.05)
+                    : const Color(0xFFF8F9FA),
+                prefixIcon: Icon(
                   Icons.location_on_rounded,
-                  color: Colors.grey,
+                  color: Theme.of(context).hintColor,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white12
+                        : Colors.grey.shade200,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white12
+                        : Colors.grey.shade200,
+                  ),
                 ),
               ),
             ),
@@ -615,15 +682,28 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
                 : Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8F9FA),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.05)
+                          : const Color(0xFFF8F9FA),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white12
+                            : Colors.grey.shade200,
+                      ),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<int>(
                         isExpanded: true,
                         value: _selectedShedId,
-                        hint: const Text('Select target shed'),
+                        dropdownColor: Theme.of(context).cardColor,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        hint: Text(
+                          'Select target shed',
+                          style: TextStyle(color: Theme.of(context).hintColor),
+                        ),
                         icon: const Icon(Icons.keyboard_arrow_down_rounded),
                         borderRadius: BorderRadius.circular(12),
                         items: _sheds
@@ -635,6 +715,11 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
                                 value: shed['id'] as int,
                                 child: Text(
                                   shed['shed_name'] ?? 'Shed ${shed['id']}',
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
+                                  ),
                                 ),
                               );
                             })
@@ -650,18 +735,33 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FA),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withOpacity(0.05)
+                    : const Color(0xFFF8F9FA),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white12
+                      : Colors.grey.shade200,
+                ),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   isExpanded: true,
                   value: _priority,
+                  dropdownColor: Theme.of(context).cardColor,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                   items: TicketPriority.values.map((p) {
                     return DropdownMenuItem<String>(
                       value: p.value,
-                      child: Text(p.label),
+                      child: Text(
+                        p.label,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
                     );
                   }).toList(),
 
@@ -678,19 +778,26 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
               controller: _reasonController,
               focusNode: _reasonFocusNode,
               maxLines: 3,
-
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Describe why this animal is being moved...',
+                hintStyle: TextStyle(color: Theme.of(context).hintColor),
                 filled: true,
-                fillColor: const Color(0xFFF8F9FA),
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withOpacity(0.05)
+                    : const Color(0xFFF8F9FA),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white12
+                        : Colors.grey.shade200,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -749,10 +856,10 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
   Widget _buildSectionLabel(String text) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: Color(0xFF5F6368),
+        color: Theme.of(context).hintColor,
       ),
     );
   }
@@ -771,10 +878,18 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.08) : const Color(0xFFF8F9FA),
+          color: isSelected
+              ? color.withOpacity(0.08)
+              : (Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withOpacity(0.05)
+                    : const Color(0xFFF8F9FA)),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? color : Colors.grey.shade200,
+            color: isSelected
+                ? color
+                : (Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white12
+                      : Colors.grey.shade200),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -783,14 +898,14 @@ class _CreateTransferSheetState extends ConsumerState<_CreateTransferSheet> {
           children: [
             Icon(
               icon,
-              color: isSelected ? color : Colors.grey.shade600,
+              color: isSelected ? color : Theme.of(context).hintColor,
               size: 18,
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? color : Colors.grey.shade600,
+                color: isSelected ? color : Theme.of(context).hintColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
