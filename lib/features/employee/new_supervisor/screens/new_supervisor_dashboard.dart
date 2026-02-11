@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:farm_vest/features/auth/presentation/widgets/profile_menu_drawer.dart';
 import 'package:shimmer/shimmer.dart';
 
 class NewSupervisorDashboard extends ConsumerWidget {
@@ -28,8 +29,11 @@ class NewSupervisorDashboard extends ConsumerWidget {
     final displayName = user?.firstName ?? "Supervisor";
 
     return Scaffold(
-      backgroundColor: AppTheme.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      drawer: const ProfileMenuDrawer(),
       appBar: AppBar(
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         toolbarHeight: screenWidth * 0.22,
         centerTitle: false,
         leading: Builder(
@@ -46,6 +50,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
               style: TextStyle(
                 fontSize: screenWidth * 0.05,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -53,7 +58,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
               "$farmName • $shedName",
               style: TextStyle(
                 fontSize: screenWidth * 0.035,
-                color: AppTheme.black,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -61,7 +66,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
               "Location: $farmLocation",
               style: TextStyle(
                 fontSize: screenWidth * 0.03,
-                color: AppTheme.slate,
+                color: Theme.of(context).hintColor,
               ),
             ),
           ],
@@ -193,6 +198,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: screenWidth * 0.045,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -219,6 +225,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: screenWidth * 0.045,
                       fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -340,8 +347,12 @@ class NewSupervisorDashboard extends ConsumerWidget {
           ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.03),
           Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[800]!
+                : Colors.grey[300]!,
+            highlightColor: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[700]!
+                : Colors.grey[100]!,
             child: Container(
               height: 10,
               width: MediaQuery.of(context).size.width - 10,
@@ -389,12 +400,15 @@ class NewSupervisorDashboard extends ConsumerWidget {
           style: TextStyle(
             fontSize: subtitleFontSize,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           title,
-          style: TextStyle(fontSize: titleFontSize, color: Colors.grey),
+          style: TextStyle(
+            fontSize: titleFontSize,
+            color: Theme.of(context).hintColor,
+          ),
         ),
       ],
     );
@@ -428,7 +442,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
           style: TextStyle(
             fontSize: textSize,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
@@ -453,14 +467,18 @@ class NewSupervisorDashboard extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Switch Active Role',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Choose which portal you want to access',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: Theme.of(context).hintColor),
               ),
               const SizedBox(height: 24),
               ...availableRoles.map((role) {
@@ -502,7 +520,9 @@ class NewSupervisorDashboard extends ConsumerWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: isSelected ? role.color : Colors.grey.shade200,
+                        color: isSelected
+                            ? role.color
+                            : Theme.of(context).dividerColor,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -514,6 +534,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
                     title: Text(
                       role.label,
                       style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -544,7 +565,7 @@ class NewSupervisorDashboard extends ConsumerWidget {
       width: 140,
       margin: const EdgeInsets.only(right: 12),
       child: Material(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         elevation: 1,
         child: InkWell(
@@ -568,7 +589,11 @@ class NewSupervisorDashboard extends ConsumerWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.errorRed.withOpacity(0.3)),
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).dividerColor
+                    : AppTheme.errorRed.withOpacity(0.3),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -595,16 +620,20 @@ class NewSupervisorDashboard extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   rfid,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   investor,
-                  style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Theme.of(context).hintColor,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

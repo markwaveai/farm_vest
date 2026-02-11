@@ -147,13 +147,11 @@ class AuthController extends Notifier<AuthState> {
       final loginResponse = await _repository.loginWithOtp(mobileNumber, otp);
       await _repository.saveToken(loginResponse.accessToken);
 
-      final availableRoles = loginResponse.roles
-          .map((r) => UserType.fromString(r))
-          .toList();
+      final availableRoles = loginResponse.roles.isNotEmpty
+          ? loginResponse.roles.map((r) => UserType.fromString(r)).toList()
+          : [UserType.customer];
 
-      final role = availableRoles.isNotEmpty
-          ? availableRoles.first
-          : UserType.customer;
+      final role = availableRoles.first;
 
       state = state.copyWith(
         isLoading: false,

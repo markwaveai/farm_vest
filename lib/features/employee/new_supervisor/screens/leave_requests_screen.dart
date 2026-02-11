@@ -8,7 +8,8 @@ class LeaveRequestsScreen extends ConsumerStatefulWidget {
   const LeaveRequestsScreen({super.key});
 
   @override
-  ConsumerState<LeaveRequestsScreen> createState() => _LeaveRequestsScreenState();
+  ConsumerState<LeaveRequestsScreen> createState() =>
+      _LeaveRequestsScreenState();
 }
 
 class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
@@ -16,7 +17,9 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
   void initState() {
     super.initState();
     // Fetch leave requests when the screen is first initialized
-    Future.microtask(() => ref.read(leaveRequestProvider.notifier).getLeaveRequests());
+    Future.microtask(
+      () => ref.read(leaveRequestProvider.notifier).getLeaveRequests(),
+    );
   }
 
   Color _getStatusColor(String status) {
@@ -33,7 +36,10 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
     }
   }
 
-  void _showLeaveRequestDetails(BuildContext context, LeaveRequest leaveRequest) {
+  void _showLeaveRequestDetails(
+    BuildContext context,
+    LeaveRequest leaveRequest,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -43,11 +49,19 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('Status: ${leaveRequest.status}', style: TextStyle(color: _getStatusColor(leaveRequest.status), fontWeight: FontWeight.bold)),
+                Text(
+                  'Status: ${leaveRequest.status}',
+                  style: TextStyle(
+                    color: _getStatusColor(leaveRequest.status),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Text('Leave Type: ${leaveRequest.leaveType}'),
                 const SizedBox(height: 8),
-                Text('From: ${leaveRequest.startDate} To: ${leaveRequest.endDate}'),
+                Text(
+                  'From: ${leaveRequest.startDate} To: ${leaveRequest.endDate}',
+                ),
                 const SizedBox(height: 8),
                 const Text('Reason:'),
                 Text(leaveRequest.reason),
@@ -57,10 +71,15 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
           actions: <Widget>[
             if (leaveRequest.status == 'PENDING')
               TextButton(
-                child: const Text('Cancel Request', style: TextStyle(color: Colors.red)),
+                child: const Text(
+                  'Cancel Request',
+                  style: TextStyle(color: Colors.red),
+                ),
                 onPressed: () {
-                   ref.read(leaveRequestProvider.notifier).cancelLeaveRequest(leaveRequest.id);
-                   Navigator.of(context).pop();
+                  ref
+                      .read(leaveRequestProvider.notifier)
+                      .cancelLeaveRequest(leaveRequest.id);
+                  Navigator.of(context).pop();
                 },
               ),
             TextButton(
@@ -80,49 +99,70 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
     final leaveRequestState = ref.watch(leaveRequestProvider);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Leave Requests'),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        title: Text(
+          'Leave Requests',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => context.go('/supervisor-dashboard'),
         ),
       ),
       body: leaveRequestState.isLoading
           ? const Center(child: CircularProgressIndicator())
           : leaveRequestState.error != null
-              ? Center(child: Text(leaveRequestState.error!))
-              : RefreshIndicator(
-                  onRefresh: () => ref.read(leaveRequestProvider.notifier).getLeaveRequests(),
-                  child: ListView.builder(
-                    itemCount: leaveRequestState.leaveRequests.length,
-                    itemBuilder: (context, index) {
-                      final leaveRequest = leaveRequestState.leaveRequests[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+          ? Center(child: Text(leaveRequestState.error!))
+          : RefreshIndicator(
+              onRefresh: () =>
+                  ref.read(leaveRequestProvider.notifier).getLeaveRequests(),
+              child: ListView.builder(
+                itemCount: leaveRequestState.leaveRequests.length,
+                itemBuilder: (context, index) {
+                  final leaveRequest = leaveRequestState.leaveRequests[index];
+                  return Card(
+                    color: Theme.of(context).cardColor,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        '${leaveRequest.leaveType} Leave',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
-                        child: ListTile(
-                          title: Text('${leaveRequest.leaveType} Leave'),
-                          subtitle: Text(
-                              '${leaveRequest.startDate} to ${leaveRequest.endDate}'),
-                          trailing: Text(
-                            leaveRequest.status,
-                            style: TextStyle(color: _getStatusColor(leaveRequest.status), fontWeight: FontWeight.bold),
-                          ),
-                          onTap: () {
-                            _showLeaveRequestDetails(context, leaveRequest);
-                          },
+                      ),
+                      subtitle: Text(
+                        '${leaveRequest.startDate} to ${leaveRequest.endDate}',
+                        style: TextStyle(color: Theme.of(context).hintColor),
+                      ),
+                      trailing: Text(
+                        leaveRequest.status,
+                        style: TextStyle(
+                          color: _getStatusColor(leaveRequest.status),
+                          fontWeight: FontWeight.bold,
                         ),
-                      );
-                    },
-                  ),
-      ),
+                      ),
+                      onTap: () {
+                        _showLeaveRequestDetails(context, leaveRequest);
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).primaryColor,
         onPressed: () {
           context.push('/create-leave-request');
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

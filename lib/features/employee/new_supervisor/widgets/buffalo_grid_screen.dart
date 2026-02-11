@@ -1,4 +1,3 @@
-import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,10 +17,8 @@ class _BuffaloGridScreenState extends ConsumerState<BuffaloGridScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.beige,
-      appBar: AppBar(
-        title: const Text('Buffalo Shed A'),
-      ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(title: const Text('Buffalo Shed A')),
       body: GridView.builder(
         padding: const EdgeInsets.all(8.0),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -49,7 +46,9 @@ class _BuffaloGridScreenState extends ConsumerState<BuffaloGridScreen> {
                 : null,
             child: Card(
               elevation: 2.0,
-              color: isEnabled ? Colors.white : Colors.grey[300],
+              color: isEnabled
+                  ? Theme.of(context).cardColor
+                  : Theme.of(context).disabledColor.withOpacity(0.1),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -58,14 +57,18 @@ class _BuffaloGridScreenState extends ConsumerState<BuffaloGridScreen> {
                       "assets/icons/buf_icon.png", // Placeholder for buffalo icon
                       width: 45,
                       height: 45,
-                      color: isEnabled ? AppTheme.primary : Colors.grey,
+                      color: isEnabled
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).disabledColor,
                     ),
                     const SizedBox(height: 8.0),
                     Text(
                       location,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: isEnabled ? Colors.black87 : Colors.grey,
+                        color: isEnabled
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context).disabledColor,
                       ),
                     ),
                   ],

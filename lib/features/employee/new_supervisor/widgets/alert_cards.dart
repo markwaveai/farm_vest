@@ -8,8 +8,6 @@ class AlertCardDivided extends StatelessWidget {
   final String actionText;
   final Color headerColor;
 
-  
-
   const AlertCardDivided({
     super.key,
     required this.title,
@@ -25,19 +23,18 @@ class AlertCardDivided extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(0, 3),
-          )
+          ),
         ],
       ),
       child: Column(
         children: [
-
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -70,10 +67,7 @@ class AlertCardDivided extends StatelessWidget {
                 ),
                 Text(
                   time,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
             ),
@@ -83,15 +77,14 @@ class AlertCardDivided extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: Row(
               children: [
-                Icon(Icons.warning_rounded,
-                    color: headerColor, size: 20),
+                Icon(Icons.warning_rounded, color: headerColor, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey,
+                      color: Theme.of(context).hintColor,
                     ),
                   ),
                 ),
@@ -101,18 +94,17 @@ class AlertCardDivided extends StatelessWidget {
 
           const Divider(height: 1),
 
-          
           Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             child: Row(
               children: [
-                Icon(Icons.badge_outlined,
-                    size: 18, color: headerColor),
+                Icon(Icons.badge_outlined, size: 18, color: headerColor),
                 const SizedBox(width: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(color: headerColor),
                     borderRadius: BorderRadius.circular(16),
@@ -135,10 +127,7 @@ class AlertCardDivided extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {},
-                  child: Text(
-                    actionText,
-                    style: const TextStyle(fontSize: 12),
-                  ),
+                  child: Text(actionText, style: const TextStyle(fontSize: 12)),
                 ),
               ],
             ),

@@ -36,7 +36,7 @@ class _CreateLeaveRequestScreenState
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             context.pop();
-          }
+          },
         ),
       ),
       body: Padding(
@@ -68,8 +68,10 @@ class _CreateLeaveRequestScreenState
                           labelText: 'Start Date',
                           border: OutlineInputBorder(),
                         ),
-                        child: Text(_startDate?.toLocal().toString().split(' ')[0] ??
-                            'Select date'),
+                        child: Text(
+                          _startDate?.toLocal().toString().split(' ')[0] ??
+                              'Select date',
+                        ),
                       ),
                     ),
                   ),
@@ -94,8 +96,10 @@ class _CreateLeaveRequestScreenState
                           labelText: 'End Date',
                           border: OutlineInputBorder(),
                         ),
-                        child: Text(_endDate?.toLocal().toString().split(' ')[0] ??
-                            'Select date'),
+                        child: Text(
+                          _endDate?.toLocal().toString().split(' ')[0] ??
+                              'Select date',
+                        ),
                       ),
                     ),
                   ),
@@ -110,12 +114,22 @@ class _CreateLeaveRequestScreenState
                   border: OutlineInputBorder(),
                 ),
                 value: _leaveType,
-                items: ['CASUAL', 'SICK', 'ANNUAL', 'MATERNITY', 'PATERNITY', 'UNPAID']
-                    .map((label) => DropdownMenuItem(
-                          value: label,
-                          child: Text(label),
-                        ))
-                    .toList(),
+                items:
+                    [
+                          'CASUAL',
+                          'SICK',
+                          'ANNUAL',
+                          'MATERNITY',
+                          'PATERNITY',
+                          'UNPAID',
+                        ]
+                        .map(
+                          (label) => DropdownMenuItem(
+                            value: label,
+                            child: Text(label),
+                          ),
+                        )
+                        .toList(),
                 onChanged: (value) {
                   setState(() {
                     _leaveType = value;
@@ -135,8 +149,9 @@ class _CreateLeaveRequestScreenState
                   alignLabelWithHint: true,
                 ),
                 maxLines: 4,
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Please enter a reason' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please enter a reason'
+                    : null,
               ),
               const SizedBox(height: 24),
 
@@ -154,13 +169,18 @@ class _CreateLeaveRequestScreenState
                         );
                     if (response != null && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Leave request created successfully'),
-                          backgroundColor: Colors.green,
+                        SnackBar(
+                          content: const Text(
+                            'Leave request created successfully',
+                          ),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.secondary,
                         ),
                       );
                       context.pop();
-                    } else if (leaveRequestState.error != null && context.mounted) {
+                    } else if (leaveRequestState.error != null &&
+                        context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(leaveRequestState.error!),
@@ -174,7 +194,9 @@ class _CreateLeaveRequestScreenState
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: leaveRequestState.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      )
                     : const Text('Submit Request'),
               ),
             ],

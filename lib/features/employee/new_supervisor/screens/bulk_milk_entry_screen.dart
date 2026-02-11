@@ -69,11 +69,16 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
     final animalsAsync = ref.watch(supervisorAnimalsProvider);
 
     return Scaffold(
-      backgroundColor: AppTheme.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.white,
-        title: const Text('Milk Entry', style: TextStyle(color: Colors.black)),
-        iconTheme: const IconThemeData(color: Colors.black),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        title: Text(
+          'Milk Entry',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
+        iconTheme: IconThemeData(
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
         elevation: 0,
       ),
       body: animalsAsync.when(
@@ -142,7 +147,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
         : '${DateFormat('dd MMM').format(_selectedDateRange!.start)} - ${DateFormat('dd MMM').format(_selectedDateRange!.end)} (+${dates.length - 1} days)';
 
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -203,9 +208,9 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
           // Toggle Mode
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Theme.of(context).dividerColor.withOpacity(0.05),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
+              border: Border.all(color: Theme.of(context).dividerColor),
             ),
             child: Row(
               children: [
@@ -226,7 +231,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                         style: TextStyle(
                           color: !_isDistributedMode
                               ? Colors.white
-                              : Colors.black,
+                              : Theme.of(context).colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -250,7 +255,9 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                         style: TextStyle(
                           color: _isDistributedMode
                               ? Colors.white
-                              : Colors.black, // Fixed color logic
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.onSurface, // Fixed color logic
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -283,22 +290,30 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
         children: [
           const Icon(Icons.hub, size: 48, color: Colors.orange),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             "Enter Total Shed Production",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             "This will be distributed equally among $count animals.\nAvg: ${_calculateAvg(count)} L/animal",
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.grey),
+            style: TextStyle(color: Theme.of(context).hintColor),
           ),
           const SizedBox(height: 24),
           TextField(
             controller: _totalShedController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             decoration: const InputDecoration(
               suffixText: 'Liters',
               border: OutlineInputBorder(),
@@ -338,6 +353,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
 
         return Card(
           elevation: 2,
+          color: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -367,14 +383,18 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                     children: [
                       Text(
                         "ID: $displayId",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       Text(
                         breed,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).hintColor,
+                        ),
                       ),
                     ],
                   ),
@@ -409,8 +429,8 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
   Widget _buildSubmitButton(List<InvestorAnimal> animals) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
             blurRadius: 4,
