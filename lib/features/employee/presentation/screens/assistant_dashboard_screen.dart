@@ -178,7 +178,10 @@ class _AssistantDashboardScreenState
                 padding: const EdgeInsets.all(AppConstants.spacingL),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppTheme.primary, AppTheme.secondary],
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      AppTheme.secondary,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -214,7 +217,10 @@ class _AssistantDashboardScreenState
               const SizedBox(height: AppConstants.spacingL),
 
               // Quick Actions
-              const Text('Quick Actions', style: AppTheme.headingMedium),
+              Text(
+                'Quick Actions',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: AppConstants.spacingM),
 
               GridView.count(
@@ -229,7 +235,7 @@ class _AssistantDashboardScreenState
                     title: 'Assigned Tasks',
                     subtitle: 'View your tasks',
                     icon: Icons.assignment,
-                    color: AppTheme.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     onTap: () => _showAssignedTasks(),
                   ),
                   EmployeeDashboardCard(
@@ -261,9 +267,9 @@ class _AssistantDashboardScreenState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Today\'s Assigned Tasks',
-                    style: AppTheme.headingMedium,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   TextButton(
                     onPressed: () => _showAssignedTasks(),
@@ -285,9 +291,9 @@ class _AssistantDashboardScreenState
               const SizedBox(height: AppConstants.spacingL),
 
               // Recent Monitoring Records
-              const Text(
+              Text(
                 'Recent Monitoring Records',
-                style: AppTheme.headingMedium,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: AppConstants.spacingM),
 
@@ -431,7 +437,7 @@ class _AssistantDashboardScreenState
         statusColor = AppTheme.warningOrange;
         break;
       case 'in progress':
-        statusColor = AppTheme.primary;
+        statusColor = Theme.of(context).colorScheme.primary;
         break;
       case 'completed':
         statusColor = AppTheme.successGreen;
@@ -494,9 +500,9 @@ class _AssistantDashboardScreenState
                 const Spacer(),
                 Text(
                   task.taskId,
-                  style: AppTheme.bodySmall.copyWith(
-                    color: AppTheme.mediumGrey,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppTheme.mediumGrey),
                 ),
               ],
             ),
@@ -504,14 +510,16 @@ class _AssistantDashboardScreenState
 
             Text(
               '${task.buffaloId} - ${task.taskType}',
-              style: AppTheme.headingSmall.copyWith(fontSize: 16),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontSize: 16),
             ),
             const SizedBox(height: AppConstants.spacingS),
 
             if (task.instructions != null) ...[
               Text(
                 task.instructions!,
-                style: AppTheme.bodySmall,
+                style: Theme.of(context).textTheme.bodySmall,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -528,9 +536,9 @@ class _AssistantDashboardScreenState
                 const SizedBox(width: AppConstants.spacingXS),
                 Text(
                   task.assignedBy,
-                  style: AppTheme.bodySmall.copyWith(
-                    color: AppTheme.mediumGrey,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppTheme.mediumGrey),
                 ),
                 const SizedBox(width: AppConstants.spacingM),
                 Icon(
@@ -541,7 +549,7 @@ class _AssistantDashboardScreenState
                 const SizedBox(width: AppConstants.spacingXS),
                 Text(
                   'Due: ${DateFormat('MMM dd, hh:mm a').format(task.deadline)}',
-                  style: AppTheme.bodySmall.copyWith(
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: isOverdue ? AppTheme.errorRed : AppTheme.mediumGrey,
                   ),
                 ),
@@ -586,14 +594,16 @@ class _AssistantDashboardScreenState
               children: [
                 Text(
                   record.buffaloId,
-                  style: AppTheme.headingSmall.copyWith(fontSize: 16),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(fontSize: 16),
                 ),
                 const Spacer(),
                 Text(
                   DateFormat('MMM dd, hh:mm a').format(record.recordedAt),
-                  style: AppTheme.bodySmall.copyWith(
-                    color: AppTheme.mediumGrey,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppTheme.mediumGrey),
                 ),
               ],
             ),
@@ -616,7 +626,7 @@ class _AssistantDashboardScreenState
                     'Eating',
                     record.eatingStatus,
                     Icons.restaurant,
-                    AppTheme.primary,
+                    Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 Expanded(
@@ -649,12 +659,12 @@ class _AssistantDashboardScreenState
         const SizedBox(height: AppConstants.spacingS),
         Text(
           value,
-          style: AppTheme.bodyMedium.copyWith(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: color,
           ),
         ),
-        Text(label, style: AppTheme.bodySmall),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
@@ -668,7 +678,10 @@ class _AssistantDashboardScreenState
         padding: const EdgeInsets.all(AppConstants.spacingL),
         child: Column(
           children: [
-            const Text('Assigned Tasks', style: AppTheme.headingMedium),
+            Text(
+              'Assigned Tasks',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: AppConstants.spacingL),
             Expanded(
               child: ListView.builder(
@@ -770,7 +783,10 @@ class _AssistantDashboardScreenState
             ),
             const SizedBox(height: AppConstants.spacingM),
             if (task.instructions != null) ...[
-              const Text('Instructions:', style: AppTheme.bodyMedium),
+              Text(
+                'Instructions:',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: AppConstants.spacingS),
               Text(task.instructions!),
             ],

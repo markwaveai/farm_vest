@@ -42,7 +42,9 @@ class EmployeeDashboardCard extends StatelessWidget {
               const SizedBox(height: AppConstants.spacingM),
               Text(
                 title,
-                style: AppTheme.headingSmall.copyWith(fontSize: 10),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontSize: 10),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -50,7 +52,9 @@ class EmployeeDashboardCard extends StatelessWidget {
               const SizedBox(height: AppConstants.spacingS),
               Text(
                 subtitle,
-                style: AppTheme.bodySmall.copyWith(color: AppTheme.mediumGrey),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppTheme.mediumGrey),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

@@ -154,6 +154,21 @@ class AppTheme {
         onSecondary: white,
         onSurface: dark,
       ),
+      textTheme: const TextTheme(
+        displayLarge: headingLarge,
+        displayMedium: headingMedium,
+        displaySmall: headingSmall,
+        headlineLarge: headingLarge,
+        headlineMedium: headingMedium,
+        headlineSmall: headingSmall,
+        titleLarge: headingLarge,
+        titleMedium: headingMedium,
+        titleSmall: headingSmall,
+        bodyLarge: bodyLarge,
+        bodyMedium: bodyMedium,
+        bodySmall: bodySmall,
+        labelLarge: buttonText,
+      ),
       // Custom extensions could go here
     );
   }
@@ -182,16 +197,20 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       iconTheme: const IconThemeData(color: white),
-      textTheme: const TextTheme(
-        // We override text styles for dark mode manually or let Flutter adapt
-        // But AppTheme.* constants are static, so widgets using them directly won't update automatically
-        // unless they use Theme.of(context).textTheme...
-        // For now, let's at least set the defaults
-        titleLarge: TextStyle(color: white, fontWeight: FontWeight.bold),
-        titleMedium: TextStyle(color: white),
-        bodyLarge: TextStyle(color: white),
-        bodyMedium: TextStyle(color: Color(0xFFB0BEC5)), // Lighter slate
-        bodySmall: TextStyle(color: Colors.grey),
+      textTheme: TextTheme(
+        displayLarge: headingLarge.copyWith(color: white),
+        displayMedium: headingMedium.copyWith(color: white),
+        displaySmall: headingSmall.copyWith(color: white),
+        headlineLarge: headingLarge.copyWith(color: white),
+        headlineMedium: headingMedium.copyWith(color: white),
+        headlineSmall: headingSmall.copyWith(color: white),
+        titleLarge: headingLarge.copyWith(color: white),
+        titleMedium: headingMedium.copyWith(color: white),
+        titleSmall: headingSmall.copyWith(color: white),
+        bodyLarge: bodyLarge.copyWith(color: white),
+        bodyMedium: bodyMedium.copyWith(color: Color(0xFFB0BEC5)),
+        bodySmall: bodySmall.copyWith(color: Colors.grey),
+        labelLarge: buttonText.copyWith(color: white),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
