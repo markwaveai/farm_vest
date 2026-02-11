@@ -87,17 +87,11 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
         ),
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back_ios_new,
-            size: 18,
+            Icons.menu,
             color: Theme.of(context).colorScheme.onSurface,
           ),
-          onPressed: () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.pop(context);
-            } else {
-              context.go('/admin-dashboard');
-            }
-          },
+
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
 
         actions: [
@@ -110,14 +104,6 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
               ),
               tooltip: 'Switch Role',
             ),
-          IconButton(
-            icon: Icon(
-              Icons.menu,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
         ],
       ),
       body: RefreshIndicator(
@@ -424,6 +410,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
