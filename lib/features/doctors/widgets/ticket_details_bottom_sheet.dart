@@ -21,9 +21,9 @@ class TicketDetailsBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -38,7 +38,9 @@ class TicketDetailsBottomSheet extends StatelessWidget {
               height: 5,
               width: 50,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white12
+                    : Colors.grey[200],
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -49,13 +51,13 @@ class TicketDetailsBottomSheet extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Ticket Information',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
-                    color: AppTheme.black,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 _statusBadge(ticket.status),
@@ -64,7 +66,12 @@ class TicketDetailsBottomSheet extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
-          const Divider(height: 1),
+          Divider(
+            height: 1,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white12
+                : Colors.grey[200],
+          ),
 
           Flexible(
             child: SingleChildScrollView(
@@ -93,17 +100,17 @@ class TicketDetailsBottomSheet extends StatelessWidget {
                         children: [
                           Text(
                             ticket.animalId ?? 'Unknown Animal',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           Text(
                             'RFID: ${ticket.rfid ?? 'N/A'}',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[600],
+                              color: Theme.of(context).hintColor,
                             ),
                           ),
                         ],
@@ -117,12 +124,12 @@ class TicketDetailsBottomSheet extends StatelessWidget {
 
                   const SizedBox(height: 28),
 
-                  const Text(
+                  Text(
                     'Reason for Request',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -130,28 +137,36 @@ class TicketDetailsBottomSheet extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.05)
+                          : Colors.grey[50],
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[200]!),
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white12
+                            : Colors.grey[200]!,
+                      ),
                     ),
                     child: Text(
                       ticket.description,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         height: 1.5,
-                        color: Colors.black87,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.8),
                       ),
                     ),
                   ),
 
                   const SizedBox(height: 28),
 
-                  const Text(
+                  Text(
                     'Evidence Photo',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -166,9 +181,16 @@ class TicketDetailsBottomSheet extends StatelessWidget {
                         height: 180,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white.withOpacity(0.05)
+                              : Colors.grey[100],
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey[200]!),
+                          border: Border.all(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white12
+                                : Colors.grey[200]!,
+                          ),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -176,12 +198,14 @@ class TicketDetailsBottomSheet extends StatelessWidget {
                             Icon(
                               Icons.image_outlined,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: Theme.of(context).hintColor,
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'No Photo Available',
-                              style: TextStyle(color: Colors.grey[500]),
+                              style: TextStyle(
+                                color: Theme.of(context).hintColor,
+                              ),
                             ),
                           ],
                         ),
@@ -273,6 +297,7 @@ class TicketDetailsBottomSheet extends StatelessWidget {
           children: [
             Expanded(
               child: _infoItem(
+                context,
                 'Request Type',
                 ticket.ticketType,
                 Icons.category_outlined,
@@ -281,6 +306,7 @@ class TicketDetailsBottomSheet extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: _infoItem(
+                context,
                 'Requested By',
                 'Supervisor Shed 03',
                 Icons.person_outline,
@@ -293,6 +319,7 @@ class TicketDetailsBottomSheet extends StatelessWidget {
           children: [
             Expanded(
               child: _infoItem(
+                context,
                 'Date',
                 ticket.createdAt != null
                     ? DateFormat('MMM dd, yyyy').format(ticket.createdAt!)
@@ -303,6 +330,7 @@ class TicketDetailsBottomSheet extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: _infoItem(
+                context,
                 'Shed ID',
                 'Shed 03',
                 Icons.location_on_outlined,
@@ -314,19 +342,24 @@ class TicketDetailsBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _infoItem(String label, String value, IconData icon) {
+  Widget _infoItem(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(icon, size: 16, color: Colors.grey[600]),
+            Icon(icon, size: 16, color: Theme.of(context).hintColor),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey[600],
+                color: Theme.of(context).hintColor,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -335,10 +368,10 @@ class TicketDetailsBottomSheet extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: AppTheme.black,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

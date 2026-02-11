@@ -25,40 +25,68 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Treatment Details'),
-        backgroundColor: AppTheme.white,
-        foregroundColor: AppTheme.black,
+        title: Text(
+          'Treatment Details',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         elevation: 0,
-        actions: [IconButton(icon: const Icon(Icons.menu), onPressed: () {})],
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.menu,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Buffalo ID',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
-            _buildReadOnlyField('', widget.ticket.animalId ?? 'Unknown'),
+            _buildReadOnlyField(
+              context,
+              '',
+              widget.ticket.animalId ?? 'Unknown',
+            ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Shed Location',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
-            _buildReadOnlyField('', 'Shed 04'), // Mock or fetch
+            _buildReadOnlyField(context, '', 'Shed 04'), // Mock or fetch
 
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Current Vital Signs',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 12),
             _buildMetricInput(
+              context,
               'Body Temperature',
               '102.3',
               '°F',
@@ -66,24 +94,31 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
             ),
 
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Activity Level',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
               children: [
                 _buildRadioOption(
+                  context,
                   'Low',
                   'Low',
                   (val) => setState(() => _activityLevel = val!),
                 ),
                 _buildRadioOption(
+                  context,
                   'Normal',
                   'Normal',
                   (val) => setState(() => _activityLevel = val!),
                 ),
                 _buildRadioOption(
+                  context,
                   'HyperActive',
                   'HyperActive',
                   (val) => setState(() => _activityLevel = val!),
@@ -92,19 +127,37 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
             ),
 
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Notes',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _notesController,
               maxLines: 4,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: 'Enter treatment notes...',
+                hintStyle: TextStyle(color: Theme.of(context).hintColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white12
+                        : Colors.grey.shade300,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white12
+                        : Colors.grey.shade300,
+                  ),
                 ),
               ),
             ),
@@ -112,9 +165,9 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
             const SizedBox(height: 24),
             Row(
               children: [
-                _buildActionRadio('Quarantine', 'Quarantine'),
+                _buildActionRadio(context, 'Quarantine', 'Quarantine'),
                 const SizedBox(width: 20),
-                _buildActionRadio('Observation', 'Observation'),
+                _buildActionRadio(context, 'Observation', 'Observation'),
               ],
             ),
 
@@ -139,7 +192,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
     );
   }
 
-  Widget _buildReadOnlyField(String label, String value) {
+  Widget _buildReadOnlyField(BuildContext context, String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -154,13 +207,23 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.05)
+                : Colors.grey[100],
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white12
+                  : Colors.grey.shade200,
+            ),
           ),
           child: Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ),
       ],
@@ -168,6 +231,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
   }
 
   Widget _buildMetricInput(
+    BuildContext context,
     String label,
     String hint,
     String suffix,
@@ -178,20 +242,35 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.black87,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
             fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
           decoration: InputDecoration(
             hintText: hint,
+            hintStyle: TextStyle(color: Theme.of(context).hintColor),
             suffixText: suffix,
+            suffixStyle: TextStyle(color: Theme.of(context).hintColor),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white12
+                    : Colors.grey.shade300,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white12
+                    : Colors.grey.shade300,
+              ),
             ),
           ),
         ),
@@ -200,6 +279,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
   }
 
   Widget _buildRadioOption(
+    BuildContext context,
     String value,
     String label,
     ValueChanged<String?> onChanged,
@@ -213,13 +293,16 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
           activeColor: AppTheme.darkPrimary,
           visualDensity: VisualDensity.compact,
         ),
-        Text(label),
+        Text(
+          label,
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
         const SizedBox(width: 12),
       ],
     );
   }
 
-  Widget _buildActionRadio(String value, String label) {
+  Widget _buildActionRadio(BuildContext context, String value, String label) {
     return Row(
       children: [
         Radio<String>(
@@ -231,7 +314,10 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
           activeColor: AppTheme.darkPrimary,
           visualDensity: VisualDensity.compact,
         ),
-        Text(label),
+        Text(
+          label,
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
       ],
     );
   }
@@ -241,22 +327,29 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => Dialog(
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              decoration: const BoxDecoration(
-                color: AppTheme.darkPrimary,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withOpacity(0.05)
+                    : AppTheme.darkPrimary,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
               ),
               width: double.infinity,
-              child: const Text(
+              child: Text(
                 'HEALTH SUCCESSFULLY COMPLETED',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppTheme.white,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.onSurface
+                      : AppTheme.white,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -268,7 +361,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
                 children: [
                   Text(
                     'Date: ${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}',
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: TextStyle(color: Theme.of(context).hintColor),
                   ),
                   const SizedBox(height: 24),
                   ClipRRect(
@@ -281,20 +374,25 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
                       errorBuilder: (_, __, ___) => Container(
                         height: 100,
                         width: 140,
-                        color: Colors.grey[200],
-                        child: const Icon(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white.withOpacity(0.05)
+                            : Colors.grey[200],
+                        child: Icon(
                           Icons.pets,
                           size: 50,
-                          color: AppTheme.grey,
+                          color: Theme.of(context).hintColor,
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'Successfully submitted not buffalo treatment details.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: 32),
                   SizedBox(
@@ -315,13 +413,28 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
                         // Navigator.pop(context); // This would close the treatment screen
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.darkPrimary,
+                        backgroundColor:
+                            Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white.withOpacity(0.05)
+                            : AppTheme.darkPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
+                        side: BorderSide(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white12
+                              : Colors.transparent,
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text('Done'),
+                      child: Text(
+                        'Done',
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],

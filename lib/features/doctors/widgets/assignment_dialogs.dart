@@ -29,6 +29,7 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -63,15 +64,34 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
                   value: _selectedAssistant,
                   decoration: InputDecoration(
                     labelText: 'Assign to',
+                    labelStyle: TextStyle(color: Theme.of(context).hintColor),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white12
+                            : Colors.grey.shade300,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white12
+                            : Colors.grey.shade300,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                   ),
                   items: _assistants.map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value),
+                      child: Text(
+                        value,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
                     );
                   }).toList(),
                   onChanged: (newValue) {
@@ -79,6 +99,10 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
                       _selectedAssistant = newValue;
                     });
                   },
+                  dropdownColor: Theme.of(context).cardColor,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -141,15 +165,15 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[600],
+            color: Theme.of(context).hintColor,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
         ),
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.black87,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
@@ -172,6 +196,7 @@ class AssignmentSuccessDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -207,11 +232,13 @@ class AssignmentSuccessDialog extends StatelessWidget {
                     errorBuilder: (_, __, ___) => Container(
                       height: 120,
                       width: 120,
-                      color: Colors.grey[200],
-                      child: const Icon(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.05)
+                          : Colors.grey[200],
+                      child: Icon(
                         Icons.pets,
                         size: 50,
-                        color: Colors.grey,
+                        color: Theme.of(context).hintColor,
                       ),
                     ),
                   ),
@@ -220,7 +247,10 @@ class AssignmentSuccessDialog extends StatelessWidget {
                 Text(
                   '$ticketId Ticket has been successfully Assigned to $assignedTo',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 SizedBox(

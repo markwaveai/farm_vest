@@ -41,17 +41,20 @@ class InvestorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: isDark ? Colors.black.withOpacity(0.3) : Colors.black12,
             blurRadius: 12,
-            offset: Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -65,15 +68,18 @@ class InvestorCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
               Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: _statusColor().withOpacity(0.12),
                   borderRadius: BorderRadius.circular(20),
@@ -96,9 +102,12 @@ class InvestorCard extends StatelessWidget {
           const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.location_on, size: 16, color: Colors.grey),
+              Icon(Icons.location_on, size: 16, color: theme.hintColor),
               const SizedBox(width: 4),
-              Text(location),
+              Text(
+                location,
+                style: TextStyle(color: theme.colorScheme.onSurface),
+              ),
             ],
           ),
 
@@ -113,6 +122,10 @@ class InvestorCard extends StatelessWidget {
                   children: [
                     _label("Investment"),
                     const SizedBox(height: 4),
+                    const Text(
+                      "Animals",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                     Text(
                       amount,
                       style: const TextStyle(
@@ -124,10 +137,7 @@ class InvestorCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       date,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 12, color: theme.hintColor),
                     ),
                   ],
                 ),

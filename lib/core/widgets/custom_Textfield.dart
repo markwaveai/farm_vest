@@ -72,11 +72,13 @@ class CustomTextField extends StatelessWidget {
       onChanged: onChanged,
       decoration: InputDecoration(
         counter: showCounter ? null : const SizedBox.shrink(),
-       // counterText: showCounter ? null : '',
+        // counterText: showCounter ? null : '',
         hintText: hint,
         prefixIcon: prefixIcon,
         filled: true,
-        fillColor: !enabled || readOnly ? Colors.grey[200] : Colors.grey[100],
+        fillColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withOpacity(0.05)
+            : (!enabled || readOnly ? Colors.grey[200] : Colors.grey[100]),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 14,
@@ -87,7 +89,11 @@ class CustomTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.grey),
+          borderSide: BorderSide(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white12
+                : Colors.grey,
+          ),
         ),
       ),
     );

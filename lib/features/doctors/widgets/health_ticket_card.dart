@@ -29,27 +29,38 @@ class HealthTicketCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade300),
-        color: Colors.white,
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white12
+              : Colors.grey.shade300,
+        ),
+        color: Theme.of(context).cardColor,
       ),
       child: Column(
         children: [
-          _cardHeader(),
+          _cardHeader(context),
 
-          _cardBody(),
-          Divider(thickness: 0.5, color: AppTheme.grey1),
-          _cardBottom(),
+          _cardBody(context),
+          Divider(
+            thickness: 0.5,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white12
+                : AppTheme.grey1,
+          ),
+          _cardBottom(context),
         ],
       ),
     );
   }
 
-  Widget _cardHeader() {
+  Widget _cardHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: const BoxDecoration(
-        color: AppTheme.darkPrimary,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withOpacity(0.05)
+            : AppTheme.darkPrimary,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Row(
         children: [
@@ -61,35 +72,55 @@ class HealthTicketCard extends StatelessWidget {
           Expanded(
             child: Text(
               ticketId,
-              style: const TextStyle(
-                color: AppTheme.white,
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.onSurface
+                    : AppTheme.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
             ),
           ),
-          Text(timeAgo, style: const TextStyle(color: Colors.white70)),
+          Text(
+            timeAgo,
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).hintColor
+                  : Colors.white70,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _cardBody() {
+  Widget _cardBody(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(description, style: TextStyle(color: AppTheme.mediumGrey)),
-          Divider(thickness: 0.5, color: AppTheme.grey1),
+          Text(
+            description,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            ),
+          ),
+          Divider(
+            thickness: 0.5,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white12
+                : AppTheme.grey1,
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
-              _iconText(Icons.remove_red_eye, "View Profile"),
+              _iconText(context, Icons.remove_red_eye, "View Profile"),
               const SizedBox(width: 20),
               GestureDetector(
                 onTap: onActionTap,
                 child: _iconText(
+                  context,
                   isVaccination
                       ? Icons.vaccines_outlined
                       : Icons.medical_services_outlined,
@@ -97,7 +128,7 @@ class HealthTicketCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              _statusChip(),
+              _statusChip(context),
             ],
           ),
         ],
@@ -105,14 +136,18 @@ class HealthTicketCard extends StatelessWidget {
     );
   }
 
-  Widget _cardBottom() {
+  Widget _cardBottom(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
       child: Row(
         children: [
           GestureDetector(
             onTap: onViewDetailsTap,
-            child: _iconText(Icons.confirmation_num_outlined, "Ticket Details"),
+            child: _iconText(
+              context,
+              Icons.confirmation_num_outlined,
+              "Ticket Details",
+            ),
           ),
           // const Spacer(),
           if (onAssignTap != null) ...[
@@ -125,7 +160,14 @@ class HealthTicketCard extends StatelessWidget {
                 ),
               ),
               onPressed: onAssignTap,
-              child: const Text("Assign"),
+              child: Text(
+                "Assign",
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Colors.white,
+                ),
+              ),
             ),
           ],
         ],
@@ -133,7 +175,7 @@ class HealthTicketCard extends StatelessWidget {
     );
   }
 
-  Widget _statusChip() {
+  Widget _statusChip(BuildContext context) {
     Color bgColor;
     Color textColor = Colors.white;
     bool isSolid = false;
@@ -194,15 +236,23 @@ class HealthTicketCard extends StatelessWidget {
     );
   }
 
-  Widget _iconText(IconData icon, String text) {
+  Widget _iconText(BuildContext context, IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: AppTheme.darkPrimary),
+        Icon(
+          icon,
+          size: 18,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).colorScheme.onSurface
+              : AppTheme.darkPrimary,
+        ),
         const SizedBox(width: 6),
         Text(
           text,
-          style: const TextStyle(
-            color: AppTheme.darkPrimary,
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).colorScheme.onSurface
+                : AppTheme.darkPrimary,
             fontWeight: FontWeight.w500,
           ),
         ),

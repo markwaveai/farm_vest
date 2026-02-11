@@ -16,31 +16,39 @@ class DoctorBottomNavigation extends StatelessWidget {
     return BottomAppBar(
       shape: const CircularNotchedRectangle(),
       notchMargin: 8.0,
-      color: AppTheme.white,
-      surfaceTintColor: AppTheme.white,
+      color: Theme.of(context).cardColor,
+      surfaceTintColor: Theme.of(context).cardColor,
       elevation: 20,
-      shadowColor: AppTheme.black.withValues(alpha: 0.2),
+      shadowColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.black.withOpacity(0.5)
+          : AppTheme.black.withValues(alpha: 0.2),
       clipBehavior: Clip.antiAlias,
       height: 70,
       padding: EdgeInsets.zero,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navItem('assets/icons/rx.png', 'Health', 0),
-          _navItem('assets/icons/injection.png', 'Vaccination', 1),
+          _navItem(context, 'assets/icons/rx.png', 'Health', 0),
+          _navItem(context, 'assets/icons/injection.png', 'Vaccination', 1),
           const SizedBox(width: 48), // Space for FAB
-          _navItem('assets/icons/swap.png', 'Movement', 2),
-          _navItem('assets/icons/buffalo_icon.png', 'Buffalo', 3),
+          _navItem(context, 'assets/icons/swap.png', 'Movement', 2),
+          _navItem(context, 'assets/icons/buffalo_icon.png', 'Buffalo', 3),
         ],
       ),
     );
   }
 
-  Widget _navItem(String assetPath, String label, int index) {
+  Widget _navItem(
+    BuildContext context,
+    String assetPath,
+    String label,
+    int index,
+  ) {
     final isSelected = currentIndex == index;
+    final theme = Theme.of(context);
     final color = isSelected
         ? AppTheme.primary
-        : AppTheme.slate.withValues(alpha: 0.5);
+        : theme.hintColor.withValues(alpha: 0.7);
 
     return Expanded(
       child: InkWell(

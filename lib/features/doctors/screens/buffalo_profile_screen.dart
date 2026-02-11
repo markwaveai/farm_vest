@@ -77,19 +77,26 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Buffalo Profile",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
-        backgroundColor: AppTheme.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        foregroundColor: AppTheme.black,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.menu, color: AppTheme.darkPrimary),
+            icon: Icon(
+              Icons.menu,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ],
       ),
@@ -121,7 +128,12 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          color: Theme.of(context).cardColor,
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white12
+                : Colors.grey.shade300,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(12),
@@ -145,7 +157,12 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.search, color: Colors.white),
+                    icon: Icon(
+                      Icons.search,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Colors.white,
+                    ),
                     onPressed: () {},
                   ),
                 ),
@@ -166,7 +183,12 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
         children: [
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
+              color: Theme.of(context).cardColor,
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white12
+                    : Colors.grey.shade300,
+              ),
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(12),
@@ -175,9 +197,10 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
                 Container(
                   height: 40,
                   decoration: BoxDecoration(
-                    color: AppTheme.white,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.05)
+                        : AppTheme.white,
                     borderRadius: BorderRadius.circular(8),
-                    // border: Border.all(color: AppTheme.darkPrimary),
                   ),
                   child: Row(
                     children: ["Today", "Month", "Year"].map((filter) {
@@ -191,7 +214,7 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? AppTheme.darkPrimary
-                                  : AppTheme.transparent,
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -201,7 +224,12 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
                                 fontWeight: FontWeight.w600,
                                 color: isSelected
                                     ? AppTheme.white
-                                    : AppTheme.darkPrimary,
+                                    : (Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface
+                                          : AppTheme.darkPrimary),
                               ),
                             ),
                           ),
@@ -230,7 +258,12 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: IconButton(
-                        icon: const Icon(Icons.search, color: Colors.white),
+                        icon: Icon(
+                          Icons.search,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Colors.white,
+                        ),
                         onPressed: () {},
                       ),
                     ),
@@ -312,7 +345,11 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
           width: 120,
           child: Text(
             label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ),
         Expanded(
@@ -354,12 +391,12 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
           ),
           const SizedBox(height: 24),
 
-          const Text(
+          Text(
             "Buffalo Profiles",
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppTheme.black,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 12),
@@ -376,8 +413,12 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
 
           Container(
             decoration: BoxDecoration(
-              color: AppTheme.white,
-              border: Border.all(color: Colors.grey.shade300),
+              color: Theme.of(context).cardColor,
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white12
+                    : Colors.grey.shade300,
+              ),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -458,8 +499,12 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.white,
-        border: Border.all(color: Colors.grey.shade300),
+        color: Theme.of(context).cardColor,
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white12
+              : Colors.grey.shade300,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -480,10 +525,10 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.black,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 if (subtitle.isNotEmpty) ...[
@@ -496,7 +541,12 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
                 const SizedBox(height: 8),
                 Text(
                   message,
-                  style: const TextStyle(fontSize: 12, color: AppTheme.black87),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.8),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -540,10 +590,10 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
           const SizedBox(height: 6),
           Text(
             id,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
-              color: AppTheme.black,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
@@ -577,10 +627,22 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
             width: 140,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
             ),
           ),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 13))),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -591,8 +653,15 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
       height: 40,
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppTheme.white,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withOpacity(0.05)
+            : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white12
+              : Colors.grey.shade300,
+        ),
       ),
       child: Row(
         children: tabs.map((tab) {
@@ -604,9 +673,7 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
                 alignment: Alignment.center,
                 margin: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppTheme.darkPrimary
-                      : AppTheme.transparent,
+                  color: isSelected ? AppTheme.darkPrimary : Colors.transparent,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -615,7 +682,11 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: isSelected ? AppTheme.white : AppTheme.darkPrimary,
+                    color: isSelected
+                        ? AppTheme.white
+                        : (Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context).colorScheme.onSurface
+                              : AppTheme.darkPrimary),
                   ),
                 ),
               ),
@@ -632,11 +703,16 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        color: Theme.of(context).cardColor,
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white12
+              : Colors.grey.shade300,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: AppTheme.transparent),
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           initiallyExpanded: isExpanded,
           tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
@@ -647,13 +723,16 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
             buffalo['rfid'],
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppTheme.darkPrimary,
+              color: AppTheme.primary,
               fontSize: 14,
             ),
           ),
           subtitle: Text(
             "Tag: ${buffalo['tag']} | Shed\n${buffalo['shed']}",
-            style: const TextStyle(fontSize: 12, color: AppTheme.black87),
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            ),
           ),
           onExpansionChanged: (val) {
             setState(() {
@@ -670,7 +749,13 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
               _buildBuffaloDetailRow("Health", buffalo['health']),
               _buildBuffaloDetailRow("Status", buffalo['status']),
               _buildBuffaloDetailRow("Onboarded", buffalo['onboarded']),
-              Divider(height: 24, thickness: 1, color: Colors.grey.shade300),
+              Divider(
+                height: 24,
+                thickness: 1,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white12
+                    : Colors.grey.shade300,
+              ),
               _buildBuffaloDetailRow("Farm", buffalo['farm']),
               _buildBuffaloDetailRow("Investor", buffalo['investor']),
             ],
@@ -690,9 +775,9 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
             width: 100,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: AppTheme.black87,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -701,9 +786,9 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: AppTheme.black,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w500,
               ),
             ),

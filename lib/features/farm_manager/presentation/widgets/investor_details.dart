@@ -1,4 +1,3 @@
-import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/investor_list_provider.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
@@ -68,6 +67,7 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
   }
 
   AppBar _buildAppBar() {
+    final theme = Theme.of(context);
     return AppBar(
       // Use GoRouter for consistent navigation
       leading: IconButton(
@@ -85,34 +85,39 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
             }
           }
         },
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        icon: Icon(Icons.arrow_back, color: theme.appBarTheme.foregroundColor),
       ),
-      backgroundColor: Colors.green,
+      backgroundColor: theme.appBarTheme.backgroundColor,
       title: _isSearching
           ? TextField(
               controller: _searchController,
               autofocus: true,
               decoration: InputDecoration(
                 hintText: 'Search Investors...',
-                hintStyle: TextStyle(color: AppTheme.grey1),
+                hintStyle: TextStyle(
+                  color: theme.appBarTheme.foregroundColor?.withOpacity(0.6),
+                ),
                 border: InputBorder.none,
               ),
-              style: const TextStyle(color: Colors.black, fontSize: 18),
+              style: TextStyle(
+                color: theme.appBarTheme.foregroundColor,
+                fontSize: 18,
+              ),
               onChanged: (query) {
                 ref.read(investorListProvider.notifier).setSearchQuery(query);
               },
             )
           : const Text("Investors Data"),
-      titleTextStyle: const TextStyle(
+      titleTextStyle: TextStyle(
         fontSize: 22,
-        color: Colors.white,
+        color: theme.appBarTheme.foregroundColor,
         fontWeight: FontWeight.bold,
       ),
       actions: [
         IconButton(
           icon: Icon(
             _isSearching ? Icons.close : Icons.search,
-            color: Colors.white,
+            color: theme.appBarTheme.foregroundColor,
           ),
           onPressed: () {
             setState(() {
@@ -125,47 +130,49 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
           },
         ),
         IconButton(
-          icon: const Icon(Icons.filter_list, color: Colors.white),
+          icon: Icon(
+            Icons.filter_list,
+            color: theme.appBarTheme.foregroundColor,
+          ),
           onPressed: _showFilterDialog,
         ),
       ],
     );
   }
-String _getEmptyMessage(String status) {
-  switch (status) {
-    case 'active':
-      return 'No active investors found';
-    case 'inactive':
-      return 'No inactive investors found';
-    case 'exited':
-      return 'No exited investors found';
-    default:
-      return 'No investors found';
-  }
-}
 
+  String _getEmptyMessage(String status) {
+    switch (status) {
+      case 'active':
+        return 'No active investors found';
+      case 'inactive':
+        return 'No inactive investors found';
+      case 'exited':
+        return 'No exited investors found';
+      default:
+        return 'No investors found';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final investorState = ref.watch(investorListProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
-     body: investorState.isLoading
-    ? const Center(child: CircularProgressIndicator())
-    : investorState.investors.isEmpty
-        ? Center(
-            child: Text(
-              _getEmptyMessage(investorState.statusFilter),
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-                fontWeight: FontWeight.w500,
+      body: investorState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : investorState.investors.isEmpty
+          ? Center(
+              child: Text(
+                _getEmptyMessage(investorState.statusFilter),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).hintColor,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          )
-
+            )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: investorState.investors.length,
@@ -174,9 +181,12 @@ String _getEmptyMessage(String status) {
                 return InvestorCard(
                   name: investor.fullName,
                   location: investor.address ?? 'N/A',
-                  amount: '₹${investor.animalCount}', 
+                  amount: '₹${investor.animalCount}',
                   date: investor.memberSince?.toIso8601String() ?? 'N/A',
-                  status: investor.animalCount > 0 ? 'Active' :'Inactive' 'Exited',
+                  status: investor.animalCount > 0
+                      ? 'Active'
+                      : 'Inactive'
+                            'Exited',
                 );
               },
             ),
