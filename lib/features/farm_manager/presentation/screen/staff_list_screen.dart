@@ -66,7 +66,7 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
     final staffState = ref.watch(staffListProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
@@ -83,16 +83,25 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
               }
             }
           },
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).appBarTheme.foregroundColor,
+          ),
         ),
         title: _isSearching
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: const TextStyle(color: Colors.black),
-                decoration: const InputDecoration(
+                style: TextStyle(
+                  color: Theme.of(context).appBarTheme.foregroundColor,
+                ),
+                decoration: InputDecoration(
                   hintText: 'Search Staff...',
-                  hintStyle: TextStyle(color: Colors.black),
+                  hintStyle: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).appBarTheme.foregroundColor?.withOpacity(0.7),
+                  ),
                   border: InputBorder.none,
                 ),
                 onChanged: (val) {
@@ -100,17 +109,17 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                 },
               )
             : const Text('Staff Directory'),
-        backgroundColor: Colors.green,
-        titleTextStyle: const TextStyle(
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        titleTextStyle: TextStyle(
           fontSize: 22,
-          color: Colors.white,
+          color: Theme.of(context).appBarTheme.foregroundColor,
           fontWeight: FontWeight.bold,
         ),
         actions: [
           IconButton(
             icon: Icon(
               _isSearching ? Icons.close : Icons.search,
-              color: Colors.white,
+              color: Theme.of(context).appBarTheme.foregroundColor,
             ),
             onPressed: () {
               setState(() {
@@ -123,7 +132,10 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.white),
+            icon: Icon(
+              Icons.filter_list,
+              color: Theme.of(context).appBarTheme.foregroundColor,
+            ),
             onPressed: _showFilterDialog,
           ),
         ],
@@ -381,9 +393,9 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
@@ -671,14 +683,16 @@ class StaffCard extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: isActive
             ? null
             : Border.all(color: Colors.red.withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -752,7 +766,9 @@ class StaffCard extends ConsumerWidget {
                           decoration: isActive
                               ? null
                               : TextDecoration.lineThrough,
-                          color: isActive ? Colors.black : Colors.grey,
+                          color: isActive
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Theme.of(context).hintColor,
                         ),
                       ),
                       const SizedBox(height: 4),

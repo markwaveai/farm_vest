@@ -142,7 +142,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                   maxWidth: 600,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
@@ -538,11 +538,19 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
     final order = dashboardState.currentOrder;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Buffalo Onboarding'),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        title: Text(
+          'Buffalo Onboarding',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () {
             ref.read(farmManagerProvider.notifier).clearOrder();
             if (context.canPop()) {
@@ -588,7 +596,6 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                       ? null
                       : _showPaidOrdersDialog,
                   style: ElevatedButton.styleFrom(
-                   
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -662,7 +669,10 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
               const SizedBox(height: 8),
               Text(
                 'Enter identification details for each animal',
-                style: TextStyle(fontSize: 14, color: AppTheme.grey1),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).hintColor,
+                ),
               ),
               const SizedBox(height: 16),
 

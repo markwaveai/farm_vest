@@ -37,9 +37,9 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
       length: 2,
       initialIndex: 0,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF4F6F8),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: AppTheme.grey,
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
@@ -59,16 +59,19 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
               }
             },
           ),
-          title: const Text(
+          title: Text(
             "Farm Reports",
-            style: TextStyle(fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           bottom: TabBar(
-            indicatorColor: Colors.green,
+            indicatorColor: AppTheme.primary,
             indicatorWeight: 3,
-            labelColor: Colors.green,
-            unselectedLabelColor: Colors.grey,
-            tabs: [
+            labelColor: AppTheme.primary,
+            unselectedLabelColor: Theme.of(context).hintColor,
+            tabs: const [
               Tab(text: "Daily"),
               Tab(text: "Weekly"),
             ],
@@ -106,20 +109,21 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
                   const SizedBox(height: 24),
 
-                  _getReportButton(_isDateSelected
-      ? () {
+                  _getReportButton(
+                    _isDateSelected
+                        ? () {
+                            final date =
+                                "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
 
-                    final date =
-                        "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
-
-                    ref
-                        .read(milkReportProvider.notifier)
-                        .getDailyReport(
-                          date: date,
-                          timing: _selectedSession.toUpperCase(),
-                        );
-                  }
-                  : null),
+                            ref
+                                .read(milkReportProvider.notifier)
+                                .getDailyReport(
+                                  date: date,
+                                  timing: _selectedSession.toUpperCase(),
+                                );
+                          }
+                        : null,
+                  ),
                   const SizedBox(height: 16),
 
                   Consumer(
@@ -170,17 +174,18 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   // _getReportButton(() {
 
                   // }),
-                  _getReportButton(_isDateSelected
-      ? () {
+                  _getReportButton(
+                    _isDateSelected
+                        ? () {
+                            final date =
+                                "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
 
-                    final date =
-                        "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
-
-                    ref
-                        .read(milkReportProvider.notifier)
-                        .getWeeklyReport(date: date);
-                  }
-                  : null),
+                            ref
+                                .read(milkReportProvider.notifier)
+                                .getWeeklyReport(date: date);
+                          }
+                        : null,
+                  ),
                   const SizedBox(height: 16),
                   Consumer(
                     builder: (context, ref, _) {
@@ -258,47 +263,44 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     );
   }
 
- Widget _getReportButton(VoidCallback? onPressed) {
-  return SizedBox(
-    width: double.infinity,
-    height: 48,
-    child: ElevatedButton(
-      onPressed: onPressed,
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith<Color>(
-          (states) {
+  Widget _getReportButton(VoidCallback? onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
             if (states.contains(MaterialState.disabled)) {
               return Colors.grey.shade400;
             }
             return Colors.green;
-          },
-        ),
-        shape: MaterialStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+          }),
+          shape: MaterialStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
+        child: const Text("Get Report", style: TextStyle(fontSize: 16)),
       ),
-      child: const Text(
-        "Get Report",
-        style: TextStyle(fontSize: 16),
-      ),
-    ),
-  );
-}
+    );
+  }
 
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: Theme.of(context).cardColor,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.grey),
+        borderSide: BorderSide(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white24
+              : Colors.grey,
+        ),
       ),
     );
   }
@@ -315,9 +317,9 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: AppTheme.darkGrey,
+              color: Theme.of(context).hintColor,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -346,11 +348,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

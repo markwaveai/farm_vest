@@ -1,6 +1,5 @@
 import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/core/services/tickets_api_services.dart';
-import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
 import 'package:farm_vest/core/widgets/primary_button.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
@@ -120,15 +119,18 @@ class _CreateTransferTicketScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        title: const Text(
+        title: Text(
           "Create Transfer Ticket",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        leading: const BackButton(color: Colors.black),
+        leading: BackButton(color: Theme.of(context).colorScheme.onSurface),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -181,7 +183,9 @@ class _CreateTransferTicketScreenState
                     hintText: "Search RFID / Ear Tag",
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
-                    fillColor: Colors.grey[100],
+                    fillColor: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.grey[100],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -205,8 +209,12 @@ class _CreateTransferTicketScreenState
                   const SizedBox(height: 8),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.grey[200]!),
+                      color: Theme.of(context).cardColor,
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white10
+                            : Colors.grey[200]!,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     constraints: const BoxConstraints(maxHeight: 200),
@@ -285,10 +293,10 @@ class _CreateTransferTicketScreenState
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
-        color: AppTheme.dark,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
@@ -297,14 +305,24 @@ class _CreateTransferTicketScreenState
     return InputDecoration(
       labelText: label,
       filled: true,
-      fillColor: Colors.grey[50],
+      fillColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.white.withOpacity(0.02)
+          : Colors.grey[50],
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey[300]!),
+        borderSide: BorderSide(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white24
+              : Colors.grey[300]!,
+        ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey[300]!),
+        borderSide: BorderSide(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white24
+              : Colors.grey[300]!,
+        ),
       ),
     );
   }

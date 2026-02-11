@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/theme/theme_provider.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -95,10 +96,7 @@ class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
               Navigator.pop(context);
               _launchURL(AppConstants.deleteAccountUrl);
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -191,6 +189,19 @@ class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
                   title: 'App Lock',
                   subtitle: 'Use biometric to unlock the app',
                 ),
+                _buildSwitchMenuItem(
+                  icon: ref.watch(themeProvider) == ThemeMode.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                  title: 'Dark Mode',
+                  subtitle: ref.watch(themeProvider) == ThemeMode.dark
+                      ? 'Enabled'
+                      : 'Disabled',
+                  value: ref.watch(themeProvider) == ThemeMode.dark,
+                  onChanged: (value) {
+                    ref.read(themeProvider.notifier).toggleTheme();
+                  },
+                ),
                 _buildMenuItem(
                   icon: Icons.help_outline,
                   title: 'Help & Support',
@@ -202,7 +213,7 @@ class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
                 _buildMenuItem(
                   icon: Icons.delete,
                   title: 'Delete Account',
-                 
+
                   onTap: _showDeleteAccountDialog,
                 ),
                 const SizedBox(height: 40),
@@ -254,6 +265,61 @@ class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
           fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
+      ),
+    );
+  }
+
+  Widget _buildSwitchMenuItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: Colors.white,
+            activeTrackColor: Colors.white.withOpacity(0.5),
+            inactiveThumbColor: Colors.grey.shade200,
+            inactiveTrackColor: Colors.white.withOpacity(0.3),
+          ),
+        ],
       ),
     );
   }
