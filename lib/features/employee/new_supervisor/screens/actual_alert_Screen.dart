@@ -14,7 +14,6 @@ class ActualAlertScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ticketsAsync = ref.watch(filteredSupervisorTicketsProvider);
     final currentFilter = ref.watch(ticketStatusFilterProvider);
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(

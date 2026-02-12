@@ -52,14 +52,25 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
     _pastEntries = {
       today: [
-        MilkProductionEntry(date: DateTime.now(), timing: 'Morning', litres: 85),
-        MilkProductionEntry(date: DateTime.now(), timing: 'Evening', litres: 78),
-      ],
-      DateFormat('yyyy-MM-dd').format(DateTime.now().subtract(const Duration(days: 1))): [
         MilkProductionEntry(
-            date: DateTime.now().subtract(const Duration(days: 1)),
-            timing: 'Morning',
-            litres: 82),
+          date: DateTime.now(),
+          timing: 'Morning',
+          litres: 85,
+        ),
+        MilkProductionEntry(
+          date: DateTime.now(),
+          timing: 'Evening',
+          litres: 78,
+        ),
+      ],
+      DateFormat(
+        'yyyy-MM-dd',
+      ).format(DateTime.now().subtract(const Duration(days: 1))): [
+        MilkProductionEntry(
+          date: DateTime.now().subtract(const Duration(days: 1)),
+          timing: 'Morning',
+          litres: 82,
+        ),
       ],
     };
     setState(() {});
@@ -94,7 +105,10 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Add New Entry', style: AppTheme.headingMedium),
+                      const Text(
+                        'Add New Entry',
+                        style: AppTheme.headingMedium,
+                      ),
                       const SizedBox(height: AppConstants.spacingL),
                       _buildDatePicker(),
                       const SizedBox(height: AppConstants.spacingL),
@@ -125,10 +139,16 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               value: _selectedTiming,
-                              decoration: const InputDecoration(labelText: 'Timing'),
+                              decoration: const InputDecoration(
+                                labelText: 'Timing',
+                              ),
                               items: ['Morning', 'Afternoon', 'Evening']
-                                  .map((timing) => DropdownMenuItem(
-                                      value: timing, child: Text(timing)))
+                                  .map(
+                                    (timing) => DropdownMenuItem(
+                                      value: timing,
+                                      child: Text(timing),
+                                    ),
+                                  )
                                   .toList(),
                               onChanged: (value) {
                                 if (value != null) {

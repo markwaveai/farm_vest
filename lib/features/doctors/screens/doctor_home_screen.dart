@@ -3,6 +3,9 @@ import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/features/doctors/providers/doctors_provider.dart';
 import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
+import 'package:farm_vest/features/doctors/widgets/buffalo_profile_view.dart';
+import 'package:farm_vest/features/doctors/widgets/transfer_tickets_view.dart';
+import 'package:farm_vest/features/doctors/widgets/health_tickets_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -60,27 +63,63 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
         elevation: 0,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         automaticallyImplyLeading: false,
-        title: Align(
-          alignment: Alignment.centerLeft,
-          child: RichText(
-            text: TextSpan(
-              text: 'Hello ',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 16,
-              ),
-              children: [
-                TextSpan(
-                  text: displayName,
-                  style: const TextStyle(
-                    color: AppTheme.orange,
-                    fontWeight: FontWeight.bold,
+        title: _currentIndex == 3
+            ? Text(
+                "Buffalo Profile",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              )
+            : _currentIndex == 2
+            ? Text(
+                "Transfer Tickets",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              )
+            : _currentIndex == 1
+            ? Text(
+                "Vaccination Tickets",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              )
+            : _currentIndex == 0
+            ? Text(
+                "Health Tickets",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              )
+            : Align(
+                alignment: Alignment.centerLeft,
+                child: RichText(
+                  text: TextSpan(
+                    text: 'Hello ',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 16,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: displayName,
+                        style: const TextStyle(
+                          color: AppTheme.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
+              ),
         actions: [
           if (ref.watch(authProvider).availableRoles.length > 1)
             IconButton(
@@ -118,189 +157,23 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           const SizedBox(width: 16),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.read(doctorsProvider.notifier).fetchTickets(),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _sectionHeader(
-                title: 'Buffalo Health Tickets',
-                ticketType: 'HEALTH',
-              ),
-
-              // _sectionHeader(title: 'Buffalo Health Tickets'),
-              const SizedBox(height: 12),
-              _grid([
-                DashboardStatCard(
-                  title: 'Total Tickets',
-                  value: healthCounts['total'].toString().padLeft(2, '0'),
-                  iconWidget: Image.asset(
-                    'assets/icons/buffalo_head.png',
-                    width: 24,
-                    height: 28,
-                  ),
-                  backgroundColor: AppTheme.primary,
-                  isLoading: healthState.isLoading,
-                  onTap: () => context.push(
-                    '/all-health-tickets',
-                    extra: {'filter': 'All', 'type': 'HEALTH'},
-                  ),
-                ),
-                DashboardStatCard(
-                  title: 'Pending Tickets',
-                  value: healthCounts['pending'].toString().padLeft(2, '0'),
-                  iconWidget: Image.asset(
-                    'assets/icons/buffalo_head.png',
-                    width: 24,
-                    height: 24,
-                    color: AppTheme.white,
-                  ),
-                  backgroundColor: AppTheme.orange,
-                  isLoading: healthState.isLoading,
-                  onTap: () => context.push(
-                    '/all-health-tickets',
-                    extra: {'filter': 'Pending', 'type': 'HEALTH'},
-                  ),
-                ),
-                DashboardStatCard(
-                  title: 'In Progress Tickets',
-                  value: healthCounts['inProgress'].toString().padLeft(2, '0'),
-                  iconWidget: Image.asset(
-                    'assets/icons/buffalo_head.png',
-                    width: 24,
-                    height: 24,
-                    color: AppTheme.white,
-                  ),
-                  backgroundColor: AppTheme.lightPrimary,
-                  isLoading: healthState.isLoading,
-                  onTap: () => context.push(
-                    '/all-health-tickets',
-                    extra: {'filter': 'In progress', 'type': 'HEALTH'},
-                  ),
-                ),
-                DashboardStatCard(
-                  title: 'Completed Tickets',
-                  value: healthCounts['completed'].toString().padLeft(2, '0'),
-                  iconWidget: Image.asset(
-                    'assets/icons/buffalo_head.png',
-                    width: 24,
-                    height: 24,
-                    color: AppTheme.white,
-                  ),
-                  backgroundColor: AppTheme.lightGreen,
-                  isLoading: healthState.isLoading,
-                  onTap: () => context.push(
-                    '/all-health-tickets',
-                    extra: {'filter': 'Completed', 'type': 'HEALTH'},
-                  ),
-                ),
-              ]),
-              const SizedBox(height: 24),
-              _sectionHeader(
-                title: 'Vaccination Tickets',
-                ticketType: 'VACCINATION',
-              ),
-
-              // _sectionHeader(title: 'Vaccination Tickets'),
-              const SizedBox(height: 12),
-              _grid([
-                DashboardStatCard(
-                  title: 'Total Tickets',
-                  value: vaccinationCounts['total'].toString().padLeft(2, '0'),
-                  iconWidget: Image.asset(
-                    'assets/icons/injection.png',
-                    width: 24,
-                    height: 24,
-                  ),
-                  backgroundColor: AppTheme.successGreen,
-                  isLoading: healthState.isLoading,
-                  onTap: () => context.push(
-                    '/all-health-tickets',
-                    extra: {'filter': 'All', 'type': 'VACCINATION'},
-                  ),
-                ),
-                DashboardStatCard(
-                  title: 'Pending Tickets',
-                  value: vaccinationCounts['pending'].toString().padLeft(
-                    2,
-                    '0',
-                  ),
-                  iconWidget: Image.asset(
-                    'assets/icons/injection.png',
-                    width: 24,
-                    height: 24,
-                  ),
-                  backgroundColor: AppTheme.orange,
-                  isLoading: healthState.isLoading,
-                  onTap: () => context.push(
-                    '/all-health-tickets',
-                    extra: {'filter': 'Pending', 'type': 'VACCINATION'},
-                  ),
-                ),
-                DashboardStatCard(
-                  title: 'In Progress Tickets',
-                  value: vaccinationCounts['inProgress'].toString().padLeft(
-                    2,
-                    '0',
-                  ),
-                  iconWidget: Image.asset(
-                    'assets/icons/injection.png',
-                    width: 24,
-                    height: 24,
-                  ),
-                  backgroundColor: AppTheme.lightPrimary,
-                  isLoading: healthState.isLoading,
-                  onTap: () => context.push(
-                    '/all-health-tickets',
-                    extra: {'filter': 'In progress', 'type': 'VACCINATION'},
-                  ),
-                ),
-                DashboardStatCard(
-                  title: 'Completed Tickets',
-                  value: vaccinationCounts['completed'].toString().padLeft(
-                    2,
-                    '0',
-                  ),
-                  iconWidget: Image.asset(
-                    'assets/icons/injection.png',
-                    width: 28,
-                    height: 28,
-                    color: AppTheme.white,
-                  ),
-                  backgroundColor: AppTheme.lightGreen,
-                  isLoading: healthState.isLoading,
-                  onTap: () => context.push(
-                    '/all-health-tickets',
-                    extra: {'filter': 'Completed', 'type': 'VACCINATION'},
-                  ),
-                ),
-              ]),
-            ],
-          ),
-        ),
-      ),
+      body: _currentIndex == 3
+          ? const BuffaloProfileView()
+          : _currentIndex == 2
+          ? const TransferTicketsView()
+          : _currentIndex == 1
+          ? const HealthTicketsView(ticketType: 'VACCINATION')
+          : _currentIndex == 0
+          ? const HealthTicketsView(ticketType: 'HEALTH')
+          : _buildDashboard(healthState, healthCounts, vaccinationCounts),
       bottomNavigationBar: EmployeeBottomNavigation(
         role: UserType.doctor,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() => _currentIndex = index);
-          if (index == 0) {
-            context.push(
-              '/all-health-tickets',
-              extra: {'filter': 'All', 'type': 'VACCINATION'},
-            );
-          } else if (index == 1) {
-            context.push('/vaccination-screen');
-          } else if (index == 2) {
-            context.push('/transfer-tickets');
-          } else if (index == 3) {
-            context.push('/buffalo-profile');
-          }
         },
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: GestureDetector(
         onTap: () {
@@ -343,11 +216,147 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
     );
   }
 
-  Widget _sectionHeader({
-    required String title,
-    String? badge,
-    required String ticketType,
-  }) {
+  Widget _buildDashboard(
+    dynamic healthState,
+    Map<String, int> healthCounts,
+    Map<String, int> vaccinationCounts,
+  ) {
+    return RefreshIndicator(
+      onRefresh: () => ref.read(doctorsProvider.notifier).fetchTickets(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionHeader(
+              title: 'Buffalo Health Tickets',
+              ticketType: 'HEALTH',
+            ),
+            const SizedBox(height: 12),
+            _grid([
+              DashboardStatCard(
+                title: 'Total Tickets',
+                value: healthCounts['total'].toString().padLeft(2, '0'),
+                iconWidget: Image.asset(
+                  'assets/icons/buffalo_head.png',
+                  width: 24,
+                  height: 28,
+                ),
+                backgroundColor: AppTheme.primary,
+                isLoading: healthState.isLoading,
+                onTap: () => setState(() => _currentIndex = 0),
+              ),
+              DashboardStatCard(
+                title: 'Pending Tickets',
+                value: healthCounts['pending'].toString().padLeft(2, '0'),
+                iconWidget: Image.asset(
+                  'assets/icons/buffalo_head.png',
+                  width: 24,
+                  height: 24,
+                  color: AppTheme.white,
+                ),
+                backgroundColor: AppTheme.orange,
+                isLoading: healthState.isLoading,
+                onTap: () => setState(() => _currentIndex = 0),
+              ),
+              DashboardStatCard(
+                title: 'In Progress Tickets',
+                value: healthCounts['inProgress'].toString().padLeft(2, '0'),
+                iconWidget: Image.asset(
+                  'assets/icons/buffalo_head.png',
+                  width: 24,
+                  height: 24,
+                  color: AppTheme.white,
+                ),
+                backgroundColor: AppTheme.lightPrimary,
+                isLoading: healthState.isLoading,
+                onTap: () => setState(() => _currentIndex = 0),
+              ),
+              DashboardStatCard(
+                title: 'Completed Tickets',
+                value: healthCounts['completed'].toString().padLeft(2, '0'),
+                iconWidget: Image.asset(
+                  'assets/icons/buffalo_head.png',
+                  width: 24,
+                  height: 24,
+                  color: AppTheme.white,
+                ),
+                backgroundColor: AppTheme.lightGreen,
+                isLoading: healthState.isLoading,
+                onTap: () => setState(() => _currentIndex = 0),
+              ),
+            ]),
+            const SizedBox(height: 24),
+            _sectionHeader(
+              title: 'Vaccination Tickets',
+              ticketType: 'VACCINATION',
+            ),
+            const SizedBox(height: 12),
+            _grid([
+              DashboardStatCard(
+                title: 'Total Tickets',
+                value: vaccinationCounts['total'].toString().padLeft(2, '0'),
+                iconWidget: Image.asset(
+                  'assets/icons/injection.png',
+                  width: 24,
+                  height: 24,
+                ),
+                backgroundColor: AppTheme.successGreen,
+                isLoading: healthState.isLoading,
+                onTap: () => setState(() => _currentIndex = 1),
+              ),
+              DashboardStatCard(
+                title: 'Pending Tickets',
+                value: vaccinationCounts['pending'].toString().padLeft(2, '0'),
+                iconWidget: Image.asset(
+                  'assets/icons/injection.png',
+                  width: 24,
+                  height: 24,
+                ),
+                backgroundColor: AppTheme.orange,
+                isLoading: healthState.isLoading,
+                onTap: () => setState(() => _currentIndex = 1),
+              ),
+              DashboardStatCard(
+                title: 'In Progress Tickets',
+                value: vaccinationCounts['inProgress'].toString().padLeft(
+                  2,
+                  '0',
+                ),
+                iconWidget: Image.asset(
+                  'assets/icons/injection.png',
+                  width: 24,
+                  height: 24,
+                ),
+                backgroundColor: AppTheme.lightPrimary,
+                isLoading: healthState.isLoading,
+                onTap: () => setState(() => _currentIndex = 1),
+              ),
+              DashboardStatCard(
+                title: 'Completed Tickets',
+                value: vaccinationCounts['completed'].toString().padLeft(
+                  2,
+                  '0',
+                ),
+                iconWidget: Image.asset(
+                  'assets/icons/injection.png',
+                  width: 28,
+                  height: 28,
+                  color: AppTheme.white,
+                ),
+                backgroundColor: AppTheme.lightGreen,
+                isLoading: healthState.isLoading,
+                onTap: () => setState(() => _currentIndex = 1),
+              ),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionHeader({required String title, required String ticketType}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -366,15 +375,11 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
         TextButton(
           onPressed: () {
             if (ticketType == 'VACCINATION') {
-              context.push('/vaccination-screen');
+              setState(() => _currentIndex = 1);
             } else {
-              context.push(
-                '/all-health-tickets',
-                extra: {'filter': 'All', 'type': 'HEALTH'},
-              );
+              setState(() => _currentIndex = 0);
             }
           },
-
           style: TextButton.styleFrom(
             backgroundColor: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white.withOpacity(0.05)

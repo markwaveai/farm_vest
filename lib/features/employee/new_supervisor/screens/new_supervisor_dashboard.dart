@@ -2,6 +2,7 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
 import 'package:farm_vest/core/widgets/custom_card.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_dashboard_provider.dart';
+import 'package:farm_vest/features/doctors/widgets/buffalo_profile_view.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/alert_dialog.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/shimmer_card.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +32,6 @@ class _NewSupervisorDashboardState
     final authState = ref.watch(authProvider);
     final user = authState.userData;
 
-    // Use dynamic data from user profile
     final farmName = user?.farmName ?? "Farm";
     final shedName = user?.shedName ?? "Shed";
     final farmLocation = user?.farmLocation ?? "Location";
@@ -42,37 +42,44 @@ class _NewSupervisorDashboardState
       appBar: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
-        toolbarHeight: screenWidth * 0.22,
+        toolbarHeight: _currentIndex == 3 ? null : screenWidth * 0.22,
         automaticallyImplyLeading: false,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Hello, $displayName",
-              style: TextStyle(
-                fontSize: screenWidth * 0.05,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+        title: _currentIndex == 3
+            ? const Text(
+                'Buffalo Profile',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Hello, $displayName",
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.05,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "$farmName • $shedName",
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.035,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.9),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    "Location: $farmLocation",
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.03,
+                      color: Theme.of(context).hintColor,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "$farmName • $shedName",
-              style: TextStyle(
-                fontSize: screenWidth * 0.035,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              "Location: $farmLocation",
-              style: TextStyle(
-                fontSize: screenWidth * 0.03,
-                color: Theme.of(context).hintColor,
-              ),
-            ),
-          ],
-        ),
         actions: [
           IconButton(
             onPressed: () => _showSwitchRoleBottomSheet(context, ref),
@@ -111,250 +118,9 @@ class _NewSupervisorDashboardState
           const SizedBox(width: 16),
         ],
       ),
-      body: dashboardState.isLoading
-          ? _buildLoadingShimmer(context)
-          : dashboardState.error != null
-          ? Center(child: Text(dashboardState.error!))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GridView.count(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.95,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      CustomCard(
-                        color: AppTheme.primary,
-                        type: DashboardCardType.priority,
-                        onTap: () => context.go('/new-supervisor/buffalo'),
-                        child: _buildStatContent(
-                          context,
-                          Icons.pets,
-                          dashboardState.stats.totalAnimals,
-                          'Total Animals',
-                          AppTheme.primary,
-                        ),
-                      ),
-                      CustomCard(
-                        color: AppTheme.errorRed,
-                        type: DashboardCardType.priority,
-                        onTap: () {},
-                        child: _buildStatContent(
-                          context,
-                          Icons.water_drop,
-                          dashboardState.stats.milkToday,
-                          'Milk Today',
-                          AppTheme.lightSecondary,
-                        ),
-                      ),
-                      CustomCard(
-                        color: AppTheme.warningOrange,
-                        type: DashboardCardType.priority,
-                        onTap: () {},
-                        child: _buildStatContent(
-                          context,
-                          Icons.warning,
-                          dashboardState.stats.activeIssues,
-                          'Active Issues',
-                          AppTheme.warningOrange,
-                        ),
-                      ),
-                      CustomCard(
-                        color: AppTheme.darkGrey,
-                        type: DashboardCardType.priority,
-                        onTap: () => context.push('/transfer-tickets'),
-                        child: _buildStatContent(
-                          context,
-                          Icons.move_down,
-                          dashboardState.stats.transfers,
-                          'Transfers',
-                          AppTheme.darkGrey,
-                        ),
-                      ),
-                      CustomCard(
-                        color: Colors.pink,
-                        type: DashboardCardType.priority,
-                        onTap: () {
-                          final shedId = int.tryParse(user?.shedId ?? '');
-                          if (shedId != null) {
-                            context.push(
-                              '/buffalo-allocation',
-                              extra: {'shedId': shedId},
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'No shed assigned to your profile',
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                        child: _buildStatContent(
-                          context,
-                          Icons.hourglass_empty_rounded,
-                          dashboardState.stats.pendingAllocations,
-                          'Pending Allocation',
-                          Colors.pink,
-                        ),
-                      ),
-                      CustomCard(
-                        color: Colors.purple,
-                        type: DashboardCardType.priority,
-                        onTap: () => context.push('/ticket-management'),
-                        child: _buildStatContent(
-                          context,
-                          Icons.confirmation_number_outlined,
-                          dashboardState.stats.allTicketsCount,
-                          'Total Tickets',
-                          Colors.purple,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  if (dashboardState.unallocatedAnimals.isNotEmpty) ...[
-                    Text(
-                      "Unallocated Animals",
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.045,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 120,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: dashboardState.unallocatedAnimals.length,
-                        itemBuilder: (context, index) {
-                          final animal =
-                              dashboardState.unallocatedAnimals[index];
-                          return _buildUnallocatedAnimalCard(
-                            context,
-                            animal,
-                            user?.shedId,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                  Text(
-                    "Quick Actions",
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.045,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  GridView.count(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1.0,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      CustomCard(
-                        type: DashboardCardType.quickAction,
-                        onTap: () =>
-                            context.go('/new-supervisor/bulk-milk-entry'),
-                        child: _buildQuickActionContent(
-                          context,
-                          Icons.water_drop,
-                          'Milk Entry',
-                          Colors.orange,
-                        ),
-                      ),
-                      CustomCard(
-                        type: DashboardCardType.quickAction,
-                        onTap: () => showQuickActionDialog(
-                          context: context,
-                          type: QuickActionType.healthTicket,
-                          ref: ref,
-                        ),
-                        child: _buildQuickActionContent(
-                          context,
-                          Icons.medical_services,
-                          'Health ticket',
-                          AppTheme.errorRed,
-                        ),
-                      ),
-                      CustomCard(
-                        type: DashboardCardType.quickAction,
-                        onTap: () => context.push('/transfer-tickets'),
-                        child: _buildQuickActionContent(
-                          context,
-                          Icons.compare_arrows,
-                          'Transfer Tickets',
-                          AppTheme.slate,
-                        ),
-                      ),
-                      CustomCard(
-                        type: DashboardCardType.quickAction,
-                        onTap: () => showQuickActionDialog(
-                          context: context,
-                          type: QuickActionType.locateAnimal,
-                          ref: ref,
-                        ),
-                        child: _buildQuickActionContent(
-                          context,
-                          Icons.search,
-                          'Locate Animal',
-                          Colors.orange,
-                        ),
-                      ),
-                      CustomCard(
-                        type: DashboardCardType.quickAction,
-                        onTap: () {
-                          final shedId = int.tryParse(user?.shedId ?? '');
-                          if (shedId != null) {
-                            context.push(
-                              '/buffalo-allocation',
-                              extra: {'shedId': shedId},
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'No shed assigned to your profile',
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                        child: _buildQuickActionContent(
-                          context,
-                          Icons.grid_view_rounded,
-                          'Shed Allocation',
-                          AppTheme.primary,
-                        ),
-                      ),
-                      CustomCard(
-                        type: DashboardCardType.quickAction,
-                        onTap: () => context.push('/onboard-animal'),
-                        child: _buildQuickActionContent(
-                          context,
-                          Icons.add_business_rounded,
-                          'Buffalo Onboarding',
-                          AppTheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 100),
-                ],
-              ),
-            ),
+      body: _currentIndex == 3
+          ? const BuffaloProfileView()
+          : _buildDashboardContent(dashboardState, screenWidth, user),
       bottomNavigationBar: EmployeeBottomNavigation(
         role: UserType.supervisor,
         currentIndex: _currentIndex,
@@ -367,7 +133,7 @@ class _NewSupervisorDashboardState
           } else if (index == 2) {
             context.push('/new-supervisor/stats');
           } else if (index == 3) {
-            context.go('/new-supervisor/buffalo');
+            // In-page display handled by state change
           }
         },
       ),
@@ -375,7 +141,6 @@ class _NewSupervisorDashboardState
       floatingActionButton: GestureDetector(
         onTap: () {
           setState(() => _currentIndex = 4);
-          context.go('/supervisor-dashboard');
         },
         child: Container(
           height: 68,
@@ -409,6 +174,257 @@ class _NewSupervisorDashboardState
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDashboardContent(
+    SupervisorDashboardState dashboardState,
+    double screenWidth,
+    dynamic user,
+  ) {
+    if (dashboardState.isLoading) {
+      return _buildLoadingShimmer(context);
+    }
+
+    if (dashboardState.error != null) {
+      return Center(child: Text(dashboardState.error!));
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.95,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              CustomCard(
+                color: AppTheme.primary,
+                type: DashboardCardType.priority,
+                onTap: () {
+                  setState(() => _currentIndex = 3);
+                },
+                child: _buildStatContent(
+                  context,
+                  Icons.pets,
+                  dashboardState.stats.totalAnimals,
+                  'Total Animals',
+                  AppTheme.primary,
+                ),
+              ),
+              CustomCard(
+                color: AppTheme.errorRed,
+                type: DashboardCardType.priority,
+                onTap: () {},
+                child: _buildStatContent(
+                  context,
+                  Icons.water_drop,
+                  dashboardState.stats.milkToday,
+                  'Milk Today',
+                  AppTheme.lightSecondary,
+                ),
+              ),
+              CustomCard(
+                color: AppTheme.warningOrange,
+                type: DashboardCardType.priority,
+                onTap: () {},
+                child: _buildStatContent(
+                  context,
+                  Icons.warning,
+                  dashboardState.stats.activeIssues,
+                  'Active Issues',
+                  AppTheme.warningOrange,
+                ),
+              ),
+              CustomCard(
+                color: AppTheme.darkGrey,
+                type: DashboardCardType.priority,
+                onTap: () => context.push('/transfer-tickets'),
+                child: _buildStatContent(
+                  context,
+                  Icons.move_down,
+                  dashboardState.stats.transfers,
+                  'Transfers',
+                  AppTheme.darkGrey,
+                ),
+              ),
+              CustomCard(
+                color: Colors.pink,
+                type: DashboardCardType.priority,
+                onTap: () {
+                  final shedId = int.tryParse(user?.shedId ?? '');
+                  if (shedId != null) {
+                    context.push(
+                      '/buffalo-allocation',
+                      extra: {'shedId': shedId},
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No shed assigned to your profile'),
+                      ),
+                    );
+                  }
+                },
+                child: _buildStatContent(
+                  context,
+                  Icons.hourglass_empty_rounded,
+                  dashboardState.stats.pendingAllocations,
+                  'Pending Allocation',
+                  Colors.pink,
+                ),
+              ),
+              CustomCard(
+                color: Colors.purple,
+                type: DashboardCardType.priority,
+                onTap: () => context.push('/ticket-management'),
+                child: _buildStatContent(
+                  context,
+                  Icons.confirmation_number_outlined,
+                  dashboardState.stats.allTicketsCount,
+                  'Total Tickets',
+                  Colors.purple,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          if (dashboardState.unallocatedAnimals.isNotEmpty) ...[
+            Text(
+              "Unallocated Animals",
+              style: TextStyle(
+                fontSize: screenWidth * 0.045,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 120,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: dashboardState.unallocatedAnimals.length,
+                itemBuilder: (context, index) {
+                  final animal = dashboardState.unallocatedAnimals[index];
+                  return _buildUnallocatedAnimalCard(
+                    context,
+                    animal,
+                    user?.shedId,
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+          Text(
+            "Quick Actions",
+            style: TextStyle(
+              fontSize: screenWidth * 0.045,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.0,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              CustomCard(
+                type: DashboardCardType.quickAction,
+                onTap: () => context.go('/new-supervisor/bulk-milk-entry'),
+                child: _buildQuickActionContent(
+                  context,
+                  Icons.water_drop,
+                  'Milk Entry',
+                  Colors.orange,
+                ),
+              ),
+              CustomCard(
+                type: DashboardCardType.quickAction,
+                onTap: () => showQuickActionDialog(
+                  context: context,
+                  type: QuickActionType.healthTicket,
+                  ref: ref,
+                ),
+                child: _buildQuickActionContent(
+                  context,
+                  Icons.medical_services,
+                  'Health ticket',
+                  AppTheme.errorRed,
+                ),
+              ),
+              CustomCard(
+                type: DashboardCardType.quickAction,
+                onTap: () => context.push('/transfer-tickets'),
+                child: _buildQuickActionContent(
+                  context,
+                  Icons.compare_arrows,
+                  'Transfer Tickets',
+                  AppTheme.slate,
+                ),
+              ),
+              CustomCard(
+                type: DashboardCardType.quickAction,
+                onTap: () => showQuickActionDialog(
+                  context: context,
+                  type: QuickActionType.locateAnimal,
+                  ref: ref,
+                ),
+                child: _buildQuickActionContent(
+                  context,
+                  Icons.search,
+                  'Locate Animal',
+                  Colors.orange,
+                ),
+              ),
+              CustomCard(
+                type: DashboardCardType.quickAction,
+                onTap: () {
+                  final shedId = int.tryParse(user?.shedId ?? '');
+                  if (shedId != null) {
+                    context.push(
+                      '/buffalo-allocation',
+                      extra: {'shedId': shedId},
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No shed assigned to your profile'),
+                      ),
+                    );
+                  }
+                },
+                child: _buildQuickActionContent(
+                  context,
+                  Icons.grid_view_rounded,
+                  'Shed Allocation',
+                  AppTheme.primary,
+                ),
+              ),
+              CustomCard(
+                type: DashboardCardType.quickAction,
+                onTap: () => context.push('/onboard-animal'),
+                child: _buildQuickActionContent(
+                  context,
+                  Icons.add_business_rounded,
+                  'Buffalo Onboarding',
+                  AppTheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 100),
+        ],
       ),
     );
   }
