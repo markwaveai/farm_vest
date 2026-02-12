@@ -10,7 +10,7 @@ import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:farm_vest/core/services/tickets_api_services.dart';
 import 'package:farm_vest/core/services/api_services.dart';
-
+import 'package:farm_vest/core/services/notification_service.dart';
 import 'package:farm_vest/core/router/app_router.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
@@ -85,8 +85,12 @@ Future<void> main() async {
     }
   }
 
-  // One-time setup to create the config document in Firestore
-  // await RemoteConfigService.seedDefaultConfig();
+  // Initialize FCM after Firebase
+  try {
+    await NotificationService().initializeFCM();
+  } catch (e) {
+    debugPrint("FCM initialization failed: $e");
+  }
 
   // Initialize Remote Config (URLs & Version)
   await RemoteConfigService.initialize();
@@ -133,6 +137,36 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
       ],
       builder: (context, child) {
         final built = DevicePreview.appBuilder(context, child);
+        if (kDebugMode) {
+          return BiometricLockScreen(
+            child: Material(
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    color: Colors.orange,
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top,
+                      bottom: 2,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'DEV MODE - STAGING',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(child: built),
+                ],
+              ),
+            ),
+          );
+        }
         return BiometricLockScreen(child: built);
       },
     );

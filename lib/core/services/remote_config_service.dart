@@ -50,7 +50,7 @@ class RemoteConfigService {
       AppConstants.stagingUrl = stagingUrl;
     }
     if (akLiveUrl != null && akLiveUrl.isNotEmpty) {
-      AppConstants.animalKartApiUrl = akLiveUrl;
+      AppConstants.animalKartLiveApiUrl = akLiveUrl;
     }
     if (akStagingUrl != null && akStagingUrl.isNotEmpty) {
       AppConstants.animalKartStagingApiUrl = akStagingUrl;

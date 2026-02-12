@@ -105,6 +105,7 @@ dependencies:
   package_info_plus: ^9.0.0
   flutter_vlc_player: ^7.4.4
   url_launcher: ^6.3.2
+  firebase_messaging: ^15.2.10
 
 
 dependency_overrides:

@@ -1,44 +1,59 @@
 // App constants
 
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 const String kHyphen = '--';
 
 class AppConstants {
   static const String appName = 'FarmVest';
-  static const String deleteAccountUrl = 'https://dashboard.farmvest.in/farmvest/account-deletion';
+  static const String deleteAccountUrl =
+      'https://dashboard.farmvest.in/farmvest/account-deletion';
 
   static String stagingUrl =
       'https://farmvest-staging-apis-jn6cma3vvq-el.a.run.app/api';
   static String liveUrl =
       'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
 
+  static String localUrl = 'http://127.0.0.1:8000/api'; // For ADB Reverse (USB)
+  // static String localUrl = 'http://192.168.0.226:8000/api'; // For Physical Device (Your IP)
+  // static String localUrl = 'http://10.0.2.2:8000/api'; // For Android Emulator
+  // static String localUrl = 'http://localhost:8000/api'; // For iOS Simulator
+
   static String animalKartStagingApiUrl =
       'https://animalkart-stagging-jn6cma3vvq-el.a.run.app';
-  static String animalKartApiUrl =
+  static String animalKartLiveApiUrl =
       'https://animalkart-live-apis-jn6cma3vvq-el.a.run.app';
 
-  static String appLiveUrl = liveUrl;
+  static String animalKartApiUrl = animalKartLiveApiUrl;
+
+  static String appLiveUrl = localUrl; // Default to local for testing
   static String visitApiUrl = appLiveUrl;
 
   static const String authApiKey =
       'bWFya3dhdmUtZmFybXZlc3QtdGVzdHRpbmctYXBpa2V5';
 
+  static void useLocal() {
+    appLiveUrl = localUrl;
+    visitApiUrl = localUrl;
+    animalKartApiUrl = animalKartStagingApiUrl; // Usually staging for local dev
+  }
+
   static void useStaging() {
     appLiveUrl = stagingUrl;
     visitApiUrl = stagingUrl;
+    animalKartApiUrl = animalKartStagingApiUrl;
   }
 
   static void useLive() {
     appLiveUrl = liveUrl;
     visitApiUrl = liveUrl;
+    animalKartApiUrl = animalKartLiveApiUrl;
   }
 
   static Future<void> initialize() async {
-    final prefs = await SharedPreferences.getInstance();
-    final useStagingFlag = prefs.getBool('use_staging') ?? false;
-    if (useStagingFlag) {
+    if (kDebugMode) {
       useStaging();
     } else {
       useLive();

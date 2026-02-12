@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:farm_vest/core/services/notification_service.dart';
 
 import 'package:farm_vest/core/error/exceptions.dart';
 import 'package:farm_vest/core/services/biometric_service.dart';
@@ -338,10 +339,24 @@ class AuthController extends Notifier<AuthState> {
       userData: userData,
     );
 
+    // Subscribe to user topic for notifications
+    if (userData != null) {
+      debugPrint('Subscribing to topic: user_${userData.id}');
+      await NotificationService().subscribeToTopic('user_${userData.id}');
+    }
+
     return {'roles': availableRoles, 'userData': userData};
   }
 
   Future<void> logout() async {
+    // Unsubscribe from user topic
+    if (state.userData != null) {
+      debugPrint('Unsubscribing from topic: user_${state.userData!.id}');
+      await NotificationService().unsubscribeFromTopic(
+        'user_${state.userData!.id}',
+      );
+    }
+
     state = AuthState();
     await _repository.clearSession();
   }

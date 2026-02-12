@@ -37,19 +37,15 @@ class AuthApiServices {
             }
             return WhatsappOtpResponse.fromJson(data);
           } catch (e) {
-            if (response.body is String) {
-              final responseString = response.body as String;
-              final otpMatch = RegExp(
-                r'\b\d{4,6}\b',
-              ).firstMatch(responseString);
-              final extractedOtp = otpMatch?.group(0);
-              return WhatsappOtpResponse(
-                otp: extractedOtp,
-                user: null,
-                message: responseString,
-                status: true,
-              );
-            }
+            final responseString = response.body;
+            final otpMatch = RegExp(r'\b\d{4,6}\b').firstMatch(responseString);
+            final extractedOtp = otpMatch?.group(0);
+            return WhatsappOtpResponse(
+              otp: extractedOtp,
+              user: null,
+              message: responseString,
+              status: true,
+            );
           }
         } else {
           throw ServerException('Empty response from server');
