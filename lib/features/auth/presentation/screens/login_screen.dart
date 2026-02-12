@@ -71,17 +71,8 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
       case UserType.supervisor:
         context.go('/supervisor-dashboard');
         break;
-      case UserType.doctor:
-        context.go('/doctor-dashboard');
-        break;
-      case UserType.assistant:
-        context.go('/assistant-dashboard');
-        break;
       case UserType.farmManager:
         context.go('/farm-manager-dashboard');
-        break;
-      case UserType.admin:
-        context.go('/admin-dashboard');
         break;
       default:
         context.go('/customer-dashboard');
@@ -617,7 +608,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           child: Row(
             children: [
               // Country code picker style
-Row(
+              Row(
                 children: [
                   const Text('🇮🇳', style: TextStyle(fontSize: 22)),
                   const SizedBox(width: 8),

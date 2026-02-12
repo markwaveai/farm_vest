@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:farm_vest/core/widgets/farm_selector_input.dart';
 import '../../data/models/farm_manager_dashboard_model.dart';
 import '../../data/models/shed_model.dart';
 import 'package:farm_vest/features/farm_manager/data/models/allocated_animal_details.dart';
@@ -39,7 +38,7 @@ class _BuffaloAllocationScreenState
   Map<String, String> draftAllocations = {};
   String? selectedAnimalId;
   int? selectedShedId;
-  int? selectedFarmId; // For Admin to select farm
+  int? selectedFarmId; // To track the selected farm
 
   @override
   void initState() {
@@ -60,58 +59,18 @@ class _BuffaloAllocationScreenState
       ref.read(farmManagerProvider.notifier).resetAllocationState();
 
       final authState = ref.read(authProvider);
-      final userRole = authState.role;
+      final farmId = int.tryParse(authState.userData?.farmId ?? '');
+      ref.read(farmManagerProvider.notifier).fetchSheds(farmId: farmId);
+      ref
+          .read(farmManagerProvider.notifier)
+          .fetchUnallocatedAnimals(farmId: farmId);
 
-      // Only auto-fetch for Farm Manager and Supervisor
-      // Admin needs to select farm first
-      if (userRole != UserType.admin) {
-        final farmId = int.tryParse(authState.userData?.farmId ?? '');
-        ref.read(farmManagerProvider.notifier).fetchSheds(farmId: farmId);
+      if (selectedShedId != null) {
         ref
             .read(farmManagerProvider.notifier)
-            .fetchUnallocatedAnimals(farmId: farmId);
-
-        if (selectedShedId != null) {
-          ref
-              .read(farmManagerProvider.notifier)
-              .fetchShedPositions(selectedShedId!);
-        }
-      } else if (widget.initialFarmId != null) {
-        ref
-            .read(farmManagerProvider.notifier)
-            .fetchSheds(farmId: widget.initialFarmId);
-
-        ref
-            .read(farmManagerProvider.notifier)
-            .fetchUnallocatedAnimals(farmId: widget.initialFarmId);
-
-        if (selectedShedId != null) {
-          ref
-              .read(farmManagerProvider.notifier)
-              .fetchShedPositions(selectedShedId!);
-        }
-      } else if (widget.initialShedId != null) {
-        // For admin, we still might need to load the shed positions if initialShedId provided
-        ref
-            .read(farmManagerProvider.notifier)
-            .fetchShedPositions(widget.initialShedId!);
+            .fetchShedPositions(selectedShedId!);
       }
     });
-  }
-
-  void _onFarmSelected(int? farmId) {
-    if (farmId == null) return;
-    setState(() {
-      selectedFarmId = farmId;
-      selectedShedId = null;
-      draftAllocations.clear();
-      selectedAnimalId = null;
-    });
-    // Fetch sheds and animals for the selected farm
-    ref.read(farmManagerProvider.notifier).fetchSheds(farmId: farmId);
-    ref
-        .read(farmManagerProvider.notifier)
-        .fetchUnallocatedAnimals(farmId: farmId);
   }
 
   void _onShedSelected(int? shedId) {
@@ -136,30 +95,6 @@ class _BuffaloAllocationScreenState
       previous,
       next,
     ) {
-      // Logic for Admin to auto-select farm from initialShedId response
-      if (authState.role == UserType.admin &&
-          selectedFarmId == null &&
-          selectedShedId != null &&
-          next.currentShedAvailability != null &&
-          next.currentShedAvailability!.farmDetails != null) {
-        final farmDetails = next.currentShedAvailability!.farmDetails!;
-        final farmId = farmDetails['id'] is int
-            ? farmDetails['id']
-            : int.tryParse(farmDetails['id'].toString());
-
-        if (farmId != null) {
-          setState(() {
-            selectedFarmId = farmId;
-          });
-          // Fetch sheds and animals for this discovered farm
-          // This allows the dropdowns to populate correctly
-          ref.read(farmManagerProvider.notifier).fetchSheds(farmId: farmId);
-          ref
-              .read(farmManagerProvider.notifier)
-              .fetchUnallocatedAnimals(farmId: farmId);
-        }
-      }
-
       if (selectedShedId == null && next.sheds.isNotEmpty && !next.isLoading) {
         final userShedId = int.tryParse(authState.userData?.shedId ?? '');
 
@@ -256,9 +191,7 @@ class _BuffaloAllocationScreenState
               if (context.canPop()) {
                 context.pop();
               } else {
-                if (userRole == UserType.admin) {
-                  context.go('/admin-dashboard');
-                } else if (userRole == UserType.supervisor) {
+                if (userRole == UserType.supervisor) {
                   context.go('/supervisor-dashboard');
                 } else {
                   context.go('/farm-manager-dashboard');
@@ -319,26 +252,6 @@ class _BuffaloAllocationScreenState
         child: Column(
           children: [
             const SizedBox(height: 100), // Space for transparent AppBar
-            // Farm Selector (Admin only)
-            Consumer(
-              builder: (context, ref, child) {
-                final authState = ref.watch(authProvider);
-                if (authState.role == UserType.admin) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: FarmSelectorInput(
-                      selectedFarmId: selectedFarmId,
-                      onChanged: _onFarmSelected,
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-
             // Shed Selector
             _buildShedSelector(dashboardState),
 
@@ -699,13 +612,7 @@ class _BuffaloAllocationScreenState
                         Navigator.pop(context);
                         ref
                             .read(farmManagerProvider.notifier)
-                            .fetchSheds(
-                              farmId:
-                                  selectedFarmId ??
-                                  (ref.read(authProvider).role != UserType.admin
-                                      ? null
-                                      : selectedFarmId),
-                            );
+                            .fetchSheds(farmId: selectedFarmId ?? null);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('CCTV Configuration Updated'),
@@ -1472,55 +1379,17 @@ class _BuffaloAllocationScreenState
   }
 
   Future<void> _finalizeAllocations() async {
-    final authState = ref.read(authProvider);
-    final isUserAdmin = authState.role == UserType.admin;
-
-    // 1. Refined Validation for Farm and Shed (Admin only)
-    if (isUserAdmin) {
-      if (selectedFarmId == null && selectedShedId == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please select farm and shed first'),
-              backgroundColor: AppTheme.warningOrange,
-            ),
-          );
-        }
-        return;
-      } else if (selectedFarmId == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please select farm first'),
-              backgroundColor: AppTheme.warningOrange,
-            ),
-          );
-        }
-        return;
-      } else if (selectedShedId == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please select shed first'),
-              backgroundColor: AppTheme.warningOrange,
-            ),
-          );
-        }
-        return;
+    // 1. Refined Validation for Shed
+    if (selectedShedId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select a shed first'),
+            backgroundColor: AppTheme.warningOrange,
+          ),
+        );
       }
-    } else {
-      // Non-Admin validation (only Shed is mandatory)
-      if (selectedShedId == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please select shed first'),
-              backgroundColor: AppTheme.warningOrange,
-            ),
-          );
-        }
-        return;
-      }
+      return;
     }
 
     // 3. Validate Animal Selection (Draft Allocations)

@@ -1,7 +1,7 @@
 import 'package:farm_vest/features/employee/new_supervisor/data/repositories/supervisor_repository.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
-import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
+import 'package:farm_vest/core/models/ticket_model.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

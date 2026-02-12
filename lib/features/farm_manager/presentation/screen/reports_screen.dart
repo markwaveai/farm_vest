@@ -49,9 +49,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                 context.pop();
               } else {
                 final userRole = ref.read(authProvider).role;
-                if (userRole == UserType.admin) {
-                  context.go('/admin-dashboard');
-                } else if (userRole == UserType.supervisor) {
+                if (userRole == UserType.supervisor) {
                   context.go('/supervisor-dashboard');
                 } else {
                   context.go('/farm-manager-dashboard');

@@ -374,7 +374,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                     ),
                     const SizedBox(width: AppConstants.spacingS),
                     const Text(
-                      'Transfer Required - Pending Admin Approval',
+                      'Transfer Required - Pending Farm Manager Approval',
                       style: TextStyle(
                         color: AppTheme.warningOrange,
                         fontWeight: FontWeight.w600,
@@ -482,7 +482,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
             Text('Issue: ${_getIssueTypeName(issue.type)}'),
             const SizedBox(height: AppConstants.spacingM),
             const Text(
-              'This case requires animal transfer to isolation. Admin approval is needed.',
+              'This case requires animal transfer to isolation. Farm Manager approval is needed.',
               style: AppTheme.bodyMedium,
             ),
             const SizedBox(height: AppConstants.spacingM),
@@ -504,7 +504,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                   ),
                   SizedBox(height: AppConstants.spacingS),
                   Text(
-                    'You will be notified once the admin reviews and approves the transfer request.',
+                    'You will be notified once the Farm Manager reviews and approves the transfer request.',
                     style: AppTheme.bodySmall,
                   ),
                 ],

@@ -149,7 +149,10 @@ class AuthController extends Notifier<AuthState> {
       await _repository.saveToken(loginResponse.accessToken);
 
       final availableRoles = loginResponse.roles.isNotEmpty
-          ? loginResponse.roles.map((r) => UserType.fromString(r)).toList()
+          ? loginResponse.roles
+                .map((r) => UserType.fromString(r))
+                .toSet()
+                .toList()
           : [UserType.customer];
 
       final role = availableRoles.first;
@@ -283,6 +286,7 @@ class AuthController extends Notifier<AuthState> {
       if (apiRoles is List) {
         availableRoles = apiRoles
             .map((r) => UserType.fromString(r.toString()))
+            .toSet()
             .toList();
       } else if (apiRoles != null) {
         availableRoles = [UserType.fromString(apiRoles.toString())];
@@ -296,6 +300,7 @@ class AuthController extends Notifier<AuthState> {
       if (localData.roles.isNotEmpty) {
         availableRoles = localData.roles
             .map((r) => UserType.fromString(r))
+            .toSet()
             .toList();
       } else {
         // Fallback to single role string
@@ -315,8 +320,6 @@ class AuthController extends Notifier<AuthState> {
         availableRoles = [UserType.assistant];
       } else if (mobileNumber.endsWith('4')) {
         availableRoles = [UserType.farmManager];
-      } else if (mobileNumber.endsWith('9')) {
-        availableRoles = [UserType.admin];
       } else {
         availableRoles = [UserType.customer];
       }
@@ -377,6 +380,7 @@ class AuthController extends Notifier<AuthState> {
         if (userData.roles.isNotEmpty) {
           newAvailableRoles = userData.roles
               .map((r) => UserType.fromString(r))
+              .toSet()
               .toList();
         } else {
           newAvailableRoles = [UserType.fromString(userData.role)];

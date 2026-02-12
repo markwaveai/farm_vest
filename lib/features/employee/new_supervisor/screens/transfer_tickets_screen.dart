@@ -4,7 +4,7 @@ import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
-import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
+import 'package:farm_vest/core/models/ticket_model.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:go_router/go_router.dart';
 

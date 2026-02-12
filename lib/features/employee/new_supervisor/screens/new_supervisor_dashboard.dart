@@ -514,9 +514,6 @@ class NewSupervisorDashboard extends ConsumerWidget {
 
                             if (!context.mounted) return;
                             switch (role) {
-                              case UserType.admin:
-                                context.go('/admin-dashboard');
-                                break;
                               case UserType.farmManager:
                                 context.go('/farm-manager-dashboard');
                                 break;

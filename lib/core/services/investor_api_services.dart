@@ -19,7 +19,7 @@ import 'package:farm_vest/features/investor/data/models/investor_model.dart';
 ///
 /// All methods require authentication via bearer token.
 class InvestorApiServices {
-  /// Fetches all investors (admin/farm manager only).
+  /// Fetches all investors (farm manager only).
   ///
   /// This endpoint returns a list of all investors in the system.
   ///
@@ -78,7 +78,7 @@ class InvestorApiServices {
   ///
   /// Parameters:
   /// - [token]: Authentication bearer token
-  /// - [investorId]: Optional investor ID (for admin/farm manager queries)
+  /// - [investorId]: Optional investor ID (for farm manager queries)
   ///
   /// Returns [InvestorAnimalsResponse] containing the list of animals.
   ///
@@ -155,7 +155,7 @@ class InvestorApiServices {
   ///
   /// Parameters:
   /// - [token]: Authentication bearer token
-  /// - [investorId]: Optional investor ID (for admin/farm manager queries)
+  /// - [investorId]: Optional investor ID (for farm manager queries)
   ///
   /// Returns [InvestorSummaryResponse] containing all summary data.
   ///

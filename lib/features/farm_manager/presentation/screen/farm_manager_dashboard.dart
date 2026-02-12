@@ -679,12 +679,6 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
 
   Map<String, dynamic> _getRoleInfo(UserType role) {
     switch (role) {
-      case UserType.admin:
-        return {
-          'label': 'Administrator',
-          'icon': Icons.admin_panel_settings,
-          'color': Colors.blue,
-        };
       case UserType.farmManager:
         return {
           'label': 'Farm Manager',
@@ -763,9 +757,6 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
 
                             if (!mounted) return;
                             switch (role) {
-                              case UserType.admin:
-                                context.go('/admin-dashboard');
-                                break;
                               case UserType.farmManager:
                                 context.go('/farm-manager-dashboard');
                                 break;

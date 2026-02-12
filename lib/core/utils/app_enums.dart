@@ -9,8 +9,7 @@ enum UserType {
   supervisor('supervisor'),
   doctor('doctor'),
   assistant('assistant'),
-  farmManager('farm_manager'),
-  admin('admin');
+  farmManager('farm_manager');
 
   final String value;
   const UserType(this.value);
@@ -26,9 +25,6 @@ enum UserType {
     if (normalized == 'doctor') return UserType.doctor;
     if (normalized == 'farm_manager' || normalized == 'manager') {
       return UserType.farmManager;
-    }
-    if (normalized == 'admin' || normalized == 'administrator') {
-      return UserType.admin;
     }
     if (normalized == 'assistant' || normalized == 'assistant_doctor') {
       return UserType.assistant;
@@ -52,8 +48,6 @@ enum UserType {
         return 'DOCTOR';
       case UserType.assistant:
         return 'ASSISTANT_DOCTOR';
-      case UserType.admin:
-        return 'ADMIN';
     }
   }
 
@@ -69,15 +63,11 @@ enum UserType {
         return 'Doctor';
       case UserType.assistant:
         return 'Assistant';
-      case UserType.admin:
-        return 'Administrator';
     }
   }
 
   IconData get icon {
     switch (this) {
-      case UserType.admin:
-        return Icons.admin_panel_settings;
       case UserType.farmManager:
         return Icons.agriculture;
       case UserType.supervisor:
@@ -93,9 +83,6 @@ enum UserType {
 
   Color get color {
     switch (this) {
-      case UserType.admin:
-        // Using explicit RGBO to match requested Colors.blue
-        return Colors.blue;
       case UserType.farmManager:
         return Colors.green;
       case UserType.supervisor:
@@ -116,7 +103,6 @@ enum AppRoutes {
   userTypeSelection('/user-type-selection'),
   login('/login'),
   customerDashboard('/customer-dashboard'),
-  adminDashboard('/admin-dashboard'),
   unitDetails('/unit-details'),
   cctvLive('/cctv-live'),
   monthlyVisits('/monthly-visits'),

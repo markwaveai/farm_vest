@@ -192,9 +192,6 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
 
                             if (!mounted) return;
                             switch (role) {
-                              case UserType.admin:
-                                context.go('/admin-dashboard');
-                                break;
                               case UserType.farmManager:
                                 context.go('/farm-manager-dashboard');
                                 break;
@@ -332,8 +329,8 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
             'Delete Account',
             style: TextStyle(color: AppTheme.errorRed),
           ),
-          
-         // trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+
+          // trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: _showDeleteAccountDialog,
         ),
       ],

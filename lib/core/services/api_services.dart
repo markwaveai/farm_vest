@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../theme/app_constants.dart';
 import 'package:farm_vest/features/farm_manager/data/models/farm_model.dart';
-import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
 // Removed unused import
 
 class ApiServices {

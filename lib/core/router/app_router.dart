@@ -1,12 +1,3 @@
-import 'package:farm_vest/features/admin/presentation/screens/add_farm_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/add_shed_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/add_staff_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/admin_dashboard_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/admin_onboard_animal_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/farm_sheds_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/investor_animals_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/investor_management_screen.dart';
-import 'package:farm_vest/features/admin/presentation/screens/ticket_management_screen.dart';
 import 'package:farm_vest/features/doctors/screens/all_health_tickets.dart';
 import 'package:farm_vest/features/doctors/screens/doctor_home_screen.dart';
 import 'package:farm_vest/features/doctors/screens/vaccination_tickets.dart';
@@ -264,67 +255,6 @@ class AppRouter {
       GoRoute(
         path: '/create-transfer-ticket',
         builder: (context, state) => const CreateTransferTicketScreen(),
-      ),
-
-      // Admin Routes
-      GoRoute(
-        path: '/admin-dashboard',
-        builder: (context, state) => const AdminDashboardScreen(),
-      ),
-      GoRoute(
-        name: 'add-farm',
-        path: '/add-farm',
-        builder: (context, state) => const AddFarmScreen(),
-      ),
-      GoRoute(
-        name: 'add-shed',
-        path: '/add-shed',
-        builder: (context, state) => const AddShedScreen(),
-      ),
-      GoRoute(
-        name: 'admin-onboard-animal',
-        path: '/admin-onboard-animal',
-        builder: (context, state) => const AdminOnboardAnimalScreen(),
-      ),
-      GoRoute(
-        name: 'add-staff',
-        path: '/add-staff',
-        builder: (context, state) {
-          final extras = state.extra as Map<String, dynamic>?;
-          final isOnboardingManager =
-              extras?['isOnboardingManager'] as bool? ?? false;
-          return AddStaffScreen(isOnboardingManager: isOnboardingManager);
-        },
-      ),
-      GoRoute(
-        path: '/ticket-management',
-        builder: (context, state) => const TicketManagementScreen(),
-      ),
-      GoRoute(
-        path: '/farm-sheds',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
-          return FarmShedsScreen(
-            farmId: extra['farmId'] as int,
-            farmName: extra['farmName'] as String,
-          );
-        },
-      ),
-      GoRoute(
-        name: 'investor-management',
-        path: '/investor-management',
-        builder: (context, state) => const InvestorManagementScreen(),
-      ),
-      GoRoute(
-        name: 'investor-animals',
-        path: '/investor-animals',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
-          return InvestorAnimalsScreen(
-            investorId: extra['investorId'] as int,
-            investorName: extra['investorName'] as String,
-          );
-        },
       ),
 
       // Common Routes

@@ -1,5 +1,5 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
-import 'package:farm_vest/features/admin/data/models/ticket_model.dart';
+import 'package:farm_vest/core/models/ticket_model.dart';
 import 'package:farm_vest/features/doctors/screens/treatment_details_screen.dart';
 import 'package:flutter/material.dart';
 

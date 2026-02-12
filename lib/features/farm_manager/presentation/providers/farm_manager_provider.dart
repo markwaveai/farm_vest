@@ -185,7 +185,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
   Future<bool> onboardAnimalsBulk({
     required AnimalkartOrder order,
     required List<AnimalOnboardingEntry> animals,
-    int? farmId, // Optional farm_id for Admin
+    int? farmId, // Optional farm_id for specific farm selection
   }) async {
     if (animals.isEmpty) return false;
 

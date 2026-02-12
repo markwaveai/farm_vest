@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:farm_vest/core/widgets/farm_selector_input.dart';
 import '../../data/models/animal_onboarding_entry.dart';
 import '../widgets/onboarding/animal_entry_form.dart';
 import '../widgets/onboarding/collapsible_section_title.dart';
@@ -557,9 +556,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
               context.pop();
             } else {
               final userRole = ref.read(authProvider).role;
-              if (userRole == UserType.admin) {
-                context.go('/admin-dashboard');
-              } else if (userRole == UserType.supervisor) {
+              if (userRole == UserType.supervisor) {
                 context.go('/supervisor-dashboard');
               } else {
                 context.go('/farm-manager-dashboard');
@@ -655,13 +652,6 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
               ),
 
               const SizedBox(height: 16),
-              if (ref.read(authProvider).role == UserType.admin) ...[
-                FarmSelectorInput(
-                  selectedFarmId: _selectedFarmId,
-                  onChanged: (id) => setState(() => _selectedFarmId = id),
-                ),
-                const SizedBox(height: 16),
-              ],
 
               const SizedBox(height: 20),
 

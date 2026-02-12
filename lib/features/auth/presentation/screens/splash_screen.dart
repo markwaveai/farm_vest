@@ -120,9 +120,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       case UserType.farmManager:
         context.go('/farm-manager-dashboard');
         break;
-      case UserType.admin:
-        context.go('/admin-dashboard');
-        break;
     }
   }
 

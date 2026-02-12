@@ -42,11 +42,11 @@ final paidOrdersProvider =
       params,
     ) async {
       final prefs = await SharedPreferences.getInstance();
-      final adminMobile = prefs.getString('mobile_number') ?? "";
+      final managerMobile = prefs.getString('mobile_number') ?? "";
 
       final response = await AnimalApiServices.getIntransitOrders(
         mobile: params.mobile.toString(),
-        adminMobile: adminMobile,
+        managerMobile: managerMobile,
       );
 
       return IntransitOrdersData(orders: response);

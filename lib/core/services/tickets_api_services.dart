@@ -6,7 +6,7 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-import '../../features/admin/data/models/ticket_model.dart';
+import 'package:farm_vest/core/models/ticket_model.dart';
 
 class TicketsApiServices {
   static VoidCallback? onUnauthorized;

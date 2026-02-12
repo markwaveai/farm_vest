@@ -81,7 +81,7 @@ class AnimalApiServices {
 
   static Future<List<AnimalkartOrder>> getIntransitOrders({
     String? mobile,
-    required String adminMobile,
+    required String managerMobile,
   }) async {
     try {
       String url =
@@ -90,7 +90,7 @@ class AnimalApiServices {
       final response = await http.post(
         Uri.parse(url),
         headers: {
-          'x-admin-mobile': adminMobile,
+          'x-admin-mobile': managerMobile,
           'Content-Type': AppConstants.applicationJson,
         },
         body: jsonEncode({"mobile": mobile ?? ""}),
