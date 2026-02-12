@@ -34,7 +34,7 @@ import 'package:farm_vest/features/farm_manager/presentation/screen/staff_list_s
 import 'package:farm_vest/features/farm_manager/presentation/widgets/investor_details.dart';
 import 'package:farm_vest/features/investor/presentation/screens/cctv_screens/cctv_main_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/monthly_visits/monthly_visits_screen.dart';
-import 'package:farm_vest/features/investor/presentation/screens/profile_Screens/investor_profile_screen.dart';
+import 'package:farm_vest/features/common/presentation/screens/profile_screen.dart';
 import 'package:farm_vest/features/investor/presentation/widgets/investor_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -98,8 +98,8 @@ class AppRouter {
           //   builder: (context, state) => const RevenueScreen(),
           // ),
           GoRoute(
-            path: '/customer-profile',
-            builder: (context, state) => const InvestorProfileScreen(),
+            path: '/profile',
+            builder: (context, state) => const ProfileScreen(),
           ),
         ],
       ),

@@ -12,7 +12,6 @@ import 'ticket_management_screen.dart';
 import 'staff_management_screen.dart';
 import '../widgets/admin_bottom_navigation.dart';
 import 'package:farm_vest/features/admin/presentation/screens/investor_management_screen.dart';
-import 'package:farm_vest/features/auth/presentation/widgets/profile_menu_drawer.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -24,7 +23,6 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
 
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   int _selectedIndex = 0;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +33,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         setState(() => _selectedIndex = 0);
       },
       child: Scaffold(
-        key: _scaffoldKey,
         backgroundColor: AppTheme.white,
-        drawer: const ProfileMenuDrawer(),
         body: _buildBody(),
         bottomNavigationBar: AdminBottomNavigation(
           currentIndex: _selectedIndex,
@@ -303,16 +299,38 @@ class _AdminHomeView extends ConsumerWidget {
             ),
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: AppTheme.black),
-          onPressed: () => Scaffold.of(context).openDrawer(),
-        ),
         actions: [
-          IconButton(
-            onPressed: () => _showSwitchRoleBottomSheet(context, ref),
-            icon: const Icon(Icons.swap_horiz_rounded, color: AppTheme.black),
-            tooltip: 'Switch Role',
+          if (ref.watch(authProvider).availableRoles.length > 1)
+            IconButton(
+              onPressed: () => _showSwitchRoleBottomSheet(context, ref),
+              icon: const Icon(Icons.swap_horiz_rounded, color: AppTheme.black),
+              tooltip: 'Switch Role',
+            ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => context.push('/profile'),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: AppTheme.primary.withOpacity(0.1),
+              child: user?.imageUrl != null && user!.imageUrl!.isNotEmpty
+                  ? ClipOval(
+                      child: Image.network(
+                        user.imageUrl!,
+                        fit: BoxFit.cover,
+                        width: 36,
+                        height: 36,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.person,
+                              size: 20,
+                              color: AppTheme.primary,
+                            ),
+                      ),
+                    )
+                  : const Icon(Icons.person, size: 20, color: AppTheme.primary),
+            ),
           ),
+          const SizedBox(width: 16),
         ],
       ),
       body: SingleChildScrollView(

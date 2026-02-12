@@ -15,34 +15,13 @@ class ProfileMenuDrawer extends ConsumerStatefulWidget {
 }
 
 class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
-  final _formKey = GlobalKey<FormState>();
-
-  late TextEditingController _nameController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneController;
-  late TextEditingController _addressController;
-  late TextEditingController _dateController;
-
   @override
   void initState() {
     super.initState();
-    final user = ref.read(authProvider).userData;
-    _nameController = TextEditingController(
-      text: '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim(),
-    );
-    _emailController = TextEditingController(text: user?.email ?? '');
-    _phoneController = TextEditingController(text: user?.mobile ?? '');
-    _addressController = TextEditingController(text: user?.address ?? '');
-    _dateController = TextEditingController(text: user?.dob ?? '');
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
-    _dateController.dispose();
     super.dispose();
   }
 
@@ -106,7 +85,8 @@ class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final user = ref.watch(authProvider).userData;
+    final authState = ref.watch(authProvider);
+    final user = authState.userData;
 
     return Drawer(
       width: size.width * 0.8,
@@ -116,156 +96,146 @@ class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
       child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Image.asset(
-                    'assets/images/farmvest_logo.png',
-                    height: 50,
-                    color: Colors.white,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Image.asset(
+                  'assets/images/farmvest_logo.png',
+                  height: 50,
+                  color: Colors.white,
                 ),
-                const SizedBox(height: 30),
-                Center(
-                  child: Column(
+              ),
+              const SizedBox(height: 30),
+              Center(
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white.withOpacity(0.9),
+                      child:
+                          (user?.imageUrl != null && user!.imageUrl!.isNotEmpty)
+                          ? ClipOval(
+                              child: Image.network(
+                                user.imageUrl!,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Icon(
+                                      Icons.person,
+                                      size: 45,
+                                      color: AppTheme.primary,
+                                    ),
+                              ),
+                            )
+                          : Icon(
+                              Icons.person_rounded,
+                              size: 45,
+                              color: AppTheme.primary,
+                            ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      user?.name ?? '',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      user?.email ?? '',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.push('/profile');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppTheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text('View Profile'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+              const Divider(color: Colors.white24),
+              const SizedBox(height: 10),
+              _buildMenuItem(
+                icon: Icons.shield_outlined,
+                title: 'App Lock',
+                subtitle: 'Use biometric to unlock the app',
+              ),
+              _buildSwitchMenuItem(
+                icon: ref.watch(themeProvider) == ThemeMode.dark
+                    ? Icons.light_mode
+                    : Icons.dark_mode,
+                title: 'Dark Mode',
+                subtitle: ref.watch(themeProvider) == ThemeMode.dark
+                    ? 'Enabled'
+                    : 'Disabled',
+                value: ref.watch(themeProvider) == ThemeMode.dark,
+                onChanged: (value) {
+                  ref.read(themeProvider.notifier).toggleTheme();
+                },
+              ),
+              _buildMenuItem(
+                icon: Icons.help_outline,
+                title: 'Help & Support',
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push('/support');
+                },
+              ),
+              _buildMenuItem(
+                icon: Icons.delete,
+                title: 'Delete Account',
+                onTap: _showDeleteAccountDialog,
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: _showLogoutDialog,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        'My Profile',
+                        'Logout',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Colors.white.withOpacity(0.9),
-                        child: Icon(
-                          Icons.person_rounded,
-                          size: 45,
-                          color: AppTheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        '${user?.firstName ?? ''} ${user?.lastName ?? ''}'
-                            .trim(),
-                        style: const TextStyle(
-                          color: Colors.white,
                           fontSize: 16,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Text(
-                        user?.email ?? '',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
-                        ),
-                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.logout_rounded, size: 20),
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
-                _buildLabel('Full Name'),
-                _buildTextField(_nameController, readOnly: true),
-                _buildLabel('Email'),
-                _buildTextField(_emailController, readOnly: true),
-                _buildLabel('Phone'),
-                _buildTextField(_phoneController, readOnly: true),
-                _buildLabel('Address'),
-                _buildTextField(
-                  _addressController,
-                  readOnly: true,
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 20),
-                const Divider(color: Colors.white24),
-                const SizedBox(height: 10),
-                _buildMenuItem(
-                  icon: Icons.shield_outlined,
-                  title: 'App Lock',
-                  subtitle: 'Use biometric to unlock the app',
-                ),
-                _buildSwitchMenuItem(
-                  icon: ref.watch(themeProvider) == ThemeMode.dark
-                      ? Icons.light_mode
-                      : Icons.dark_mode,
-                  title: 'Dark Mode',
-                  subtitle: ref.watch(themeProvider) == ThemeMode.dark
-                      ? 'Enabled'
-                      : 'Disabled',
-                  value: ref.watch(themeProvider) == ThemeMode.dark,
-                  onChanged: (value) {
-                    ref.read(themeProvider.notifier).toggleTheme();
-                  },
-                ),
-                _buildMenuItem(
-                  icon: Icons.help_outline,
-                  title: 'Help & Support',
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/support');
-                  },
-                ),
-                _buildMenuItem(
-                  icon: Icons.delete,
-                  title: 'Delete Account',
-
-                  onTap: _showDeleteAccountDialog,
-                ),
-                const SizedBox(height: 40),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: _showLogoutDialog,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Logout',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.logout_rounded, size: 20),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6, left: 4),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.9),
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -322,39 +292,6 @@ class _ProfileMenuDrawerState extends ConsumerState<ProfileMenuDrawer> {
             inactiveTrackColor: Colors.white.withOpacity(0.3),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller, {
-    bool readOnly = false,
-    int maxLines = 1,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        controller: controller,
-        readOnly: readOnly,
-        maxLines: maxLines,
-        style: const TextStyle(
-          color: Colors.black87,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.85),
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-        ),
       ),
     );
   }

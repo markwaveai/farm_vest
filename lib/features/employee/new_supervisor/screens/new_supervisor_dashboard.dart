@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
-import 'package:farm_vest/features/auth/presentation/widgets/profile_menu_drawer.dart';
 import 'package:shimmer/shimmer.dart';
 
 class NewSupervisorDashboard extends ConsumerWidget {
@@ -30,18 +29,11 @@ class NewSupervisorDashboard extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      drawer: const ProfileMenuDrawer(),
       appBar: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         toolbarHeight: screenWidth * 0.22,
-        centerTitle: false,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
-        ),
+        automaticallyImplyLeading: false,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -82,6 +74,31 @@ class NewSupervisorDashboard extends ConsumerWidget {
             icon: const Icon(Icons.notifications_active_outlined),
             tooltip: 'Notifications',
           ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => context.push('/profile'),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: AppTheme.primary.withOpacity(0.1),
+              child: user?.imageUrl != null && user!.imageUrl!.isNotEmpty
+                  ? ClipOval(
+                      child: Image.network(
+                        user.imageUrl!,
+                        fit: BoxFit.cover,
+                        width: 36,
+                        height: 36,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.person,
+                              size: 20,
+                              color: AppTheme.primary,
+                            ),
+                      ),
+                    )
+                  : const Icon(Icons.person, size: 20, color: AppTheme.primary),
+            ),
+          ),
+          const SizedBox(width: 16),
         ],
       ),
       body: dashboardState.isLoading

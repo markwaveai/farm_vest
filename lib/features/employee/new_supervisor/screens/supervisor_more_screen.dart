@@ -77,44 +77,78 @@ class SupervisorMoreScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Profile Header
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: AppTheme.primary.withOpacity(0.1),
-                    child: const Icon(
-                      Icons.person,
-                      size: 35,
-                      color: AppTheme.primary,
-                    ),
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: AppTheme.primary.withOpacity(0.1),
+                        child:
+                            (user?.imageUrl != null &&
+                                user!.imageUrl!.isNotEmpty)
+                            ? ClipOval(
+                                child: Image.network(
+                                  user.imageUrl!,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(
+                                        Icons.person,
+                                        size: 35,
+                                        color: AppTheme.primary,
+                                      ),
+                                ),
+                              )
+                            : const Icon(
+                                Icons.person,
+                                size: 35,
+                                color: AppTheme.primary,
+                              ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user?.name ?? 'Supervisor',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              user?.mobile ?? '',
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user?.name ?? 'Supervisor',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () => context.push('/profile'),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        Text(
-                          user?.mobile ?? '',
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
+                        side: const BorderSide(color: AppTheme.primary),
+                      ),
+                      child: const Text('View / Edit Profile'),
                     ),
                   ),
                 ],

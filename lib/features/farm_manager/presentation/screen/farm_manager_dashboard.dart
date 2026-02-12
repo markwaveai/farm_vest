@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:farm_vest/features/auth/presentation/widgets/profile_menu_drawer.dart';
 
 class FarmManagerDashboard extends ConsumerStatefulWidget {
   const FarmManagerDashboard({super.key});
@@ -23,7 +22,6 @@ class FarmManagerDashboard extends ConsumerStatefulWidget {
 }
 
 class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   void initState() {
     super.initState();
@@ -247,9 +245,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     displayName = "$displayName,";
 
     return Scaffold(
-      key: _scaffoldKey,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      drawer: const ProfileMenuDrawer(),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -275,13 +271,6 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             ),
           ),
         ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.menu,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
         actions: [
           if (ref.watch(authProvider).availableRoles.length > 1)
             IconButton(
@@ -306,6 +295,31 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             ),
             onPressed: () => context.push('/notifications'),
           ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => context.push('/profile'),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: AppTheme.primary.withOpacity(0.1),
+              child: user?.imageUrl != null && user!.imageUrl!.isNotEmpty
+                  ? ClipOval(
+                      child: Image.network(
+                        user.imageUrl!,
+                        fit: BoxFit.cover,
+                        width: 36,
+                        height: 36,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.person,
+                              size: 20,
+                              color: AppTheme.primary,
+                            ),
+                      ),
+                    )
+                  : const Icon(Icons.person, size: 20, color: AppTheme.primary),
+            ),
+          ),
+          const SizedBox(width: 16),
         ],
       ),
       body: ds.isLoading

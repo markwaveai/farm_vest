@@ -24,7 +24,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
     if (location.startsWith('/asset-valuation')) return 1;
     if (location.startsWith('/cctv-live')) return 2;
     if (location.startsWith('/revenue')) return 3;
-    if (location.startsWith('/customer-profile')) return 4;
+    if (location.startsWith('/profile')) return 4;
     return null;
   }
 
@@ -47,7 +47,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
         context.go('/revenue');
         break;
       case 4:
-        context.go('/customer-profile');
+        context.go('/profile');
         break;
     }
   }
@@ -116,7 +116,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
                   Padding(
                     padding: const EdgeInsets.only(right: 16.0),
                     child: GestureDetector(
-                      onTap: () => context.push('/customer-profile'),
+                      onTap: () => context.push('/profile'),
                       child: CircleAvatar(
                         radius: 20,
                         backgroundColor: AppTheme.primary.withOpacity(0.1),

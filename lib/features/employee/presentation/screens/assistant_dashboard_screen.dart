@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
-import 'package:farm_vest/features/auth/presentation/widgets/profile_menu_drawer.dart';
 import '../widgets/employee_dashboard_card.dart';
 
 class AssignedTask {
@@ -58,7 +57,6 @@ class AssistantDashboardScreen extends ConsumerStatefulWidget {
 
 class _AssistantDashboardScreenState
     extends ConsumerState<AssistantDashboardScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<AssignedTask> _assignedTasks = [];
   List<MonitoringRecord> _monitoringRecords = [];
 
@@ -143,20 +141,16 @@ class _AssistantDashboardScreenState
         }
       },
       child: Scaffold(
-        key: _scaffoldKey,
         appBar: AppBar(
           title: const Text('Assistant Dashboard'),
-          leading: IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
+          automaticallyImplyLeading: false,
           actions: [
-            // if (ref.watch(authProvider).availableRoles.length > 1)
-            IconButton(
-              icon: const Icon(Icons.swap_horiz),
-              onPressed: _showSwitchRoleBottomSheet,
-              tooltip: 'Switch Role',
-            ),
+            if (ref.watch(authProvider).availableRoles.length > 1)
+              IconButton(
+                icon: const Icon(Icons.swap_horiz),
+                onPressed: _showSwitchRoleBottomSheet,
+                tooltip: 'Switch Role',
+              ),
             IconButton(
               icon: const Icon(Icons.notifications),
               onPressed: () => context.push(
@@ -164,9 +158,39 @@ class _AssistantDashboardScreenState
                 extra: {'fallbackRoute': '/assistant-dashboard'},
               ),
             ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () => context.push('/profile'),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: AppTheme.primary.withOpacity(0.1),
+                child:
+                    ref.watch(authProvider).userData?.imageUrl != null &&
+                        ref.watch(authProvider).userData!.imageUrl!.isNotEmpty
+                    ? ClipOval(
+                        child: Image.network(
+                          ref.watch(authProvider).userData!.imageUrl!,
+                          fit: BoxFit.cover,
+                          width: 36,
+                          height: 36,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(
+                                Icons.person,
+                                size: 20,
+                                color: AppTheme.primary,
+                              ),
+                        ),
+                      )
+                    : const Icon(
+                        Icons.person,
+                        size: 20,
+                        color: AppTheme.primary,
+                      ),
+              ),
+            ),
+            const SizedBox(width: 16),
           ],
         ),
-        drawer: const ProfileMenuDrawer(),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(AppConstants.spacingM),
           child: Column(
