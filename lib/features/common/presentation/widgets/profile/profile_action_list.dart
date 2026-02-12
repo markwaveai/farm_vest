@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProfileActionList extends ConsumerStatefulWidget {
@@ -21,11 +22,13 @@ class ProfileActionList extends ConsumerStatefulWidget {
 class _ProfileActionListState extends ConsumerState<ProfileActionList> {
   bool _isBiometricEnabled = false;
   bool _isBiometricSupported = false;
+  String _appVersion = '';
 
   @override
   void initState() {
     super.initState();
     _loadBiometricPreference();
+    _loadAppVersion();
   }
 
   Future<void> _loadBiometricPreference() async {
@@ -35,6 +38,14 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
     setState(() {
       _isBiometricEnabled = enabled;
       _isBiometricSupported = supported;
+    });
+  }
+
+  Future<void> _loadAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (!mounted) return;
+    setState(() {
+      _appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
     });
   }
 
@@ -333,6 +344,26 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
           // trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: _showDeleteAccountDialog,
         ),
+        if (_appVersion.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Text(
+            'Version $_appVersion',
+            style: TextStyle(
+              color: AppTheme.mediumGrey,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            AppConstants.poweredBy,
+            style: TextStyle(
+              color: AppTheme.mediumGrey.withOpacity(0.7),
+              fontSize: 10,
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
       ],
     );
   }

@@ -12,6 +12,8 @@ import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dar
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:shimmer/shimmer.dart';
 
+import 'package:farm_vest/features/employee/new_supervisor/widgets/supervisor_views.dart';
+
 class NewSupervisorDashboard extends ConsumerStatefulWidget {
   const NewSupervisorDashboard({super.key});
 
@@ -37,23 +39,45 @@ class _NewSupervisorDashboardState
     final farmLocation = user?.farmLocation ?? "Location";
     final displayName = user?.firstName ?? "Supervisor";
 
+    String appBarTitle = 'Dashboard';
+    bool showProfileInfo = _currentIndex == 4;
+
+    switch (_currentIndex) {
+      case 0:
+        appBarTitle = 'Milk Entry';
+        break;
+      case 1:
+        appBarTitle = 'Alerts';
+        break;
+      case 2:
+        appBarTitle = 'Farm Statistics';
+        break;
+      case 3:
+        appBarTitle = 'Buffalo Profile';
+        break;
+      case 4:
+        appBarTitle = "Hello, $displayName";
+        break;
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
-        toolbarHeight: _currentIndex == 3 ? null : screenWidth * 0.22,
-        automaticallyImplyLeading: false,
-        title: _currentIndex == 3
-            ? const Text(
-                'Buffalo Profile',
-                style: TextStyle(fontWeight: FontWeight.bold),
+        toolbarHeight: showProfileInfo ? screenWidth * 0.22 : 64,
+        leading: !showProfileInfo
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => setState(() => _currentIndex = 4),
               )
-            : Column(
+            : null,
+        title: showProfileInfo
+            ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Hello, $displayName",
+                    appBarTitle,
                     style: TextStyle(
                       fontSize: screenWidth * 0.05,
                       fontWeight: FontWeight.bold,
@@ -79,6 +103,10 @@ class _NewSupervisorDashboardState
                     ),
                   ),
                 ],
+              )
+            : Text(
+                appBarTitle,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
         actions: [
           IconButton(
@@ -118,23 +146,21 @@ class _NewSupervisorDashboardState
           const SizedBox(width: 16),
         ],
       ),
-      body: _currentIndex == 3
-          ? const BuffaloProfileView()
-          : _buildDashboardContent(dashboardState, screenWidth, user),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          const BulkMilkEntryView(), // 0
+          const SupervisorAlertsView(), // 1
+          const SupervisorStatsView(), // 2
+          const BuffaloProfileView(), // 3
+          _buildDashboardContent(dashboardState, screenWidth, user), // 4
+        ],
+      ),
       bottomNavigationBar: EmployeeBottomNavigation(
         role: UserType.supervisor,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() => _currentIndex = index);
-          if (index == 0) {
-            context.push('/new-supervisor/bulk-milk-entry');
-          } else if (index == 1) {
-            context.push('/new-supervisor/alerts');
-          } else if (index == 2) {
-            context.push('/new-supervisor/stats');
-          } else if (index == 3) {
-            // In-page display handled by state change
-          }
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -198,9 +224,9 @@ class _NewSupervisorDashboardState
         children: [
           GridView.count(
             crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.95,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.4,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             children: [
@@ -333,15 +359,15 @@ class _NewSupervisorDashboardState
           const SizedBox(height: 12),
           GridView.count(
             crossAxisCount: 2,
-            crossAxisSpacing: 14,
+            crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: 1.0,
+            childAspectRatio: 1.6,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             children: [
               CustomCard(
                 type: DashboardCardType.quickAction,
-                onTap: () => context.go('/new-supervisor/bulk-milk-entry'),
+                onTap: () => setState(() => _currentIndex = 0),
                 child: _buildQuickActionContent(
                   context,
                   Icons.water_drop,
@@ -365,12 +391,12 @@ class _NewSupervisorDashboardState
               ),
               CustomCard(
                 type: DashboardCardType.quickAction,
-                onTap: () => context.push('/transfer-tickets'),
+                onTap: () => setState(() => _currentIndex = 1),
                 child: _buildQuickActionContent(
                   context,
-                  Icons.compare_arrows,
-                  'Transfer Tickets',
-                  AppTheme.slate,
+                  Icons.notification_important_rounded,
+                  'Alerts & Issues',
+                  AppTheme.warningOrange,
                 ),
               ),
               CustomCard(
@@ -483,16 +509,16 @@ class _NewSupervisorDashboardState
     Color iconColor,
   ) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final iconSize = screenWidth * 0.07;
-    final subtitleFontSize = screenWidth * 0.040;
-    final titleFontSize = screenWidth * 0.030;
+    final iconSize = screenWidth * 0.055;
+    final subtitleFontSize = screenWidth * 0.038;
+    final titleFontSize = screenWidth * 0.028;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(icon, color: iconColor, size: iconSize),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
           subtitle,
           style: TextStyle(
@@ -519,21 +545,21 @@ class _NewSupervisorDashboardState
     Color iconColor,
   ) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final iconSize = screenWidth * 0.08;
-    final textSize = screenWidth * 0.035;
+    final iconSize = screenWidth * 0.06;
+    final textSize = screenWidth * 0.032;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.2),
+            color: iconColor.withOpacity(0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: iconColor, size: iconSize),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Text(
           label,
           textAlign: TextAlign.center,

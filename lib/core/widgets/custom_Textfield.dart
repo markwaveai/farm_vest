@@ -13,6 +13,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onFieldSubmitted;
   final Widget? prefixIcon;
   final TextStyle? style;
   final TextCapitalization textCapitalization;
@@ -39,6 +40,7 @@ class CustomTextField extends StatelessWidget {
     this.prefixIcon,
     this.style,
     this.onChanged,
+    this.onFieldSubmitted,
     this.textCapitalization = TextCapitalization.none,
     this.autovalidateMode,
   });
@@ -70,6 +72,7 @@ class CustomTextField extends StatelessWidget {
       style: style,
       textCapitalization: textCapitalization,
       onChanged: onChanged,
+      onFieldSubmitted: onFieldSubmitted,
       decoration: InputDecoration(
         counter: showCounter ? null : const SizedBox.shrink(),
         // counterText: showCounter ? null : '',

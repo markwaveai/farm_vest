@@ -1,15 +1,19 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_Textfield.dart';
+import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
-class BuffaloProfileView extends StatefulWidget {
+class BuffaloProfileView extends ConsumerStatefulWidget {
   const BuffaloProfileView({super.key});
 
   @override
-  State<BuffaloProfileView> createState() => _BuffaloProfileViewState();
+  ConsumerState<BuffaloProfileView> createState() => _BuffaloProfileViewState();
 }
 
-class _BuffaloProfileViewState extends State<BuffaloProfileView> {
+class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
   String selectedTab = "Buffalo Profile";
   final List<String> tabs = [
     "Buffalo Profile",
@@ -23,47 +27,12 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
   final TextEditingController _morningMilkController = TextEditingController();
   final TextEditingController _todayMilkController = TextEditingController();
 
-  final List<Map<String, dynamic>> buffalos = [
-    {
-      "rfid": "RFID-10001",
-      "tag": "RFID-10001",
-      "shed": "KUR_F1_S1",
-      "id": "4e13286-0900e-29287b-67199r-900901p-2445r",
-      "breed": "Murrah Buffalo",
-      "age": "40 months",
-      "type": "BUFFALO",
-      "health": "HEALTHY",
-      "status": "high_yield",
-      "onboarded": "30 Jan 2026",
-      "farm": "KUR_F1",
-      "investor": "Ch Laxman",
-      "isExpanded": true,
-    },
-    {
-      "rfid": "RFID-Test-59593",
-      "tag": "ET-RFID-Test-59593",
-      "shed": "KUR_F1_S1",
-      "isExpanded": false,
-    },
-    {
-      "rfid": "RFID-Test-59593",
-      "tag": "RFID-10001",
-      "shed": "KUR_F1_S1",
-      "isExpanded": false,
-    },
-    {
-      "rfid": "RFID-Test-8196",
-      "tag": "ET-RFID-TEst-8196",
-      "shed": "KUR_F1_S1",
-      "isExpanded": false,
-    },
-    {
-      "rfid": "RFID-Test-31992",
-      "tag": "ET-RFID-31993",
-      "shed": "KUR_F1_S1",
-      "isExpanded": false,
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    final query = ref.read(animalSearchQueryProvider);
+    _searchController.text = query == 'all' ? '' : query;
+  }
 
   @override
   void dispose() {
@@ -72,6 +41,13 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
     _morningMilkController.dispose();
     _todayMilkController.dispose();
     super.dispose();
+  }
+
+  void _onSearch() {
+    final query = _searchController.text.trim();
+    ref.read(animalSearchQueryProvider.notifier).state = query.isEmpty
+        ? 'all'
+        : query;
   }
 
   @override
@@ -99,6 +75,8 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
   }
 
   Widget _buildBuffaloProfileTab() {
+    final animalsAsync = ref.watch(searchedAnimalsProvider);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
@@ -119,8 +97,12 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
                 Expanded(
                   child: CustomTextField(
                     controller: _searchController,
-                    hint: "Enter Buffalo ID",
+                    hint: "Enter Tag, RFID or ID",
                     style: const TextStyle(fontSize: 14),
+                    onFieldSubmitted: (_) => _onSearch(),
+                    onChanged: (v) {
+                      if (v.isEmpty) _onSearch();
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -138,13 +120,35 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
                           ? Theme.of(context).colorScheme.onSurface
                           : Colors.white,
                     ),
-                    onPressed: () {},
+                    onPressed: _onSearch,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            ...buffalos.map((buffalo) => _buildBuffaloCard(buffalo)),
+            animalsAsync.when(
+              data: (animals) {
+                if (animals.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 32),
+                    child: Center(child: Text("No animals found")),
+                  );
+                }
+                return Column(
+                  children: animals
+                      .map((animal) => _buildBuffaloCard(animal))
+                      .toList(),
+                );
+              },
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, stack) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Center(child: Text("Error: $err")),
+              ),
+            ),
           ],
         ),
       ),
@@ -247,19 +251,19 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
                 _buildMilkEntryRow(
                   "Evening milk",
                   _eveningMilkController,
-                  "100 Litre",
+                  "0.0 Litre",
                 ),
                 const SizedBox(height: 12),
                 _buildMilkEntryRow(
                   "Morning milk",
                   _morningMilkController,
-                  "120 Litre",
+                  "0.0 Litre",
                 ),
                 const SizedBox(height: 12),
                 _buildMilkEntryRow(
                   "Today's milk",
                   _todayMilkController,
-                  "220 Litre",
+                  "0.0 Litre",
                 ),
               ],
             ),
@@ -347,18 +351,6 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
             "Shed 02 / Row 04",
             "Supervisor's Message:\nInitiate to AI Protocol.",
           ),
-          const SizedBox(height: 12),
-          _buildHeatCard(
-            "Buffalo #32 (TAG - 8889)",
-            "Shed 02 / Row 03",
-            "Supervisor's Message:\nInitiate to AI Protocol.",
-          ),
-          const SizedBox(height: 12),
-          _buildHeatCard(
-            "Shed 04 / Row 04",
-            "",
-            "Supervisor's Message:\nInitiate to AI Protocol.",
-          ),
           const SizedBox(height: 24),
           Text(
             "Buffalo Profiles",
@@ -426,9 +418,7 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
                         "Bellowing, clear discharge, restless.",
                       ),
                       const SizedBox(height: 12),
-                      _buildDetailRow("Recorded By", "Breed"),
-                      const SizedBox(height: 12),
-                      _buildDetailRow("Rakesh Kumar", "Murrah"),
+                      _buildDetailRow("Recorded By", "Murrah"),
                       const SizedBox(height: 20),
                       SizedBox(
                         width: 220,
@@ -478,13 +468,14 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
-              'assets/images/buffalo.png',
-              width: 100,
-              height: 100,
-              fit: BoxFit.cover,
+              'assets/icons/buffalo_icon.png',
+              width: 80,
+              height: 80,
+              fit: BoxFit.contain,
+              color: AppTheme.primary,
             ),
           ),
-          const SizedBox(width: 30),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,18 +508,18 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 6,
+                    horizontal: 12,
+                    vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.orange,
+                    color: Colors.orange,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
                     "Action Required",
                     style: TextStyle(
                       color: AppTheme.white,
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -545,12 +536,14 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
     return Expanded(
       child: Column(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              'assets/images/buffalo.png',
-              height: 90,
-              fit: BoxFit.cover,
+          Container(
+            height: 80,
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Icon(Icons.pets, color: AppTheme.primary, size: 40),
             ),
           ),
           const SizedBox(height: 6),
@@ -663,9 +656,7 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
     );
   }
 
-  Widget _buildBuffaloCard(Map<String, dynamic> buffalo) {
-    bool isExpanded = buffalo['isExpanded'] == true;
-
+  Widget _buildBuffaloCard(InvestorAnimal animal) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -680,13 +671,16 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          initiallyExpanded: isExpanded,
           tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
           childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           iconColor: AppTheme.darkPrimary,
           collapsedIconColor: AppTheme.darkPrimary,
+          leading: CircleAvatar(
+            backgroundColor: AppTheme.primary.withOpacity(0.1),
+            child: const Icon(Icons.pets, color: AppTheme.primary, size: 20),
+          ),
           title: Text(
-            buffalo['rfid'],
+            animal.rfid ?? 'No RFID',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: AppTheme.primary,
@@ -694,37 +688,34 @@ class _BuffaloProfileViewState extends State<BuffaloProfileView> {
             ),
           ),
           subtitle: Text(
-            "Tag: ${buffalo['tag']} | Shed: ${buffalo['shed']}",
+            "Tag: ${animal.earTagId ?? 'N/A'} | Shed: ${animal.shedName ?? 'N/A'}",
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             ),
           ),
-          onExpansionChanged: (val) {
-            setState(() {
-              buffalo['isExpanded'] = val;
-            });
-          },
           children: [
-            if (isExpanded && buffalo.containsKey('breed')) ...[
-              const SizedBox(height: 8),
-              _buildBuffaloDetailRow("ID", buffalo['id']),
-              _buildBuffaloDetailRow("Breed", buffalo['breed']),
-              _buildBuffaloDetailRow("Age", buffalo['age']),
-              _buildBuffaloDetailRow("Type", buffalo['type']),
-              _buildBuffaloDetailRow("Health", buffalo['health']),
-              _buildBuffaloDetailRow("Status", buffalo['status']),
-              _buildBuffaloDetailRow("Onboarded", buffalo['onboarded']),
-              Divider(
-                height: 24,
-                thickness: 1,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white12
-                    : Colors.grey.shade300,
+            const SizedBox(height: 8),
+            _buildBuffaloDetailRow("ID", animal.animalId),
+            _buildBuffaloDetailRow("Breed", animal.breed ?? 'N/A'),
+            _buildBuffaloDetailRow("Age", "${animal.age ?? 'N/A'} months"),
+            _buildBuffaloDetailRow("Type", animal.animalType ?? 'N/A'),
+            _buildBuffaloDetailRow("Health", animal.healthStatus),
+            _buildBuffaloDetailRow("Status", animal.status ?? 'N/A'),
+            if (animal.onboardedAt != null)
+              _buildBuffaloDetailRow(
+                "Onboarded",
+                DateFormat('dd MMM yyyy').format(animal.onboardedAt!),
               ),
-              _buildBuffaloDetailRow("Farm", buffalo['farm']),
-              _buildBuffaloDetailRow("Investor", buffalo['investor']),
-            ],
+            Divider(
+              height: 24,
+              thickness: 1,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white12
+                  : Colors.grey.shade300,
+            ),
+            _buildBuffaloDetailRow("Farm", animal.farmName ?? 'N/A'),
+            _buildBuffaloDetailRow("Investor", animal.investorName ?? 'N/A'),
           ],
         ),
       ),
