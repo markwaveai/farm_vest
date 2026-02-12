@@ -1,18 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
 
-class DoctorBottomNavigation extends StatelessWidget {
+class NavItemData {
+  final String label;
+  final String icon;
+  NavItemData(this.label, this.icon);
+}
+
+class EmployeeBottomNavigation extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final UserType role;
 
-  const DoctorBottomNavigation({
+  const EmployeeBottomNavigation({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    required this.role,
   });
+
+  List<NavItemData> _getRoleItems() {
+    switch (role) {
+      case UserType.doctor:
+        return [
+          NavItemData('Health', 'assets/icons/rx.png'),
+          NavItemData('Vaccination', 'assets/icons/injection.png'),
+          NavItemData('Movement', 'assets/icons/swap.png'),
+        ];
+      case UserType.supervisor:
+        return [
+          NavItemData('Milk Entry', 'assets/icons/injection.png'),
+          NavItemData('Alerts', 'assets/icons/Notification_icon.png'),
+          NavItemData('Stats', 'assets/icons/app_icon.png'),
+        ];
+      case UserType.farmManager:
+        return [
+          NavItemData('Onboard', 'assets/icons/new_heat.png'),
+          NavItemData('Allocation', 'assets/icons/swap.png'),
+          NavItemData('Reports', 'assets/icons/app_icon.png'),
+        ];
+      case UserType.assistant:
+        return [
+          NavItemData('Tasks', 'assets/icons/app_icon.png'),
+          NavItemData('Monitoring', 'assets/icons/heart.png'),
+          NavItemData('Treatments', 'assets/icons/rx.png'),
+        ];
+      default:
+        return [
+          NavItemData('Item 1', 'assets/icons/rx.png'),
+          NavItemData('Item 2', 'assets/icons/injection.png'),
+          NavItemData('Item 3', 'assets/icons/swap.png'),
+        ];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final roleItems = _getRoleItems();
+
     return BottomAppBar(
       shape: const CircularNotchedRectangle(),
       notchMargin: 8.0,
@@ -28,10 +74,10 @@ class DoctorBottomNavigation extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navItem(context, 'assets/icons/rx.png', 'Health', 0),
-          _navItem(context, 'assets/icons/injection.png', 'Vaccination', 1),
+          _navItem(context, roleItems[0].icon, roleItems[0].label, 0),
+          _navItem(context, roleItems[1].icon, roleItems[1].label, 1),
           const SizedBox(width: 48), // Space for FAB
-          _navItem(context, 'assets/icons/swap.png', 'Movement', 2),
+          _navItem(context, roleItems[2].icon, roleItems[2].label, 2),
           _navItem(context, 'assets/icons/buffalo_icon.png', 'Buffalo', 3),
         ],
       ),
@@ -78,9 +124,10 @@ class DoctorBottomNavigation extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: color,
-                fontSize: 11,
+                fontSize: 10, // Slightly smaller to accommodate longer labels
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),

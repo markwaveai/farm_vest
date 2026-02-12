@@ -1,4 +1,5 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,6 +58,7 @@ class AssistantDashboardScreen extends ConsumerStatefulWidget {
 
 class _AssistantDashboardScreenState
     extends ConsumerState<AssistantDashboardScreen> {
+  int _currentIndex = 4;
   List<AssignedTask> _assignedTasks = [];
   List<MonitoringRecord> _monitoringRecords = [];
 
@@ -331,6 +333,61 @@ class _AssistantDashboardScreenState
                 },
               ),
             ],
+          ),
+        ),
+        bottomNavigationBar: EmployeeBottomNavigation(
+          role: UserType.assistant,
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() => _currentIndex = index);
+            if (index == 0) {
+              context.push('/health-issues');
+            } else if (index == 1) {
+              context.push('/milk-production');
+            } else if (index == 2) {
+              context.push('/raise-ticket');
+            } else if (index == 3) {
+              context.push('/buffalo-profile');
+            }
+          },
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: GestureDetector(
+          onTap: () {
+            setState(() => _currentIndex = 4);
+            context.go('/assistant-dashboard');
+          },
+          child: Container(
+            height: 68,
+            width: 68,
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).cardColor
+                  : AppTheme.darkPrimary,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.darkPrimary
+                    : AppTheme.white,
+                width: 4,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Image.asset(
+                'assets/icons/home.png',
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.primary
+                    : AppTheme.white,
+              ),
+            ),
           ),
         ),
       ),

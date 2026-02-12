@@ -2,7 +2,7 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/features/doctors/providers/doctors_provider.dart';
-import 'package:farm_vest/features/doctors/widgets/bottom_navigation.dart';
+import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -282,7 +282,8 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: DoctorBottomNavigation(
+      bottomNavigationBar: EmployeeBottomNavigation(
+        role: UserType.doctor,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() => _currentIndex = index);

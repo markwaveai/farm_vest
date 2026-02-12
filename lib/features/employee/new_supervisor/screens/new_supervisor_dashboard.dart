@@ -1,4 +1,5 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
 import 'package:farm_vest/core/widgets/custom_card.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_dashboard_provider.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/alert_dialog.dart';
@@ -10,11 +11,20 @@ import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dar
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:shimmer/shimmer.dart';
 
-class NewSupervisorDashboard extends ConsumerWidget {
+class NewSupervisorDashboard extends ConsumerStatefulWidget {
   const NewSupervisorDashboard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NewSupervisorDashboard> createState() =>
+      _NewSupervisorDashboardState();
+}
+
+class _NewSupervisorDashboardState
+    extends ConsumerState<NewSupervisorDashboard> {
+  int _currentIndex = 4;
+
+  @override
+  Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final dashboardState = ref.watch(supervisorDashboardProvider);
 
@@ -345,6 +355,61 @@ class NewSupervisorDashboard extends ConsumerWidget {
                 ],
               ),
             ),
+      bottomNavigationBar: EmployeeBottomNavigation(
+        role: UserType.supervisor,
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() => _currentIndex = index);
+          if (index == 0) {
+            context.push('/new-supervisor/bulk-milk-entry');
+          } else if (index == 1) {
+            context.push('/new-supervisor/alerts');
+          } else if (index == 2) {
+            context.push('/new-supervisor/stats');
+          } else if (index == 3) {
+            context.go('/new-supervisor/buffalo');
+          }
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: GestureDetector(
+        onTap: () {
+          setState(() => _currentIndex = 4);
+          context.go('/supervisor-dashboard');
+        },
+        child: Container(
+          height: 68,
+          width: 68,
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).cardColor
+                : AppTheme.darkPrimary,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.darkPrimary
+                  : AppTheme.white,
+              width: 4,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Image.asset(
+              'assets/icons/home.png',
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.primary
+                  : AppTheme.white,
+            ),
+          ),
+        ),
+      ),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/doctors/providers/doctors_provider.dart';
-import 'package:farm_vest/features/doctors/widgets/bottom_navigation.dart';
+import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
 import 'package:farm_vest/features/doctors/widgets/health_ticket_card.dart';
 import 'package:farm_vest/features/doctors/widgets/assignment_dialogs.dart';
 import 'package:farm_vest/features/doctors/widgets/ticket_details_bottom_sheet.dart';
@@ -137,7 +138,8 @@ class _HealthTicketScreenState extends ConsumerState<HealthTicketScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: DoctorBottomNavigation(
+      bottomNavigationBar: EmployeeBottomNavigation(
+        role: UserType.doctor,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() => _currentIndex = index);
