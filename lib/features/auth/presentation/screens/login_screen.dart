@@ -71,11 +71,15 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
       case UserType.supervisor:
         context.go('/supervisor-dashboard');
         break;
+      case UserType.doctor:
+        context.go('/doctor-dashboard');
+        break;
+      case UserType.assistant:
+        context.go('/assistant-dashboard');
+        break;
       case UserType.farmManager:
         context.go('/farm-manager-dashboard');
         break;
-      default:
-        context.go('/customer-dashboard');
     }
   }
 
