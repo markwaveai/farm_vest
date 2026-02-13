@@ -19,7 +19,9 @@ class MilkProductionEntry {
 }
 
 class MilkProductionScreen extends StatefulWidget {
-  const MilkProductionScreen({super.key});
+  final bool hideAppBar;
+
+  const MilkProductionScreen({super.key, this.hideAppBar = false});
 
   @override
   State<MilkProductionScreen> createState() => _MilkProductionScreenState();
@@ -82,16 +84,18 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
     final entriesForSelectedDate = _pastEntries[dateKey] ?? [];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Milk Production Entry'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => NavigationHelper.safePopOrNavigate(
-            context,
-            fallbackRoute: '/supervisor-dashboard',
-          ),
-        ),
-      ),
+      appBar: widget.hideAppBar
+          ? null
+          : AppBar(
+              title: const Text('Milk Production Entry'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => NavigationHelper.safePopOrNavigate(
+                  context,
+                  fallbackRoute: '/supervisor-dashboard',
+                ),
+              ),
+            ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(

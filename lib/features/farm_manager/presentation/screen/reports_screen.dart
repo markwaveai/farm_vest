@@ -8,7 +8,9 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
 
 class ReportsScreen extends ConsumerStatefulWidget {
-  const ReportsScreen({super.key});
+  final bool hideAppBar;
+
+  const ReportsScreen({super.key, this.hideAppBar = false});
 
   @override
   ConsumerState<ReportsScreen> createState() => _ReportsScreenState();
@@ -38,43 +40,45 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
       initialIndex: 0,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              ref.read(milkReportProvider.notifier).clear();
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                final userRole = ref.read(authProvider).role;
-                if (userRole == UserType.supervisor) {
-                  context.go('/supervisor-dashboard');
-                } else {
-                  context.go('/farm-manager-dashboard');
-                }
-              }
-            },
-          ),
-          title: Text(
-            "Farm Reports",
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          bottom: TabBar(
-            indicatorColor: AppTheme.primary,
-            indicatorWeight: 3,
-            labelColor: AppTheme.primary,
-            unselectedLabelColor: Theme.of(context).hintColor,
-            tabs: const [
-              Tab(text: "Daily"),
-              Tab(text: "Weekly"),
-            ],
-          ),
-        ),
+        appBar: widget.hideAppBar
+            ? null
+            : AppBar(
+                backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    ref.read(milkReportProvider.notifier).clear();
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      final userRole = ref.read(authProvider).role;
+                      if (userRole == UserType.supervisor) {
+                        context.go('/supervisor-dashboard');
+                      } else {
+                        context.go('/farm-manager-dashboard');
+                      }
+                    }
+                  },
+                ),
+                title: Text(
+                  "Farm Reports",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                bottom: TabBar(
+                  indicatorColor: AppTheme.primary,
+                  indicatorWeight: 3,
+                  labelColor: AppTheme.primary,
+                  unselectedLabelColor: Theme.of(context).hintColor,
+                  tabs: const [
+                    Tab(text: "Daily"),
+                    Tab(text: "Weekly"),
+                  ],
+                ),
+              ),
         body: TabBarView(
           children: [
             Padding(

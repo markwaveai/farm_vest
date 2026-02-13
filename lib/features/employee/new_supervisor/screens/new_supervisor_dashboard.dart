@@ -66,12 +66,7 @@ class _NewSupervisorDashboardState
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         toolbarHeight: showProfileInfo ? screenWidth * 0.22 : 64,
-        leading: !showProfileInfo
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => setState(() => _currentIndex = 4),
-              )
-            : null,
+        automaticallyImplyLeading: false,
         title: showProfileInfo
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

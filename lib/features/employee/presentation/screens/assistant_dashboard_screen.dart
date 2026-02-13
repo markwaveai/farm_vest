@@ -10,6 +10,11 @@ import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import '../widgets/employee_dashboard_card.dart';
 
+import 'health_issues_screen.dart';
+import 'milk_production_screen.dart';
+import 'raise_ticket_screen.dart';
+import 'package:farm_vest/features/doctors/widgets/buffalo_profile_view.dart';
+
 class AssignedTask {
   final String taskId;
   final String buffaloId;
@@ -131,20 +136,43 @@ class _AssistantDashboardScreenState
     ];
   }
 
+  String _getTitle(int index) {
+    switch (index) {
+      case 0:
+        return 'Health Issues';
+      case 1:
+        return 'Milk Production';
+      case 2:
+        return 'Raise Ticket';
+      case 3:
+        return 'Buffalo Profile';
+      case 4:
+        return 'Assistant Dashboard';
+      default:
+        return 'Assistant Dashboard';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
         if (didPop) return;
-        final router = GoRouter.of(context);
-        if (router.canPop()) {
-          router.pop();
+        if (_currentIndex != 4) {
+          setState(() {
+            _currentIndex = 4;
+          });
+        } else {
+          final router = GoRouter.of(context);
+          if (router.canPop()) {
+            router.pop();
+          }
         }
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Assistant Dashboard'),
+          title: Text(_getTitle(_currentIndex)),
           automaticallyImplyLeading: false,
           actions: [
             if (ref.watch(authProvider).availableRoles.length > 1)
@@ -193,169 +221,27 @@ class _AssistantDashboardScreenState
             const SizedBox(width: 16),
           ],
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.spacingM),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome Section
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppConstants.spacingL),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primary,
-                      AppTheme.secondary,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(AppConstants.radiusL),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Welcome, Assistant Kumar!',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.white,
-                      ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingS),
-                    const Text(
-                      'Supporting healthcare operations',
-                      style: TextStyle(fontSize: 16, color: AppTheme.white),
-                    ),
-                    const SizedBox(height: AppConstants.spacingM),
-                    Row(
-                      children: [
-                        _buildQuickStat('Active Tasks', '8'),
-                        const SizedBox(width: AppConstants.spacingL),
-                        _buildQuickStat('Completed', '15'),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppConstants.spacingL),
-
-              // Quick Actions
-              Text(
-                'Quick Actions',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: AppConstants.spacingM),
-
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: AppConstants.spacingM,
-                mainAxisSpacing: AppConstants.spacingM,
-                childAspectRatio: 1.1,
-                children: [
-                  EmployeeDashboardCard(
-                    title: 'Assigned Tasks',
-                    subtitle: 'View your tasks',
-                    icon: Icons.assignment,
-                    color: Theme.of(context).colorScheme.primary,
-                    onTap: () => _showAssignedTasks(),
-                  ),
-                  EmployeeDashboardCard(
-                    title: 'Daily Monitoring',
-                    subtitle: 'Record observations',
-                    icon: Icons.monitor_heart,
-                    color: AppTheme.secondary,
-                    onTap: () => _showDailyMonitoring(),
-                  ),
-                  EmployeeDashboardCard(
-                    title: 'Treatment Execution',
-                    subtitle: 'Follow instructions',
-                    icon: Icons.medication,
-                    color: AppTheme.darkSecondary,
-                    onTap: () => _showTreatmentExecution(),
-                  ),
-                  EmployeeDashboardCard(
-                    title: 'Completed Updates',
-                    subtitle: 'Update progress',
-                    icon: Icons.check_circle,
-                    color: AppTheme.successGreen,
-                    onTap: () => _showCompletedUpdates(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppConstants.spacingL),
-
-              // Assigned Tasks
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Today\'s Assigned Tasks',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  TextButton(
-                    onPressed: () => _showAssignedTasks(),
-                    child: const Text('View All'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppConstants.spacingM),
-
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _assignedTasks.take(3).length,
-                itemBuilder: (context, index) {
-                  final task = _assignedTasks[index];
-                  return _buildTaskCard(task);
-                },
-              ),
-              const SizedBox(height: AppConstants.spacingL),
-
-              // Recent Monitoring Records
-              Text(
-                'Recent Monitoring Records',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: AppConstants.spacingM),
-
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _monitoringRecords.take(3).length,
-                itemBuilder: (context, index) {
-                  final record = _monitoringRecords[index];
-                  return _buildMonitoringCard(record);
-                },
-              ),
-            ],
-          ),
+        body: IndexedStack(
+          index: _currentIndex,
+          children: [
+            const HealthIssuesScreen(hideAppBar: true),
+            const MilkProductionScreen(hideAppBar: true),
+            const RaiseTicketScreen(hideAppBar: true),
+            const BuffaloProfileView(),
+            _buildDashboardHome(),
+          ],
         ),
         bottomNavigationBar: EmployeeBottomNavigation(
           role: UserType.assistant,
           currentIndex: _currentIndex,
           onTap: (index) {
             setState(() => _currentIndex = index);
-            if (index == 0) {
-              context.push('/health-issues');
-            } else if (index == 1) {
-              context.push('/milk-production');
-            } else if (index == 2) {
-              context.push('/raise-ticket');
-            } else if (index == 3) {
-              context.push('/buffalo-profile');
-            }
           },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: GestureDetector(
           onTap: () {
             setState(() => _currentIndex = 4);
-            context.go('/assistant-dashboard');
           },
           child: Container(
             height: 68,
@@ -390,6 +276,148 @@ class _AssistantDashboardScreenState
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDashboardHome() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Welcome Section
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppConstants.spacingL),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  AppTheme.secondary,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(AppConstants.radiusL),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Welcome, Assistant Kumar!',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.white,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+                const Text(
+                  'Supporting healthcare operations',
+                  style: TextStyle(fontSize: 16, color: AppTheme.white),
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                Row(
+                  children: [
+                    _buildQuickStat('Active Tasks', '8'),
+                    const SizedBox(width: AppConstants.spacingL),
+                    _buildQuickStat('Completed', '15'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+
+          // Quick Actions
+          Text('Quick Actions', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: AppConstants.spacingM),
+
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            crossAxisSpacing: AppConstants.spacingM,
+            mainAxisSpacing: AppConstants.spacingM,
+            childAspectRatio: 1.1,
+            children: [
+              EmployeeDashboardCard(
+                title: 'Assigned Tasks',
+                subtitle: 'View your tasks',
+                icon: Icons.assignment,
+                color: Theme.of(context).colorScheme.primary,
+                onTap: () => _showAssignedTasks(),
+              ),
+              EmployeeDashboardCard(
+                title: 'Daily Monitoring',
+                subtitle: 'Record observations',
+                icon: Icons.monitor_heart,
+                color: AppTheme.secondary,
+                onTap: () => _showDailyMonitoring(),
+              ),
+              EmployeeDashboardCard(
+                title: 'Treatment Execution',
+                subtitle: 'Follow instructions',
+                icon: Icons.medication,
+                color: AppTheme.darkSecondary,
+                onTap: () => _showTreatmentExecution(),
+              ),
+              EmployeeDashboardCard(
+                title: 'Completed Updates',
+                subtitle: 'Update progress',
+                icon: Icons.check_circle,
+                color: AppTheme.successGreen,
+                onTap: () => _showCompletedUpdates(),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+
+          // Assigned Tasks
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Today\'s Assigned Tasks',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              TextButton(
+                onPressed: () => _showAssignedTasks(),
+                child: const Text('View All'),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _assignedTasks.take(3).length,
+            itemBuilder: (context, index) {
+              final task = _assignedTasks[index];
+              return _buildTaskCard(task);
+            },
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+
+          // Recent Monitoring Records
+          Text(
+            'Recent Monitoring Records',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _monitoringRecords.take(3).length,
+            itemBuilder: (context, index) {
+              final record = _monitoringRecords[index];
+              return _buildMonitoringCard(record);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -458,7 +486,10 @@ class _AssistantDashboardScreenState
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: isSelected ? role.color : Colors.grey.shade200,
+                        color: isSelected
+                            ? role.color
+                            : Colors
+                                  .grey[200]!, // Fixed: Use valid color access
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -542,7 +573,9 @@ class _AssistantDashboardScreenState
                     vertical: AppConstants.spacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
+                    color: statusColor.withOpacity(
+                      0.1,
+                    ), // Fixed: Use withOpacity
                     borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Text(
@@ -562,7 +595,9 @@ class _AssistantDashboardScreenState
                       vertical: AppConstants.spacingXS,
                     ),
                     decoration: BoxDecoration(
-                      color: AppTheme.errorRed.withValues(alpha: 0.1),
+                      color: AppTheme.errorRed.withOpacity(
+                        0.1,
+                      ), // Fixed: Use withOpacity
                       borderRadius: BorderRadius.circular(AppConstants.radiusS),
                     ),
                     child: const Text(

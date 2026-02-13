@@ -13,6 +13,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/onboard_animal_screen.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/buffalo_allocation_screen.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/reports_screen.dart';
+import 'package:farm_vest/features/doctors/widgets/buffalo_profile_view.dart';
 
 class FarmManagerDashboard extends ConsumerStatefulWidget {
   const FarmManagerDashboard({super.key});
@@ -247,33 +251,59 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     }
     displayName = "$displayName,";
 
+    String appBarTitle = 'Hello ';
+    bool showProfileInfo = _currentIndex == 4;
+
+    switch (_currentIndex) {
+      case 0:
+        appBarTitle = 'Onboard Animal';
+        break;
+      case 1:
+        appBarTitle = 'Buffalo Allocation';
+        break;
+      case 2:
+        appBarTitle = 'Reports';
+        break;
+      case 3:
+        appBarTitle = 'Buffalo Profile';
+        break;
+      case 4:
+        appBarTitle = 'Hello ';
+        break;
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         automaticallyImplyLeading: false,
-        title: Align(
-          alignment: Alignment.centerLeft,
-          child: RichText(
-            text: TextSpan(
-              text: 'Hello ',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 16,
-              ),
-              children: [
-                TextSpan(
-                  text: displayName,
-                  style: const TextStyle(
-                    color: AppTheme.orange,
-                    fontWeight: FontWeight.bold,
+        title: showProfileInfo
+            ? Align(
+                alignment: Alignment.centerLeft,
+                child: RichText(
+                  text: TextSpan(
+                    text: appBarTitle,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 16,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: displayName,
+                        style: const TextStyle(
+                          color: AppTheme.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
+              )
+            : Text(
+                appBarTitle,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
         actions: [
           if (ref.watch(authProvider).availableRoles.length > 1)
             IconButton(
@@ -325,60 +355,61 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
           const SizedBox(width: 16),
         ],
       ),
-      body: ds.isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppTheme.primary),
-            )
-          : ds.error != null
-          ? _buildErrorView(ds.error!)
-          : RefreshIndicator(
-              onRefresh: () async {
-                await ref.read(farmManagerProvider.notifier).refreshDashboard();
-                await ref.read(staffListProvider.notifier).loadStaff();
-              },
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionHeader("Overview Management"),
-                    const SizedBox(height: 16),
-                    _buildStatsGrid(ds, ss),
-                    const SizedBox(height: 32),
-                    _buildSectionHeader("Operations"),
-                    const SizedBox(height: 16),
-                    _buildQuickActionGrid(),
-                    const SizedBox(height: 32),
-                    _buildSectionHeader("Pending Allocation"),
-                    const SizedBox(height: 16),
-                    _buildRecentActivity(ds),
-                    const SizedBox(height: 100),
-                  ],
-                ),
-              ),
-            ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          const OnboardAnimalScreen(hideAppBar: true), // 0
+          const BuffaloAllocationScreen(hideAppBar: true), // 1
+          const ReportsScreen(hideAppBar: true), // 2
+          const BuffaloProfileView(), // 3
+          ds.isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(color: AppTheme.primary),
+                )
+              : ds.error != null
+              ? _buildErrorView(ds.error!)
+              : RefreshIndicator(
+                  onRefresh: () async {
+                    await ref
+                        .read(farmManagerProvider.notifier)
+                        .refreshDashboard();
+                    await ref.read(staffListProvider.notifier).loadStaff();
+                  },
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader("Overview Management"),
+                        const SizedBox(height: 16),
+                        _buildStatsGrid(ds, ss),
+                        const SizedBox(height: 32),
+                        _buildSectionHeader("Operations"),
+                        const SizedBox(height: 16),
+                        _buildQuickActionGrid(),
+                        const SizedBox(height: 32),
+                        _buildSectionHeader("Pending Allocation"),
+                        const SizedBox(height: 16),
+                        _buildRecentActivity(ds),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  ),
+                ), // 4
+        ],
+      ),
       bottomNavigationBar: EmployeeBottomNavigation(
         role: UserType.farmManager,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() => _currentIndex = index);
-          if (index == 0) {
-            context.push('/onboard-animal');
-          } else if (index == 1) {
-            context.push('/buffalo-allocation');
-          } else if (index == 2) {
-            context.push('/reports');
-          } else if (index == 3) {
-            context.push('/buffalo-profile');
-          }
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: GestureDetector(
         onTap: () {
           setState(() => _currentIndex = 4);
-          context.go('/farm-manager-dashboard');
         },
         child: Container(
           height: 68,

@@ -17,6 +17,7 @@ class BuffaloAllocationScreen extends ConsumerStatefulWidget {
   final int? initialShedId;
   final String? targetParkingId;
   final String? initialAnimalId;
+  final bool hideAppBar;
 
   const BuffaloAllocationScreen({
     super.key,
@@ -24,6 +25,7 @@ class BuffaloAllocationScreen extends ConsumerStatefulWidget {
     this.targetParkingId,
     this.initialAnimalId,
     this.initialFarmId,
+    this.hideAppBar = false,
   });
 
   @override
@@ -161,83 +163,85 @@ class _BuffaloAllocationScreenState
     }
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text(
-          appBarTitle,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-            color: Colors.white,
-            letterSpacing: 0.5,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Container(
-          margin: const EdgeInsets.only(left: 8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-            onPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                if (userRole == UserType.supervisor) {
-                  context.go('/supervisor-dashboard');
-                } else {
-                  context.go('/farm-manager-dashboard');
-                }
-              }
-            },
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-            onPressed: () {
-              if (selectedShedId != null) {
-                ref
-                    .read(farmManagerProvider.notifier)
-                    .fetchShedPositions(selectedShedId!);
-              }
-            },
-          ),
-          // Finalize button visible for both Manager and Supervisor
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.check_rounded),
-              onPressed: _finalizeAllocations,
-              color: Colors.blueGrey,
-            ),
-          ),
-        ],
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppTheme.primary.withOpacity(0.9),
-                AppTheme.primary.withOpacity(0.0),
+      extendBodyBehindAppBar: !widget.hideAppBar,
+      appBar: widget.hideAppBar
+          ? null
+          : AppBar(
+              title: Text(
+                appBarTitle,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              centerTitle: true,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: Container(
+                margin: const EdgeInsets.only(left: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      if (userRole == UserType.supervisor) {
+                        context.go('/supervisor-dashboard');
+                      } else {
+                        context.go('/farm-manager-dashboard');
+                      }
+                    }
+                  },
+                ),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                  onPressed: () {
+                    if (selectedShedId != null) {
+                      ref
+                          .read(farmManagerProvider.notifier)
+                          .fetchShedPositions(selectedShedId!);
+                    }
+                  },
+                ),
+                // Finalize button visible for both Manager and Supervisor
+                Container(
+                  margin: const EdgeInsets.only(right: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.check_rounded),
+                    onPressed: _finalizeAllocations,
+                    color: Colors.blueGrey,
+                  ),
+                ),
               ],
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppTheme.primary.withOpacity(0.9),
+                      AppTheme.primary.withOpacity(0.0),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

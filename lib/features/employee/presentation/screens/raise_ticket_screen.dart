@@ -32,7 +32,9 @@ class Ticket {
 }
 
 class RaiseTicketScreen extends StatefulWidget {
-  const RaiseTicketScreen({super.key});
+  final bool hideAppBar;
+
+  const RaiseTicketScreen({super.key, this.hideAppBar = false});
 
   @override
   State<RaiseTicketScreen> createState() => _RaiseTicketScreenState();
@@ -124,27 +126,43 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Support Tickets'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => NavigationHelper.safePopOrNavigate(
-            context,
-            fallbackRoute: '/supervisor-dashboard',
-          ),
-        ),
-        bottom: TabBar(
-          labelStyle: TextStyle(
-            color: AppTheme.white,
-            fontWeight: FontWeight.bold,
-          ),
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Raise Ticket'),
-            Tab(text: 'My Tickets'),
-          ],
-        ),
-      ),
+      appBar: widget.hideAppBar
+          ? AppBar(
+              automaticallyImplyLeading: false,
+              toolbarHeight: 0,
+              bottom: TabBar(
+                labelStyle: TextStyle(
+                  color: AppTheme.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'Raise Ticket'),
+                  Tab(text: 'My Tickets'),
+                ],
+              ),
+            )
+          : AppBar(
+              title: const Text('Support Tickets'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => NavigationHelper.safePopOrNavigate(
+                  context,
+                  fallbackRoute: '/supervisor-dashboard',
+                ),
+              ),
+              bottom: TabBar(
+                labelStyle: TextStyle(
+                  color: AppTheme.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'Raise Ticket'),
+                  Tab(text: 'My Tickets'),
+                ],
+              ),
+            ),
       body: TabBarView(
         controller: _tabController,
         children: [_buildRaiseTicketTab(), _buildMyTicketsTab()],

@@ -26,7 +26,9 @@ class HealthIssue {
 }
 
 class HealthIssuesScreen extends StatefulWidget {
-  const HealthIssuesScreen({super.key});
+  final bool hideAppBar;
+
+  const HealthIssuesScreen({super.key, this.hideAppBar = false});
 
   @override
   State<HealthIssuesScreen> createState() => _HealthIssuesScreenState();
@@ -95,16 +97,18 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Health Issues'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => NavigationHelper.safePopOrNavigate(
-            context,
-            fallbackRoute: '/supervisor-dashboard',
-          ),
-        ),
-      ),
+      appBar: widget.hideAppBar
+          ? null
+          : AppBar(
+              title: const Text('Health Issues'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => NavigationHelper.safePopOrNavigate(
+                  context,
+                  fallbackRoute: '/supervisor-dashboard',
+                ),
+              ),
+            ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(

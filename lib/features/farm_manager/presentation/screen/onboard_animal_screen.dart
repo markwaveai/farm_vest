@@ -17,7 +17,9 @@ import '../widgets/onboarding/info_card.dart';
 import '../widgets/onboarding/order_card.dart';
 
 class OnboardAnimalScreen extends ConsumerStatefulWidget {
-  const OnboardAnimalScreen({super.key});
+  final bool hideAppBar;
+
+  const OnboardAnimalScreen({super.key, this.hideAppBar = false});
 
   @override
   ConsumerState<OnboardAnimalScreen> createState() =>
@@ -543,33 +545,37 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        title: Text(
-          'Buffalo Onboarding',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 20,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () {
-            ref.read(farmManagerProvider.notifier).clearOrder();
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              final userRole = ref.read(authProvider).role;
-              if (userRole == UserType.supervisor) {
-                context.go('/supervisor-dashboard');
-              } else {
-                context.go('/farm-manager-dashboard');
-              }
-            }
-          },
-        ),
-      ),
+      appBar: widget.hideAppBar
+          ? null
+          : AppBar(
+              backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+              title: Text(
+                'Buffalo Onboarding',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              leading: IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                onPressed: () {
+                  ref.read(farmManagerProvider.notifier).clearOrder();
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    final userRole = ref.read(authProvider).role;
+                    if (userRole == UserType.supervisor) {
+                      context.go('/supervisor-dashboard');
+                    } else {
+                      context.go('/farm-manager-dashboard');
+                    }
+                  }
+                },
+              ),
+            ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
