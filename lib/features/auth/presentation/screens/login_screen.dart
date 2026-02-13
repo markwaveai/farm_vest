@@ -32,6 +32,15 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   Timer? _tapResetTimer;
   final _phoneFocusNode = FocusNode();
   final _otpFocusNode = FocusNode();
+  late final TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    final mobileNumber = ref.read(authProvider).mobileNumber;
+    _phoneController = TextEditingController(text: mobileNumber ?? '');
+    _phoneNumber = mobileNumber ?? '';
+  }
 
   @override
   void dispose() {
@@ -39,6 +48,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     _tapResetTimer?.cancel();
     _phoneFocusNode.dispose();
     _otpFocusNode.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -315,8 +325,9 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
               const SizedBox(height: 10),
 
-              // App Logo Area (Shrink if role selection is visible)
-              if (!_showRoleSelection)
+              // App Logo Area - Hides when keyboard is up to save space
+              if (!_showRoleSelection &&
+                  MediaQuery.of(context).viewInsets.bottom == 0)
                 Hero(
                   tag: 'app_logo',
                   child: Container(
@@ -396,7 +407,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
               const SizedBox(height: 40),
 
-              // Form/Role Container
+              // Form/Role Container - Expanded to take remaining space
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -429,10 +440,11 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   Widget _buildLoginForm(AuthState authState, ThemeData theme, bool isDark) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 50),
+          const SizedBox(height: 10), // Shrunk the top spacing
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 400),
             child: _isOtpSent
@@ -461,6 +473,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
+          const SizedBox(height: 40),
         ],
       ),
     );
@@ -668,6 +681,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
               // Input
               Expanded(
                 child: TextField(
+                  controller: _phoneController,
                   focusNode: _phoneFocusNode,
                   keyboardType: TextInputType.phone,
                   maxLength: 10,
