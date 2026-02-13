@@ -102,6 +102,20 @@ class NotificationService {
         // Handle navigation for initial message
       }
     });
+
+    // Print FCM Token
+    await printFCMToken();
+  }
+
+  Future<void> printFCMToken() async {
+    try {
+      String? token = await FirebaseMessaging.instance.getToken();
+      debugPrint('================ FCM TOKEN ================');
+      debugPrint(token);
+      debugPrint('============================================');
+    } catch (e) {
+      debugPrint('Error getting FCM token: $e');
+    }
   }
 
   Future<void> subscribeToTopic(String topic) async {
