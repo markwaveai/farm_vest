@@ -71,15 +71,11 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
       case UserType.supervisor:
         context.go('/supervisor-dashboard');
         break;
-      case UserType.doctor:
-        context.go('/doctor-dashboard');
-        break;
-      case UserType.assistant:
-        context.go('/assistant-dashboard');
-        break;
       case UserType.farmManager:
         context.go('/farm-manager-dashboard');
         break;
+      default:
+        context.go('/customer-dashboard');
     }
   }
 
@@ -238,6 +234,8 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -246,11 +244,17 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primary,
-              AppTheme.primary.withOpacity(0.85),
-              AppTheme.darkPrimary,
-            ],
+            colors: isDark
+                ? [
+                    theme.colorScheme.surface,
+                    theme.colorScheme.surface.withValues(alpha: 0.8),
+                    theme.colorScheme.primary.withValues(alpha: 0.1),
+                  ]
+                : [
+                    AppTheme.primary,
+                    AppTheme.primary.withOpacity(0.85),
+                    AppTheme.darkPrimary,
+                  ],
           ),
         ),
         child: SafeArea(
@@ -321,7 +325,9 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: isDark
+                              ? Colors.white.withOpacity(0.05)
+                              : Colors.black.withOpacity(0.1),
                           blurRadius: 40,
                           spreadRadius: 5,
                         ),
@@ -333,12 +339,11 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                         'assets/images/farmvest_logo.png',
                         height: 100,
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(
-                              Icons.agriculture,
-                              size: 100,
-                              color: AppTheme.white,
-                            ),
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.agriculture,
+                          size: 100,
+                          color: isDark ? AppTheme.primary : AppTheme.white,
+                        ),
                       ),
                     ),
                   ),
@@ -395,23 +400,23 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
               Expanded(
                 child: Container(
                   width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: AppTheme.white,
-                    borderRadius: BorderRadius.only(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(40),
                       topRight: Radius.circular(40),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
+                        color: isDark ? Colors.black45 : Colors.black12,
                         blurRadius: 20,
-                        offset: Offset(0, -5),
+                        offset: const Offset(0, -5),
                       ),
                     ],
                   ),
                   child: _showRoleSelection
-                      ? _buildRoleSelection()
-                      : _buildLoginForm(authState),
+                      ? _buildRoleSelection(theme, isDark)
+                      : _buildLoginForm(authState, theme, isDark),
                 ),
               ),
             ],
@@ -421,7 +426,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     );
   }
 
-  Widget _buildLoginForm(AuthState authState) {
+  Widget _buildLoginForm(AuthState authState, ThemeData theme, bool isDark) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -430,10 +435,15 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           const SizedBox(height: 50),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 400),
-            child: _isOtpSent ? _buildOtpDisplay() : _buildPhoneNumberDisplay(),
+            child: _isOtpSent
+                ? _buildOtpDisplay(theme, isDark)
+                : _buildPhoneNumberDisplay(theme, isDark),
           ),
           const SizedBox(height: 40),
-          if (_isOtpSent) ...[_buildTimerSection(), const SizedBox(height: 32)],
+          if (_isOtpSent) ...[
+            _buildTimerSection(theme),
+            const SizedBox(height: 32),
+          ],
           PrimaryButton(
             text: _isOtpSent ? 'Verify & Login' : 'Continue',
             isLoading: authState.isLoading,
@@ -448,7 +458,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
-                color: AppTheme.slate.withOpacity(0.5),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
         ],
@@ -456,7 +466,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     );
   }
 
-  Widget _buildRoleSelection() {
+  Widget _buildRoleSelection(ThemeData theme, bool isDark) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       itemCount: _availableRoles.length,
@@ -481,11 +491,14 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     color: role.color.withOpacity(0.2),
                     width: 2,
                   ),
-                  gradient: LinearGradient(
-                    colors: [role.color.withOpacity(0.05), Colors.white],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: isDark ? theme.colorScheme.surface : Colors.white,
+                  gradient: isDark
+                      ? null
+                      : LinearGradient(
+                          colors: [role.color.withOpacity(0.05), Colors.white],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                 ),
                 child: Row(
                   children: [
@@ -504,10 +517,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                         children: [
                           Text(
                             role.label,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.dark,
+                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -515,16 +528,18 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                             'Log in as ${role.label}',
                             style: TextStyle(
                               fontSize: 14,
-                              color: AppTheme.slate.withOpacity(0.6),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
-                      color: Colors.black26,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                     ),
                   ],
                 ),
@@ -536,26 +551,30 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     );
   }
 
-  Widget _buildTimerSection() {
+  Widget _buildTimerSection(ThemeData theme) {
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: AppTheme.primary.withOpacity(0.05),
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.timer_outlined, size: 16, color: AppTheme.primary),
+              Icon(
+                Icons.timer_outlined,
+                size: 16,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(width: 8),
               Text(
                 '00:${_remainingSeconds.toString().padLeft(2, '0')}',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ],
@@ -567,7 +586,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           children: [
             Text(
               "Didn't receive the code? ",
-              style: TextStyle(fontSize: 14, color: AppTheme.mediumGrey),
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
             ),
             GestureDetector(
               onTap: _handleResend,
@@ -577,8 +599,8 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: _remainingSeconds == 0
-                      ? AppTheme.primary
-                      : AppTheme.mediumGrey.withOpacity(0.5),
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
                 child: const Text('Resend OTP'),
               ),
@@ -589,7 +611,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     );
   }
 
-  Widget _buildPhoneNumberDisplay() {
+  Widget _buildPhoneNumberDisplay(ThemeData theme, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -598,15 +620,19 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppTheme.slate.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: AppTheme.lightGrey,
+            color: isDark
+                ? theme.colorScheme.surfaceVariant
+                : AppTheme.lightGrey,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.primary.withOpacity(0.1)),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
@@ -621,19 +647,23 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.dark,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(width: 4),
                   Icon(
                     Icons.keyboard_arrow_down,
                     size: 18,
-                    color: AppTheme.slate,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ],
               ),
               const SizedBox(width: 12),
-              Container(height: 30, width: 1, color: Colors.black12),
+              Container(
+                height: 30,
+                width: 1,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+              ),
               const SizedBox(width: 16),
               // Input
               Expanded(
@@ -645,26 +675,26 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   onChanged: (value) => setState(() => _phoneNumber = value),
                   onSubmitted: (_) => _handleContinue(),
 
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.dark,
+                    color: theme.colorScheme.onSurface,
                     letterSpacing: 2.0,
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Enter Your Phone Number',
 
                     hintStyle: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.normal,
-                      color: Colors.black26,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                       letterSpacing: 2.0,
                     ),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     counterText: '',
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       vertical: 16,
                       horizontal: 0,
                     ),
@@ -678,29 +708,31 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     );
   }
 
-  Widget _buildOtpDisplay() {
+  Widget _buildOtpDisplay(ThemeData theme, bool isDark) {
     final defaultPinTheme = PinTheme(
       width: 48,
       height: 56,
-      textStyle: const TextStyle(
+      textStyle: TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
-        color: AppTheme.dark,
+        color: theme.colorScheme.onSurface,
       ),
       decoration: BoxDecoration(
-        color: AppTheme.lightGrey,
+        color: isDark ? theme.colorScheme.surfaceVariant : AppTheme.lightGrey,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.05)),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+        ),
       ),
     );
 
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        border: Border.all(color: AppTheme.primary, width: 1.5),
-        color: Colors.white,
+        border: Border.all(color: theme.colorScheme.primary, width: 1.5),
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.1),
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

@@ -53,6 +53,7 @@ class BuffaloCard extends StatelessWidget {
         AppConstants.mediumphoneheight >= AppConstants.smallphoneheight &&
         screenHeight < 800;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -63,9 +64,11 @@ class BuffaloCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             isDark
-                ? AppTheme.darkSurface
-                : AppTheme.beige.withValues(alpha: 0.3),
-            isDark ? AppTheme.darkSurfaceVariant : AppTheme.white,
+                ? theme.colorScheme.surface
+                : theme.colorScheme.surfaceVariant.withValues(alpha: 0.3),
+            isDark
+                ? theme.colorScheme.surface.withValues(alpha: 0.8)
+                : theme.colorScheme.surface,
           ],
         ),
         boxShadow: [
@@ -100,8 +103,8 @@ class BuffaloCard extends StatelessWidget {
                   Expanded(
                     child: Container(
                       color: isDark
-                          ? AppTheme.transparent
-                          : AppTheme.beige.withValues(alpha: 0.3),
+                          ? theme.colorScheme.surfaceVariant
+                          : Colors.grey[100],
                       child: _buildInfoSection(
                         context,
                         isSmallPhone: isSmallPhone,
@@ -139,6 +142,8 @@ class BuffaloCard extends StatelessWidget {
     required bool isMediumPhone,
   }) {
     final overlayPadding = isSmallPhone ? 6.0 : 8.0;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Stack(
       fit: StackFit.expand,
@@ -150,8 +155,8 @@ class BuffaloCard extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppTheme.slate.withValues(alpha: 0.1),
-                AppTheme.lightGrey,
+                theme.colorScheme.onSurface.withValues(alpha: 0.05),
+                theme.colorScheme.surfaceVariant,
               ],
             ),
           ),
@@ -204,12 +209,16 @@ class BuffaloCard extends StatelessWidget {
                   gaplessPlayback: true,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      color: AppTheme.lightGrey,
+                      color: isDark
+                          ? theme.colorScheme.surfaceVariant
+                          : AppTheme.lightGrey,
                       child: Center(
                         child: Icon(
                           Icons.pets,
                           size: 48,
-                          color: AppTheme.slate.withOpacity(0.3),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                       ),
                     );
@@ -270,7 +279,8 @@ class BuffaloCard extends StatelessWidget {
     required bool isMediumPhone,
     bool applyColor = true,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     final paddingH = isSmallPhone ? 8.0 : 10.0;
     final paddingV = isSmallPhone ? 4.0 : (isMediumPhone ? 5.0 : 6.0);
@@ -286,7 +296,7 @@ class BuffaloCard extends StatelessWidget {
       color: applyColor
           ? (isDark
                 ? Colors.transparent
-                : AppTheme.beige.withValues(alpha: 0.3))
+                : theme.colorScheme.surfaceVariant.withValues(alpha: 0.3))
           : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -326,7 +336,7 @@ class BuffaloCard extends StatelessWidget {
             fontSize: fontSize,
           ),
           // SizedBox(height: rowGap),
-          // // Age (Months)
+          //  Age nonths)
           // _buildInfoRow(
           //   'Age (Months)',
           //   (animal.age != null) ? animal.age.toString() : kHyphen,
@@ -442,6 +452,8 @@ class BuffaloCard extends StatelessWidget {
     final badgeFont = isSmallPhone ? 9.0 : 10.0;
     final valueFont = isSmallPhone ? 12.0 : 10.0;
     final rfid = animal.rfid ?? '';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: () async {
@@ -462,8 +474,8 @@ class BuffaloCard extends StatelessWidget {
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              AppTheme.primary,
-              AppTheme.primary.withValues(alpha: 0.85),
+              theme.colorScheme.primary,
+              theme.colorScheme.primary.withValues(alpha: 0.85),
             ],
           ),
           borderRadius: const BorderRadius.only(

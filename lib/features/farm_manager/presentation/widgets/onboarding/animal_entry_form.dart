@@ -191,11 +191,11 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
             .images
             .isNotEmpty; // Make image mandatory for "Complete" status styling
 
-    final cardColor = Colors.white;
+    final cardColor = Theme.of(context).cardColor;
 
     final borderColor = isComplete
-        ? AppTheme.successGreen.withOpacity(0.3)
-        : AppTheme.primary.withOpacity(0.1);
+        ? AppTheme.successGreen.withValues(alpha: 0.3)
+        : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
@@ -205,7 +205,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
         border: Border.all(color: borderColor, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, 8),
             spreadRadius: -4,
@@ -218,14 +218,14 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(
-                alpha: 0.04,
-              ), // Very subtle fill
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.04), // Very subtle fill
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(18),
               ),
               border: Border(
-                bottom: BorderSide(color: AppTheme.lightGrey.withOpacity(0.5)),
+                bottom: BorderSide(color: Theme.of(context).dividerColor),
               ),
             ),
             child: Row(
@@ -234,11 +234,13 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.primary.withOpacity(0.15),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.15),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -248,7 +250,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     '#${widget.index + 1}',
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
-                      color: AppTheme.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontSize: 14,
                     ),
                   ),
@@ -260,10 +262,10 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.darkGrey,
+                          color: Theme.of(context).colorScheme.onSurface,
                           height: 1.2,
                         ),
                       ),
@@ -273,7 +275,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           'Tag: ${animal.earTag}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: AppTheme.primary,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         )
@@ -282,7 +284,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           'Enter details below',
                           style: TextStyle(
                             fontSize: 12,
-                            color: AppTheme.grey1,
+                            color: Theme.of(context).hintColor,
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -428,16 +430,21 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppTheme.grey1,
+                                color: Theme.of(context).hintColor,
                               ),
                             ),
                             const SizedBox(height: 8),
                             Container(
                               height: 48,
                               decoration: BoxDecoration(
-                                color: AppTheme.lightGrey.withValues(
-                                  alpha: 0.5,
-                                ),
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).inputDecorationTheme.fillColor ??
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.surfaceVariant,
+
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: DropdownButtonFormField<String>(
@@ -520,7 +527,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.grey1,
+                            color: Theme.of(context).hintColor,
                           ),
                         ),
                       ],
@@ -542,12 +549,14 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                             child: Container(
                               width: 80,
                               decoration: BoxDecoration(
-                                color: AppTheme.primary.withOpacity(0.08),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: AppTheme.primary.withValues(
-                                    alpha: 0.2,
-                                  ),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withValues(alpha: 0.2),
                                   style: BorderStyle.solid,
                                 ),
                               ),
@@ -556,7 +565,9 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                 children: [
                                   Icon(
                                     Icons.add_a_photo_rounded,
-                                    color: AppTheme.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     size: 24,
                                   ),
                                   const SizedBox(height: 4),
@@ -564,7 +575,9 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                     'Add',
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: AppTheme.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -628,13 +641,13 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: Theme.of(context).cardColor,
                                           shape: BoxShape.circle,
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.black.withValues(
-                                                alpha: 0.1,
-                                              ),
+                                              color: Theme.of(context)
+                                                  .shadowColor
+                                                  .withValues(alpha: 0.1),
                                               blurRadius: 4,
                                             ),
                                           ],
@@ -669,21 +682,27 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0F9FF), // Light Blue
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFBCE3FF)),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.child_friendly_rounded,
-                          color: Colors.blue,
+                          color: Theme.of(context).colorScheme.primary,
                           size: 20,
                         ),
                       ),
@@ -703,15 +722,18 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                             widget.calfEntry!.earTag.isNotEmpty
                                 ? "Tag: ${widget.calfEntry!.earTag}"
                                 : "Tap to enter calf details",
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).hintColor,
+                            ),
                           ),
                         ],
                       ),
                       const Spacer(),
-                      const Icon(
+                      Icon(
                         Icons.arrow_forward_ios_rounded,
                         size: 14,
-                        color: Colors.blue,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ],
                   ),

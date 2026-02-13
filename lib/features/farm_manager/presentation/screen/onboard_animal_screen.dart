@@ -145,7 +145,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Theme.of(context).colorScheme.shadow,
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -159,7 +159,12 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [AppTheme.primary, AppTheme.darkPrimary],
+                          colors: [
+                            Theme.of(context).colorScheme.primary,
+                            Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.8),
+                          ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -173,7 +178,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(
@@ -202,7 +207,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                   'Select an order to continue',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.white.withValues(alpha: 0.8),
+                                    color: Colors.white.withOpacity(0.8),
                                   ),
                                 ),
                               ],
@@ -244,7 +249,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                       child: Icon(
                                         Icons.inbox_outlined,
                                         size: 48,
-                                        color: AppTheme.grey1,
+                                        color: Theme.of(context).disabledColor,
                                       ),
                                     ),
                                     const SizedBox(height: 16),
@@ -253,7 +258,9 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w600,
-                                        color: AppTheme.darkGrey,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -263,7 +270,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                           : 'No orders found for this mobile number.',
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: AppTheme.grey1,
+                                        color: Theme.of(context).hintColor,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
@@ -300,21 +307,21 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                               ],
                             );
                           },
-                          loading: () => const Center(
+                          loading: () => Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppTheme.primary,
+                                    Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
                                 Text(
                                   'Loading orders...',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: AppTheme.grey1,
+                                    color: Theme.of(context).hintColor,
                                   ),
                                 ),
                               ],
@@ -327,9 +334,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(20),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.errorRed.withValues(
-                                      alpha: 0.1,
-                                    ),
+                                    color: AppTheme.errorRed.withOpacity(0.1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
@@ -585,6 +590,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                     maxLength: 10,
                     showCounter: false,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    // Theme aware text field is handled by CustomTextField but we ensure its consistent
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -593,6 +599,8 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                       ? null
                       : _showPaidOrdersDialog,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

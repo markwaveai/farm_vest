@@ -69,7 +69,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppTheme.grey1,
+            color: Theme.of(context).hintColor,
           ),
         ),
         const SizedBox(height: 8),
@@ -95,26 +95,28 @@ class _ModernTextFieldState extends State<ModernTextField> {
             if (widget.textCapitalization == TextCapitalization.characters)
               UpperCaseTextFormatter(),
           ],
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppTheme.darkGrey,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           decoration: InputDecoration(
             errorMaxLines: 3,
             filled: true,
-            fillColor: AppTheme.lightGrey.withOpacity(0.5),
+            fillColor:
+                Theme.of(context).inputDecorationTheme.fillColor ??
+                Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
             counterText: "",
             hintText: widget.hint,
             hintStyle: TextStyle(
               fontSize: 14,
-              color: AppTheme.grey1.withOpacity(0.5),
+              color: Theme.of(context).hintColor.withOpacity(0.5),
               fontWeight: FontWeight.normal,
             ),
             prefixIcon: Icon(
               widget.icon,
               size: 18,
-              color: AppTheme.primary.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

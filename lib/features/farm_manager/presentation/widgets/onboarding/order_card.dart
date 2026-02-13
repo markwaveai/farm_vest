@@ -13,12 +13,12 @@ class OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.lightGrey, width: 1),
+        border: Border.all(color: Theme.of(context).dividerColor, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -42,15 +42,19 @@ class OrderCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            AppTheme.primary.withOpacity(0.1),
-                            AppTheme.darkPrimary.withOpacity(0.1),
+                            Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.1),
+                            Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.1),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.receipt_long,
-                        color: AppTheme.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 24,
                       ),
                     ),
@@ -61,10 +65,10 @@ class OrderCard extends StatelessWidget {
                         children: [
                           Text(
                             item.investor.fullName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.darkGrey,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -72,7 +76,7 @@ class OrderCard extends StatelessWidget {
                             '📱 ${item.investor.mobile}',
                             style: TextStyle(
                               fontSize: 14,
-                              color: AppTheme.grey1,
+                              color: Theme.of(context).hintColor,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -80,7 +84,7 @@ class OrderCard extends StatelessWidget {
                             'Order #${item.order.id.substring(0, 8)}',
                             style: TextStyle(
                               fontSize: 12,
-                              color: AppTheme.grey1,
+                              color: Theme.of(context).hintColor,
                               fontFamily: 'Monospace',
                             ),
                           ),
@@ -90,12 +94,12 @@ class OrderCard extends StatelessWidget {
                     Icon(
                       Icons.arrow_forward_ios_rounded,
                       size: 16,
-                      color: AppTheme.grey1,
+                      color: Theme.of(context).hintColor,
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                Divider(height: 1, color: AppTheme.lightGrey),
+                Divider(height: 1, color: Theme.of(context).dividerColor),
                 const SizedBox(height: 16),
 
                 // Stats Row
@@ -103,16 +107,19 @@ class OrderCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _buildStatItem(
+                      context,
                       'Buffaloes',
                       item.order.buffaloCount.toString(),
                       Icons.pets,
                     ),
                     _buildStatItem(
+                      context,
                       'Calves',
                       item.order.calfCount.toString(),
                       Icons.cruelty_free,
                     ),
                     _buildStatItem(
+                      context,
                       'Total',
                       '₹${NumberFormat('#,##,###').format(item.order.totalCost)}',
                       Icons.payments_outlined,
@@ -127,18 +134,23 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon) {
+  Widget _buildStatItem(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     return Column(
       children: [
         Row(
           children: [
-            Icon(icon, size: 14, color: AppTheme.grey1),
+            Icon(icon, size: 14, color: Theme.of(context).hintColor),
             const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: AppTheme.grey1,
+                color: Theme.of(context).hintColor,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -147,10 +159,10 @@ class OrderCard extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: AppTheme.darkGrey,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
