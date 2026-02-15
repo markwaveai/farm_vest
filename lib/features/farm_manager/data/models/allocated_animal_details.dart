@@ -5,6 +5,8 @@ class AllocatedAnimalDetails {
   final InvestorInfo investorDetails;
   final StaffInfo? farmManager;
   final StaffInfo? supervisor;
+  final StaffInfo? doctor;
+  final StaffInfo? assistantDoctor;
 
   AllocatedAnimalDetails({
     required this.animalDetails,
@@ -13,6 +15,8 @@ class AllocatedAnimalDetails {
     required this.investorDetails,
     this.farmManager,
     this.supervisor,
+    this.doctor,
+    this.assistantDoctor,
   });
 
   factory AllocatedAnimalDetails.fromJson(Map<String, dynamic> json) {
@@ -27,30 +31,38 @@ class AllocatedAnimalDetails {
       supervisor: json['supervisor'] != null
           ? StaffInfo.fromJson(json['supervisor'])
           : null,
+      doctor: json['doctor'] != null
+          ? StaffInfo.fromJson(json['doctor'])
+          : null,
+      assistantDoctor: json['assistant_doctor'] != null
+          ? StaffInfo.fromJson(json['assistant_doctor'])
+          : null,
     );
   }
 }
 
 class AnimalInfo {
-  final int id;
-  final String animalId;
+  final int animalId;
   final String rfidTagNumber;
   final String? earTag;
   final String? breedName;
   final String? status;
-  final int? rowNumber;
+  final String? healthStatus;
+  final int? ageMonths;
+  final String? rowNumber;
   final String? parkingId;
   final List<String> images;
   final String? onboardedAt;
   final String? dateOfCalving;
 
   AnimalInfo({
-    required this.id,
     required this.animalId,
     required this.rfidTagNumber,
     this.earTag,
     this.breedName,
     this.status,
+    this.healthStatus,
+    this.ageMonths,
     this.rowNumber,
     this.parkingId,
     this.images = const [],
@@ -59,22 +71,19 @@ class AnimalInfo {
   });
 
   factory AnimalInfo.fromJson(Map<String, dynamic> json) {
-    int? parseRow(dynamic val) {
-      if (val is num) return val.toInt();
-      if (val is String) {
-        return int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), ''));
-      }
-      return null;
-    }
-
     return AnimalInfo(
-      id: json['id'] is num ? (json['id'] as num).toInt() : 0,
-      animalId: json['animal_id'] ?? '',
+      animalId: json['animal_id'] is num
+          ? (json['animal_id'] as num).toInt()
+          : 0,
       rfidTagNumber: json['rfid_tag_number'] ?? '',
       earTag: json['ear_tag'],
       breedName: json['breed_name'],
       status: json['status'],
-      rowNumber: parseRow(json['row_number']),
+      healthStatus: json['health_status'],
+      ageMonths: json['age_months'] is num
+          ? (json['age_months'] as num).toInt()
+          : null,
+      rowNumber: json['row_number']?.toString(),
       parkingId: json['parking_id'],
       images: json['images'] != null ? List<String>.from(json['images']) : [],
       onboardedAt: json['onboarded_at'],
@@ -84,14 +93,12 @@ class AnimalInfo {
 }
 
 class ShedInfo {
-  final int id;
-  final String shedId;
+  final int shedId;
   final String shedName;
   final int capacity;
   final int buffaloesCount;
 
   ShedInfo({
-    required this.id,
     required this.shedId,
     required this.shedName,
     required this.capacity,
@@ -100,8 +107,7 @@ class ShedInfo {
 
   factory ShedInfo.fromJson(Map<String, dynamic> json) {
     return ShedInfo(
-      id: json['id'] is num ? (json['id'] as num).toInt() : 0,
-      shedId: json['sheds.id'] ?? '',
+      shedId: json['shed_id'] is num ? (json['shed_id'] as num).toInt() : 0,
       shedName: json['shed_name'] ?? '',
       capacity: json['capacity'] is num ? (json['capacity'] as num).toInt() : 0,
       buffaloesCount: json['buffaloes_count'] is num
@@ -112,15 +118,19 @@ class ShedInfo {
 }
 
 class FarmInfo {
-  final int id;
+  final int farmId;
   final String farmName;
   final String location;
 
-  FarmInfo({required this.id, required this.farmName, required this.location});
+  FarmInfo({
+    required this.farmId,
+    required this.farmName,
+    required this.location,
+  });
 
   factory FarmInfo.fromJson(Map<String, dynamic> json) {
     return FarmInfo(
-      id: json['id'] is num ? (json['id'] as num).toInt() : 0,
+      farmId: json['farm_id'] is num ? (json['farm_id'] as num).toInt() : 0,
       farmName: json['farm_name'] ?? '',
       location: json['location'] ?? '',
     );
@@ -128,13 +138,13 @@ class FarmInfo {
 }
 
 class InvestorInfo {
-  final int id;
+  final int investorId;
   final String fullName;
   final String mobile;
   final String? email;
 
   InvestorInfo({
-    required this.id,
+    required this.investorId,
     required this.fullName,
     required this.mobile,
     this.email,
@@ -142,7 +152,9 @@ class InvestorInfo {
 
   factory InvestorInfo.fromJson(Map<String, dynamic> json) {
     return InvestorInfo(
-      id: json['id'] is num ? (json['id'] as num).toInt() : 0,
+      investorId: json['investor_id'] is num
+          ? (json['investor_id'] as num).toInt()
+          : 0,
       fullName: json['full_name'] ?? '',
       mobile: json['mobile'] ?? '',
       email: json['email'],

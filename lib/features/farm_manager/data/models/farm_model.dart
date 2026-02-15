@@ -21,7 +21,7 @@ class Farm {
 
   factory Farm.fromJson(Map<String, dynamic> json) {
     return Farm(
-      id: json['id'] is num ? (json['id'] as num).toInt() : 0,
+      id: json['farm_id'] is num ? (json['farm_id'] as num).toInt() : 0,
       farmName: json['farm_name'] ?? json['name'] ?? '',
       location: json['location'] ?? '',
       totalBuffaloesCount: json['total_buffaloes_count'] is num

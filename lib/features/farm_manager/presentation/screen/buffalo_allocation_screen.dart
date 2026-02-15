@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/models/farm_manager_dashboard_model.dart';
 import '../../data/models/shed_model.dart';
 import 'package:farm_vest/features/farm_manager/data/models/allocated_animal_details.dart';
+import 'package:farm_vest/core/theme/app_constants.dart';
 
 class BuffaloAllocationScreen extends ConsumerStatefulWidget {
   final int? initialFarmId;
@@ -36,11 +37,12 @@ class BuffaloAllocationScreen extends ConsumerStatefulWidget {
 class _BuffaloAllocationScreenState
     extends ConsumerState<BuffaloAllocationScreen> {
   // Local state to track allocations before finalizing
-  // Key: "row-slot", Value: animalId
-  Map<String, String> draftAllocations = {};
+  // Key: shedId, Value: { "row-slot": animalId }
+  Map<int, Map<String, String>> allDraftAllocations = {};
   String? selectedAnimalId;
   int? selectedShedId;
   int? selectedFarmId; // To track the selected farm
+  final ScrollController _shedScrollController = ScrollController();
 
   @override
   void initState() {
@@ -73,13 +75,27 @@ class _BuffaloAllocationScreenState
             .fetchShedPositions(selectedShedId!);
       }
     });
+
+    _shedScrollController.addListener(() {
+      if (_shedScrollController.position.pixels >=
+          _shedScrollController.position.maxScrollExtent - 200) {
+        final authState = ref.read(authProvider);
+        final farmId = int.tryParse(authState.userData?.farmId ?? '');
+        ref.read(farmManagerProvider.notifier).fetchMoreSheds(farmId: farmId);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _shedScrollController.dispose();
+    super.dispose();
   }
 
   void _onShedSelected(int? shedId) {
     if (shedId == null) return;
     setState(() {
       selectedShedId = shedId;
-      draftAllocations.clear();
       selectedAnimalId = null;
     });
     ref.read(farmManagerProvider.notifier).fetchShedPositions(shedId);
@@ -152,7 +168,7 @@ class _BuffaloAllocationScreenState
     }
 
     String appBarTitle = 'Shed Allocation';
-    if (userRole == UserType.supervisor &&
+    if (userRole == UserType.farmManager &&
         selectedShedId != null &&
         dashboardState.sheds.isNotEmpty) {
       final shed = dashboardState.sheds.firstWhere(
@@ -205,6 +221,21 @@ class _BuffaloAllocationScreenState
                 ),
               ),
               actions: [
+                if (selectedShedId != null &&
+                    dashboardState.sheds.isNotEmpty &&
+                    !dashboardState.isLoading)
+                  IconButton(
+                    icon: const Icon(
+                      Icons.videocam_rounded,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      final shed = dashboardState.sheds.firstWhere(
+                        (s) => s.id == selectedShedId,
+                      );
+                      _showCctvUrlDialog(shed);
+                    },
+                  ),
                 IconButton(
                   icon: const Icon(Icons.refresh_rounded, color: Colors.white),
                   onPressed: () {
@@ -323,13 +354,16 @@ class _BuffaloAllocationScreenState
     final authState = ref.watch(authProvider);
     final userShedId = int.tryParse(authState.userData?.shedId ?? '');
 
-    // Filter sheds for Supervisor role
+    // Filter sheds for Supervisor role: only show their assigned shed
     final List<Shed> displayedSheds =
         (authState.role == UserType.supervisor && userShedId != null)
         ? state.sheds.where((s) => s.id == userShedId).toList()
         : state.sheds;
 
-    if (displayedSheds.isEmpty) return const SizedBox.shrink();
+    // If it's a supervisor or there's only one shed, hide the selector
+    if (authState.role == UserType.supervisor || displayedSheds.length <= 1) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,22 +381,32 @@ class _BuffaloAllocationScreenState
           ),
         ),
         SizedBox(
-          height: 100,
+          height: 80,
           child: ListView.builder(
+            controller: _shedScrollController,
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: displayedSheds.length,
+            itemCount: displayedSheds.length + (state.hasMoreSheds ? 1 : 0),
             itemBuilder: (context, index) {
+              if (index == displayedSheds.length) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              }
+
               final shed = displayedSheds[index];
               final isSelected = selectedShedId == shed.id;
 
               return Padding(
-                padding: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.only(right: 12, bottom: 8),
                 child: GestureDetector(
                   onTap: () => _onShedSelected(shed.id),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    width: 180,
+                    width: 150,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isSelected ? AppTheme.primary : Colors.white,
@@ -370,7 +414,7 @@ class _BuffaloAllocationScreenState
                       boxShadow: [
                         BoxShadow(
                           color: (isSelected ? AppTheme.primary : Colors.black)
-                              .withOpacity(0.1),
+                              .withOpacity(0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -378,79 +422,33 @@ class _BuffaloAllocationScreenState
                       border: Border.all(
                         color: isSelected
                             ? AppTheme.primary
-                            : Colors.grey.shade200,
-                        width: 1.5,
+                            : AppTheme.primary.withOpacity(0.1),
+                        width: 1,
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                shed.shedName,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : AppTheme.dark,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (isSelected) ...[
-                              IconButton(
-                                constraints: const BoxConstraints(),
-                                padding: EdgeInsets.zero,
-                                icon: const Icon(
-                                  Icons.videocam_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                onPressed: () => _showCctvUrlDialog(shed),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.check_circle,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                            ],
-                          ],
+                        Text(
+                          shed.shedName,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: isSelected ? Colors.white : AppTheme.dark,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${shed.availablePositions} positions left',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: isSelected
-                                    ? Colors.white.withOpacity(0.8)
-                                    : AppTheme.grey1,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(2),
-                              child: LinearProgressIndicator(
-                                value: (shed.capacity > 0)
-                                    ? (shed.currentBuffaloes / shed.capacity)
-                                    : 0,
-                                backgroundColor: isSelected
-                                    ? Colors.white.withOpacity(0.3)
-                                    : Colors.grey.shade100,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  isSelected ? Colors.white : AppTheme.primary,
-                                ),
-                                minHeight: 4,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 4),
+                        Text(
+                          '${shed.availablePositions} left',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: isSelected
+                                ? Colors.white.withOpacity(0.9)
+                                : AppTheme.grey1,
+                          ),
                         ),
                       ],
                     ),
@@ -661,6 +659,12 @@ class _BuffaloAllocationScreenState
     int totalOccupied = 0;
     availability.rows.values.forEach((r) => totalOccupied += r.filled.length);
 
+    final currentDraft = allDraftAllocations[selectedShedId] ?? {};
+    final totalAllocatedInAllSheds = allDraftAllocations.values.fold(
+      0,
+      (sum, draft) => sum + draft.length,
+    );
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(20),
@@ -687,17 +691,17 @@ class _BuffaloAllocationScreenState
           ),
           Container(height: 40, width: 1, color: Colors.grey.shade300),
           _buildPremiumStat(
-            'Allocated',
-            '${totalOccupied + draftAllocations.length}',
+            'Shed Pick',
+            '${totalOccupied + currentDraft.length}',
             Icons.pets_rounded,
             AppTheme.successGreen,
           ),
           Container(height: 40, width: 1, color: Colors.grey.shade300),
           _buildPremiumStat(
-            'Pending',
-            '${(ref.read(farmManagerProvider).onboardedAnimalIds.length) - draftAllocations.length}',
-            Icons.pending_actions_rounded,
-            AppTheme.warningOrange,
+            'Total Draft',
+            '$totalAllocatedInAllSheds',
+            Icons.assignment_turned_in_rounded,
+            AppTheme.primary,
           ),
         ],
       ),
@@ -706,6 +710,10 @@ class _BuffaloAllocationScreenState
 
   Widget _buildPendingAnimalsTray(List<dynamic> onboardedAnimals) {
     // Determine the ID to use for filtering. If map, use animal_id or rfid. If string, use string
+    final allAllocatedIds = allDraftAllocations.values
+        .expand((d) => d.values)
+        .toSet();
+
     final pendingAnimals = onboardedAnimals.where((animal) {
       final id = (animal is Map)
           ? (animal['rfid_tag'] ??
@@ -713,7 +721,7 @@ class _BuffaloAllocationScreenState
                 animal['rfid_tag_number'] ??
                 animal['animal_id'])
           : animal.toString();
-      return !draftAllocations.values.contains(id);
+      return !allAllocatedIds.contains(id.toString());
     }).toList();
 
     return Container(
@@ -819,14 +827,17 @@ class _BuffaloAllocationScreenState
                       children: [
                         if (imageUrl != null)
                           Container(
-                            width: 40,
-                            height: 40,
+                            width: 80,
+                            height: 45,
                             margin: const EdgeInsets.only(bottom: 4),
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
+                              borderRadius: BorderRadius.circular(8),
+                              color: isSelected
+                                  ? Colors.white.withOpacity(0.1)
+                                  : Colors.grey.shade50,
                               image: DecorationImage(
                                 image: NetworkImage(imageUrl),
-                                fit: BoxFit.cover,
+                                fit: BoxFit.contain,
                               ),
                             ),
                           )
@@ -1064,7 +1075,8 @@ class _BuffaloAllocationScreenState
     Map<String, dynamic>? details,
   ]) {
     final slotKey = '$rowName-$posId';
-    final draftAnimalId = draftAllocations[slotKey];
+    final currentDraft = allDraftAllocations[selectedShedId] ?? {};
+    final draftAnimalId = currentDraft[slotKey];
     final isBeingAllocated = draftAnimalId != null;
 
     final String targetId = (widget.targetParkingId ?? '').trim().toUpperCase();
@@ -1112,7 +1124,7 @@ class _BuffaloAllocationScreenState
                     ? AppTheme.secondary
                     : isTarget
                     ? Colors
-                          .red // Highlight target with RED
+                          .green // Highlight target with GREEN
                     : isOccupied
                     ? AppTheme.primary.withOpacity(0.1)
                     : Colors.transparent,
@@ -1128,7 +1140,7 @@ class _BuffaloAllocationScreenState
                                     ? AppTheme.secondary
                                     : isTarget
                                     ? Colors
-                                          .red // RED shadow for target
+                                          .green // GREEN shadow for target
                                     : AppTheme.primary)
                                 .withValues(
                                   alpha: 0.3,
@@ -1198,10 +1210,20 @@ class _BuffaloAllocationScreenState
                   setState(() {
                     if (isBeingAllocated) {
                       // Remove from draft
-                      draftAllocations.remove(slotKey);
-                    } else if (selectedAnimalId != null) {
+                      if (allDraftAllocations.containsKey(selectedShedId)) {
+                        allDraftAllocations[selectedShedId]!.remove(slotKey);
+                        if (allDraftAllocations[selectedShedId]!.isEmpty) {
+                          allDraftAllocations.remove(selectedShedId);
+                        }
+                      }
+                    } else if (selectedAnimalId != null &&
+                        selectedShedId != null) {
                       // Allocate selected animal to this slot
-                      draftAllocations[slotKey] = selectedAnimalId!;
+                      if (!allDraftAllocations.containsKey(selectedShedId)) {
+                        allDraftAllocations[selectedShedId!] = {};
+                      }
+                      allDraftAllocations[selectedShedId]![slotKey] =
+                          selectedAnimalId!;
                       selectedAnimalId = null;
                     }
                   });
@@ -1213,10 +1235,10 @@ class _BuffaloAllocationScreenState
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       if (isOccupied) ...[
-                        const Icon(
+                        Icon(
                           Icons.pets,
                           size: 16,
-                          color: AppTheme.primary,
+                          color: isTarget ? Colors.green : AppTheme.primary,
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -1224,14 +1246,14 @@ class _BuffaloAllocationScreenState
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
-                            color: AppTheme.primary,
+                            color: isTarget ? Colors.green : AppTheme.primary,
                           ),
                         ),
                       ] else if (isBeingAllocated) ...[
-                        const Icon(
+                        Icon(
                           Icons.add_location_alt_rounded,
                           size: 16,
-                          color: AppTheme.secondary,
+                          color: isTarget ? Colors.green : AppTheme.secondary,
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -1248,8 +1270,12 @@ class _BuffaloAllocationScreenState
                           posId,
                           style: TextStyle(
                             fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.grey1.withOpacity(0.5),
+                            fontWeight: isTarget
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            color: isTarget
+                                ? Colors.red
+                                : AppTheme.grey1.withOpacity(0.5),
                           ),
                         ),
                       ],
@@ -1269,79 +1295,176 @@ class _BuffaloAllocationScreenState
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Allocated Animal Details'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Animal Details
-              const Text(
-                'Animal Information',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const Divider(),
-              _buildDetailRow('Farm', data.farmDetails.farmName),
-              _buildDetailRow('Shed', data.shedDetails.shedName),
-              _buildDetailRow(
-                'Row',
-                'R${data.animalDetails.rowNumber?.toString() ?? "?"}',
-              ),
-              _buildDetailRow('Slot', data.animalDetails.parkingId ?? 'N/A'),
-              _buildDetailRow('RFID Tag', data.animalDetails.rfidTagNumber),
-              _buildDetailRow(
-                'Onboarded',
-                data.animalDetails.onboardedAt?.split('T').first ?? 'N/A',
-              ),
-
-              const SizedBox(height: 16),
-
-              // Investor Details
-              const Text(
-                'Investor Details',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const Divider(),
-              _buildDetailRow('Name', data.investorDetails.fullName),
-              _buildDetailRow('Mobile', data.investorDetails.mobile),
-
-              // Farm Staff Details
-              const SizedBox(height: 16),
-              const Text(
-                'Assigned Staff',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const Divider(),
-
-              // Farm Manager
-              if (data.farmManager != null) ...[
-                const SizedBox(height: 8),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Animal Details
                 const Text(
-                  'Farm Manager',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: AppTheme.primary,
-                  ),
+                  'Animal Information',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                _buildDetailRow('Name', data.farmManager!.fullName),
-                _buildDetailRow('Mobile', data.farmManager!.mobile),
-              ],
+                const Divider(),
+                if (data.animalDetails.images.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Container(
+                      height: 180,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          width: 0.5,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          data.animalDetails.images.first,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Center(
+                                child: Icon(
+                                  Icons.error_outline,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                        ),
+                      ),
+                    ),
+                  ),
+                _buildDetailRow(
+                  'Animal ID',
+                  data.animalDetails.animalId.toString(),
+                ),
+                _buildDetailRow('Breed', data.animalDetails.breedName ?? 'N/A'),
+                _buildDetailRow('Status', data.animalDetails.status ?? 'N/A'),
+                _buildDetailRow(
+                  'Health Status',
+                  data.animalDetails.healthStatus ?? 'N/A',
+                ),
+                _buildDetailRow(
+                  'Age (Months)',
+                  data.animalDetails.ageMonths?.toString() ?? 'N/A',
+                ),
+                _buildDetailRow('RFID Tag', data.animalDetails.rfidTagNumber),
+                _buildDetailRow('Ear Tag', data.animalDetails.earTag ?? 'N/A'),
+                _buildDetailRow('Row', data.animalDetails.rowNumber ?? 'N/A'),
+                _buildDetailRow('Slot', data.animalDetails.parkingId ?? 'N/A'),
+                _buildDetailRow(
+                  'Onboarded',
+                  AppConstants.formatDateTime(data.animalDetails.onboardedAt),
+                ),
 
-              // Supervisor
-              if (data.supervisor != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
+
+                // Investor Details
                 const Text(
-                  'Supervisor',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: AppTheme.primary,
-                  ),
+                  'Investor Details',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                _buildDetailRow('Name', data.supervisor!.fullName),
-                _buildDetailRow('Mobile', data.supervisor!.mobile),
+                const Divider(),
+                _buildDetailRow('Name', data.investorDetails.fullName),
+                _buildDetailRow('Mobile', data.investorDetails.mobile),
+                _buildDetailRow('Email', data.investorDetails.email ?? 'N/A'),
+
+                const SizedBox(height: 16),
+
+                // Farm & Shed Details
+                const Text(
+                  'Location Details',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const Divider(),
+                _buildDetailRow('Farm', data.farmDetails.farmName),
+                _buildDetailRow('Location', data.farmDetails.location),
+                _buildDetailRow('Shed', data.shedDetails.shedName),
+                _buildDetailRow(
+                  'Current Buffaloes',
+                  data.shedDetails.buffaloesCount.toString(),
+                ),
+                _buildDetailRow(
+                  'Capacity',
+                  data.shedDetails.capacity.toString(),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Assigned Staff
+                const Text(
+                  'Assigned Staff',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const Divider(),
+
+                if (data.farmManager != null) ...[
+                  const Text(
+                    'Farm Manager',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                  _buildDetailRow('Name', data.farmManager!.fullName),
+                  _buildDetailRow('Mobile', data.farmManager!.mobile),
+                  const SizedBox(height: 8),
+                ],
+
+                if (data.supervisor != null) ...[
+                  const Text(
+                    'Supervisor',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                  _buildDetailRow('Name', data.supervisor!.fullName),
+                  _buildDetailRow('Mobile', data.supervisor!.mobile),
+                  const SizedBox(height: 8),
+                ],
+
+                if (data.doctor != null) ...[
+                  const Text(
+                    'Doctor',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                  _buildDetailRow('Name', data.doctor!.fullName),
+                  _buildDetailRow('Mobile', data.doctor!.mobile),
+                  const SizedBox(height: 8),
+                ],
+
+                if (data.assistantDoctor != null) ...[
+                  const Text(
+                    'Assistant Doctor',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                  _buildDetailRow('Name', data.assistantDoctor!.fullName),
+                  _buildDetailRow('Mobile', data.assistantDoctor!.mobile),
+                  const SizedBox(height: 8),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         actions: [
@@ -1383,21 +1506,13 @@ class _BuffaloAllocationScreenState
   }
 
   Future<void> _finalizeAllocations() async {
-    // 1. Refined Validation for Shed
-    if (selectedShedId == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select a shed first'),
-            backgroundColor: AppTheme.warningOrange,
-          ),
-        );
-      }
-      return;
-    }
+    final totalDraftCount = allDraftAllocations.values.fold(
+      0,
+      (sum, draft) => sum + draft.length,
+    );
 
-    // 3. Validate Animal Selection (Draft Allocations)
-    if (draftAllocations.isEmpty) {
+    // 1. Validate Selection
+    if (totalDraftCount == 0) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1411,13 +1526,14 @@ class _BuffaloAllocationScreenState
 
     final onboardedAnimals = ref.read(farmManagerProvider).onboardedAnimalIds;
 
-    if (draftAllocations.length < onboardedAnimals.length) {
+    // 2. Incomplete Allocation Warning
+    if (totalDraftCount < onboardedAnimals.length) {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Incomplete Allocation'),
           content: Text(
-            'You have ${onboardedAnimals.length - draftAllocations.length} animals left to allocate. Do you want to proceed anyway?',
+            'You have ${onboardedAnimals.length - totalDraftCount} animals left to allocate. Do you want to proceed anyway?',
           ),
           actions: [
             TextButton(
@@ -1435,76 +1551,104 @@ class _BuffaloAllocationScreenState
     }
 
     final dashboardState = ref.read(farmManagerProvider);
-    final selectedShed = dashboardState.sheds
-        .where((s) => s.id == selectedShedId)
-        .firstOrNull;
+    bool overallSuccess = true;
+    int successCount = 0;
+    int failCount = 0;
 
-    if (selectedShed == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Selected shed not found')),
-        );
-      }
-      return;
-    }
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
 
-    // Convert draftAllocations to required format
-    final List<Map<String, dynamic>> allocations = draftAllocations.entries.map(
-      (e) {
-        final parts = e.key.split('-'); // e.g. ["R1", "A4"]
-        final rowId = parts[0]; // "R1"
-        final slotId = parts[1]; // "A4"
+    try {
+      final shedsToProcess = allDraftAllocations.keys.toList();
 
-        final String animalId = e.value;
-        // Find the animal object to get the RFID tag
-        final animalObj = onboardedAnimals.firstWhere(
-          (a) {
-            final aId = (a is Map)
-                ? (a['rfid_tag'] ??
-                      a['rfid'] ??
-                      a['rfid_tag_number'] ??
-                      a['animal_id'])
-                : a.toString();
-            return aId.toString() == animalId;
-          },
-          orElse: () => <String, dynamic>{}, // Return empty map if not found
-        );
+      for (final shedId in shedsToProcess) {
+        final currentShedDraft = allDraftAllocations[shedId]!;
+        final selectedShed = dashboardState.sheds
+            .where((s) => s.id == shedId)
+            .firstOrNull;
 
-        String rfidTag = animalId; // Fallback to ID
-        if (animalObj is Map) {
-          rfidTag = (animalObj['rfid_tag'] ?? animalObj['rfid'] ?? animalId)
-              .toString();
+        if (selectedShed == null) {
+          failCount++;
+          continue;
         }
 
-        return {
-          'rfid_tag_number': rfidTag,
-          'parking_id': slotId, // Just the slot ID like "A4"
-          'row_number': rowId, // Row ID as string like "R1"
-        };
-      },
-    ).toList();
+        // Convert draftAllocations to required format
+        final List<Map<String, dynamic>> allocations = currentShedDraft.entries
+            .map((e) {
+              final parts = e.key.split('-'); // e.g. ["R1", "A4"]
+              final rowId = parts[0]; // "R1"
+              final slotId = parts[1]; // "A4"
 
-    final success = await ref
-        .read(farmManagerProvider.notifier)
-        .allocateAnimals(
-          shedId: selectedShed.id.toString(),
-          allocations: allocations,
-        );
+              final String animalId = e.value;
+              final animalObj = onboardedAnimals.firstWhere((a) {
+                final aId = (a is Map)
+                    ? (a['rfid_tag'] ??
+                          a['rfid'] ??
+                          a['rfid_tag_number'] ??
+                          a['animal_id'])
+                    : a.toString();
+                return aId.toString() == animalId;
+              }, orElse: () => <String, dynamic>{});
 
-    if (success && mounted) {
+              String rfidTag = animalId;
+              if (animalObj is Map) {
+                rfidTag =
+                    (animalObj['rfid_tag'] ?? animalObj['rfid'] ?? animalId)
+                        .toString();
+              }
+
+              return {
+                'rfid_tag_number': rfidTag,
+                'parking_id': slotId,
+                'row_number': rowId,
+              };
+            })
+            .toList();
+
+        final success = await ref
+            .read(farmManagerProvider.notifier)
+            .allocateAnimals(
+              shedId: shedId.toString(),
+              allocations: allocations,
+            );
+
+        if (success) {
+          successCount++;
+        } else {
+          overallSuccess = false;
+          failCount++;
+        }
+      }
+    } catch (e) {
+      overallSuccess = false;
+    }
+
+    if (mounted) Navigator.pop(context); // Close loading dialog
+
+    if (successCount > 0 && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Animals allocated successfully!'),
-          backgroundColor: AppTheme.successGreen,
+        SnackBar(
+          content: Text(
+            overallSuccess
+                ? 'All animals allocated successfully across $successCount sheds!'
+                : 'Allocated in $successCount sheds. $failCount sheds failed.',
+          ),
+          backgroundColor: overallSuccess
+              ? AppTheme.successGreen
+              : AppTheme.warningOrange,
         ),
       );
 
-      // Clear drafts
+      // Clear all drafts
       setState(() {
-        draftAllocations.clear();
+        allDraftAllocations.clear();
       });
 
-      // Refresh data to show updated slots and remove allocated animals
+      // Refresh data
       if (selectedShedId != null) {
         ref
             .read(farmManagerProvider.notifier)
@@ -1516,8 +1660,8 @@ class _BuffaloAllocationScreenState
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to allocate animals.'),
-          backgroundColor: AppTheme.errorRed,
+          content: Text('Failed to allocate animals to any shed.'),
+          backgroundColor: Colors.red,
         ),
       );
     }

@@ -31,12 +31,15 @@ class InvestorAnimal {
   final String? investorName;
   final String? earTagId;
   final String? status;
+  final String? animalkartOrderId;
+  final String? parentAnimalId;
 
   /// Current health status of the animal
   final String healthStatus;
 
   /// Date when the animal was onboarded
   final DateTime? onboardedAt;
+  final String? onboardedBy;
 
   /// Creates an instance of [InvestorAnimal].
   const InvestorAnimal({
@@ -61,6 +64,9 @@ class InvestorAnimal {
     required this.healthStatus,
     this.breed,
     this.onboardedAt,
+    this.onboardedBy,
+    this.animalkartOrderId,
+    this.parentAnimalId,
   });
 
   /// Creates an [InvestorAnimal] from JSON data.
@@ -127,6 +133,18 @@ class InvestorAnimal {
       onboardedAt: animalData['onboarded_at'] != null
           ? DateTime.tryParse(animalData['onboarded_at'].toString())
           : null,
+      onboardedBy:
+          (json['farm_manager']?['full_name'] ??
+                  json['farm_manager']?['name'] ??
+                  json['onboarded_by'] ??
+                  animalData['onboarded_by'])
+              ?.toString(),
+      animalkartOrderId:
+          (json['animalkart_order_id'] ?? animalData['animalkart_order_id'])
+              ?.toString(),
+      parentAnimalId:
+          (json['parent_animal_id'] ?? animalData['parent_animal_id'])
+              ?.toString(),
     );
   }
 
@@ -153,6 +171,7 @@ class InvestorAnimal {
       'health_status': healthStatus,
       'animal_type': animalType,
       'onboarded_at': onboardedAt?.toIso8601String(),
+      'onboarded_by': onboardedBy,
     };
   }
 

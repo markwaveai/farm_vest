@@ -35,6 +35,8 @@ class OrderInfo {
   final String breedId;
   final int buffaloCount;
   final int calfCount;
+  final int inTransitBuffaloCount;
+  final int inTransitCalfCount;
   final int? numUnits;
   final double totalCost;
   final String status;
@@ -47,6 +49,8 @@ class OrderInfo {
     required this.breedId,
     required this.buffaloCount,
     required this.calfCount,
+    required this.inTransitBuffaloCount,
+    required this.inTransitCalfCount,
     this.numUnits,
     required this.totalCost,
     required this.status,
@@ -56,20 +60,37 @@ class OrderInfo {
   });
 
   factory OrderInfo.fromJson(Map<String, dynamic> json) {
+    final buffaloIds =
+        (json['buffaloIds'] as List?)?.map((e) => e.toString()).toList() ?? [];
+    final calfIds =
+        (json['calfIds'] as List?)?.map((e) => e.toString()).toList() ?? [];
+    final numUnits = json['numUnits']?.toInt();
+
+    // Prioritize in_transist fields if available, otherwise use buffaloIds.length or numUnits
+    final transitBuf =
+        (json['in_transist_buffaloes_count'] ??
+                json['in_transit_buffaloes_count'] ??
+                (buffaloIds.isNotEmpty ? buffaloIds.length : numUnits ?? 0))
+            .toInt();
+    final transitCalf =
+        (json['in_transist_calfs_count'] ??
+                json['in_transit_calfs_count'] ??
+                (calfIds.isNotEmpty ? calfIds.length : numUnits ?? 0))
+            .toInt();
+
     return OrderInfo(
       id: json['id'],
       breedId: json['breedId'],
       buffaloCount: (json['buffaloCount'] ?? 0).toInt(),
       calfCount: (json['calfCount'] ?? 0).toInt(),
-      numUnits: json['numUnits']?.toInt(),
+      inTransitBuffaloCount: transitBuf,
+      inTransitCalfCount: transitCalf,
+      numUnits: numUnits,
       totalCost: (json['totalCost'] ?? 0).toDouble(),
       status: json['status'],
       placedAt: json['placedAt'],
-      buffaloIds:
-          (json['buffaloIds'] as List?)?.map((e) => e.toString()).toList() ??
-          [],
-      calfIds:
-          (json['calfIds'] as List?)?.map((e) => e.toString()).toList() ?? [],
+      buffaloIds: buffaloIds,
+      calfIds: calfIds,
     );
   }
 }

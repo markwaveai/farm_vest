@@ -50,32 +50,6 @@ class ApiServices {
     }
   }
 
-  static Future<int> getTotalAnimals(String token) async {
-    try {
-      final response = await http.get(
-        Uri.parse("${AppConstants.appLiveUrl}/animal/get_total_animals"),
-        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
-      );
-      if (response.statusCode == 401) {
-        onUnauthorized?.call();
-        throw ServerException('Unauthorized', statusCode: 401);
-      }
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['animals_count'] ?? 0;
-      } else {
-        throw ServerException(
-          'Failed to load total animals',
-          statusCode: response.statusCode,
-        );
-      }
-    } on SocketException {
-      throw NetworkException('No Internet connection');
-    } catch (e) {
-      throw AppException(e.toString());
-    }
-  }
-
   static Future<Map<String, dynamic>> createMilkEntry({
     required String token,
     required Map<String, dynamic> body,
@@ -315,6 +289,48 @@ class ApiServices {
       throw NetworkException('No Internet connection');
     } catch (e) {
       throw AppException(e.toString());
+    }
+  }
+
+  static Future<void> updateOnboardingStatus({
+    required String orderId,
+    required String status,
+    required List<dynamic> buffaloIds,
+    required String adminMobile,
+  }) async {
+    try {
+      final uri = Uri.parse(
+        "${AppConstants.animalKartApiUrl}/order-tracking/update-status",
+      );
+
+      final body = {
+        "orderId": orderId,
+        "status": status,
+        "buffaloIds": buffaloIds,
+      };
+
+      debugPrint('Updating AnimalKart status: $uri');
+      debugPrint('Status Body: ${jsonEncode(body)}');
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': AppConstants.applicationJson,
+          'x-admin-mobile': adminMobile,
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint('Successfully updated AnimalKart status');
+      } else {
+        debugPrint(
+          'Failed to update AnimalKart status: ${response.statusCode}',
+        );
+        debugPrint('Response: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Error updating AnimalKart status: $e');
     }
   }
 }

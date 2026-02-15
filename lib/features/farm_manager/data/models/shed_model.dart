@@ -31,9 +31,13 @@ class Shed {
 
   factory Shed.fromJson(Map<String, dynamic> json) {
     return Shed(
-      id: json['id'] is num ? (json['id'] as num).toInt() : 0,
+      id: json['shed_id'] is num
+          ? (json['shed_id'] as num).toInt()
+          : json['id'] is num
+          ? (json['id'] as num).toInt()
+          : 0,
       farmId: json['farm_id'] is num ? (json['farm_id'] as num).toInt() : 0,
-      shedId: json['sheds.id'] ?? '',
+      shedId: json['sheds.id'] ?? json['shed_name'] ?? '',
       shedName: json['shed_name'] ?? '',
       farmName: json['farm_name'] ?? '',
       currentBuffaloes: json['current_buffaloes'] is num
@@ -123,6 +127,49 @@ class RowAvailability {
     return RowAvailability(
       available: List<String>.from(json['available'] ?? []),
       filled: List<String>.from(json['filled'] ?? []),
+    );
+  }
+}
+
+class Pagination {
+  final int currentPage;
+  final int itemsPerPage;
+  final int totalPages;
+  final int totalItems;
+
+  Pagination({
+    required this.currentPage,
+    required this.itemsPerPage,
+    required this.totalPages,
+    required this.totalItems,
+  });
+
+  factory Pagination.fromJson(Map<String, dynamic> json) {
+    return Pagination(
+      currentPage: json['current_page'] ?? 1,
+      itemsPerPage: json['items_per_page'] ?? 15,
+      totalPages: json['total_pages'] ?? 1,
+      totalItems: json['total_items'] ?? 0,
+    );
+  }
+}
+
+class ShedListResponse {
+  final String message;
+  final List<Shed> data;
+  final Pagination pagination;
+
+  ShedListResponse({
+    required this.message,
+    required this.data,
+    required this.pagination,
+  });
+
+  factory ShedListResponse.fromJson(Map<String, dynamic> json) {
+    return ShedListResponse(
+      message: json['message'] ?? '',
+      data: (json['data'] as List? ?? []).map((s) => Shed.fromJson(s)).toList(),
+      pagination: Pagination.fromJson(json['pagination'] ?? {}),
     );
   }
 }

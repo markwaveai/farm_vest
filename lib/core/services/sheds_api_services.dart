@@ -6,16 +6,24 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:farm_vest/features/farm_manager/data/models/shed_model.dart';
+
 class ShedsApiServices {
   static VoidCallback? onUnauthorized;
 
-  static Future<List<Map<String, dynamic>>> getSheds({
+  static Future<ShedListResponse> getSheds({
     required String token,
     int? farmId,
+    int page = 1,
+    int limit = 15,
   }) async {
     try {
       final uri = Uri.parse("${AppConstants.appLiveUrl}/shed/list").replace(
-        queryParameters: {if (farmId != null) 'farm_id': farmId.toString()},
+        queryParameters: {
+          if (farmId != null) 'farm_id': farmId.toString(),
+          'page': page.toString(),
+          'limit': limit.toString(),
+        },
       );
       print("Fetching sheds from: $uri");
       final response = await http.get(
@@ -28,24 +36,33 @@ class ShedsApiServices {
         throw ServerException('Unauthorized', statusCode: 401);
       }
 
-      print("Shed List Status: ${response.statusCode}");
       if (response.statusCode == 200) {
-        print("Shed List Body: ${response.body}");
         final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['data']);
+        return ShedListResponse.fromJson(data);
       }
-      print("Failed to fetch sheds: ${response.body}");
-      return [];
+      return ShedListResponse(
+        message: 'Failed to fetch',
+        data: [],
+        pagination: Pagination(
+          currentPage: page,
+          itemsPerPage: limit,
+          totalPages: 1,
+          totalItems: 0,
+        ),
+      );
     } catch (e) {
+      debugPrint("Error fetching sheds: $e");
       throw AppException(e.toString());
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getShedList({
+  static Future<ShedListResponse> getShedList({
     required String token,
     int? farmId,
+    int page = 1,
+    int limit = 15,
   }) async {
-    return getSheds(token: token, farmId: farmId);
+    return getSheds(token: token, farmId: farmId, page: page, limit: limit);
   }
 
   static Future<bool> createShed({

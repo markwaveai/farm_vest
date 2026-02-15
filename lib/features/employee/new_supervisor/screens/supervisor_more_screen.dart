@@ -22,6 +22,7 @@ class SupervisorMoreScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () async {
+              Navigator.pop(context); // Dismiss dialog first
               await ref.read(authProvider.notifier).logout();
               if (context.mounted) {
                 context.go('/login');

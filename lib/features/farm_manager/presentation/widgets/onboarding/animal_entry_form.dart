@@ -328,7 +328,41 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Row: RFID & Ear Tag
+                // New First Row: Neckband ID & Tag Number (Buffalo only)
+                if (isBuffalo) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ModernTextField(
+                          label: 'Neckband ID',
+                          hint: 'e.g. NB-8877',
+                          value: animal.neckbandId,
+                          icon: Icons.link_rounded,
+                          onChanged: (val) {
+                            setState(() => animal.neckbandId = val);
+                            widget.onUpdate();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: ModernTextField(
+                          label: 'Tag Number',
+                          hint: 'e.g. TAG-XXXX',
+                          value: animal.tagNumber,
+                          icon: Icons.tag_rounded,
+                          onChanged: (val) {
+                            setState(() => animal.tagNumber = val);
+                            widget.onUpdate();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                ],
+
+                // Previous First Row: RFID & Ear Tag
                 Row(
                   children: [
                     Expanded(
@@ -419,14 +453,95 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
 
                 // Third Row: Status (Buffalo Only)
                 if (isBuffalo) ...[
+                  // Status & Health Status Row
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (isBuffalo) ...[
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Status',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).inputDecorationTheme.fillColor ??
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceVariant,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: DropdownButtonFormField<String>(
+                                  value: animal.status.isNotEmpty
+                                      ? animal.status
+                                      : null,
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                  ),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
+                                  ),
+                                  items: const [
+                                    DropdownMenuItem(
+                                      value: 'high_yield',
+                                      child: Text('High Yield'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'low_yield',
+                                      child: Text('Low Yield'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'dry',
+                                      child: Text('Dry'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'pregnant',
+                                      child: Text('Pregnant'),
+                                    ),
+                                  ],
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      setState(() => animal.status = value);
+                                      widget.onUpdate();
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                      ],
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Status',
+                              'Health Status',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -444,49 +559,54 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                     Theme.of(
                                       context,
                                     ).colorScheme.surfaceVariant,
-
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: DropdownButtonFormField<String>(
-                                value: animal.status.isNotEmpty
-                                    ? animal.status
-                                    : null,
+                                value: animal.healthStatus.isNotEmpty
+                                    ? animal.healthStatus.toLowerCase()
+                                    : 'healthy',
                                 decoration: const InputDecoration(
                                   border: InputBorder.none,
+                                  isDense: true,
                                   contentPadding: EdgeInsets.symmetric(
                                     horizontal: 12,
                                     vertical: 12,
                                   ),
-                                  isDense: true,
                                 ),
                                 icon: const Icon(
                                   Icons.keyboard_arrow_down_rounded,
                                 ),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
                                 items: const [
                                   DropdownMenuItem(
-                                    value: 'high_yield',
-                                    child: Text('High Yield'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'low_yield',
-                                    child: Text('Low Yield'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'dry',
-                                    child: Text('Dry'),
+                                    value: 'healthy',
+                                    child: Text('Healthy'),
                                   ),
                                   DropdownMenuItem(
                                     value: 'sick',
                                     child: Text('Sick'),
                                   ),
                                   DropdownMenuItem(
-                                    value: 'sold',
-                                    child: Text('Sold'),
+                                    value: 'treatment',
+                                    child: Text('Under Treatment'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'recovered',
+                                    child: Text('Recovered'),
                                   ),
                                 ],
                                 onChanged: (value) {
                                   if (value != null) {
-                                    setState(() => animal.status = value);
+                                    setState(
+                                      () => animal.healthStatus = value
+                                          .toUpperCase(),
+                                    );
                                     widget.onUpdate();
                                   }
                                 },
@@ -500,18 +620,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                   const SizedBox(height: 20),
                 ],
 
-                // Neckband ID (Buffalo Only)
-                if (isBuffalo)
-                  ModernTextField(
-                    label: 'Neckband ID (Optional)',
-                    hint: 'e.g. NB-8877',
-                    value: animal.neckbandId,
-                    icon: Icons.link_rounded,
-                    onChanged: (val) {
-                      setState(() => animal.neckbandId = val);
-                      widget.onUpdate();
-                    },
-                  ),
+                const SizedBox.shrink(),
 
                 if (isBuffalo) const SizedBox(height: 24),
 

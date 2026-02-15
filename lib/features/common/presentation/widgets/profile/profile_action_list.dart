@@ -108,6 +108,7 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
           ),
           TextButton(
             onPressed: () async {
+              Navigator.pop(context); // Dismiss dialog
               await ref.read(authProvider.notifier).logout();
               if (mounted) {
                 context.go('/login');

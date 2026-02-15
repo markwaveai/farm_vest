@@ -223,6 +223,13 @@ class AuthController extends Notifier<AuthState> {
         userData: session['userData'],
       );
 
+      // Ensure Firebase session is active
+      try {
+        await _repository.ensureFirebaseSession();
+      } catch (e) {
+        debugPrint("Error ensuring Firebase session: $e");
+      }
+
       // If userData is still null, try refreshing it once
       if (state.userData == null && state.mobileNumber != null) {
         refreshUserData();
@@ -352,16 +359,29 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
-    // Unsubscribe from user topic
-    if (state.userData != null) {
-      debugPrint('Unsubscribing from topic: user_${state.userData!.id}');
-      await NotificationService().unsubscribeFromTopic(
-        'user_${state.userData!.id}',
-      );
-    }
+    try {
+      final userId = state.userData?.id;
 
-    state = AuthState();
-    await _repository.clearSession();
+      // Unsubscribe from user topic in background - don't let it block logout
+      if (userId != null) {
+        debugPrint('Unsubscribing from topic: user_$userId in background');
+        NotificationService().unsubscribeFromTopic('user_$userId').catchError((
+          e,
+        ) {
+          debugPrint('Error unsubscribing from topic: $e');
+        });
+      }
+
+      // Clear state and session
+      state = AuthState();
+      await _repository.clearSession();
+      debugPrint('Logout completed: State reset and session cleared');
+    } catch (e) {
+      debugPrint('Error during logout: $e');
+      // Ensure state is reset even on error
+      state = AuthState();
+      await _repository.clearSession().catchError((_) {});
+    }
   }
 
   Future<void> refreshUserData() async {

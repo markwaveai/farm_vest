@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'animalkart_order_model.dart';
 import 'shed_model.dart';
+import 'farm_model.dart';
 
 class DashboardImage {
   final File? localFile;
@@ -26,7 +27,14 @@ class FarmManagerDashboardState {
   final AnimalkartOrder? currentOrder;
   final List<dynamic> onboardedAnimalIds;
   final List<Shed> sheds;
+  final List<Farm> farms;
   final ShedPositionResponse? currentShedAvailability;
+
+  // Pagination fields for Sheds
+  final int currentShedPage;
+  final int totalShedPages;
+  final bool hasMoreSheds;
+  final bool isLoadingMoreSheds;
 
   FarmManagerDashboardState({
     this.investorCount = 0,
@@ -38,7 +46,12 @@ class FarmManagerDashboardState {
     this.currentOrder,
     this.onboardedAnimalIds = const [],
     this.sheds = const [],
+    this.farms = const [],
     this.currentShedAvailability,
+    this.currentShedPage = 1,
+    this.totalShedPages = 1,
+    this.hasMoreSheds = false,
+    this.isLoadingMoreSheds = false,
   });
 
   FarmManagerDashboardState copyWith({
@@ -51,7 +64,12 @@ class FarmManagerDashboardState {
     AnimalkartOrder? currentOrder,
     List<dynamic>? onboardedAnimalIds,
     List<Shed>? sheds,
+    List<Farm>? farms,
     ShedPositionResponse? currentShedAvailability,
+    int? currentShedPage,
+    int? totalShedPages,
+    bool? hasMoreSheds,
+    bool? isLoadingMoreSheds,
   }) {
     return FarmManagerDashboardState(
       investorCount: investorCount ?? this.investorCount,
@@ -63,8 +81,13 @@ class FarmManagerDashboardState {
       currentOrder: currentOrder ?? this.currentOrder,
       onboardedAnimalIds: onboardedAnimalIds ?? this.onboardedAnimalIds,
       sheds: sheds ?? this.sheds,
+      farms: farms ?? this.farms,
       currentShedAvailability:
           currentShedAvailability ?? this.currentShedAvailability,
+      currentShedPage: currentShedPage ?? this.currentShedPage,
+      totalShedPages: totalShedPages ?? this.totalShedPages,
+      hasMoreSheds: hasMoreSheds ?? this.hasMoreSheds,
+      isLoadingMoreSheds: isLoadingMoreSheds ?? this.isLoadingMoreSheds,
     );
   }
 }

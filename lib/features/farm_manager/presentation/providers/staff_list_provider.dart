@@ -104,7 +104,21 @@ class StaffListNotifier extends StateNotifier<StaffListState> {
       final token = prefs.getString('access_token');
       if (token == null) return [];
 
-      return await ShedsApiServices.getShedList(token: token);
+      final response = await ShedsApiServices.getShedList(token: token);
+      return response.data
+          .map(
+            (s) => {
+              'id': s.id,
+              'shed_id': s.id,
+              'shed_name': s.shedName,
+              'farm_name': s.farmName,
+              'current_buffaloes': s.currentBuffaloes,
+              'capacity': s.capacity,
+              'available_positions': s.availablePositions,
+              'cctv_url': s.cctvUrl,
+            },
+          )
+          .toList();
     } catch (e) {
       return [];
     }

@@ -4,7 +4,8 @@ class AnimalOnboardingEntry {
   String animalId;
   String rfidTag;
   String earTag;
-  String neckbandId;
+  String neckbandId = '';
+  String tagNumber = '';
   String dob;
   int ageMonths;
   String healthStatus;
@@ -20,6 +21,7 @@ class AnimalOnboardingEntry {
     required this.rfidTag,
     required this.earTag,
     this.neckbandId = '',
+    this.tagNumber = '',
     required this.dob,
     this.ageMonths = 0,
     required this.healthStatus,
@@ -36,6 +38,7 @@ class AnimalOnboardingEntry {
     String? rfidTag,
     String? earTag,
     String? neckbandId,
+    String? tagNumber,
     String? dob,
     int? ageMonths,
     String? healthStatus,
@@ -51,6 +54,7 @@ class AnimalOnboardingEntry {
       rfidTag: rfidTag ?? this.rfidTag,
       earTag: earTag ?? this.earTag,
       neckbandId: neckbandId ?? this.neckbandId,
+      tagNumber: tagNumber ?? this.tagNumber,
       dob: dob ?? this.dob,
       ageMonths: ageMonths ?? this.ageMonths,
       healthStatus: healthStatus ?? this.healthStatus,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:farm_vest/core/services/auth_api_services.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 
@@ -20,9 +21,20 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 class AuthRepository {
+  Future<void> ensureFirebaseSession() async {
+    try {
+      if (FirebaseAuth.instance.currentUser == null) {
+        await FirebaseAuth.instance.signInAnonymously();
+        debugPrint("Signed in to Firebase Anonymously for Storage access");
+      }
+    } catch (e) {
+      debugPrint("Failed to sign in to Firebase Anonymously: $e");
+    }
+  }
+
   Future<LoginResponse> loginWithOtp(String mobile, String otp) async {
     final response = await AuthApiServices.loginWithOtp(mobile, otp);
-
+    await ensureFirebaseSession();
     return response;
   }
 

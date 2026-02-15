@@ -207,4 +207,30 @@ class AnimalApiServices {
       throw AppException(e.toString());
     }
   }
+
+  static Future<int> getTotalAnimals(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse("${AppConstants.appLiveUrl}/animal/get_total_animals"),
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      );
+      if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['animals_count'] ?? 0;
+      } else {
+        throw ServerException(
+          'Failed to load total animals',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw NetworkException('No Internet connection');
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
 }

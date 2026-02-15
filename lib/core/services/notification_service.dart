@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -109,6 +110,26 @@ class NotificationService {
 
   Future<void> printFCMToken() async {
     try {
+      if (Platform.isIOS) {
+        // Wait for APNS token to be available
+        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        int retryCount = 0;
+        while (apnsToken == null && retryCount < 10) {
+          await Future.delayed(const Duration(seconds: 1));
+          apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+          retryCount++;
+          debugPrint('Waiting for APNS token... (Attempt $retryCount)');
+        }
+
+        if (apnsToken == null) {
+          debugPrint(
+            'APNS token still null after retries. FCM token might fail.',
+          );
+        } else {
+          debugPrint('APNS token set: $apnsToken');
+        }
+      }
+
       String? token = await FirebaseMessaging.instance.getToken();
       debugPrint('================ FCM TOKEN ================');
       debugPrint(token);

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
@@ -38,6 +39,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
   bool _isBuffaloExpanded = true;
   bool _isSubmitting = false;
   int? _selectedFarmId;
+  bool _isCpfPaid = true;
 
   @override
   void initState() {
@@ -67,7 +69,9 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
 
     if (order != null) {
       // Create empty entries for buffaloes
-      buffaloEntries = List.generate(order.order.buffaloCount, (index) {
+      buffaloEntries = List.generate(order.order.inTransitBuffaloCount, (
+        index,
+      ) {
         final buffaloId = index < order.order.buffaloIds.length
             ? order.order.buffaloIds[index]
             : '';
@@ -82,12 +86,14 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
           type: 'BUFFALO',
           breedName: 'Murrah Buffalo', // Default or fetch
           breedId: 'MURRAH-001',
+          neckbandId: '',
+          tagNumber: '',
           images: [],
         );
       });
 
       // Create empty entries for calves
-      calfEntries = List.generate(order.order.calfCount, (index) {
+      calfEntries = List.generate(order.order.inTransitCalfCount, (index) {
         final calfId = index < order.order.calfIds.length
             ? order.order.calfIds[index]
             : '';
@@ -100,6 +106,8 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
           healthStatus: 'Healthy',
           type: 'CALF',
           parentAnimalId: '', // To be selected
+          neckbandId: '',
+          tagNumber: '',
           images: [],
         );
       });
@@ -386,6 +394,11 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
     if (order == null) return;
     if (_isSubmitting) return;
 
+    if (_selectedFarmId == null) {
+      _showError('Please select a target farm');
+      return;
+    }
+
     // Validate all animal entries
     final allAnimals = [...buffaloEntries, ...calfEntries];
     for (int i = 0; i < allAnimals.length; i++) {
@@ -394,12 +407,6 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
 
       if (animal.rfidTag.trim().isEmpty) {
         _showError('RFID Tag is required for $animalName');
-        return;
-      }
-
-      // Enforce RFID- prefix as required by backend
-      if (!animal.rfidTag.startsWith('RFID-')) {
-        _showError('RFID Tag must start with "RFID-" for $animalName');
         return;
       }
 
@@ -445,6 +452,48 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
       }
     }
 
+    if (!_isCpfPaid) {
+      final bool? confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.orange),
+              SizedBox(width: 8),
+              Text('Important Warning'),
+            ],
+          ),
+          content: const Text(
+            'Please make sure without CPF buffalo visualization you maintain your own risk buffalo management.',
+            style: TextStyle(fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Theme.of(context).hintColor),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+              child: const Text('Proceed Anyway'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+    }
+
     setState(() => _isSubmitting = true);
 
     try {
@@ -475,6 +524,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
             order: order,
             animals: preparedAnimals,
             farmId: _selectedFarmId,
+            isCpfPaid: _isCpfPaid,
           );
 
       if (!success) {
@@ -628,6 +678,55 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
             if (order != null) ...[
               const SizedBox(height: 24),
 
+              // Farm Selection Dropdown
+              SectionTitle('Select Target Farm'),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<int>(
+                value: dashboardState.farms.any((f) => f.id == _selectedFarmId)
+                    ? _selectedFarmId
+                    : null,
+                isExpanded: true,
+                dropdownColor: Theme.of(context).cardColor,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 14,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Select a farm',
+                  prefixIcon: Icon(
+                    Icons.location_on_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).cardColor,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                    ),
+                  ),
+                ),
+                items: dashboardState.farms.map((farm) {
+                  return DropdownMenuItem<int>(
+                    value: farm.id,
+                    child: Text(farm.farmName, overflow: TextOverflow.ellipsis),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedFarmId = value;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 24),
+
               // Investor Summary Card
               InfoCard(
                 title: 'Investor Profile',
@@ -649,6 +748,26 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                 color: Colors.teal,
                 children: [
                   InfoDataRow(label: 'Order ID', value: order.order.id),
+                  InfoDataRow(
+                    label: 'Total Units',
+                    value: (order.order.numUnits ?? 0).toString(),
+                  ),
+                  InfoDataRow(
+                    label: 'Total Buffalos',
+                    value: order.order.buffaloCount.toString(),
+                  ),
+                  InfoDataRow(
+                    label: 'Total Calves',
+                    value: order.order.calfCount.toString(),
+                  ),
+                  InfoDataRow(
+                    label: 'In-Transit Buffalos',
+                    value: order.order.inTransitBuffaloCount.toString(),
+                  ),
+                  InfoDataRow(
+                    label: 'In-Transit Calves',
+                    value: order.order.inTransitCalfCount.toString(),
+                  ),
                   InfoDataRow(
                     label: 'Total Cost',
                     value:
@@ -738,7 +857,8 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
               // Removed Global Image Selector in favor of per-animal validation
               const SizedBox(height: 24),
 
-              if (buffaloEntries.isNotEmpty || calfEntries.isNotEmpty)
+              if (kDebugMode &&
+                  (buffaloEntries.isNotEmpty || calfEntries.isNotEmpty))
                 Center(
                   child: TextButton.icon(
                     onPressed: () {
@@ -771,6 +891,49 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                     ),
                   ),
                 ),
+
+              const SizedBox(height: 16),
+
+              // CPF Status Checkbox
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: _isCpfPaid
+                      ? AppTheme.successGreen.withOpacity(0.05)
+                      : Colors.orange.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _isCpfPaid
+                        ? AppTheme.successGreen.withOpacity(0.2)
+                        : Colors.orange.withOpacity(0.2),
+                  ),
+                ),
+                child: CheckboxListTile(
+                  title: const Text(
+                    "CPF (Care & Protection Fee) Paid",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    _isCpfPaid
+                        ? "Visualization and insurance coverage active"
+                        : "No visualization - Self risk management",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _isCpfPaid
+                          ? AppTheme.successGreen
+                          : Colors.orange.shade700,
+                    ),
+                  ),
+                  value: _isCpfPaid,
+                  onChanged: (val) => setState(() => _isCpfPaid = val ?? true),
+                  activeColor: AppTheme.successGreen,
+                  checkColor: Colors.white,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
 
               const SizedBox(height: 16),
 

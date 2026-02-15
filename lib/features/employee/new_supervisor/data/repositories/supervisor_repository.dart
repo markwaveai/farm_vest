@@ -23,7 +23,7 @@ class SupervisorRepository {
     if (token == null) {
       throw AuthException('Authentication token not found');
     }
-    return await ApiServices.getTotalAnimals(token);
+    return await AnimalApiServices.getTotalAnimals(token);
   }
 
   Future<List<Map<String, dynamic>>> getUnallocatedAnimals(String token) async {
@@ -233,6 +233,23 @@ class SupervisorRepository {
     if (token == null) {
       throw AuthException('Authentication token not found');
     }
-    return await ShedsApiServices.getSheds(token: token, farmId: farmId);
+    final response = await ShedsApiServices.getSheds(
+      token: token,
+      farmId: farmId,
+    );
+    return response.data
+        .map(
+          (s) => {
+            'id': s.id,
+            'shed_id': s.id,
+            'shed_name': s.shedName,
+            'farm_name': s.farmName,
+            'current_buffaloes': s.currentBuffaloes,
+            'capacity': s.capacity,
+            'available_positions': s.availablePositions,
+            'cctv_url': s.cctvUrl,
+          },
+        )
+        .toList();
   }
 }

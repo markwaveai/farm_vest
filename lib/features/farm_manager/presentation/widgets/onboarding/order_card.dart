@@ -14,48 +14,44 @@ class OrderCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor, width: 1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Order Header
+                // Header: Profile & Order info
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.1),
-                            Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.1),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: Icon(
-                        Icons.receipt_long,
+                        Icons.receipt_rounded,
                         color: Theme.of(context).colorScheme.primary,
-                        size: 24,
+                        size: 28,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -65,66 +61,130 @@ class OrderCard extends StatelessWidget {
                         children: [
                           Text(
                             item.investor.fullName,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            '📱 ${item.investor.mobile}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).hintColor,
-                            ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.phone_android_rounded,
+                                size: 14,
+                                color: Theme.of(context).hintColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                item.investor.mobile,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).hintColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Order #${item.order.id.substring(0, 8)}',
+                            'Order ID: ${item.order.id}',
                             style: TextStyle(
                               fontSize: 12,
                               color: Theme.of(context).hintColor,
-                              fontFamily: 'Monospace',
+                              letterSpacing: 0.5,
+                              fontFamily: 'Courier',
                             ),
                           ),
                         ],
                       ),
                     ),
                     Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 16,
-                      color: Theme.of(context).hintColor,
+                      Icons.chevron_right_rounded,
+                      color: Theme.of(context).hintColor.withValues(alpha: 0.5),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Divider(height: 1, color: Theme.of(context).dividerColor),
-                const SizedBox(height: 16),
 
-                // Stats Row
+                const SizedBox(height: 20),
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: 20),
+
+                // Primary Stats Row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildStatItem(
-                      context,
-                      'Buffaloes',
-                      item.order.buffaloCount.toString(),
-                      Icons.pets,
+                    Expanded(
+                      child: _buildCountBlock(
+                        context,
+                        'Buffaloes',
+                        item.order.buffaloCount.toString(),
+                        item.order.inTransitBuffaloCount.toString(),
+                        Icons.pets_rounded,
+                        Colors.blue,
+                      ),
                     ),
-                    _buildStatItem(
-                      context,
-                      'Calves',
-                      item.order.calfCount.toString(),
-                      Icons.cruelty_free,
-                    ),
-                    _buildStatItem(
-                      context,
-                      'Total',
-                      '₹${NumberFormat('#,##,###').format(item.order.totalCost)}',
-                      Icons.payments_outlined,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildCountBlock(
+                        context,
+                        'Calves',
+                        item.order.calfCount.toString(),
+                        item.order.inTransitCalfCount.toString(),
+                        Icons.cruelty_free_rounded,
+                        Colors.teal,
+                      ),
                     ),
                   ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Bottom Row: Total Cost
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.account_balance_wallet_rounded,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Investment Value',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).hintColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '₹${NumberFormat('#,##,###').format(item.order.totalCost)}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -134,38 +194,85 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(
+  Widget _buildCountBlock(
     BuildContext context,
     String label,
-    String value,
+    String total,
+    String inTransit,
     IconData icon,
+    Color color,
   ) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 14, color: Theme.of(context).hintColor),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).hintColor,
-                fontWeight: FontWeight.w500,
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 14, color: color),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                total,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Total',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(context).hintColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                  color: Colors.orange,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '$inTransit In-Transit',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.orange,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

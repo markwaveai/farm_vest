@@ -12,14 +12,14 @@ class AppConstants {
       'https://dashboard.farmvest.in/farmvest/account-deletion';
 
   static String stagingUrl =
-      'https://farmvest-staging-apis-jn6cma3vvq-el.a.run.app/api';
+      'https://farmvest-stagging-services-612299373064.asia-south1.run.app/api';
   static String liveUrl =
       'https://farmvest-live-apis-jn6cma3vvq-el.a.run.app/api';
 
-  static String localUrl = 'http://127.0.0.1:8000/api'; // For ADB Reverse (USB)
-  // static String localUrl = 'http://192.168.0.226:8000/api'; // For Physical Device (Your IP)
+  static String localUrl =
+      'http://127.0.0.1:8000/api'; // For ADB Reverse / iOS Sim
   // static String localUrl = 'http://10.0.2.2:8000/api'; // For Android Emulator
-  // static String localUrl = 'http://localhost:8000/api'; // For iOS Simulator
+  // static String localUrl = 'http://192.168.0.226:8000/api'; // For Physical Device (Your IP)
 
   static String animalKartStagingApiUrl =
       'https://animalkart-stagging-jn6cma3vvq-el.a.run.app';
@@ -126,6 +126,26 @@ class AppConstants {
 
     final text = '₹${parts.join(' ')}';
     return isNegative ? '-$text' : text;
+  }
+
+  static String formatDateTime(String? isoString) {
+    if (isoString == null || isoString.isEmpty) return 'N/A';
+    try {
+      final dt = DateTime.parse(isoString).toLocal();
+      final year = dt.year;
+      final month = dt.month.toString().padLeft(2, '0');
+      final day = dt.day.toString().padLeft(2, '0');
+
+      int hour = dt.hour;
+      final amPm = hour >= 12 ? 'PM' : 'AM';
+      if (hour > 12) hour -= 12;
+      if (hour == 0) hour = 12;
+      final minute = dt.minute.toString().padLeft(2, '0');
+
+      return '$year-$month-$day $hour:$minute $amPm';
+    } catch (_) {
+      return isoString;
+    }
   }
 }
 

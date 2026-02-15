@@ -2,6 +2,7 @@ import 'package:farm_vest/features/doctors/screens/all_health_tickets.dart';
 import 'package:farm_vest/features/doctors/screens/doctor_home_screen.dart';
 import 'package:farm_vest/features/doctors/screens/vaccination_tickets.dart';
 import 'package:farm_vest/features/doctors/screens/buffalo_profile_screen.dart';
+import 'package:farm_vest/features/doctors/screens/buffalo_device_details_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/actual_alert_Screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/create_leave_request_screen.dart';
 import 'package:farm_vest/features/employee/new_supervisor/screens/leave_requests_screen.dart';
@@ -235,6 +236,18 @@ class AppRouter {
       GoRoute(
         path: '/buffalo-profile',
         builder: (context, state) => const BuffaloProfileScreen(),
+      ),
+      GoRoute(
+        path: '/buffalo-device-details',
+        builder: (context, state) {
+          final extras = state.extra as Map<String, dynamic>;
+          return BuffaloDeviceDetailsScreen(
+            animalId: extras['animalId'],
+            beltId: extras['beltId'],
+            rfid: extras['rfid'],
+            tagNumber: extras['tagNumber'],
+          );
+        },
       ),
       GoRoute(
         path: '/assistant-dashboard',

@@ -33,7 +33,10 @@ class TicketsApiServices {
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
       );
       if (response.statusCode == 401) {
         onUnauthorized?.call();
@@ -61,7 +64,10 @@ class TicketsApiServices {
           "${AppConstants.appLiveUrl}/ticket/get_health_tickets?ticket_type=TRANSFER&status_filter=$status";
       final response = await http.get(
         Uri.parse(url),
-        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
       );
 
       if (response.statusCode == 401) {
@@ -199,7 +205,10 @@ class TicketsApiServices {
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
       );
       if (response.statusCode == 401) {
         onUnauthorized?.call();

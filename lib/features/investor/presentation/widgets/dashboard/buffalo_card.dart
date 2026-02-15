@@ -165,7 +165,7 @@ class BuffaloCard extends StatelessWidget {
                   imageUrl,
 
                   key: ValueKey(imageUrl),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                   width: double.infinity,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
@@ -187,7 +187,7 @@ class BuffaloCard extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return Image.asset(
                       'assets/images/buffalo4.jpeg',
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                     );
                     // Container(
                     //   color: AppTheme.lightGrey,

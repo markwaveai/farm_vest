@@ -1,6 +1,8 @@
 import 'package:farm_vest/core/services/employee_api_services.dart';
 import 'package:farm_vest/core/services/investor_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
+import 'package:farm_vest/core/services/farms_api_services.dart';
+import 'package:farm_vest/features/farm_manager/data/models/farm_model.dart';
 import 'package:farm_vest/core/services/tickets_api_services.dart';
 import 'package:farm_vest/features/auth/data/repositories/auth_repository.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
@@ -13,7 +15,6 @@ import '../../data/models/animalkart_order_model.dart';
 import '../../data/models/farm_manager_dashboard_model.dart';
 import '../../data/models/animal_onboarding_entry.dart';
 import '../../data/models/shed_model.dart';
-import 'package:uuid/uuid.dart';
 
 class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
   final ImagePicker _picker = ImagePicker();
@@ -78,17 +79,26 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
           : null;
 
       List<Shed> sheds = [];
+      List<Farm> farms = [];
       List<Map<String, dynamic>> onboardedAnimals = [];
 
       final roleStr = authState.userData?.role;
       final isFM = roleStr == 'FARM_MANAGER' || roleStr == 'SUPERVISOR';
 
       if (farmId != null || isFM) {
-        final rawSheds = await ShedsApiServices.getShedList(
+        final shedResponse = await ShedsApiServices.getShedList(
           token: token,
           farmId: farmId,
+          page: 1,
         );
-        sheds = rawSheds.map((s) => Shed.fromJson(s)).toList();
+        sheds = shedResponse.data;
+
+        final pagination = shedResponse.pagination;
+        state = state.copyWith(
+          currentShedPage: pagination.currentPage,
+          totalShedPages: pagination.totalPages,
+          hasMoreSheds: pagination.currentPage < pagination.totalPages,
+        );
 
         // 6. Fetch Unallocated Animals
         onboardedAnimals = await ShedsApiServices.getUnallocatedAnimals(
@@ -97,11 +107,15 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
         );
       }
 
+      // 7. Fetch All Farms (for dropdowns)
+      farms = await FarmsApiServices.getFarms(token: token);
+
       state = state.copyWith(
         investorCount: investorCount,
         totalStaff: totalStaff,
         // pendingApprovals: pendingLeaves + pendingTickets,
         sheds: sheds,
+        farms: farms,
         onboardedAnimalIds: onboardedAnimals,
         isLoading: false,
         error: null,
@@ -186,6 +200,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
     required AnimalkartOrder order,
     required List<AnimalOnboardingEntry> animals,
     int? farmId, // Optional farm_id for specific farm selection
+    bool isCpfPaid = true,
   }) async {
     if (animals.isEmpty) return false;
 
@@ -212,67 +227,33 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       // }
 
       final animalData = {
-        "animal_id": animal.animalId.isNotEmpty ? animal.animalId : Uuid().v4(),
         "animal_type": animal.type,
         "rfid_tag": animal.rfidTag.startsWith('RFID-')
             ? animal.rfidTag
             : 'RFID-${animal.rfidTag}',
-        "ear_tag": animal.rfidTag.startsWith('ET-')
-            ? animal.rfidTag
-            : 'ET-${animal.rfidTag}',
-
+        "ear_tag": animal.earTag.startsWith('ET-')
+            ? animal.earTag
+            : 'ET-${animal.earTag}',
         "age_months": animal.ageMonths,
         "health_status": animal.healthStatus.toUpperCase(),
         "images": imageUrls,
       };
 
       if (animal.type == 'BUFFALO') {
+        animalData["tag_number"] = animal.tagNumber;
         animalData["status"] = animal.status;
         animalData["breed_id"] = animal.breedId.isNotEmpty
             ? animal.breedId
             : '';
         animalData["breed_name"] = animal.breedName;
+        animalData["animalkart_buffalo_id"] = animal.animalId;
         if (animal.neckbandId.isNotEmpty) {
-          animalData["neckband_id"] = animal.rfidTag.startsWith('NB-')
-              ? animal.rfidTag
-              : 'NB-${animal.neckbandId}';
-        }
-      } else if (animal.type == 'CALF') {
-        // Map parent ID. The parent ID in entry is likely just the ID/Tag selected.
-        if (animal.parentAnimalId.isNotEmpty) {
-          // The parentAnimalId stored in entry was "BUFFALOTEMP_$index" or correct ID.
-          // In the UI, I might need to resolve this to the actual animal_id of the buffalo being onboarded in the same batch.
-          // The request example uses "BUFF-V-001" and "BUFF-V-001" as parent.
-          // If the parent is in the same batch, we need to ensure the ID matches.
-          // Let's assume for now the user provides or we generate consistency.
-          animalData["parent_animal_id"] = animal.parentAnimalId;
+          animalData["neckband_id"] = animal.neckbandId;
         }
       }
 
       return animalData;
     }).toList();
-
-    // Fix Parent IDs for Calves referring to Buffalos in the same batch
-    // The UI uses "BUFFALOTEMP_$idx" as values. We should replace them with the actual "animal_id" (Ear Tag) of the buffalo.
-    for (var animalMap in animalList) {
-      if (animalMap["animal_type"] == 'CALF') {
-        final parentVal = animalMap["parent_animal_id"] as String?;
-        if (parentVal != null && parentVal.startsWith("BUFFALOTEMP_")) {
-          final buffaloIdxStr = parentVal.replaceFirst("BUFFALOTEMP_", "");
-          final buffaloIdx = int.tryParse(buffaloIdxStr);
-          if (buffaloIdx != null && buffaloIdx < animals.length) {
-            // Wait, buffaloEntries logic in UI separated indices.
-            // This is tricky because the UI passes `buffaloEntries` to `AnimalEntryForm`.
-            // But here we receive a flat list `animals`.
-            // We need to assume the caller (UI) has already resolved this OR we need to trust the UI passed consistent IDs.
-            // The UI sets `parentAnimalId` to "BUFFALOTEMP_$idx".
-            // If we just use Ear Tag as ID, we need to find the Ear Tag of that buffalo index.
-            // I'll leave this resolution to the UI before calling this method, OR handle it here if I can distinguish types.
-            // BETTER: Handle in UI `_submit` to map TEMP IDs to Ear Tags.
-          }
-        }
-      }
-    }
 
     final payload = {
       "investor_details": {
@@ -301,13 +282,13 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       },
       "investment_details": {
         "animalkart_order_id": order.order.id,
+        "is_cpf_paid": isCpfPaid,
         "order_date": order.order.placedAt,
         "total_investment_amount": order.order.totalCost,
         "unit_cost": unitCost,
         "number_of_units": numUnits,
         "payment_method": order.transaction.paymentType,
-        "bank_name":
-            "HDFC Bank - PARK STREET", // Hardcoded per example/requirement if not in data
+        "bank_name": "", // Hardcoded per example/requirement if not in data
         "utr_number": order.transaction.utrNumber,
         "payment_verification_screenshot":
             (order.transaction.paymentScreenshotUrl.isNotEmpty)
@@ -331,13 +312,32 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       if (response !=
           null /*  && response['onboarded_animal_ids'] != null */ ) {
         // Update onboarding status in AnimalKart
-        // final mobile = prefs.getString('mobile_number') ?? "";
-        // await ApiServices.updateOnboardingStatus(
-        //   orderId: order.order.id,
-        //   status: "DELIVERED",
-        //   buffaloIds: order.order.buffaloIds,
-        //   adminMobile: mobile,
-        // );
+        final mobile = prefs.getString('mobile_number') ?? "";
+
+        // Extract animalkart_buffalo_id for AnimalKart update from response['data']
+        final responseData = response['data'] as List<dynamic>? ?? [];
+        final kartBuffaloIds = responseData
+            .where(
+              (e) =>
+                  e['animal_type'] == 'BUFFALO' &&
+                  e['animalkart_buffalo_id'] != null,
+            )
+            .map((e) => e['animalkart_buffalo_id'])
+            .toList();
+
+        // If data is present, use our filtered list (even if empty, meaning no buffaloes).
+        // Fallback to onboarded_animal_ids only if data is missing (legacy support).
+        final idsToUpdate = responseData.isNotEmpty
+            ? kartBuffaloIds
+            : List<dynamic>.from(response['onboarded_animal_ids'] ?? []);
+
+        // Notify AnimalKart of successful onboarding
+        ApiServices.updateOnboardingStatus(
+          orderId: order.order.id,
+          status: "DELIVERED",
+          buffaloIds: idsToUpdate,
+          adminMobile: order.investor.mobile,
+        );
 
         final animalsList = List<Map<String, dynamic>>.from(
           response['animals'] ?? [],
@@ -356,7 +356,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
 
         // If animals list is empty but we have IDs, try to construct from request (fallback)
         if (animalsList.isEmpty && response['onboarded_animal_ids'] != null) {
-          final ids = List<String>.from(response['onboarded_animal_ids']);
+          final ids = List<int>.from(response['onboarded_animal_ids']);
           for (var id in ids) {
             animalsList.add({
               'rfid': id, // Fallback if we only have ID
@@ -444,21 +444,66 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
     }
   }
 
-  Future<void> fetchSheds({int? farmId}) async {
+  Future<void> fetchSheds({int? farmId, bool refresh = true}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
     if (token == null) return;
 
-    state = state.copyWith(isLoading: true);
+    if (refresh) {
+      state = state.copyWith(
+        isLoading: true,
+        currentShedPage: 1,
+        sheds: [],
+        hasMoreSheds: false,
+      );
+    } else {
+      if (!state.hasMoreSheds || state.isLoadingMoreSheds) return;
+      state = state.copyWith(isLoadingMoreSheds: true);
+    }
+
     try {
-      final rawSheds = await ShedsApiServices.getShedList(
+      final page = refresh ? 1 : state.currentShedPage + 1;
+      final shedResponse = await ShedsApiServices.getShedList(
         token: token,
         farmId: farmId,
+        page: page,
       );
-      final sheds = rawSheds.map((s) => Shed.fromJson(s)).toList();
-      state = state.copyWith(sheds: sheds, isLoading: false, error: null);
+
+      final newSheds = shedResponse.data;
+      final pagination = shedResponse.pagination;
+
+      state = state.copyWith(
+        sheds: refresh ? newSheds : [...state.sheds, ...newSheds],
+        currentShedPage: pagination.currentPage,
+        totalShedPages: pagination.totalPages,
+        hasMoreSheds: pagination.currentPage < pagination.totalPages,
+        isLoading: false,
+        isLoadingMoreSheds: false,
+        error: null,
+      );
     } catch (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
+      state = state.copyWith(
+        error: e.toString(),
+        isLoading: false,
+        isLoadingMoreSheds: false,
+      );
+    }
+  }
+
+  Future<void> fetchMoreSheds({int? farmId}) async {
+    await fetchSheds(farmId: farmId, refresh: false);
+  }
+
+  Future<void> fetchFarms() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token == null) return;
+
+    try {
+      final farms = await FarmsApiServices.getFarms(token: token);
+      state = state.copyWith(farms: farms, error: null);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
     }
   }
 

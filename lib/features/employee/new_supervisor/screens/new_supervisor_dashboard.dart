@@ -67,6 +67,7 @@ class _NewSupervisorDashboardState
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         toolbarHeight: showProfileInfo ? screenWidth * 0.22 : 64,
         automaticallyImplyLeading: false,
+        centerTitle: false,
         title: showProfileInfo
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

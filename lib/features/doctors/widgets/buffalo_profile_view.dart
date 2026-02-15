@@ -5,6 +5,7 @@ import 'package:farm_vest/features/investor/data/models/investor_animal_model.da
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 class BuffaloProfileView extends ConsumerStatefulWidget {
   const BuffaloProfileView({super.key});
@@ -675,6 +676,33 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
           childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           iconColor: AppTheme.darkPrimary,
           collapsedIconColor: AppTheme.darkPrimary,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(
+                  Icons.monitor_heart_outlined,
+                  color: AppTheme.primary,
+                  size: 22,
+                ),
+                onPressed: () {
+                  context.push(
+                    '/buffalo-device-details',
+                    extra: {
+                      'animalId': animal.animalId,
+                      'beltId':
+                          animal.neckBandId ??
+                          'S1IAD1884', // Fallback to fixed belt id as requested for now
+                      'rfid': animal.rfid,
+                      'tagNumber': animal.earTagId,
+                    },
+                  );
+                },
+              ),
+              const Icon(Icons.expand_more, color: AppTheme.darkPrimary),
+            ],
+          ),
           leading: CircleAvatar(
             backgroundColor: AppTheme.primary.withOpacity(0.1),
             child: const Icon(Icons.pets, color: AppTheme.primary, size: 20),
@@ -688,7 +716,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
             ),
           ),
           subtitle: Text(
-            "Tag: ${animal.earTagId ?? 'N/A'} | Shed: ${animal.shedName ?? 'N/A'}",
+            "Tag: ${animal.earTagId ?? 'N/A'} | Shed: ${animal.shedName ?? 'N/A'} | Slot: ${animal.parkingId ?? 'N/A'}",
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
@@ -697,6 +725,23 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
           children: [
             const SizedBox(height: 8),
             _buildBuffaloDetailRow("ID", animal.animalId),
+            _buildBuffaloDetailRow(
+              "Slot",
+              animal.parkingId ?? 'N/A',
+              onTap: animal.parkingId != null
+                  ? () {
+                      context.push(
+                        '/buffalo-allocation',
+                        extra: {
+                          'shedId': animal.shedId,
+                          'parkingId': animal.parkingId,
+                          'farmId': animal.farmId,
+                          'animalId': animal.animalId,
+                        },
+                      );
+                    }
+                  : null,
+            ),
             _buildBuffaloDetailRow("Breed", animal.breed ?? 'N/A'),
             _buildBuffaloDetailRow("Age", "${animal.age ?? 'N/A'} months"),
             _buildBuffaloDetailRow("Type", animal.animalType ?? 'N/A'),
@@ -722,7 +767,11 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
     );
   }
 
-  Widget _buildBuffaloDetailRow(String label, String value) {
+  Widget _buildBuffaloDetailRow(
+    String label,
+    String value, {
+    VoidCallback? onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -740,13 +789,19 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 13,
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
+            child: GestureDetector(
+              onTap: onTap,
+              child: Text(
+                value,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: onTap != null
+                      ? AppTheme.primary
+                      : Theme.of(context).colorScheme.onSurface,
+                  fontWeight: onTap != null ? FontWeight.bold : FontWeight.w500,
+                  decoration: onTap != null ? TextDecoration.underline : null,
+                ),
               ),
             ),
           ),

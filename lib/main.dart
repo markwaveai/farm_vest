@@ -1,4 +1,3 @@
-import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -95,12 +94,7 @@ Future<void> main() async {
   // Initialize Remote Config (URLs & Version)
   await RemoteConfigService.initialize();
 
-  runApp(
-    DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context) => const ProviderScope(child: FarmVestApp()),
-    ),
-  );
+  runApp(const ProviderScope(child: FarmVestApp()));
 }
 
 class FarmVestApp extends ConsumerStatefulWidget {
@@ -136,7 +130,7 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       builder: (context, child) {
-        final built = DevicePreview.appBuilder(context, child);
+        final built = child!;
         if (kDebugMode) {
           return BiometricLockScreen(
             child: Material(
