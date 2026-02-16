@@ -387,6 +387,49 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
     );
   }
 
+  bool _isFormValid() {
+    final dashboardState = ref.read(farmManagerProvider);
+    final order = dashboardState.currentOrder;
+
+    // Must have an order selected
+    if (order == null) return false;
+
+    // Must have a farm selected
+    if (_selectedFarmId == null) return false;
+
+    // Validate all animal entries
+    final allAnimals = [...buffaloEntries, ...calfEntries];
+    if (allAnimals.isEmpty) return false;
+
+    for (final animal in allAnimals) {
+      // Check RFID Tag
+      if (animal.rfidTag.trim().isEmpty) return false;
+
+      // Check Ear Tag
+      if (animal.earTag.trim().isEmpty) return false;
+
+      // Check age
+      if (animal.type == 'BUFFALO' && animal.ageMonths < 36) return false;
+      if (animal.ageMonths <= 0 || animal.ageMonths > 300) return false;
+
+      // Check health status
+      if (animal.healthStatus.trim().isEmpty) return false;
+
+      // Check images
+      if (animal.images.isEmpty) return false;
+
+      // Type-specific validations
+      if (animal.type == 'BUFFALO') {
+        if (animal.breedName.trim().isEmpty) return false;
+        if (animal.status.trim().isEmpty) return false;
+      } else if (animal.type == 'CALF') {
+        if (animal.parentAnimalId.isEmpty) return false;
+      }
+    }
+
+    return true;
+  }
+
   Future<void> _submit() async {
     final dashboardState = ref.read(farmManagerProvider);
     final order = dashboardState.currentOrder;
@@ -938,7 +981,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
               const SizedBox(height: 16),
 
               CustomActionButton(
-                onPressed: _submit,
+                onPressed: _isFormValid() ? _submit : null,
                 color: AppTheme.primary,
                 width: double.infinity,
                 child: _isSubmitting

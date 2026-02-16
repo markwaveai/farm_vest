@@ -577,12 +577,13 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                   Icons.keyboard_arrow_down_rounded,
                                 ),
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: Theme.of(
                                     context,
                                   ).colorScheme.onSurface,
                                 ),
+                                isExpanded: true,
                                 items: const [
                                   DropdownMenuItem(
                                     value: 'healthy',
