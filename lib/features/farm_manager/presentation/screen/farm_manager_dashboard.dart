@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
+import 'package:farm_vest/core/widgets/notification_bell_button.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
@@ -321,12 +322,9 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             ),
             onPressed: () => _searchDialog(context),
           ),
-          IconButton(
-            icon: Icon(
-              Icons.notifications_active_outlined,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            onPressed: () => context.push('/notifications'),
+          NotificationBellButton(
+            fallbackRoute: '/farm-manager-dashboard',
+            iconColor: Theme.of(context).colorScheme.onSurface,
           ),
           const SizedBox(width: 8),
           GestureDetector(

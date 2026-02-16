@@ -2,6 +2,7 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:farm_vest/core/services/notification_service.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
@@ -21,7 +22,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   void initState() {
     super.initState();
-    _notificationService.initializeSampleNotifications();
+
+    // Fetch real notifications from backend
+    _notificationService.fetchNotificationHistory();
 
     // Initial fetch
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -222,6 +225,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         onTap: () {
           if (isUnread) {
             _notificationService.markAsRead(notification.id);
+          }
+          // Navigate to ticket if it's a ticket notification
+          if (notification.notificationCategory == 'ticket' &&
+              notification.referenceId != null) {
+            context.push('/all-health-tickets');
           }
         },
         borderRadius: BorderRadius.circular(AppConstants.radiusL),

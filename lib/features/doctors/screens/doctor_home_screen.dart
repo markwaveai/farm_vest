@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:farm_vest/core/widgets/notification_bell_button.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/features/doctors/providers/doctors_provider.dart';
 import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
@@ -130,6 +131,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
               ),
               tooltip: 'Switch Role',
             ),
+          NotificationBellButton(
+            fallbackRoute: '/doctor-dashboard',
+            iconColor: Theme.of(context).colorScheme.onSurface,
+          ),
           const SizedBox(width: 8),
           GestureDetector(
             onTap: () => context.push('/profile'),

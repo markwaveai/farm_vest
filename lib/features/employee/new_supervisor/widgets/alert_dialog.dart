@@ -129,7 +129,8 @@ class _QuickActionDialogContentState
             ],
           ),
           const SizedBox(height: 12),
-          ConstrainedBox(
+          Flexible(
+            child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.6,
             ),
@@ -360,15 +361,17 @@ class _QuickActionDialogContentState
               ),
             ),
           ),
+          ),
           const SizedBox(height: 20),
           if (widget.type != QuickActionType.locateAnimal)
             CustomActionButton(
               onPressed: _isSubmitting
                   ? null
                   : () async {
+                      final messenger = ScaffoldMessenger.of(context);
                       if (widget.type == QuickActionType.milkEntry) {
                         if (quantityController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          messenger.showSnackBar(
                             const SnackBar(
                               content: Text('Quantity is required'),
                             ),
@@ -386,7 +389,7 @@ class _QuickActionDialogContentState
                               );
                           if (res != null && mounted) {
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               const SnackBar(
                                 content: Text('Milk entry added'),
                                 backgroundColor: Colors.green,
@@ -394,12 +397,14 @@ class _QuickActionDialogContentState
                             );
                           }
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(e.toString()),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                          if (mounted) {
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         } finally {
                           if (mounted) setState(() => _isSubmitting = false);
                         }
@@ -407,7 +412,7 @@ class _QuickActionDialogContentState
                           widget.type == QuickActionType.transferRequest) {
                         if (_selectedAnimalId == null &&
                             idController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          messenger.showSnackBar(
                             const SnackBar(
                               content: Text('Animal selection is required'),
                             ),
@@ -415,7 +420,7 @@ class _QuickActionDialogContentState
                           return;
                         }
                         if (reasonController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          messenger.showSnackBar(
                             const SnackBar(
                               content: Text('Reason/Description is required'),
                             ),
@@ -485,7 +490,7 @@ class _QuickActionDialogContentState
                               );
                           if (res != null && mounted) {
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               SnackBar(
                                 content: Text(successMessage),
                                 backgroundColor: Colors.green,
@@ -493,12 +498,14 @@ class _QuickActionDialogContentState
                             );
                           }
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(e.toString()),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                          if (mounted) {
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         } finally {
                           if (mounted) setState(() => _isSubmitting = false);
                         }

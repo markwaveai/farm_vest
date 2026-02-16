@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
+import 'package:farm_vest/core/widgets/notification_bell_button.dart';
 import 'package:farm_vest/core/widgets/custom_card.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_dashboard_provider.dart';
 import 'package:farm_vest/features/doctors/widgets/buffalo_profile_view.dart';
@@ -110,10 +111,9 @@ class _NewSupervisorDashboardState
             icon: const Icon(Icons.swap_horiz_rounded, color: AppTheme.primary),
             tooltip: 'Switch Role',
           ),
-          IconButton(
-            onPressed: () => context.push('/notifications'),
-            icon: const Icon(Icons.notifications_active_outlined),
-            tooltip: 'Notifications',
+          NotificationBellButton(
+            fallbackRoute: '/supervisor-dashboard',
+            iconColor: AppTheme.primary,
           ),
           const SizedBox(width: 8),
           GestureDetector(

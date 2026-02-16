@@ -1,4 +1,5 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/widgets/notification_bell_button.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -105,12 +106,8 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
                       onPressed: _showSwitchRoleBottomSheet,
                       tooltip: 'Switch Role',
                     ),
-                  IconButton(
-                    icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () => context.push(
-                      '/notifications',
-                      extra: {'fallbackRoute': '/customer-dashboard'},
-                    ),
+                  const NotificationBellButton(
+                    fallbackRoute: '/customer-dashboard',
                   ),
                   // Profile icon in top right
                   Padding(

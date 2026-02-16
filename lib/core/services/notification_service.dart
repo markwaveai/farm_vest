@@ -1,8 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:farm_vest/core/router/app_router.dart';
 import 'dart:io';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -18,6 +24,8 @@ class AppNotification {
   final NotificationType type;
   final DateTime timestamp;
   final bool isRead;
+  final String? notificationCategory; // "ticket", "leave", etc.
+  final int? referenceId; // ticket_id, leave_id, etc.
 
   AppNotification({
     required this.id,
@@ -26,6 +34,8 @@ class AppNotification {
     required this.type,
     required this.timestamp,
     this.isRead = false,
+    this.notificationCategory,
+    this.referenceId,
   });
 
   AppNotification copyWith({
@@ -35,6 +45,8 @@ class AppNotification {
     NotificationType? type,
     DateTime? timestamp,
     bool? isRead,
+    String? notificationCategory,
+    int? referenceId,
   }) {
     return AppNotification(
       id: id ?? this.id,
@@ -43,6 +55,23 @@ class AppNotification {
       type: type ?? this.type,
       timestamp: timestamp ?? this.timestamp,
       isRead: isRead ?? this.isRead,
+      notificationCategory: notificationCategory ?? this.notificationCategory,
+      referenceId: referenceId ?? this.referenceId,
+    );
+  }
+
+  factory AppNotification.fromJson(Map<String, dynamic> json) {
+    return AppNotification(
+      id: json['id'].toString(),
+      title: json['title'] ?? '',
+      message: json['body'] ?? '',
+      type: NotificationType.info,
+      timestamp: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      isRead: json['is_read'] ?? false,
+      notificationCategory: json['notification_type'],
+      referenceId: json['reference_id'],
     );
   }
 }
@@ -54,9 +83,11 @@ class NotificationService {
 
   final List<AppNotification> _notifications = [];
   final List<Function(List<AppNotification>)> _listeners = [];
+  Timer? _pollTimer;
+  int _unreadCount = 0;
 
   List<AppNotification> get notifications => List.unmodifiable(_notifications);
-  int get unreadCount => _notifications.where((n) => !n.isRead).length;
+  int get unreadCount => _unreadCount;
 
   Future<void> initializeFCM() async {
     // Request permission
@@ -71,8 +102,7 @@ class NotificationService {
     // Handle background notification tap
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint('A new onMessageOpenedApp event was published!');
-      // Navigate to tickets or relevant screen
-      // AppRouter.router.push('/tickets');
+      _handleNotificationTap(message.data);
     });
 
     // Foreground handler
@@ -81,6 +111,7 @@ class NotificationService {
       debugPrint('Message data: ${message.data}');
 
       if (message.notification != null) {
+        final data = message.data;
         addNotification(
           AppNotification(
             id:
@@ -90,22 +121,140 @@ class NotificationService {
             message: message.notification?.body ?? '',
             type: NotificationType.info,
             timestamp: DateTime.now(),
+            notificationCategory: data['ticket_id'] != null ? 'ticket' : null,
+            referenceId: data['ticket_id'] != null
+                ? int.tryParse(data['ticket_id'])
+                : null,
           ),
         );
+        // Refresh unread count from backend
+        fetchUnreadCount();
       }
     });
 
-    // Check for initial message
+    // Check for initial message (app opened from terminated state via notification)
     FirebaseMessaging.instance.getInitialMessage().then((
       RemoteMessage? message,
     ) {
       if (message != null) {
-        // Handle navigation for initial message
+        _handleNotificationTap(message.data);
       }
     });
 
     // Print FCM Token
     await printFCMToken();
+
+    // Start polling unread count every 30 seconds
+    startPolling();
+  }
+
+  void _handleNotificationTap(Map<String, dynamic> data) {
+    final ticketId = data['ticket_id'];
+    if (ticketId != null) {
+      AppRouter.router.push('/all-health-tickets');
+    }
+  }
+
+  void startPolling() {
+    _pollTimer?.cancel();
+    fetchUnreadCount();
+    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      fetchUnreadCount();
+    });
+  }
+
+  void stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+  }
+
+  Future<String?> _getAuthToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token');
+  }
+
+  /// Fetch unread count from backend API
+  Future<void> fetchUnreadCount() async {
+    try {
+      final token = await _getAuthToken();
+      if (token == null) return;
+
+      final baseUrl = AppConstants.appLiveUrl;
+      final response = await http.get(
+        Uri.parse('$baseUrl/notifications/unread_count'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final newCount = data['unread_count'] ?? 0;
+        if (newCount != _unreadCount) {
+          _unreadCount = newCount;
+          _updateAppBadge();
+          _notifyListeners();
+        }
+      }
+    } catch (e) {
+      debugPrint('[NotificationService] Error fetching unread count: $e');
+    }
+  }
+
+  /// Fetch notification history from backend API
+  Future<void> fetchNotificationHistory({int page = 1, int size = 20}) async {
+    try {
+      final token = await _getAuthToken();
+      if (token == null) return;
+
+      final baseUrl = AppConstants.appLiveUrl;
+      final response = await http.get(
+        Uri.parse('$baseUrl/notifications/history?page=$page&size=$size'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final List items = data['data'] ?? [];
+        _notifications.clear();
+        _notifications.addAll(
+          items.map((item) => AppNotification.fromJson(item)),
+        );
+        _notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('[NotificationService] Error fetching history: $e');
+    }
+  }
+
+  /// Mark notification(s) as read via backend API
+  Future<void> markAsReadOnServer({int? notificationId}) async {
+    try {
+      final token = await _getAuthToken();
+      if (token == null) return;
+
+      final baseUrl = AppConstants.appLiveUrl;
+      String url = '$baseUrl/notifications/mark_read';
+      if (notificationId != null) {
+        url += '?notification_id=$notificationId';
+      }
+
+      await http.put(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      await fetchUnreadCount();
+    } catch (e) {
+      debugPrint('[NotificationService] Error marking read: $e');
+    }
   }
 
   Future<void> printFCMToken() async {
@@ -173,6 +322,8 @@ class NotificationService {
 
   void addNotification(AppNotification notification) {
     _notifications.insert(0, notification);
+    _unreadCount++;
+    _updateAppBadge();
     _notifyListeners();
   }
 
@@ -181,6 +332,11 @@ class NotificationService {
     if (index != -1) {
       _notifications[index] = _notifications[index].copyWith(isRead: true);
       _notifyListeners();
+      // Also mark on server
+      final serverId = int.tryParse(notificationId);
+      if (serverId != null) {
+        markAsReadOnServer(notificationId: serverId);
+      }
     }
   }
 
@@ -188,7 +344,29 @@ class NotificationService {
     for (int i = 0; i < _notifications.length; i++) {
       _notifications[i] = _notifications[i].copyWith(isRead: true);
     }
+    _unreadCount = 0;
+    _updateAppBadge();
     _notifyListeners();
+    // Also mark all on server
+    markAsReadOnServer();
+  }
+
+  void _updateAppBadge() {
+    try {
+      FlutterAppBadger.isAppBadgeSupported().then((isSupported) {
+        if (isSupported) {
+          if (_unreadCount > 0) {
+            FlutterAppBadger.updateBadgeCount(_unreadCount);
+          } else {
+            FlutterAppBadger.removeBadge();
+          }
+        }
+      }).catchError((e) {
+        debugPrint('App badge not supported on this device: $e');
+      });
+    } catch (e) {
+      debugPrint('App badge error: $e');
+    }
   }
 
   void removeNotification(String notificationId) {
@@ -198,6 +376,7 @@ class NotificationService {
 
   void clearAll() {
     _notifications.clear();
+    _unreadCount = 0;
     _notifyListeners();
   }
 
@@ -258,6 +437,8 @@ class NotificationService {
         message: 'Ticket $ticketId status: $status',
         type: NotificationType.info,
         timestamp: DateTime.now(),
+        notificationCategory: 'ticket',
+        referenceId: int.tryParse(ticketId),
       ),
     );
   }
@@ -271,6 +452,7 @@ class NotificationService {
             '$buffaloId transfer request ${approved ? 'approved' : 'rejected'}',
         type: approved ? NotificationType.success : NotificationType.warning,
         timestamp: DateTime.now(),
+        notificationCategory: 'ticket',
       ),
     );
   }
@@ -285,51 +467,6 @@ class NotificationService {
         timestamp: DateTime.now(),
       ),
     );
-  }
-
-  // Initialize with sample notifications
-  void initializeSampleNotifications() {
-    final sampleNotifications = [
-      AppNotification(
-        id: '1',
-        title: 'Vaccination Reminder',
-        message: 'BUF-003 is due for FMD vaccination',
-        type: NotificationType.warning,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
-      ),
-      AppNotification(
-        id: '2',
-        title: 'Health Issue Alert',
-        message: 'BUF-007 showing signs of fever',
-        type: NotificationType.error,
-        timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-      ),
-      AppNotification(
-        id: '3',
-        title: 'Recovery Complete',
-        message: 'BUF-012 has fully recovered from infection',
-        type: NotificationType.success,
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      AppNotification(
-        id: '4',
-        title: 'Visit Confirmed',
-        message: 'Your visit is scheduled for Dec 15, 2024 at 10:00 AM',
-        type: NotificationType.info,
-        timestamp: DateTime.now().subtract(const Duration(hours: 4)),
-      ),
-      AppNotification(
-        id: '5',
-        title: 'Ticket Update',
-        message: 'Ticket TKT-001 has been assigned to Dr. Sharma',
-        type: NotificationType.info,
-        timestamp: DateTime.now().subtract(const Duration(hours: 6)),
-        isRead: true,
-      ),
-    ];
-
-    _notifications.addAll(sampleNotifications);
-    _notifyListeners();
   }
 }
 

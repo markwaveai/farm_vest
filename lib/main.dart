@@ -17,6 +17,19 @@ import 'package:farm_vest/core/theme/theme_provider.dart';
 import 'package:farm_vest/core/widgets/biometric_lock_screen.dart';
 
 import 'package:farm_vest/core/services/remote_config_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint("Handling a background message: ${message.messageId}");
+  if (message.data['badge'] != null) {
+    final badgeCount = int.tryParse(message.data['badge'].toString());
+    if (badgeCount != null) {
+      FlutterAppBadger.updateBadgeCount(badgeCount);
+    }
+  }
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,6 +96,9 @@ Future<void> main() async {
       debugPrint("Firebase initialization failed: $e");
     }
   }
+
+  // Register background message handler before FCM init
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // Initialize FCM after Firebase
   try {

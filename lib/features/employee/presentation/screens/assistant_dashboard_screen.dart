@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
+import 'package:farm_vest/core/widgets/notification_bell_button.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -181,12 +182,8 @@ class _AssistantDashboardScreenState
                 onPressed: _showSwitchRoleBottomSheet,
                 tooltip: 'Switch Role',
               ),
-            IconButton(
-              icon: const Icon(Icons.notifications),
-              onPressed: () => context.push(
-                '/notifications',
-                extra: {'fallbackRoute': '/assistant-dashboard'},
-              ),
+            const NotificationBellButton(
+              fallbackRoute: '/assistant-dashboard',
             ),
             const SizedBox(width: 8),
             GestureDetector(
