@@ -69,6 +69,11 @@ class AuthRepository {
     );
   }
 
+  Future<void> registerFcmToken(String token) async {
+    final jwt = await getToken();
+    await AuthApiServices.registerFcmToken(token, jwt: jwt);
+  }
+
   Future<void> saveUserSession({
     required String mobile,
     required List<UserType> roles,

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:farm_vest/core/services/notification_service.dart';
 
 import 'package:farm_vest/core/error/exceptions.dart';
@@ -234,6 +235,18 @@ class AuthController extends Notifier<AuthState> {
       if (state.userData == null && state.mobileNumber != null) {
         refreshUserData();
       }
+
+      // Sync FCM Token
+      try {
+        final token = await FirebaseMessaging.instance.getToken();
+        if (token != null) {
+          // We use the repository which gets the token internally
+          await _repository.registerFcmToken(token);
+          debugPrint("FCM Registration: Token synced on app start");
+        }
+      } catch (e) {
+        debugPrint("FCM Registration Error on start: $e");
+      }
     }
   }
 
@@ -353,6 +366,17 @@ class AuthController extends Notifier<AuthState> {
     if (userData != null) {
       debugPrint('Subscribing to topic: user_${userData.id}');
       await NotificationService().subscribeToTopic('user_${userData.id}');
+
+      // Register FCM Token with backend
+      try {
+        final token = await FirebaseMessaging.instance.getToken();
+        if (token != null) {
+          await _repository.registerFcmToken(token);
+          debugPrint("FCM Registration: Token registered after login");
+        }
+      } catch (e) {
+        debugPrint("FCM Registration Error after login: $e");
+      }
     }
 
     return {'roles': availableRoles, 'userData': userData};

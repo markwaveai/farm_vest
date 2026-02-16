@@ -9,6 +9,7 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/router/app_router.dart';
 import 'dart:io';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -140,6 +141,32 @@ class NotificationService {
         _handleNotificationTap(message.data);
       }
     });
+
+    // Create the channel on the device (Android 8.0+)
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'farmvest_notifications', // id
+      'FarmVest Notifications', // title
+      description: 'This channel is used for important notifications.',
+      importance: Importance.high,
+      playSound: true,
+    );
+
+    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
+
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(channel);
+
+    // Update foreground presentation options to allow heads-up notifications
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
 
     // Print FCM Token
     await printFCMToken();
@@ -353,17 +380,19 @@ class NotificationService {
 
   void _updateAppBadge() {
     try {
-      FlutterAppBadger.isAppBadgeSupported().then((isSupported) {
-        if (isSupported) {
-          if (_unreadCount > 0) {
-            FlutterAppBadger.updateBadgeCount(_unreadCount);
-          } else {
-            FlutterAppBadger.removeBadge();
-          }
-        }
-      }).catchError((e) {
-        debugPrint('App badge not supported on this device: $e');
-      });
+      FlutterAppBadger.isAppBadgeSupported()
+          .then((isSupported) {
+            if (isSupported) {
+              if (_unreadCount > 0) {
+                FlutterAppBadger.updateBadgeCount(_unreadCount);
+              } else {
+                FlutterAppBadger.removeBadge();
+              }
+            }
+          })
+          .catchError((e) {
+            debugPrint('App badge not supported on this device: $e');
+          });
     } catch (e) {
       debugPrint('App badge error: $e');
     }

@@ -180,13 +180,44 @@ class AuthApiServices {
         }
       }
       final data = jsonDecode(response.body);
-      final message = data['detail'] ?? 'Failed to update user profile';
-
+      String message = 'Failed to update user profile';
+      if (data is Map) {
+        message = data['message'] ?? data['detail'] ?? message;
+      }
       throw ServerException(message, statusCode: response.statusCode);
     } on SocketException {
       throw NetworkException('No Internet connection');
     } catch (e) {
       throw AppException(e.toString());
+    }
+  }
+
+  static Future<void> registerFcmToken(String token, {String? jwt}) async {
+    try {
+      final headers = {
+        HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+      };
+
+      if (jwt != null && jwt.isNotEmpty) {
+        headers[HttpHeaders.authorizationHeader] = 'Bearer $jwt';
+      }
+
+      final response = await http.post(
+        Uri.parse("${AppConstants.appLiveUrl}/fcm/register_token"),
+        headers: headers,
+        body: jsonEncode({"token": token}),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return;
+      } else {
+        // Log but don't throw to avoid blocking app flow
+        print(
+          'Failed to register FCM token: ${response.statusCode} ${response.body}',
+        );
+      }
+    } catch (e) {
+      print("Error registering FCM token: $e");
     }
   }
 }

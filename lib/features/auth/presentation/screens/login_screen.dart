@@ -84,8 +84,12 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
       case UserType.farmManager:
         context.go('/farm-manager-dashboard');
         break;
-      default:
-        context.go('/customer-dashboard');
+      case UserType.doctor:
+        context.go('/doctor-dashboard');
+        break;
+      case UserType.assistant:
+        context.go('/assistant-dashboard');
+        break;
     }
   }
 
@@ -767,7 +771,8 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           separatorBuilder: (index) => const SizedBox(width: 8),
           hapticFeedbackType: HapticFeedbackType.lightImpact,
           onChanged: (value) => setState(() => _otp = value),
-          onCompleted: (value) { setState(() => _otp = value);
+          onCompleted: (value) {
+            setState(() => _otp = value);
             _handleContinue();
           },
         ),
