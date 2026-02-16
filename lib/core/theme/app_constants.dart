@@ -28,7 +28,7 @@ class AppConstants {
 
   static String animalKartApiUrl = animalKartLiveApiUrl;
 
-  static String appLiveUrl = localUrl; // Default to local for testing
+  static String appLiveUrl = stagingUrl; // User requested staging
   static String visitApiUrl = appLiveUrl;
 
   static const String authApiKey =
