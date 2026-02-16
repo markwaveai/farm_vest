@@ -12,39 +12,52 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
   final String? tagNumber;
   final String beltId;
 
+  final String? age;
+  final String? breed;
+  final String? weight;
+
   const BuffaloDeviceDetailsScreen({
     super.key,
     required this.animalId,
     required this.beltId,
     this.rfid,
     this.tagNumber,
+    this.age,
+    this.breed,
+    this.weight,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final telemetryAsync = ref.watch(buffaloTelemetryProvider(beltId));
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F0),
+      backgroundColor: isDark
+          ? theme.colorScheme.surface
+          : const Color(0xFFF0F4F0),
       body: Stack(
         children: [
           // Dynamic Background Elements
-          _buildBackgroundDecorations(),
+          _buildBackgroundDecorations(theme, isDark),
 
           CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              _buildSliverAppBar(context),
+              _buildSliverAppBar(context, theme, isDark),
               SliverToBoxAdapter(
                 child: telemetryAsync.when(
-                  data: (data) => _buildBody(context, ref, data),
-                  loading: () => const SizedBox(
+                  data: (data) => _buildBody(context, ref, data, theme, isDark),
+                  loading: () => SizedBox(
                     height: 400,
                     child: Center(
-                      child: CircularProgressIndicator(color: AppTheme.primary),
+                      child: CircularProgressIndicator(
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                   ),
-                  error: (err, stack) => _buildErrorState(err),
+                  error: (err, stack) => _buildErrorState(err, theme),
                 ),
               ),
             ],
@@ -54,7 +67,7 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBackgroundDecorations() {
+  Widget _buildBackgroundDecorations(ThemeData theme, bool isDark) {
     return Stack(
       children: [
         Positioned(
@@ -64,7 +77,9 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
             width: 300,
             height: 300,
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.05),
+              color: theme.colorScheme.primary.withOpacity(
+                isDark ? 0.03 : 0.05,
+              ),
               shape: BoxShape.circle,
             ),
           ),
@@ -73,7 +88,7 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
           bottom: 100,
           left: -50,
           child: Opacity(
-            opacity: 0.03,
+            opacity: isDark ? 0.01 : 0.03,
             child: Image.asset('assets/icons/sitting.png', width: 400),
           ),
         ),
@@ -81,13 +96,17 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context) {
+  Widget _buildSliverAppBar(
+    BuildContext context,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return SliverAppBar(
       expandedHeight: 0,
       floating: true,
       pinned: true,
       elevation: 0,
-      backgroundColor: AppTheme.primary,
+      backgroundColor: theme.colorScheme.primary,
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new,
@@ -116,42 +135,50 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     BuffaloTelemetry data,
+    ThemeData theme,
+    bool isDark,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           const SizedBox(height: 25),
-          _buildProfileHero(data),
+          _buildProfileHero(data, theme, isDark),
           const SizedBox(height: 25),
-          _buildAlertSection(data),
+          _buildAlertSection(data, theme, isDark),
           const SizedBox(height: 30),
-          _buildSectionHeader(context, ref, 'Live Behavioral Data'),
+          _buildSectionHeader(context, ref, 'Live Behavioral Data', theme),
           const SizedBox(height: 16),
-          _buildMetricsGrid(data),
+          _buildMetricsGrid(data, theme, isDark),
           const SizedBox(height: 30),
-          _buildActivitySummaryCard(data),
+          _buildActivitySummaryCard(data, theme, isDark),
           const SizedBox(height: 40),
         ],
       ),
     );
   }
 
-  Widget _buildProfileHero(BuffaloTelemetry data) {
+  Widget _buildProfileHero(
+    BuffaloTelemetry data,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: theme.colorScheme.surface.withOpacity(isDark ? 0.7 : 0.9),
         borderRadius: BorderRadius.circular(35),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withOpacity(0.05),
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF000000).withOpacity(0.04),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.04),
             blurRadius: 40,
             offset: const Offset(0, 20),
           ),
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.06),
+            color: theme.colorScheme.primary.withOpacity(isDark ? 0.05 : 0.06),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -165,16 +192,18 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.05),
+                  color: theme.colorScheme.primary.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppTheme.primary.withOpacity(0.1)),
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withOpacity(0.1),
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Image.asset(
-                    'assets/icons/buffalo_head.png',
+                    'assets/icons/buffalo_icon.png',
                     fit: BoxFit.contain,
-                    color: AppTheme.primary.withOpacity(0.8),
+                    color: theme.colorScheme.primary.withOpacity(0.8),
                   ),
                 ),
               ),
@@ -185,17 +214,17 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
                   children: [
                     Text(
                       tagNumber ?? 'Buffalo Unit',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w900,
-                        color: Color(0xFF1B301B),
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'BELT ID: $beltId',
                       style: TextStyle(
-                        color: AppTheme.primary.withOpacity(0.6),
+                        color: theme.colorScheme.primary.withOpacity(0.6),
                         fontWeight: FontWeight.w800,
                         fontSize: 12,
                         letterSpacing: 1.2,
@@ -211,11 +240,19 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildModernStat('WEIGHT', '540', 'kg'),
-              Container(width: 1, height: 30, color: Colors.black12),
-              _buildModernStat('AGE', '4.2', 'Yrs'),
-              Container(width: 1, height: 30, color: Colors.black12),
-              _buildModernStat('BREED', 'Murrah', ''),
+              _buildModernStat('WEIGHT', weight ?? '540', 'kg', theme),
+              Container(
+                width: 1,
+                height: 30,
+                color: theme.dividerColor.withOpacity(0.2),
+              ),
+              _buildModernStat('AGE', age ?? '4.2', 'Yrs', theme),
+              Container(
+                width: 1,
+                height: 30,
+                color: theme.dividerColor.withOpacity(0.2),
+              ),
+              _buildModernStat('BREED', breed ?? 'Murrah', '', theme),
             ],
           ),
         ],
@@ -223,13 +260,18 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildModernStat(String label, String value, String unit) {
+  Widget _buildModernStat(
+    String label,
+    String value,
+    String unit,
+    ThemeData theme,
+  ) {
     return Column(
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.grey,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface.withOpacity(0.4),
             fontSize: 10,
             fontWeight: FontWeight.w900,
             letterSpacing: 1,
@@ -241,16 +283,16 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
             children: [
               TextSpan(
                 text: value,
-                style: const TextStyle(
-                  color: Color(0xFF1B301B),
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                 ),
               ),
               TextSpan(
                 text: ' $unit',
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.4),
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -262,7 +304,11 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAlertSection(BuffaloTelemetry data) {
+  Widget _buildAlertSection(
+    BuffaloTelemetry data,
+    ThemeData theme,
+    bool isDark,
+  ) {
     final bool isHeat = data.heatAlert.toLowerCase() == 'yes';
     final bool isHealth = data.healthAlert.toLowerCase() == 'yes';
 
@@ -273,8 +319,10 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
             'HEAT',
             data.heatAlert,
             isHeat,
-            'assets/buffalofit_icons/heat.png',
+            'assets/buffalofit_icons/heatt.png',
             Colors.orange,
+            theme,
+            isDark,
             isSvg: false,
           ),
         ),
@@ -286,6 +334,8 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
             isHealth,
             'assets/buffalofit_icons/Hert_alert.svg',
             Colors.red,
+            theme,
+            isDark,
             isSvg: true,
           ),
         ),
@@ -298,25 +348,29 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     String value,
     bool active,
     String asset,
-    Color color, {
+    Color color,
+    ThemeData theme,
+    bool isDark, {
     bool isSvg = false,
   }) {
-    final Color displayColor = active ? color : AppTheme.primary;
+    final Color displayColor = active ? color : theme.colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: active ? displayColor.withOpacity(0.12) : Colors.white,
+        color: active
+            ? displayColor.withOpacity(0.12)
+            : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(28),
         border: Border.all(
           color: active
               ? displayColor.withOpacity(0.3)
-              : Colors.black.withOpacity(0.04),
+              : theme.colorScheme.onSurface.withOpacity(0.04),
           width: 1.5,
         ),
         boxShadow: [
           if (!active)
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withOpacity(isDark ? 0.3 : 0.02),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -369,6 +423,7 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     String title,
+    ThemeData theme,
   ) {
     return Row(
       children: [
@@ -376,17 +431,17 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
           width: 4,
           height: 18,
           decoration: BoxDecoration(
-            color: AppTheme.primary,
+            color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(width: 10),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w900,
-            color: Color(0xFF1B301B),
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const Spacer(),
@@ -408,7 +463,11 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricsGrid(BuffaloTelemetry data) {
+  Widget _buildMetricsGrid(
+    BuffaloTelemetry data,
+    ThemeData theme,
+    bool isDark,
+  ) {
     final metrics = [
       {
         'label': 'Chewing',
@@ -457,12 +516,12 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(30),
             border: Border.all(color: mColor.withOpacity(0.08), width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: mColor.withOpacity(0.04),
+                color: mColor.withOpacity(isDark ? 0.08 : 0.04),
                 blurRadius: 24,
                 offset: const Offset(0, 12),
               ),
@@ -538,10 +597,10 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
                           const SizedBox(height: 2),
                           Text(
                             m['value'] as String,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFF1B301B),
+                              color: theme.colorScheme.onSurface,
                               height: 1.1,
                             ),
                           ),
@@ -558,16 +617,25 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildActivitySummaryCard(BuffaloTelemetry data) {
+  Widget _buildActivitySummaryCard(
+    BuffaloTelemetry data,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B301B),
+        color: isDark ? theme.colorScheme.surface : const Color(0xFF1B301B),
         borderRadius: BorderRadius.circular(40),
+        border: isDark
+            ? Border.all(color: theme.colorScheme.primary.withOpacity(0.2))
+            : null,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1B301B).withOpacity(0.3),
+            color:
+                (isDark ? theme.colorScheme.primary : const Color(0xFF1B301B))
+                    .withOpacity(0.3),
             blurRadius: 30,
             offset: const Offset(0, 15),
           ),
@@ -577,22 +645,29 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Activity Analysis',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: isDark
+                            ? theme.colorScheme.onSurface
+                            : Colors.white,
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       'Optimized Movement Tracking',
-                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                      style: TextStyle(
+                        color: isDark
+                            ? theme.colorScheme.onSurface.withOpacity(0.5)
+                            : Colors.white54,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -603,13 +678,15 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary,
+                  color: isDark
+                      ? theme.colorScheme.primary.withOpacity(0.1)
+                      : theme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Text(
                   '${data.activity}',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDark ? theme.colorScheme.primary : Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
@@ -625,9 +702,17 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
                 'IDLE TIME',
                 '${data.idle}h',
                 Icons.query_builder,
+                theme,
+                isDark,
               ),
-              _buildDarkPoint('REST SCORE', '96%', Icons.auto_awesome),
-              _buildDarkPoint('METABOLIC', 'Active', Icons.bolt),
+              _buildDarkPoint(
+                'REST SCORE',
+                '96%',
+                Icons.auto_awesome,
+                theme,
+                isDark,
+              ),
+              _buildDarkPoint('METABOLIC', 'Active', Icons.bolt, theme, isDark),
             ],
           ),
         ],
@@ -635,15 +720,23 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDarkPoint(String label, String value, IconData icon) {
+  Widget _buildDarkPoint(
+    String label,
+    String value,
+    IconData icon,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return Column(
       children: [
-        Icon(icon, color: AppTheme.primary, size: 24),
+        Icon(icon, color: theme.colorScheme.primary, size: 24),
         const SizedBox(height: 10),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white38,
+          style: TextStyle(
+            color: isDark
+                ? theme.colorScheme.onSurface.withOpacity(0.4)
+                : Colors.white38,
             fontSize: 10,
             fontWeight: FontWeight.w900,
             letterSpacing: 0.5,
@@ -652,8 +745,8 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: isDark ? theme.colorScheme.onSurface : Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -662,7 +755,7 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(Object err) {
+  Widget _buildErrorState(Object err, ThemeData theme) {
     return Container(
       height: 400,
       alignment: Alignment.center,
@@ -674,7 +767,7 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
           Text(
             'Sync Interrupted',
             style: TextStyle(
-              color: Colors.grey.shade800,
+              color: theme.colorScheme.onSurface,
               fontWeight: FontWeight.bold,
             ),
           ),

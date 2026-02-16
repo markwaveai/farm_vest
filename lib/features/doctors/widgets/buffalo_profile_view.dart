@@ -695,7 +695,10 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                           animal.neckBandId ??
                           'S1IAD1884', // Fallback to fixed belt id as requested for now
                       'rfid': animal.rfid,
-                      'tagNumber': animal.earTagId,
+                      'tagNumber': animal.tagNumber,
+                      'age': animal.age?.toString(),
+                      'breed': animal.breed,
+                      'weight': null, // InvestorAnimal doesn't have weight yet
                     },
                   );
                 },
@@ -716,7 +719,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
             ),
           ),
           subtitle: Text(
-            "Tag: ${animal.earTagId ?? 'N/A'} | Shed: ${animal.shedName ?? 'N/A'} | Slot: ${animal.parkingId ?? 'N/A'}",
+            "Tag: ${animal.tagNumber ?? 'N/A'} | Shed: ${animal.shedName ?? 'N/A'} | Slot: ${animal.parkingId ?? 'N/A'}",
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),

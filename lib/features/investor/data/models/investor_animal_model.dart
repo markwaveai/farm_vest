@@ -40,6 +40,7 @@ class InvestorAnimal {
   /// Date when the animal was onboarded
   final DateTime? onboardedAt;
   final String? onboardedBy;
+  final String? tagNumber;
 
   /// Creates an instance of [InvestorAnimal].
   const InvestorAnimal({
@@ -67,6 +68,7 @@ class InvestorAnimal {
     this.onboardedBy,
     this.animalkartOrderId,
     this.parentAnimalId,
+    this.tagNumber,
   });
 
   /// Creates an [InvestorAnimal] from JSON data.
@@ -118,6 +120,9 @@ class InvestorAnimal {
           : null,
       rowNumber: (animalData['row_number'] != null)
           ? animalData['row_number'].toString()
+          : null,
+      tagNumber: (animalData['tag_number'] != null)
+          ? animalData['tag_number'].toString()
           : null,
       shedId: shedData['id'] is int ? shedData['id'] : null,
       shedName: (shedData['shed_name'] ?? shedData['name'] ?? '').toString(),
@@ -172,6 +177,7 @@ class InvestorAnimal {
       'animal_type': animalType,
       'onboarded_at': onboardedAt?.toIso8601String(),
       'onboarded_by': onboardedBy,
+      'tag_number': tagNumber,
     };
   }
 
@@ -187,7 +193,7 @@ class InvestorAnimal {
     String? farmName,
     int? farmId,
     String? farmLocation,
-
+    String? tagNumber,
     String? parkingId,
     String? rowNumber,
     String? investorName,
@@ -210,7 +216,7 @@ class InvestorAnimal {
       farmName: farmName ?? this.farmName,
       farmId: farmId ?? this.farmId,
       farmLocation: farmLocation ?? this.farmLocation,
-
+      tagNumber: tagNumber ?? this.tagNumber,
       parkingId: parkingId ?? this.parkingId,
       rowNumber: rowNumber ?? this.rowNumber,
       investorName: investorName ?? this.investorName,
