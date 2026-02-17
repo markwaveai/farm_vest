@@ -17,18 +17,20 @@ import 'package:farm_vest/core/theme/theme_provider.dart';
 import 'package:farm_vest/core/widgets/biometric_lock_screen.dart';
 
 import 'package:farm_vest/core/services/remote_config_service.dart';
+import 'package:farm_vest/core/providers/environment_provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+// import 'package:flutter_app_badger/flutter_app_badger.dart'; // Commented out - package not in pubspec.yaml
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint("Handling a background message: ${message.messageId}");
-  if (message.data['badge'] != null) {
-    final badgeCount = int.tryParse(message.data['badge'].toString());
-    if (badgeCount != null) {
-      FlutterAppBadger.updateBadgeCount(badgeCount);
-    }
-  }
+  // Badge functionality commented out until flutter_app_badger is added to pubspec.yaml
+  // if (message.data['badge'] != null) {
+  //   final badgeCount = int.tryParse(message.data['badge'].toString());
+  //   if (badgeCount != null) {
+  //     FlutterAppBadger.updateBadgeCount(badgeCount);
+  //   }
+  // }
 }
 
 Future<void> main() async {
@@ -147,7 +149,9 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
       ],
       builder: (context, child) {
         final built = child!;
-        if (kDebugMode) {
+        final isStaging = ref.watch(isStagingProvider);
+
+        if (isStaging) {
           return BiometricLockScreen(
             child: Material(
               child: Column(

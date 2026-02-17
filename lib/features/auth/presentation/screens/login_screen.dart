@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pinput/pinput.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
+import '../../../../core/providers/environment_provider.dart';
 import '../../../../core/theme/app_constants.dart';
 
 class NewLoginScreen extends ConsumerStatefulWidget {
@@ -237,9 +238,11 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
     if (isStaging) {
       AppConstants.useStaging();
+      ref.read(isStagingProvider.notifier).state = true;
       if (mounted) ToastUtils.showSuccess(context, 'Switched to STAGING');
     } else {
       AppConstants.useLive();
+      ref.read(isStagingProvider.notifier).state = false;
       if (mounted) ToastUtils.showSuccess(context, 'Switched to LIVE');
     }
     if (mounted) Navigator.pop(context);

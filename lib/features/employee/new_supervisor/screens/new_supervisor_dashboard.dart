@@ -106,11 +106,15 @@ class _NewSupervisorDashboardState
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
         actions: [
-          IconButton(
-            onPressed: () => _showSwitchRoleBottomSheet(context, ref),
-            icon: const Icon(Icons.swap_horiz_rounded, color: AppTheme.primary),
-            tooltip: 'Switch Role',
-          ),
+          if (authState.availableRoles.length > 1)
+            IconButton(
+              onPressed: () => _showSwitchRoleBottomSheet(context, ref),
+              icon: const Icon(
+                Icons.swap_horiz_rounded,
+                color: AppTheme.primary,
+              ),
+              tooltip: 'Switch Role',
+            ),
           NotificationBellButton(
             fallbackRoute: '/supervisor-dashboard',
             iconColor: AppTheme.primary,

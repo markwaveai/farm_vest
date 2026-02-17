@@ -233,7 +233,7 @@ class _ManagerTransferApprovalScreenState
                       onPressed: () => _approveTransfer(transfer['id']),
                       child: const Text(
                         'Approve',
-                        style: TextStyle(color: Colors.white, fontSize: 1),
+                        style: TextStyle(color: Colors.white, fontSize: 11),
                       ),
                     ),
                   ],
