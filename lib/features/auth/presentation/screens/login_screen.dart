@@ -30,16 +30,22 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   Timer? _timer;
   int _remainingSeconds = 24;
   int _logoTapCount = 0;
+
   Timer? _tapResetTimer;
   final _phoneFocusNode = FocusNode();
+  final _emailFocusNode = FocusNode();
   final _otpFocusNode = FocusNode();
   late final TextEditingController _phoneController;
+  late final TextEditingController _emailController;
+  bool _isEmailLogin = false;
+  String _email = '';
 
   @override
   void initState() {
     super.initState();
     final mobileNumber = ref.read(authProvider).mobileNumber;
     _phoneController = TextEditingController(text: mobileNumber ?? '');
+    _emailController = TextEditingController();
     _phoneNumber = mobileNumber ?? '';
   }
 
@@ -48,8 +54,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     _timer?.cancel();
     _tapResetTimer?.cancel();
     _phoneFocusNode.dispose();
+    _emailFocusNode.dispose();
     _otpFocusNode.dispose();
     _phoneController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -96,6 +104,18 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
   Future<void> _handleContinue() async {
     if (!_isOtpSent) {
+      if (_isEmailLogin) {
+        if (_email.isNotEmpty && _email.contains('@')) {
+          setState(() {
+            _isOtpSent = true;
+            _otp = '';
+          });
+          _startTimer();
+        } else {
+          ToastUtils.showError(context, 'Please enter a valid email address');
+        }
+        return;
+      }
       if (_phoneNumber.length == 10) {
         final response = await ref
             .read(authProvider.notifier)
@@ -121,6 +141,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
       }
     } else {
       if (_otp.length == 6) {
+        if (_isEmailLogin) {
+          ToastUtils.showError(context, 'your email id is not registered');
+          return;
+        }
         final loginData = await ref
             .read(authProvider.notifier)
             .loginWithOtp(_phoneNumber, _otp);
@@ -397,8 +421,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                         _showRoleSelection
                             ? 'Choose how you want to log in'
                             : (_isOtpSent
-                                  ? 'Enter the 6-digit code sent to\n+91 $_phoneNumber'
-                                  : 'Enter your phone number to access your account'),
+                                  ? 'Enter the 6-digit code sent to\n${_isEmailLogin ? _email : '+91 $_phoneNumber'}'
+                                  : (_isEmailLogin
+                                        ? 'Enter your email address to access your account'
+                                        : 'Enter your phone number to access your account')),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
@@ -456,7 +482,15 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             duration: const Duration(milliseconds: 400),
             child: _isOtpSent
                 ? _buildOtpDisplay(theme, isDark)
-                : _buildPhoneNumberDisplay(theme, isDark),
+                : Column(
+                    children: [
+                      _buildLoginTabs(theme, isDark),
+                      const SizedBox(height: 32),
+                      _isEmailLogin
+                          ? _buildEmailDisplay(theme, isDark)
+                          : _buildPhoneNumberDisplay(theme, isDark),
+                    ],
+                  ),
           ),
           const SizedBox(height: 40),
           if (_isOtpSent) ...[
@@ -468,7 +502,9 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             isLoading: authState.isLoading,
             onPressed: (_isOtpSent
                 ? (_otp.length == 6 ? _handleContinue : null)
-                : (_phoneNumber.length == 10 ? _handleContinue : null)),
+                : (_isEmailLogin
+                      ? (_email.isNotEmpty ? _handleContinue : null)
+                      : (_phoneNumber.length == 10 ? _handleContinue : null))),
           ),
           const SizedBox(height: 24),
           if (!_isOtpSent)
@@ -778,6 +814,159 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             setState(() => _otp = value);
             _handleContinue();
           },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginTabs(ThemeData theme, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: isDark ? theme.colorScheme.surfaceVariant : AppTheme.lightGrey,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _isEmailLogin = false),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: !_isEmailLogin
+                      ? (isDark ? theme.colorScheme.surface : Colors.white)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: !_isEmailLogin
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: Text(
+                    'Mobile',
+                    style: TextStyle(
+                      fontWeight: !_isEmailLogin
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: !_isEmailLogin
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _isEmailLogin = true),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _isEmailLogin
+                      ? (isDark ? theme.colorScheme.surface : Colors.white)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: _isEmailLogin
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: Text(
+                    'Email',
+                    style: TextStyle(
+                      fontWeight: _isEmailLogin
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: _isEmailLogin
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmailDisplay(ThemeData theme, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Email Address',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? theme.colorScheme.surfaceVariant
+                : AppTheme.lightGrey,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Icon(
+                Icons.email_outlined,
+                color: theme.colorScheme.primary.withOpacity(0.5),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextField(
+                  controller: _emailController,
+                  focusNode: _emailFocusNode,
+                  keyboardType: TextInputType.emailAddress,
+                  onChanged: (value) => setState(() => _email = value),
+                  onSubmitted: (_) => _handleContinue(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Enter Your Email Address',
+                    hintStyle: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

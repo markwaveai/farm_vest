@@ -225,6 +225,7 @@ class AppRouter {
           return HealthTicketScreen(
             initialFilter: extras?['filter'] as String?,
             ticketType: extras?['type'] as String? ?? 'HEALTH',
+            showActions: extras?['showActions'] ?? true,
           );
         },
       ),

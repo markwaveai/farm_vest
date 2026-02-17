@@ -5,11 +5,13 @@ import 'package:go_router/go_router.dart';
 class HealthTicketScreen extends StatelessWidget {
   final String? initialFilter;
   final String ticketType;
+  final bool showActions;
 
   const HealthTicketScreen({
     super.key,
     this.initialFilter,
     this.ticketType = 'HEALTH',
+    this.showActions = true,
   });
 
   @override
@@ -37,6 +39,7 @@ class HealthTicketScreen extends StatelessWidget {
       body: HealthTicketsView(
         ticketType: ticketType,
         initialFilter: initialFilter ?? "All",
+        showActions: showActions,
       ),
     );
   }

@@ -245,7 +245,8 @@ class _NewSupervisorDashboardState
                 ),
               ),
               CustomCard(
-                color: AppTheme.errorRed,
+                color: AppTheme.lightSecondary,
+                //color: AppTheme.errorRed,
                 type: DashboardCardType.priority,
                 onTap: () {},
                 child: _buildStatContent(
@@ -256,32 +257,12 @@ class _NewSupervisorDashboardState
                   AppTheme.lightSecondary,
                 ),
               ),
+              
               CustomCard(
-                color: AppTheme.warningOrange,
-                type: DashboardCardType.priority,
-                onTap: () {},
-                child: _buildStatContent(
-                  context,
-                  Icons.warning,
-                  dashboardState.stats.activeIssues,
-                  'Active Issues',
-                  AppTheme.warningOrange,
-                ),
-              ),
-              CustomCard(
-                color: AppTheme.darkGrey,
-                type: DashboardCardType.priority,
-                onTap: () => context.push('/transfer-tickets'),
-                child: _buildStatContent(
-                  context,
-                  Icons.move_down,
-                  dashboardState.stats.transfers,
-                  'Transfers',
-                  AppTheme.darkGrey,
-                ),
-              ),
-              CustomCard(
-                color: Colors.pink,
+                color: AppTheme.errorRed,
+                //color: AppTheme.warningOrange,
+                // color: AppTheme.darkGrey,
+                //color: Colors.pink,
                 type: DashboardCardType.priority,
                 onTap: () {
                   final shedId = int.tryParse(user?.shedId ?? '');
@@ -303,13 +284,18 @@ class _NewSupervisorDashboardState
                   Icons.hourglass_empty_rounded,
                   dashboardState.stats.pendingAllocations,
                   'Pending Allocation',
-                  Colors.pink,
+                  AppTheme.errorRed,
+                  // AppTheme.darkGrey
+                  //Colors.pink,
                 ),
               ),
               CustomCard(
                 color: Colors.purple,
                 type: DashboardCardType.priority,
-                onTap: () => context.push('/ticket-management'),
+                onTap: () => context.push(
+                  '/all-health-tickets',
+                  extra: {'showActions': false},
+                ),
                 child: _buildStatContent(
                   context,
                   Icons.confirmation_number_outlined,

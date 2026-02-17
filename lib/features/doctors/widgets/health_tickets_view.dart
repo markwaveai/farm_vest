@@ -10,11 +10,13 @@ import 'package:intl/intl.dart';
 class HealthTicketsView extends ConsumerStatefulWidget {
   final String ticketType; // 'HEALTH' or 'VACCINATION'
   final String initialFilter;
+  final bool showActions;
 
   const HealthTicketsView({
     super.key,
     required this.ticketType,
     this.initialFilter = "All",
+    this.showActions = true,
   });
 
   @override
@@ -109,6 +111,7 @@ class _HealthTicketsViewState extends ConsumerState<HealthTicketsView> {
                                 // Handle vaccination action if needed
                               }
                             : null,
+                        showActions: widget.showActions,
                       );
                     },
                   ),

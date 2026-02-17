@@ -11,6 +11,8 @@ class HealthTicketCard extends StatelessWidget {
   final VoidCallback? onActionTap; // For "Treatment" or "Add Vaccine"
   final bool isVaccination; // To toggle between Treatment and Add Vaccine
 
+  final bool showActions;
+
   const HealthTicketCard({
     super.key,
     required this.ticketId,
@@ -21,6 +23,7 @@ class HealthTicketCard extends StatelessWidget {
     this.onViewDetailsTap,
     this.onActionTap,
     this.isVaccination = false,
+    this.showActions = true,
   });
 
   @override
@@ -41,13 +44,15 @@ class HealthTicketCard extends StatelessWidget {
           _cardHeader(context),
 
           _cardBody(context),
-          Divider(
-            thickness: 0.5,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white12
-                : AppTheme.grey1,
-          ),
-          _cardBottom(context),
+          if (showActions) ...[
+            Divider(
+              thickness: 0.5,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white12
+                  : AppTheme.grey1,
+            ),
+            _cardBottom(context),
+          ],
         ],
       ),
     );
