@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/router/app_router.dart';
 import 'dart:io';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+// import 'package:flutter_app_badger/flutter_app_badger.dart';  // Temporarily disabled for release build
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 @pragma('vm:entry-point')
@@ -378,24 +378,25 @@ class NotificationService {
     markAsReadOnServer();
   }
 
+  // Temporarily disabled for release build - flutter_app_badger package issue
   void _updateAppBadge() {
-    try {
-      FlutterAppBadger.isAppBadgeSupported()
-          .then((isSupported) {
-            if (isSupported) {
-              if (_unreadCount > 0) {
-                FlutterAppBadger.updateBadgeCount(_unreadCount);
-              } else {
-                FlutterAppBadger.removeBadge();
-              }
-            }
-          })
-          .catchError((e) {
-            debugPrint('App badge not supported on this device: $e');
-          });
-    } catch (e) {
-      debugPrint('App badge error: $e');
-    }
+    // try {
+    //   FlutterAppBadger.isAppBadgeSupported()
+    //       .then((isSupported) {
+    //         if (isSupported) {
+    //           if (_unreadCount > 0) {
+    //             FlutterAppBadger.updateBadgeCount(_unreadCount);
+    //           } else {
+    //             FlutterAppBadger.removeBadge();
+    //           }
+    //         }
+    //       })
+    //       .catchError((e) {
+    //         debugPrint('App badge not supported on this device: $e');
+    //       });
+    // } catch (e) {
+    //   debugPrint('App badge error: $e');
+    // }
   }
 
   void removeNotification(String notificationId) {
