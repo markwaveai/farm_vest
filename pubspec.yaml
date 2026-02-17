@@ -55,7 +55,7 @@ dependencies:
 
   # Camera & Video
   # camera removed
-  video_player: ^2.8.6
+  # video_player removed
   # flutter_vlc_player removed
 
   # Utilities
@@ -103,7 +103,8 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   cloud_firestore: ^5.6.12
   package_info_plus: ^9.0.0
-  flutter_vlc_player: ^7.4.4
+  video_player: ^2.8.6
+  # flutter_vlc_player: ^7.4.4
   url_launcher: ^6.3.2
   firebase_messaging: ^15.2.10
   # flutter_app_badger: ^1.5.0  # Temporarily disabled for release build

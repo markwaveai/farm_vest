@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:video_player/video_player.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 
 class CCTVMainScreen extends ConsumerStatefulWidget {
@@ -29,9 +29,10 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
     'Loading Dock Cam',
   ];
 
-  VlcPlayerController? _controller;
+  VideoPlayerController? _controller;
   int? _activeCameraIndex;
   bool _isGridView = true;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -42,39 +43,39 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
   Future<void> _initializePlayer(int index) async {
     // If there's an existing controller, dispose it first properly with safety checks
     if (_controller != null) {
-      if (_controller!.value.isInitialized) {
-        await _controller!.stop();
-      }
-      await _controller!.dispose();
+      final oldController = _controller!;
       _controller = null;
+      _isInitialized = false;
+      await oldController.dispose();
     }
+
+    // Create new controller
+    final controller = VideoPlayerController.networkUrl(
+      Uri.parse(_videoUrls[index]),
+      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+    );
 
     setState(() {
       _activeCameraIndex = index;
-      _controller = VlcPlayerController.network(
-        _videoUrls[index],
-        hwAcc: HwAcc.full,
-        autoPlay: true,
-        options: VlcPlayerOptions(
-          advanced: VlcAdvancedOptions([
-            VlcAdvancedOptions.networkCaching(300), // Low latency as suggested
-          ]),
-          rtp: VlcRtpOptions([
-            VlcRtpOptions.rtpOverRtsp(true), // Stable for mobile networks
-          ]),
-        ),
-      );
+      _controller = controller;
     });
+
+    try {
+      await controller.initialize();
+      await controller.play();
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error initializing video player: $e');
+    }
   }
 
   @override
   void dispose() {
-    if (_controller != null) {
-      if (_controller!.value.isInitialized) {
-        _controller!.stop();
-      }
-      _controller!.dispose();
-    }
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -111,13 +112,10 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
           onPressed: () {
             if (!_isGridView) {
               setState(() => _isGridView = true);
-              if (_controller != null) {
-                if (_controller!.value.isInitialized) {
-                  _controller!.stop();
-                }
-                _controller!.dispose();
-                _controller = null;
-              }
+              _controller?.pause();
+              _controller?.dispose();
+              _controller = null;
+              _isInitialized = false;
             } else {
               if (context.canPop()) {
                 context.pop();
@@ -137,13 +135,10 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
               ),
               onPressed: () {
                 setState(() => _isGridView = true);
-                if (_controller != null) {
-                  if (_controller!.value.isInitialized) {
-                    _controller!.stop();
-                  }
-                  _controller!.dispose();
-                  _controller = null;
-                }
+                _controller?.pause();
+                _controller?.dispose();
+                _controller = null;
+                _isInitialized = false;
               },
             ),
         ],
@@ -258,15 +253,17 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  VlcPlayer(
-                    controller: _controller!,
-                    aspectRatio: 16 / 9,
-                    placeholder: const Center(
+                  if (_isInitialized)
+                    AspectRatio(
+                      aspectRatio: _controller!.value.aspectRatio,
+                      child: VideoPlayer(_controller!),
+                    )
+                  else
+                    const Center(
                       child: CircularProgressIndicator(
                         color: AppTheme.secondary,
                       ),
                     ),
-                  ),
                   Positioned(
                     top: 12,
                     left: 12,

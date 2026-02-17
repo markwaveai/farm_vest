@@ -375,6 +375,7 @@ class AuthController extends Notifier<AuthState> {
   Future<void> logout() async {
     try {
       final userId = state.userData?.id;
+      // final mobile = state.userData?.mobile;
 
       // Unsubscribe from user topic in background - don't let it block logout
       if (userId != null) {
@@ -384,6 +385,7 @@ class AuthController extends Notifier<AuthState> {
         ) {
           debugPrint('Error unsubscribing from topic: $e');
         });
+
         NotificationService()
             .unsubscribeFromTopic('${userId}_farmvest_iotalerts')
             .catchError((e) {
