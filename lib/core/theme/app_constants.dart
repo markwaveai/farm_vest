@@ -1,8 +1,8 @@
 // App constants
 
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 const String kHyphen = '--';
 
@@ -28,7 +28,7 @@ class AppConstants {
 
   static String animalKartApiUrl = animalKartLiveApiUrl;
 
-  static String appLiveUrl = stagingUrl; // User requested staging
+  static String appLiveUrl = liveUrl; // Default to Live
   static String visitApiUrl = appLiveUrl;
 
   static const String authApiKey =
@@ -53,7 +53,11 @@ class AppConstants {
   }
 
   static Future<void> initialize() async {
-    if (kDebugMode) {
+    final prefs = await SharedPreferences.getInstance();
+    // Default to Live (false) if not found
+    final bool useStagingPref = prefs.getBool('use_staging') ?? false;
+
+    if (useStagingPref) {
       useStaging();
     } else {
       useLive();

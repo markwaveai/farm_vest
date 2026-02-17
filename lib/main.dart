@@ -17,6 +17,7 @@ import 'package:farm_vest/core/theme/theme_provider.dart';
 import 'package:farm_vest/core/widgets/biometric_lock_screen.dart';
 
 import 'package:farm_vest/core/services/remote_config_service.dart';
+import 'package:farm_vest/core/providers/environment_provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:flutter_app_badger/flutter_app_badger.dart'; // Commented out - package not in pubspec.yaml
 
@@ -148,7 +149,9 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
       ],
       builder: (context, child) {
         final built = child!;
-        if (kDebugMode) {
+        final isStaging = ref.watch(isStagingProvider);
+
+        if (isStaging) {
           return BiometricLockScreen(
             child: Material(
               child: Column(
