@@ -1,15 +1,16 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-class BuffaloAlertScreen extends StatefulWidget {
-  const BuffaloAlertScreen({super.key});
+class BuffaloAlertScreen extends ConsumerStatefulWidget {
+  BuffaloAlertScreen({super.key});
 
   @override
   State<BuffaloAlertScreen> createState() => _BuffaloAlertScreenState();
 }
 
-class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
+class _BuffaloAlertScreenState extends ConsumerState<BuffaloAlertScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Placeholder();
   }
 }
 
@@ -19,14 +20,15 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 // import 'package:farm_vest/features/employee/new_supervisor/widgets/textfileds.dart';
 // import 'package:flutter/material.dart';
 
-// class BuffaloAlertScreen extends StatefulWidget {
-//   const BuffaloAlertScreen({super.key});
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+// class BuffaloAlertScreen extends ConsumerStatefulWidget {
+//   BuffaloAlertScreen({super.key});
 
 //   @override
 //   State<BuffaloAlertScreen> createState() => _BuffaloAlertScreenState();
 // }
 
-// class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
+// class _BuffaloAlertScreenState extends ConsumerState<BuffaloAlertScreen> {
 //   late BuffaloDataControllers controllers;
 
 // @override
@@ -42,21 +44,21 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
-//       backgroundColor: const Color(0xFFF5F6FA),
+//       backgroundColor: Color(0xFFF5F6FA),
 //       body: SafeArea(
 //         child: SingleChildScrollView(
-//           padding: const EdgeInsets.all(16),
+//           padding: EdgeInsets.all(16),
 //           child: Column(
 //             crossAxisAlignment: CrossAxisAlignment.start,
 //             children: [
 //               _searchBar(),
-//               const SizedBox(height: 12),
+//               SizedBox(height: 12),
 //               _actionButtons(),
-//               const SizedBox(height: 16),
+//               SizedBox(height: 16),
 //             Column(
 //               children: [
 //                 _buffaloImage(),
-//                 const SizedBox(height: 16),
+//                 SizedBox(height: 16),
               
             
 //              infoRowWithColumns(
@@ -86,11 +88,11 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //            editButtonText: 'Edit Info',
 //             ),]),
 
-//               const SizedBox(height: 16),
+//               SizedBox(height: 16),
 //               _milkProduction(context),
-//               const SizedBox(height: 16),
+//               SizedBox(height: 16),
 //               _heatCycle(context),
-//               const SizedBox(height: 16),
+//               SizedBox(height: 16),
 //               _doctorSection(context),
 //             ],
 //           ),
@@ -110,7 +112,7 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //           ),
           
 //         ),
-//         const SizedBox(width: 8),
+//         SizedBox(width: 8),
 //         Container(
 //           height: 48,
 //           width: 48,
@@ -119,8 +121,8 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //            color: Color(0xFF4CAF50),
 //             borderRadius: BorderRadius.circular(12),
 //           ),
-//           child: IconButton(onPressed: (){}, icon: const Icon(Icons.search, color: Colors.white)),
-//           // child: const Icon(Icons.search, color: Colors.white),
+//           child: IconButton(onPressed: (){}, icon: Icon(Icons.search, color: Colors.white)),
+//           // child: Icon(Icons.search, color: Colors.white),
 //         ),
 //       ],
 //     );
@@ -132,7 +134,7 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //       children: [
 //         Expanded(child: _smallButton( 'Mark Heat',Icons.local_fire_department, Colors.red)),
        
-//         const SizedBox(width: 8),
+//         SizedBox(width: 8),
 //        Expanded(child: _smallButton('Add symptoms', Icons.favorite, Colors.black)),
      
 //       ],
@@ -141,7 +143,7 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 
 //   Widget _smallButton(String text, IconData icon, Color color) {
 //     return Container(
-//       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+//       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
 //       decoration: BoxDecoration(
 //         color: Colors.white,
 //         borderRadius: BorderRadius.circular(20),
@@ -149,8 +151,8 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //       child: Row(
 //         children: [
 //           Icon(icon, size: 18, color: color),
-//           const SizedBox(width: 4),
-//           Text(text, style: const TextStyle(fontSize: 10)),
+//           SizedBox(width: 4),
+//           Text(text, style: TextStyle(fontSize: 10)),
 //         ],
 //       ),
 //     );
@@ -166,7 +168,7 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //   String editButtonText = 'Edit',
 // }) {
 //   return Padding(
-//     padding: const EdgeInsets.symmetric(vertical: 6),
+//     padding: EdgeInsets.symmetric(vertical: 6),
 //     child:
 //      Row(
 //       children: [
@@ -176,7 +178,7 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //           width: 80,
 //           child: Text(
 //             label,
-//             style: const TextStyle(
+//             style: TextStyle(
 //               fontSize: 12,
 //               fontWeight: FontWeight.w600,
 //             ),
@@ -192,17 +194,17 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //           ),
 //         ),
 //         if (rightLabel.isNotEmpty) ...[
-//           const SizedBox(width: 8),
+//           SizedBox(width: 8),
 //           Expanded(child: 
 //           Container(
-//             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 15),
+//             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
 //             decoration: BoxDecoration(
 //               color: Colors.green,
 //               borderRadius: BorderRadius.circular(6),
 //             ),
 //             child: Text(
 //               '$rightLabel : $rightValue',
-//               style: const TextStyle(
+//               style: TextStyle(
 //                 color: Colors.white,
 //                 fontSize: 11,
 //               ),
@@ -212,7 +214,7 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 
 //         SizedBox(width: 10,),
 //         if (showEditButton) ...[
-//           const SizedBox(width: 8),
+//           SizedBox(width: 8),
 //         Align(
 //             alignment: Alignment.bottomRight,
 //             child: _editButton(
@@ -233,14 +235,14 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //       onPressed: () {},
 //       style: ElevatedButton.styleFrom(
 //         backgroundColor: color,
-//         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+//         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
 //         shape: RoundedRectangleBorder(
 //           borderRadius: BorderRadius.circular(20),
 //         ),
 //       ),
 //       child: Text(
 //         buttonText,
-//         style: const TextStyle(color: Colors.white, fontSize: 12),
+//         style: TextStyle(color: Colors.white, fontSize: 12),
 //       ),
 //     );
     
@@ -259,13 +261,13 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //           Container(
 //             width: MediaQuery.of(context).size.width,
             
-//             padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 6),
+//             padding: EdgeInsets.symmetric(horizontal: 12,vertical: 6),
 //             decoration: BoxDecoration(
 //               color: Colors.green,
 //               //borderRadius: BorderRadius.circular(20),
 //               borderRadius: BorderRadius.only(topLeft: Radius.circular(12),topRight: Radius.circular(12)),
 //             ),
-//             child: const Text(  'Milk Production',
+//             child: Text(  'Milk Production'.tr(ref),
 //                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
                 
 //           ),
@@ -274,12 +276,12 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 
          
 //           Padding(
-//   padding: const EdgeInsets.symmetric(horizontal: 12),
+//   padding: EdgeInsets.symmetric(horizontal: 12),
 //   child: Column(
 //     children: [
 //       Row(
 //         children: [
-//           const SizedBox(
+//           SizedBox(
 //             width: 110,
 //             child: Text(
 //               'Evening milk :',
@@ -296,10 +298,10 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //               }),
 //             ),
 //           ),
-//           const SizedBox(width: 6),
-//           const Text('L'),
+//           SizedBox(width: 6),
+//           Text('L'.tr(ref)),
 //           SizedBox(width: 5,),
-//           const SizedBox(
+//           SizedBox(
 //             width: 110,
 //             child: Text(
 //               'Morning milk :',
@@ -316,22 +318,22 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //               }),
 //             ),
 //           ),
-//           const SizedBox(width: 6),
-//         const Text('L'),
+//           SizedBox(width: 6),
+//         Text('L'.tr(ref)),
 //         ],
 //       ),
 
-//       const SizedBox(height: 10),
+//       SizedBox(height: 10),
 
       
 //     ],
 //   ),
 // ),
-//         const SizedBox(height: 10),
+//         SizedBox(height: 10),
 //         Row(
 //         children: [
 //           Padding(padding: EdgeInsets.only(left: 12,top: 12),child:
-//           const SizedBox(
+//           SizedBox(
 //             width: 110,
 //             child: Text(
 //               'Todays  milk :',
@@ -349,8 +351,8 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //               }),
 //             ),
 //           ),
-//           const SizedBox(width: 6),
-//           const Text('L'),
+//           SizedBox(width: 6),
+//           Text('L'.tr(ref)),
 //           SizedBox(width: 50,),        
 //         ],
 //       ),
@@ -382,14 +384,14 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //               topRight: Radius.circular(12),
 //             ),
 //           ),
-//           child: const Padding(
+//           child: Padding(
 //             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-//             child: Text('Heat Cycle',
+//             child: Text('Heat Cycle'.tr(ref),
 //                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
 //           ),
 //         ),
 
-//         const SizedBox(height: 10),
+//         SizedBox(height: 10),
 //         Row(          
 //         children: [
 //           Expanded(
@@ -397,7 +399,7 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //               children: [          
 //           Padding(padding: EdgeInsets.all(12),
 //           child:
-//           const SizedBox(
+//           SizedBox(
 //             width: 100,
 //             child: Text(
 //               'Last :',
@@ -412,8 +414,8 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //               onChanged: (_) => setState(() {}),
 //             ),
 //           ),
-//           const SizedBox(width: 6),
-//           const Text('L'),
+//           SizedBox(width: 6),
+//           Text('L'.tr(ref)),
         
 //         ],))]
 //       ),
@@ -422,7 +424,7 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //       Row(      
 //         children: [        
 //           Padding(padding: EdgeInsets.only(left: 4,top: 12),child:
-//           const SizedBox(
+//           SizedBox(
 //             width: 100,
 //             child: Text(
 //               'Cycle Count :',
@@ -437,8 +439,8 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //               onChanged: (_) => setState(() {}),
 //             ),
 //           ),
-//           const SizedBox(width: 6),
-//           const Text('L'),
+//           SizedBox(width: 6),
+//           Text('L'.tr(ref)),
 //           SizedBox(width: 50,),
 //           //_editButton(buttonText: 'Mark Heat', color: Colors.orange)
 //           Align(
@@ -458,7 +460,7 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //   Widget _doctorSection(context) {
 //     return Container(
 //       width: MediaQuery.of(context).size.width,
-//       padding: const EdgeInsets.all(12),
+//       padding: EdgeInsets.all(12),
 //       decoration: BoxDecoration(
 //         color: Colors.white,
 //         borderRadius: BorderRadius.circular(16),
@@ -466,7 +468,7 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //       child: Column(
 //         crossAxisAlignment: CrossAxisAlignment.start,
 //         children:  [  
-//           Text('Doctor name :', style: TextStyle(fontWeight: FontWeight.bold)),
+//           Text('Doctor name :'.tr(ref), style: TextStyle(fontWeight: FontWeight.bold)),
 //           SizedBox(height: 12),
 //           Row(
 //             children: [
@@ -482,9 +484,9 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //               Column(
 //                 crossAxisAlignment: CrossAxisAlignment.start,
 //                 children: [
-//                    Text('Date :',),
-//           Text('Time :'),
-//           Text('Buffalo ID :'),
+//                    Text('Date :'.tr(ref),),
+//           Text('Time :'.tr(ref)),
+//           Text('Buffalo ID :'.tr(ref)),
 //                 ],
 //               )    
 //             ],
@@ -492,13 +494,13 @@ class _BuffaloAlertScreenState extends State<BuffaloAlertScreen> {
 //           Container(
 //             width: MediaQuery.of(context).size.width,
 //             alignment: Alignment.center,
-//             margin: const EdgeInsets.only(top: 12),
-//             //padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+//             margin: EdgeInsets.only(top: 12),
+//             //padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
 //             decoration: BoxDecoration(
 //               color: Colors.green,
 //               borderRadius: BorderRadius.circular(20),
 //             ),
-//             child: const Text('Contact Doctor',
+//             child: Text('Contact Doctor'.tr(ref),
 //                 style: TextStyle(color: Colors.white, fontSize: 20)),
 //           )
 //         ],

@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class BuffaloProfileView extends ConsumerStatefulWidget {
-  const BuffaloProfileView({super.key});
+  BuffaloProfileView({super.key});
 
   @override
   ConsumerState<BuffaloProfileView> createState() => _BuffaloProfileViewState();
@@ -55,9 +55,9 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         _buildTabs(),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Expanded(child: _buildTabContent()),
       ],
     );
@@ -79,7 +79,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
     final animalsAsync = ref.watch(searchedAnimalsProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
@@ -90,7 +90,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
           ),
           borderRadius: BorderRadius.circular(8),
         ),
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         child: Column(
           children: [
             Row(
@@ -99,14 +99,14 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                   child: CustomTextField(
                     controller: _searchController,
                     hint: "Enter Tag, RFID or ID",
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14),
                     onFieldSubmitted: (_) => _onSearch(),
                     onChanged: (v) {
                       if (v.isEmpty) _onSearch();
                     },
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Container(
                   height: 54,
                   width: 54,
@@ -126,13 +126,13 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             animalsAsync.when(
               data: (animals) {
                 if (animals.isEmpty) {
-                  return const Padding(
+                  return Padding(
                     padding: EdgeInsets.symmetric(vertical: 32),
-                    child: Center(child: Text("No animals found")),
+                    child: Center(child: Text("No animals found".tr(ref))),
                   );
                 }
                 return Column(
@@ -141,12 +141,12 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                       .toList(),
                 );
               },
-              loading: () => const Padding(
+              loading: () => Padding(
                 padding: EdgeInsets.symmetric(vertical: 32),
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (err, stack) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32),
+                padding: EdgeInsets.symmetric(vertical: 32),
                 child: Center(child: Text("Error: $err")),
               ),
             ),
@@ -158,7 +158,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
 
   Widget _buildMilkProductionTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
           Container(
@@ -171,7 +171,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
               ),
               borderRadius: BorderRadius.circular(8),
             ),
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             child: Column(
               children: [
                 Container(
@@ -190,7 +190,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                           onTap: () => setState(() => milkFilter = filter),
                           child: Container(
                             alignment: Alignment.center,
-                            margin: const EdgeInsets.all(4),
+                            margin: EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? AppTheme.darkPrimary
@@ -218,17 +218,17 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                     }).toList(),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
                       child: CustomTextField(
                         controller: _searchController,
                         hint: "Enter Buffalo ID",
-                        style: const TextStyle(fontSize: 14),
+                        style: TextStyle(fontSize: 14),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Container(
                       height: 54,
                       width: 54,
@@ -248,19 +248,19 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 _buildMilkEntryRow(
                   "Evening milk",
                   _eveningMilkController,
                   "0.0 Litre",
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 _buildMilkEntryRow(
                   "Morning milk",
                   _morningMilkController,
                   "0.0 Litre",
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 _buildMilkEntryRow(
                   "Today's milk",
                   _todayMilkController,
@@ -269,7 +269,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           SizedBox(
             width: 220,
             height: 48,
@@ -281,13 +281,13 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                   borderRadius: BorderRadius.circular(24),
                 ),
               ),
-              child: const Text(
-                "Save",
+              child: Text(
+                "Save".tr(ref),
                 style: TextStyle(fontSize: 16, color: AppTheme.white),
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           SizedBox(
             width: 220,
             height: 48,
@@ -299,8 +299,8 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                   borderRadius: BorderRadius.circular(24),
                 ),
               ),
-              child: const Text(
-                "Cancel",
+              child: Text(
+                "Cancel".tr(ref),
                 style: TextStyle(fontSize: 16, color: AppTheme.white),
               ),
             ),
@@ -333,7 +333,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
             controller: controller,
             hint: hint,
             keyboardType: TextInputType.number,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 14),
           ),
         ),
       ],
@@ -342,36 +342,36 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
 
   Widget _buildHeatCycleTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildHeatCard(
             "Buffalo #32 (TAG - 8889)",
             "Shed 02 / Row 04",
             "Supervisor's Message:\nInitiate to AI Protocol.",
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           Text(
-            "Buffalo Profiles",
+            "Buffalo Profiles".tr(ref),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Row(
             children: [
               _buildBuffaloProfileImage("#65", "View Profile"),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               _buildBuffaloProfileImage("#66", "View Profile"),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               _buildBuffaloProfileImage("#67", "View Profile"),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           Container(
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
@@ -386,16 +386,16 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: const BoxDecoration(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
                     color: AppTheme.darkPrimary,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    "Mark Heat Details",
+                  child: Text(
+                    "Mark Heat Details".tr(ref),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppTheme.white,
@@ -405,22 +405,22 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   child: Column(
                     children: [
                       _buildDetailRow("ID", "BUF-082"),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       _buildDetailRow("Date of Observation", "28-01-2026"),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       _buildDetailRow("Heat Intensity", "High"),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       _buildDetailRow(
                         "Observation Notes",
                         "Bellowing, clear discharge, restless.",
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       _buildDetailRow("Recorded By", "Murrah"),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
                       SizedBox(
                         width: 220,
                         height: 48,
@@ -432,8 +432,8 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                               borderRadius: BorderRadius.circular(24),
                             ),
                           ),
-                          child: const Text(
-                            "See all",
+                          child: Text(
+                            "See all".tr(ref),
                             style: TextStyle(
                               fontSize: 16,
                               color: AppTheme.white,
@@ -454,7 +454,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
 
   Widget _buildHeatCard(String title, String subtitle, String message) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         border: Border.all(
@@ -476,7 +476,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
               color: AppTheme.primary,
             ),
           ),
-          const SizedBox(width: 20),
+          SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -490,13 +490,13 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                   ),
                 ),
                 if (subtitle.isNotEmpty) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: TextStyle(fontSize: 12, color: AppTheme.mediumGrey),
                   ),
                 ],
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   message,
                   style: TextStyle(
@@ -506,9 +506,9 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                     ).colorScheme.onSurface.withOpacity(0.8),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 4,
                   ),
@@ -516,8 +516,8 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                     color: Colors.orange,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    "Action Required",
+                  child: Text(
+                    "Action Required".tr(ref),
                     style: TextStyle(
                       color: AppTheme.white,
                       fontSize: 10,
@@ -547,7 +547,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
               child: Icon(Icons.pets, color: AppTheme.primary, size: 40),
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             id,
             style: TextStyle(
@@ -556,16 +556,16 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: AppTheme.darkPrimary,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               status,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.white,
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
@@ -579,7 +579,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -611,7 +611,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
   Widget _buildTabs() {
     return Container(
       height: 40,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
             ? Colors.white.withOpacity(0.05)
@@ -631,7 +631,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
               onTap: () => setState(() => selectedTab = tab),
               child: Container(
                 alignment: Alignment.center,
-                margin: const EdgeInsets.all(4),
+                margin: EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: isSelected ? AppTheme.darkPrimary : Colors.transparent,
                   borderRadius: BorderRadius.circular(6),
@@ -659,7 +659,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
 
   Widget _buildBuffaloCard(InvestorAnimal animal) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         border: Border.all(
@@ -672,8 +672,8 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          tilePadding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+          childrenPadding: EdgeInsets.fromLTRB(12, 0, 12, 12),
           iconColor: AppTheme.darkPrimary,
           collapsedIconColor: AppTheme.darkPrimary,
           trailing: Row(
@@ -681,7 +681,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
             children: [
               IconButton(
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(
+                icon: Icon(
                   Icons.monitor_heart_outlined,
                   color: AppTheme.primary,
                   size: 22,
@@ -705,16 +705,16 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                   );
                 },
               ),
-              const Icon(Icons.expand_more, color: AppTheme.darkPrimary),
+              Icon(Icons.expand_more, color: AppTheme.darkPrimary),
             ],
           ),
           leading: CircleAvatar(
             backgroundColor: AppTheme.primary.withOpacity(0.1),
-            child: const Icon(Icons.pets, color: AppTheme.primary, size: 20),
+            child: Icon(Icons.pets, color: AppTheme.primary, size: 20),
           ),
           title: Text(
             animal.rfid ?? 'No RFID',
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
               color: AppTheme.primary,
               fontSize: 14,
@@ -728,7 +728,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
             ),
           ),
           children: [
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _buildBuffaloDetailRow("ID", animal.animalId),
             _buildBuffaloDetailRow(
               "Slot",
@@ -778,7 +778,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
     VoidCallback? onTap,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: EdgeInsets.only(bottom: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

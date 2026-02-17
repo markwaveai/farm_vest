@@ -8,9 +8,9 @@ import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class StaffListScreen extends ConsumerStatefulWidget {
-  const StaffListScreen({super.key});
+  StaffListScreen({super.key});
 
   @override
   ConsumerState<StaffListScreen> createState() => _StaffListScreenState();
@@ -30,13 +30,13 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text('Filter by Role'),
+        title: Text('Filter by Role'.tr(ref)),
         children: [
-          _buildFilterOption('All'),
-          _buildFilterOption('Supervisor'),
-          _buildFilterOption('Doctor'),
-          _buildFilterOption('Assistant Doctor'),
-          _buildFilterOption('Farm Manager'),
+          _buildFilterOption('All'.tr(ref)),
+          _buildFilterOption('Supervisor'.tr(ref)),
+          _buildFilterOption('Doctor'.tr(ref)),
+          _buildFilterOption('Assistant Doctor'.tr(ref)),
+          _buildFilterOption('Farm Manager'.tr(ref)),
         ],
       ),
     );
@@ -57,7 +57,7 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const AddStaffBottomSheet(),
+      builder: (context) => AddStaffBottomSheet(),
     );
   }
 
@@ -94,11 +94,11 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                   color: Theme.of(context).appBarTheme.foregroundColor,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Search Staff...',
+                  hintText: 'Search Staff...'.tr(ref),
                   hintStyle: TextStyle(
                     color: Theme.of(
                       context,
-                    ).appBarTheme.foregroundColor?.withOpacity(0.7),
+                    ).appBarTheme.foregroundColor?.withValues(alpha: 0.7),
                   ),
                   border: InputBorder.none,
                 ),
@@ -106,7 +106,7 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                   ref.read(staffListProvider.notifier).setSearchQuery(val);
                 },
               )
-            : const Text('Staff Directory'),
+            : Text('Staff Directory'.tr(ref)),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         titleTextStyle: TextStyle(
           fontSize: 22,
@@ -141,11 +141,11 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Row(
               children: [
                 FilterChip(
-                  label: const Text('Active Staff'),
+                  label: Text('Active Staff'.tr(ref)),
                   selected: staffState.isActiveFilter == true,
                   onSelected: (val) {
                     if (val) {
@@ -157,9 +157,9 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                   selectedColor: Colors.green,
                   checkmarkColor: Colors.white,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 FilterChip(
-                  label: const Text('Inactive Staff'),
+                  label: Text('Inactive Staff'.tr(ref)),
                   selected: staffState.isActiveFilter == false,
                   onSelected: (val) {
                     if (val) {
@@ -176,7 +176,7 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
           ),
           Expanded(
             child: staffState.isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator())
                 : staffState.error != null
                 ? Center(
                     child: Column(
@@ -184,12 +184,12 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                       children: [
                         Text(
                           staffState.error!,
-                          style: const TextStyle(color: Colors.red),
+                          style: TextStyle(color: Colors.red),
                         ),
                         TextButton(
                           onPressed: () =>
                               ref.read(staffListProvider.notifier).loadStaff(),
-                          child: const Text('Retry'),
+                          child: Text('Retry'.tr(ref)),
                         ),
                       ],
                     ),
@@ -204,18 +204,18 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                           size: 64,
                           color: Colors.grey[300],
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'No staff members found',
+                        SizedBox(height: 16),
+                        Text(
+                          'No staff members found'.tr(ref),
                           style: TextStyle(color: AppTheme.slate, fontSize: 16),
                         ),
                       ],
                     ),
                   )
                 : ListView.separated(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     itemCount: staffState.staff.length,
-                    separatorBuilder: (c, i) => const SizedBox(height: 12),
+                    separatorBuilder: (c, i) => SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final staffMember = staffState.staff[index];
                       return StaffCard(
@@ -230,7 +230,7 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddStaffBottomSheet,
         backgroundColor: AppTheme.primary,
-        child: const Icon(Icons.person_add_alt_1, color: Colors.white),
+        child: Icon(Icons.person_add_alt_1, color: Colors.white),
       ),
     );
   }
@@ -241,7 +241,7 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -250,17 +250,17 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                 backgroundColor: AppTheme.primary.withOpacity(0.1),
                 child: Text(
                   staff.name?.substring(0, 1).toUpperCase() ?? '?',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(
                 staff.name ?? 'Unknown',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -269,23 +269,23 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
                 staff.role ?? 'No Role',
                 style: TextStyle(color: Colors.grey[600]),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               _buildDetailRow(Icons.email, staff.email ?? 'N/A'),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _buildDetailRow(Icons.phone, staff.phone ?? 'N/A'),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _buildDetailRow(
                 Icons.assignment_ind,
                 'Status: ${staff.status ?? "Unknown"}',
               ),
               if (staff.assignedSheds.isNotEmpty) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 _buildDetailRow(
                   Icons.warehouse,
                   'Sheds: ${staff.assignedSheds.join(", ")}',
                 ),
               ],
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: PrimaryButton(
@@ -304,15 +304,15 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
     return Row(
       children: [
         Icon(icon, size: 20, color: Colors.grey[600]),
-        const SizedBox(width: 12),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 15))),
+        SizedBox(width: 12),
+        Expanded(child: Text(text, style: TextStyle(fontSize: 15))),
       ],
     );
   }
 }
 
 class AddStaffBottomSheet extends ConsumerStatefulWidget {
-  const AddStaffBottomSheet({super.key});
+  AddStaffBottomSheet({super.key});
 
   @override
   ConsumerState<AddStaffBottomSheet> createState() =>
@@ -393,7 +393,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
@@ -402,15 +402,15 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
         top: 24,
       ),
       child: _isLoadingData
-          ? const SizedBox(
+          ? SizedBox(
               height: 200,
               child: Center(child: CircularProgressIndicator()),
             )
           : _myFarmId == null
-          ? const SizedBox(
+          ? SizedBox(
               height: 100,
               child: Center(
-                child: Text("Error: No Farm ID found. Please contact support."),
+                child: Text("Error: No Farm ID found. Please contact support.".tr(ref)),
               ),
             )
           : Form(
@@ -423,8 +423,8 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          "Add New Staff",
+                        Text(
+                          "Add New Staff".tr(ref),
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -433,20 +433,20 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                         ),
                         IconButton(
                           onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close),
+                          icon: Icon(Icons.close),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
-                      'Onboard a new staff member for your farm.',
+                      'Onboard a new staff member for your farm.'.tr(ref),
                       style: TextStyle(color: AppTheme.slate.withOpacity(0.7)),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     if (_localError != null)
                       Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: EdgeInsets.all(12),
+                        margin: EdgeInsets.only(bottom: 16),
                         decoration: BoxDecoration(
                           color: Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
@@ -456,7 +456,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                         ),
                         child: Text(
                           _localError!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.red,
                             fontSize: 13,
                           ),
@@ -473,7 +473,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     _buildLabel('Email Address'),
                     CustomTextField(
                       controller: _emailController,
@@ -482,7 +482,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                       validator: (v) =>
                           v?.isEmpty ?? true ? 'Email is required' : null,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     _buildLabel('Phone Number'),
                     CustomTextField(
                       controller: _phoneController,
@@ -491,7 +491,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                       validator: (v) =>
                           v?.isEmpty ?? true ? 'Phone is required' : null,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     _buildLabel('Assigned Role'),
                     DropdownButtonFormField<String>(
                       value: _selectedRole,
@@ -504,7 +504,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                       onChanged: _onRoleChanged,
                       validator: (v) => v == null ? 'Role is required' : null,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     if (_selectedRole == 'Supervisor' ||
                         _selectedRole == 'Assistant Doctor') ...[
                       _buildLabel(
@@ -516,6 +516,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                         value: _selectedShedId,
                         decoration: _dropdownDecoration('Select Shed'),
                         items: _sheds
+                            .where((s) => s['id'] != null)
                             .map(
                               (s) => DropdownMenuItem(
                                 value: s['id'] as int,
@@ -529,14 +530,14 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                             ? 'Shed is required for Supervisors'
                             : null,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                     ],
                     if (_selectedRole == 'Assistant Doctor') ...[
                       _buildLabel('Senior Doctor'),
                       DropdownButtonFormField<int>(
                         value: _selectedDoctorId,
                         decoration: _dropdownDecoration('Select Doctor'),
-                        items: _doctors.map((d) {
+                        items: _doctors.where((d) => d['id'] != null).map((d) {
                           final firstName = d['first_name'] ?? '';
                           final lastName = d['last_name'] ?? '';
                           final fullName =
@@ -552,24 +553,24 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
                         validator: (v) =>
                             v == null ? 'Senior Doctor is required' : null,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                     ],
                     CheckboxListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Is Test Employee'),
+                      title: Text('Is Test Employee'.tr(ref)),
                       value: _isTestAccount,
                       onChanged: (val) =>
                           setState(() => _isTestAccount = val ?? false),
                       controlAffinity: ListTileControlAffinity.leading,
                       activeColor: Colors.green,
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     PrimaryButton(
                       isLoading: _isSubmitting,
                       onPressed: _submitForm,
                       text: 'Add Staff Member',
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -579,14 +580,14 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
 
   InputDecoration _dropdownDecoration(String hint) {
     return InputDecoration(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppTheme.mediumGrey),
+        borderSide: BorderSide(color: AppTheme.mediumGrey),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppTheme.mediumGrey),
+        borderSide: BorderSide(color: AppTheme.mediumGrey),
       ),
       hintText: hint,
     );
@@ -594,10 +595,10 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
 
   Widget _buildLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      padding: EdgeInsets.only(bottom: 8, left: 4),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w600,
           color: AppTheme.slate,
         ),
@@ -639,7 +640,7 @@ class _AddStaffBottomSheetState extends ConsumerState<AddStaffBottomSheet> {
         setState(() => _isSubmitting = false);
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Staff member added successfully!')),
+            SnackBar(content: Text('Staff member added successfully!'.tr(ref))),
           );
           Navigator.pop(context);
         } else {
@@ -656,7 +657,7 @@ class StaffCard extends ConsumerWidget {
   final Staff staff;
   final VoidCallback? onTap;
 
-  const StaffCard({super.key, required this.staff, this.onTap});
+  StaffCard({super.key, required this.staff, this.onTap});
 
   Color _getRoleColor(String? role) {
     switch (role?.toUpperCase()) {
@@ -679,7 +680,7 @@ class StaffCard extends ConsumerWidget {
     final isActive = staff.status != 'Inactive';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -692,7 +693,7 @@ class StaffCard extends ConsumerWidget {
                 ? Colors.black.withOpacity(0.2)
                 : Colors.black.withOpacity(0.04),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -702,7 +703,7 @@ class StaffCard extends ConsumerWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             child: Row(
               children: [
                 Stack(
@@ -727,7 +728,7 @@ class StaffCard extends ConsumerWidget {
                           (staff.name?.isNotEmpty ?? false)
                               ? staff.name!.substring(0, 1).toUpperCase()
                               : '?',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -751,7 +752,7 @@ class StaffCard extends ConsumerWidget {
                       ),
                   ],
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -769,11 +770,11 @@ class StaffCard extends ConsumerWidget {
                               : Theme.of(context).hintColor,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 2,
                             ),
@@ -794,7 +795,7 @@ class StaffCard extends ConsumerWidget {
                       ),
                       if (staff.assignedFarms.isNotEmpty ||
                           staff.assignedSheds.isNotEmpty) ...[
-                        const SizedBox(height: 6),
+                        SizedBox(height: 6),
                         Wrap(
                           spacing: 6,
                           runSpacing: 4,
@@ -831,7 +832,7 @@ class StaffCard extends ConsumerWidget {
                       if (success && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Status updated successfully'),
+                            content: Text('Status updated successfully'.tr(ref)),
                           ),
                         );
                       }
@@ -848,7 +849,7 @@ class StaffCard extends ConsumerWidget {
                         children: [
                           Icon(Icons.call, size: 20),
                           SizedBox(width: 8),
-                          Text('Call Staff'),
+                          Text('Call Staff'.tr(ref)),
                         ],
                       ),
                     ),
@@ -867,12 +868,12 @@ class StaffCard extends ConsumerWidget {
                     ),
                   ],
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.grey.withOpacity(0.05),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.more_vert,
                       color: Colors.grey,
                       size: 20,
@@ -889,7 +890,7 @@ class StaffCard extends ConsumerWidget {
 
   Widget _buildMiniTag(IconData icon, String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(4),
@@ -899,7 +900,7 @@ class StaffCard extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 10, color: color),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           Flexible(
             child: Text(
               label,

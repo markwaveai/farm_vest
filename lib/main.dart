@@ -1,7 +1,10 @@
+import 'package:farm_vest/core/services/localization_service.dart';
+import 'package:farm_vest/core/providers/locale_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:farm_vest/core/services/auth_api_services.dart';
@@ -36,6 +39,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppConstants.initialize();
+  await LocalizationService.init();
 
   ApiServices.onUnauthorized = () async {
     final prefs = await SharedPreferences.getInstance();
@@ -58,7 +62,7 @@ Future<void> main() async {
       if (kIsWeb) {
         // Add web-specific options here if needed
         await Firebase.initializeApp(
-          options: const FirebaseOptions(
+          options: FirebaseOptions(
             apiKey: "AIzaSyC0XUQqk51NGLazlnaGKsPAgjkNNbgZR-E",
             appId: "1:612299373064:web:5d5ea121566c54b30eefbd",
             messagingSenderId: "612299373064",
@@ -69,7 +73,7 @@ Future<void> main() async {
         );
       } else if (defaultTargetPlatform == TargetPlatform.android) {
         await Firebase.initializeApp(
-          options: const FirebaseOptions(
+          options: FirebaseOptions(
             apiKey: "AIzaSyC88x_wjf5oBRmTxyXUwXV_UY2N73kl82c",
             appId: "1:612299373064:android:c1d4128de1e099f20eefbd",
             messagingSenderId: "612299373064",
@@ -79,7 +83,7 @@ Future<void> main() async {
         );
       } else if (defaultTargetPlatform == TargetPlatform.iOS) {
         await Firebase.initializeApp(
-          options: const FirebaseOptions(
+          options: FirebaseOptions(
             apiKey: "AIzaSyD2v698q2fOZTM8oegi2tq962-wBsLGay8",
             appId: "1:612299373064:ios:428bc6097f5171e80eefbd",
             messagingSenderId: "612299373064",
@@ -112,11 +116,20 @@ Future<void> main() async {
   // Initialize Remote Config (URLs & Version)
   await RemoteConfigService.initialize();
 
-  runApp(const ProviderScope(child: FarmVestApp()));
+  final prefs = await SharedPreferences.getInstance();
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        child: FarmVestApp(),
+      ),
+    ),
+  );
 }
 
 class FarmVestApp extends ConsumerStatefulWidget {
-  const FarmVestApp({super.key});
+  FarmVestApp({super.key});
 
   @override
   ConsumerState<FarmVestApp> createState() => _FarmVestAppState();
@@ -132,17 +145,25 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
+    final currentLocale = ref.watch(localeProvider);
 
     return MaterialApp.router(
       title: 'FarmVest - Smart Dairy Farm Management',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      routerConfig: AppRouter.router,
+      locale: currentLocale,
+      routeInformationParser: AppRouter.router.routeInformationParser,
+      routerDelegate: AppRouter.router.routerDelegate,
+      routeInformationProvider: AppRouter.router.routeInformationProvider,
+      backButtonDispatcher: AppRouter.router.backButtonDispatcher,
       debugShowCheckedModeBanner: false,
-      locale: const Locale('en', 'US'),
-      supportedLocales: const [Locale('en', 'US')],
-      localizationsDelegates: const [
+      supportedLocales: [
+        Locale('en', 'US'),
+        Locale('hi', 'IN'),
+        Locale('te', 'IN'),
+      ],
+      localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -163,7 +184,7 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
                       top: MediaQuery.of(context).padding.top,
                       bottom: 2,
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
                         'DEV MODE - STAGING',
                         style: TextStyle(
@@ -180,8 +201,9 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
               ),
             ),
           );
+        } else {
+          return BiometricLockScreen(child: built);
         }
-        return BiometricLockScreen(child: built);
       },
     );
   }

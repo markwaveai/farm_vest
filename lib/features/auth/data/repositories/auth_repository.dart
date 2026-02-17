@@ -15,7 +15,7 @@ import 'package:farm_vest/core/utils/image_helper_compressor.dart';
 import 'package:intl/intl.dart';
 import '../models/user_model.dart';
 import '../models/whatsapp_otp_response.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
 });
@@ -184,15 +184,15 @@ class AuthRepository {
     } on FirebaseException catch (e) {
       if (e.code == 'object-not-found') {
         // Already deleted or never uploaded.
-        // SnackBar(content: Text('Profile image already deleted'));
+        // SnackBar(content: Text('Profile image already deleted'.tr(ref)));
         return true;
       }
       debugPrint('Error deleting profile image: ${e.code} ${e.message}');
-      // SnackBar(content: Text('Failed to delete profile image'));
+      // SnackBar(content: Text('Failed to delete profile image'.tr(ref)));
       return false;
     } catch (e) {
       debugPrint('Error deleting profile image: $e');
-      // SnackBar(content: Text('Failed to delete profile image'));
+      // SnackBar(content: Text('Failed to delete profile image'.tr(ref)));
       return false;
     }
   }

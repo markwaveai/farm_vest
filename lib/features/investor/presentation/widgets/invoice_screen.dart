@@ -6,6 +6,7 @@
 // import 'package:intl/intl.dart';
 // import 'package:path_provider/path_provider.dart';
 // import 'package:pdf/pdf.dart';
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 // import 'package:pdf/widgets.dart' as pw;
 
 // class InvoiceGenerator {
@@ -189,7 +190,7 @@
 //                           pw.Row(
 //                             mainAxisAlignment: pw.MainAxisAlignment.end,
 //                             children: [
-//                               pw.Text("CPF Discount: "),
+//                               pw.Text("CPF Discount: ".tr(ref)),
 //                               pw.SizedBox(width: 5),
 //                               pw.Text(
 //                                 FormatUtils.formatAmount(cpfDiscountAmount),

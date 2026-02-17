@@ -4,11 +4,13 @@
 // import 'package:flutter_pdfview/flutter_pdfview.dart';
 // import 'package:printing/printing.dart';
 
-// class InvoicePdfView extends StatefulWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+// class InvoicePdfView extends ConsumerStatefulWidget {
 //   final Order order;
 //   final String filePath;
 
-//   const InvoicePdfView({
+//   InvoicePdfView({
 //     super.key,
 //     required this.order,
 //     required this.filePath,
@@ -18,7 +20,7 @@
 //   State<InvoicePdfView> createState() => _InvoicePdfViewState();
 // }
 
-// class _InvoicePdfViewState extends State<InvoicePdfView> {
+// class _InvoicePdfViewState extends ConsumerState<InvoicePdfView> {
 //   late final Future<_PdfSource> _sourceFuture;
 //   Object? _viewerError;
 //   int? _totalPages;
@@ -31,14 +33,14 @@
 //   }
 
 //   @override
-//   Widget build(BuildContext context) {
+//   Widget build(BuildContext context, WidgetRef ref) {
 //     return Scaffold(
 //       backgroundColor: Colors.grey.shade100,
 //       appBar: AppBar(
-//         title: const Text('Invoice'),
+//         title: Text('Invoice'.tr(ref)),
 //         actions: [
 //           IconButton(
-//             icon: const Icon(Icons.share),
+//             icon: Icon(Icons.share),
 //             onPressed: () async {
 //               try {
 //                 final bytes = await File(widget.filePath).readAsBytes();
@@ -62,7 +64,7 @@
 //         future: _sourceFuture,
 //         builder: (context, snapshot) {
 //           if (snapshot.connectionState != ConnectionState.done) {
-//             return const Center(child: CircularProgressIndicator());
+//             return Center(child: CircularProgressIndicator());
 //           }
 
 //           if (snapshot.hasError) {
@@ -127,7 +129,7 @@
 //               ),
 //               if (_totalPages != null && _currentPage != null)
 //                 Padding(
-//                   padding: const EdgeInsets.symmetric(vertical: 8),
+//                   padding: EdgeInsets.symmetric(vertical: 8),
 //                   child: Text(
 //                     'Page $_currentPage of $_totalPages',
 //                     style: Theme.of(context).textTheme.bodySmall,
@@ -164,25 +166,25 @@
 // class _PdfSource {
 //   final String path;
 
-//   const _PdfSource({required this.path});
+//   _PdfSource({required this.path});
 // }
 
-// class _ErrorView extends StatelessWidget {
+// class _ErrorView extends ConsumerWidget {
 //   final String title;
 //   final String message;
 //   final String filePath;
 
-//   const _ErrorView({
+//   _ErrorView({
 //     required this.title,
 //     required this.message,
 //     required this.filePath,
 //   });
 
 //   @override
-//   Widget build(BuildContext context) {
+//   Widget build(BuildContext context, WidgetRef ref) {
 //     return Center(
 //       child: Padding(
-//         padding: const EdgeInsets.all(16),
+//         padding: EdgeInsets.all(16),
 //         child: Column(
 //           mainAxisSize: MainAxisSize.min,
 //           children: [
@@ -193,7 +195,7 @@
 //               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
 //               textAlign: TextAlign.center,
 //             ),
-//             const SizedBox(height: 12),
+//             SizedBox(height: 12),
 //             Text(
 //               message,
 //               style: Theme.of(
@@ -201,7 +203,7 @@
 //               ).textTheme.bodySmall?.copyWith(color: Colors.red.shade700),
 //               textAlign: TextAlign.center,
 //             ),
-//             const SizedBox(height: 12),
+//             SizedBox(height: 12),
 //             Text(
 //               filePath,
 //               style: Theme.of(context).textTheme.bodySmall,

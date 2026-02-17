@@ -10,9 +10,9 @@ import 'package:farm_vest/features/common/presentation/widgets/profile/profile_i
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({super.key});
+  ProfileScreen({super.key});
 
   @override
   ConsumerState<ProfileScreen> createState() => _CommonProfileScreenState();
@@ -123,8 +123,8 @@ class _CommonProfileScreenState extends ConsumerState<ProfileScreen> {
                 _isEditing = false;
               });
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Profile updated successfully"),
+                SnackBar(
+                  content: Text("Profile updated successfully".tr(ref)),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -132,8 +132,8 @@ class _CommonProfileScreenState extends ConsumerState<ProfileScreen> {
           } else {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Failed to update profile"),
+                SnackBar(
+                  content: Text("Failed to update profile".tr(ref)),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -244,10 +244,10 @@ class _CommonProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        title: const Text('My Profile'),
+        title: Text('My Profile'.tr(ref)),
         actions: [
           IconButton(
             icon: Icon(_isEditing ? Icons.save : Icons.edit),
@@ -259,7 +259,7 @@ class _CommonProfileScreenState extends ConsumerState<ProfileScreen> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
+            padding: EdgeInsets.all(AppConstants.spacingM),
             child: Column(
               children: [
                 // Profile Header
@@ -282,7 +282,7 @@ class _CommonProfileScreenState extends ConsumerState<ProfileScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: AppConstants.spacingL),
+                SizedBox(height: AppConstants.spacingL),
 
                 // Profile Details
                 ProfileInfoCard(
@@ -297,16 +297,16 @@ class _CommonProfileScreenState extends ConsumerState<ProfileScreen> {
                   membershipDate: formattedDate,
                 ),
 
-                const SizedBox(height: AppConstants.spacingL),
+                SizedBox(height: AppConstants.spacingL),
 
                 // Account Actions
-                const ProfileActionList(),
+                ProfileActionList(),
               ],
             ),
           ),
           if (_isSaving) ...[
-            const ModalBarrier(dismissible: false, color: Colors.black26),
-            const Center(child: CircularProgressIndicator()),
+            ModalBarrier(dismissible: false, color: Colors.black26),
+            Center(child: CircularProgressIndicator()),
           ],
         ],
       ),

@@ -12,8 +12,9 @@ import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class SupervisorStatsView extends ConsumerWidget {
-  const SupervisorStatsView({super.key});
+  SupervisorStatsView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,46 +22,46 @@ class SupervisorStatsView extends ConsumerWidget {
     final stats = dashboardState.stats;
 
     if (dashboardState.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator());
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildStatCard(
             context,
-            'Total Animals',
+            'Total Animals'.tr(ref),
             stats.totalAnimals,
             Icons.pets,
             AppTheme.primary,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           _buildStatCard(
             context,
-            'Daily Milk Content',
+            'Daily Milk Content'.tr(ref),
             stats.milkToday,
             Icons.water_drop,
             Colors.blue,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           _buildStatCard(
             context,
-            'Active Health Issues',
+            'Active Health Issues'.tr(ref),
             stats.activeIssues,
             Icons.warning,
             AppTheme.errorRed,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           _buildStatCard(
             context,
-            'Pending Transfers',
+            'Pending Transfers'.tr(ref),
             stats.transfers,
             Icons.move_down,
             AppTheme.slate,
           ),
-          const SizedBox(height: 100),
+          SizedBox(height: 100),
         ],
       ),
     );
@@ -74,29 +75,29 @@ class SupervisorStatsView extends ConsumerWidget {
     Color color,
   ) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 28),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -108,7 +109,7 @@ class SupervisorStatsView extends ConsumerWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text(
                 value,
                 style: TextStyle(
@@ -126,7 +127,7 @@ class SupervisorStatsView extends ConsumerWidget {
 }
 
 class SupervisorAlertsView extends ConsumerWidget {
-  const SupervisorAlertsView({super.key});
+  SupervisorAlertsView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -134,47 +135,47 @@ class SupervisorAlertsView extends ConsumerWidget {
     final currentFilter = ref.watch(ticketStatusFilterProvider);
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Farm Alerts',
+            'Farm Alerts'.tr(ref),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           SizedBox(
             height: 40,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
                 FilterChipWidget(
-                  label: 'All',
+                  label: 'All'.tr(ref),
                   selected: currentFilter == 'all',
                   onTap: () =>
                       ref.read(ticketStatusFilterProvider.notifier).state =
                           'all',
                 ),
                 FilterChipWidget(
-                  label: 'Critical',
+                  label: 'Critical'.tr(ref),
                   selected: currentFilter == 'Critical',
                   onTap: () =>
                       ref.read(ticketStatusFilterProvider.notifier).state =
                           'Critical',
                 ),
                 FilterChipWidget(
-                  label: 'Today',
+                  label: 'Today'.tr(ref),
                   selected: currentFilter == 'Today',
                   onTap: () =>
                       ref.read(ticketStatusFilterProvider.notifier).state =
                           'Today',
                 ),
                 FilterChipWidget(
-                  label: 'Completed',
+                  label: 'Completed'.tr(ref),
                   selected: currentFilter == 'Completed',
                   onTap: () =>
                       ref.read(ticketStatusFilterProvider.notifier).state =
@@ -183,20 +184,20 @@ class SupervisorAlertsView extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
-            'Active Alerts',
+            'Active Alerts'.tr(ref),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Expanded(
             child: ticketsAsync.when(
               data: (tickets) {
                 if (tickets.isEmpty) {
-                  return const Center(child: Text('No alerts found'));
+                  return Center(child: Text('No alerts found'.tr(ref)));
                 }
                 return ListView.builder(
                   itemCount: tickets.length,
@@ -215,27 +216,40 @@ class SupervisorAlertsView extends ConsumerWidget {
                       headerColor = Colors.orange;
 
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
+                      padding: EdgeInsets.only(bottom: 16.0),
                       child: AlertCardDivided(
-                        title: '$type Ticket #${ticket.id}',
+                        title: '@type Ticket #@id'.trParams({
+                          'type': type,
+                          'id': ticket.id.toString(),
+                        }),
                         subtitle: ticket.description,
-                        time:
-                            '${DateTime.now().difference(createdAt).inMinutes} min ago',
-                        ids: 'Animal ID: ${ticket.animalId ?? 'N/A'}',
+                        time: '@countm ago'.trParams({
+                          'count': DateTime.now()
+                              .difference(createdAt)
+                              .inMinutes
+                              .toString(),
+                        }),
+                        ids: 'Animal ID: @id'.trParams({
+                          'id': ticket.animalId ?? 'N/A',
+                        }),
                         actionText: status == TicketStatus.pending.value
-                            ? 'Track Progress'
-                            : 'View Details',
+                            ? 'Track Progress'.tr(ref)
+                            : 'View Details'.tr(ref),
                         headerColor: headerColor,
                       ),
                     );
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('Error: $err')),
+              loading: () => Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(
+                child: Text(
+                  'Error: @message'.trParams({'message': err.toString()}),
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 100),
+          SizedBox(height: 100),
         ],
       ),
     );
@@ -243,7 +257,7 @@ class SupervisorAlertsView extends ConsumerWidget {
 }
 
 class BulkMilkEntryView extends ConsumerStatefulWidget {
-  const BulkMilkEntryView({super.key});
+  BulkMilkEntryView({super.key});
 
   @override
   ConsumerState<BulkMilkEntryView> createState() => _BulkMilkEntryViewState();
@@ -251,7 +265,7 @@ class BulkMilkEntryView extends ConsumerStatefulWidget {
 
 class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
   DateTimeRange? _selectedDateRange;
-  String _selectedTiming = 'Morning';
+  String _selectedTiming = 'morning';
   final Map<int, TextEditingController> _quantityControllers = {};
   final TextEditingController _totalShedController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
@@ -287,7 +301,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
 
     while (!cur.isAfter(end)) {
       dates.add(DateFormat('yyyy-MM-dd').format(cur));
-      cur = cur.add(const Duration(days: 1));
+      cur = cur.add(Duration(days: 1));
     }
     return dates;
   }
@@ -299,7 +313,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
     return animalsAsync.when(
       data: (animals) {
         if (animals.isEmpty) {
-          return const Center(child: Text('No animals found'));
+          return Center(child: Text('No animals found'.tr(ref)));
         }
         final milkingAnimals = animals.where((a) {
           final type = a.animalType?.toLowerCase() ?? '';
@@ -320,19 +334,19 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
             _buildControlPanel(milkingAnimals.length),
             if (!_isDistributedMode)
               Padding(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
                 ),
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search by ID or Tag',
-                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Search by Tag, RFID or ID'.tr(ref),
+                    prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12),
                   ),
                   onChanged: (v) => setState(() {}),
                 ),
@@ -343,12 +357,14 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
                   : _buildDetailedList(filteredAnimals),
             ),
             _buildSubmitButton(milkingAnimals),
-            const SizedBox(height: 80),
+            SizedBox(height: 80),
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, s) => Center(child: Text('Error: $e')),
+      loading: () => Center(child: CircularProgressIndicator()),
+      error: (e, s) => Center(
+        child: Text('Error: @message'.trParams({'message': e.toString()})),
+      ),
     );
   }
 
@@ -356,11 +372,11 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
     final dates = _getSelectedDates();
     final dateText = dates.length == 1
         ? DateFormat('dd MMM').format(_selectedDateRange!.start)
-        : '${DateFormat('dd MMM').format(_selectedDateRange!.start)} - ${DateFormat('dd MMM').format(_selectedDateRange!.end)} (+${dates.length - 1} days)';
+        : '${DateFormat('dd MMM').format(_selectedDateRange!.start)} - ${DateFormat('dd MMM').format(_selectedDateRange!.end)} (+${dates.length - 1} ${'days'.tr(ref)})';
 
     return Container(
       color: Theme.of(context).cardColor,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         children: [
           Row(
@@ -378,8 +394,8 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
                       setState(() => _selectedDateRange = picked);
                   },
                   child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Dates',
+                    decoration: InputDecoration(
+                      labelText: 'Dates'.tr(ref),
                       border: OutlineInputBorder(),
                       suffixIcon: Icon(Icons.calendar_month),
                       contentPadding: EdgeInsets.symmetric(
@@ -395,27 +411,27 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<String>(
                   value: _selectedTiming,
-                  decoration: const InputDecoration(
-                    labelText: 'Session',
+                  decoration: InputDecoration(
+                    labelText: 'Session'.tr(ref),
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 8,
                     ),
                   ),
-                  items: ['Morning', 'Evening']
-                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                  items: ['morning', 'evening']
+                      .map((t) => DropdownMenuItem(value: t, child: Text(t.tr(ref))))
                       .toList(),
                   onChanged: (v) => setState(() => _selectedTiming = v!),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Container(
             decoration: BoxDecoration(
               color: Theme.of(context).dividerColor.withOpacity(0.05),
@@ -428,7 +444,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
                   child: GestureDetector(
                     onTap: () => setState(() => _isDistributedMode = false),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                         color: !_isDistributedMode
                             ? AppTheme.primary
@@ -436,7 +452,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'Per Animal',
+                        'Per Animal'.tr(ref),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: !_isDistributedMode
@@ -452,7 +468,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
                   child: GestureDetector(
                     onTap: () => setState(() => _isDistributedMode = true),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                         color: _isDistributedMode
                             ? AppTheme.primary
@@ -460,7 +476,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'Shed Total',
+                        'Shed Total'.tr(ref),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: _isDistributedMode
@@ -476,10 +492,12 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
             ),
           ),
           if (_isDistributedMode) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(
-              "Active Animals Participating: $animalCount",
-              style: const TextStyle(
+              "Active Animals Participating: @count".trParams({
+                'count': animalCount.toString(),
+              }),
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.green,
               ),
@@ -492,37 +510,41 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
 
   Widget _buildDistributedView(int count) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24),
       child: Column(
         children: [
-          const Icon(Icons.hub, size: 48, color: Colors.orange),
-          const SizedBox(height: 16),
+          Icon(Icons.hub, size: 48, color: Colors.orange),
+          SizedBox(height: 16),
           Text(
-            "Enter Total Shed Production",
+            "Enter Total Shed Production".tr(ref),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
-            "This will be distributed equally among $count animals.\nAvg: ${_calculateAvg(count)} L/animal",
+            "This will be distributed equally among @count animals.\nAvg: @avg L/animal"
+                .trParams({
+                  'count': count.toString(),
+                  'avg': _calculateAvg(count),
+                }),
             textAlign: TextAlign.center,
             style: TextStyle(color: Theme.of(context).hintColor),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           TextField(
             controller: _totalShedController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
             ),
-            decoration: const InputDecoration(
-              suffixText: 'Liters',
+            decoration: InputDecoration(
+              suffixText: 'Liters'.tr(ref),
               border: OutlineInputBorder(),
               hintText: '0.0',
             ),
@@ -541,9 +563,9 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
 
   Widget _buildDetailedList(List<InvestorAnimal> animals) {
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       itemCount: animals.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, __) => SizedBox(height: 12),
       itemBuilder: (context, index) {
         final animal = animals[index];
         final id = animal.internalId ?? 0;
@@ -563,31 +585,31 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: AppTheme.primary.withOpacity(0.1),
+                  backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
                   child: Text(
                     displayId.toString().substring(
                       0,
                       min(3, displayId.toString().length),
                     ),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.primary,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "ID: $displayId",
+                        'ID: @id'.trParams({'id': displayId}),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -608,15 +630,15 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
                   width: 100,
                   child: TextField(
                     controller: _quantityControllers[id],
-                    keyboardType: const TextInputType.numberWithOptions(
+                    keyboardType: TextInputType.numberWithOptions(
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      labelText: 'Liters',
+                      labelText: 'Liters'.tr(ref),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding: EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 8,
                       ),
@@ -633,7 +655,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
 
   Widget _buildSubmitButton(List<InvestorAnimal> animals) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         boxShadow: [
@@ -649,7 +671,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
         color: AppTheme.primary,
         onPressed: _isSubmitting ? null : () => _submit(animals),
         child: _isSubmitting
-            ? const SizedBox(
+            ? SizedBox(
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
@@ -657,8 +679,8 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
                   strokeWidth: 2,
                 ),
               )
-            : const Text(
-                'Submit Entries',
+            : Text(
+                'Submit Entries'.tr(ref),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -672,7 +694,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
     final dates = _getSelectedDates();
     if (dates.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one date')),
+        SnackBar(content: Text('Please select at least one date'.tr(ref))),
       );
       return;
     }
@@ -684,7 +706,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
       final total = _totalShedController.text.trim();
       if (total.isEmpty || (double.tryParse(total) ?? 0) <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter valid total quantity')),
+          SnackBar(content: Text('Please enter valid total quantity'.tr(ref))),
         );
         setState(() => _isSubmitting = false);
         return;
@@ -699,18 +721,26 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
         if (res != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Success! ${res['message'] ?? 'Entries Created'}'),
+              content: Text(
+                'Success! @message'.trParams({
+                  'message': res['message'] ?? 'entries_created'.tr(ref),
+                }),
+              ),
             ),
           );
         } else {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Failed to submit.')));
+          ).showSnackBar(SnackBar(content: Text('Failed to submit.'.tr(ref))));
         }
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error: @message'.trParams({'message': e.toString()}),
+            ),
+          ),
+        );
       }
     } else {
       final perAnimalData = <int, String>{};
@@ -726,7 +756,7 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
       if (perAnimalData.isEmpty) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('No entries entered')));
+        ).showSnackBar(SnackBar(content: Text('No entries entered'.tr(ref))));
         setState(() => _isSubmitting = false);
         return;
       }
@@ -753,13 +783,22 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
 
       if (failCount == 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Successfully created $successCount entries')),
+          SnackBar(
+            content: Text(
+              'Successfully created @count entries'.trParams({
+                'count': successCount.toString(),
+              }),
+            ),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Finished with $failCount errors. $successCount success.',
+              'Finished with @errors errors. @success success.'.trParams({
+                'errors': failCount.toString(),
+                'success': successCount.toString(),
+              }),
             ),
           ),
         );

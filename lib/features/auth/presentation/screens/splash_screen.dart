@@ -9,8 +9,9 @@ import 'package:farm_vest/core/utils/app_enums.dart';
 import 'dart:ui';
 // import 'package:shimmer/shimmer.dart';
 
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class SplashScreen extends ConsumerStatefulWidget {
-  const SplashScreen({super.key});
+  SplashScreen({super.key});
 
   @override
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
@@ -36,7 +37,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void _initializeAnimations() {
     // 1. Background slow zoom
     _backgroundController = AnimationController(
-      duration: const Duration(seconds: 10),
+      duration: Duration(seconds: 10),
       vsync: this,
     );
     _bgScale = Tween<double>(begin: 1.0, end: 1.3).animate(
@@ -45,34 +46,34 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _bgBlur = Tween<double>(begin: 0.0, end: 5.0).animate(
       CurvedAnimation(
         parent: _backgroundController,
-        curve: const Interval(0.0, 0.2, curve: Curves.easeIn),
+        curve: Interval(0.0, 0.2, curve: Curves.easeIn),
       ),
     );
 
     // 2. Content (Logo, Text) reveal
     _contentController = AnimationController(
-      duration: const Duration(milliseconds: 3000),
+      duration: Duration(milliseconds: 3000),
       vsync: this,
     );
 
     _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _contentController,
-        curve: const Interval(0.1, 0.4, curve: Curves.easeIn),
+        curve: Interval(0.1, 0.4, curve: Curves.easeIn),
       ),
     );
 
     _logoScale = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(
         parent: _contentController,
-        curve: const Interval(0.1, 0.5, curve: Curves.elasticOut),
+        curve: Interval(0.1, 0.5, curve: Curves.elasticOut),
       ),
     );
 
     _textReveal = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _contentController,
-        curve: const Interval(0.5, 0.8, curve: Curves.easeOutCubic),
+        curve: Interval(0.5, 0.8, curve: Curves.easeOutCubic),
       ),
     );
   }
@@ -86,7 +87,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Future<void> _checkAuthAndNavigate() async {
     await ref.read(authProvider.notifier).checkLoginStatus();
     // Keep the splash visible for a minimum time for the "premium" feel
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(Duration(milliseconds: 500));
 
     if (!mounted) return;
 
@@ -192,21 +193,21 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       child: Transform.scale(
                         scale: _logoScale.value,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          padding: EdgeInsets.symmetric(horizontal: 40),
                           child: Image.asset(
                             'assets/images/farmvest_logo.png',
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) =>
                                 Column(
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.agriculture,
                                       size: 100,
                                       color: Colors.white,
                                     ),
-                                    const SizedBox(height: 24),
+                                    SizedBox(height: 24),
                                     Text(
-                                      'FarmVest',
+                                      'FarmVest'.tr(ref),
                                       style: Theme.of(context)
                                           .textTheme
                                           .displayMedium
@@ -224,7 +225,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   },
                 ),
 
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
 
                 // Subtitle/Motto Reveal
                 AnimatedBuilder(
@@ -244,9 +245,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                 borderRadius: BorderRadius.circular(1),
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            SizedBox(height: 20),
                             Text(
-                              'SMART DAIRY FARM MANAGEMENT',
+                              'SMART DAIRY FARM MANAGEMENT'.tr(ref),
                               style: Theme.of(context).textTheme.labelLarge
                                   ?.copyWith(
                                     color: Colors.white.withOpacity(0.85),
@@ -255,7 +256,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                     shadows: [
                                       Shadow(
                                         color: Colors.black.withOpacity(0.5),
-                                        offset: const Offset(0, 2),
+                                        offset: Offset(0, 2),
                                         blurRadius: 4,
                                       ),
                                     ],

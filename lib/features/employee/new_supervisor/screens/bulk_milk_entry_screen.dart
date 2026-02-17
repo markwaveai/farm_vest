@@ -8,9 +8,9 @@ import 'package:farm_vest/features/investor/data/models/investor_animal_model.da
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class BulkMilkEntryScreen extends ConsumerStatefulWidget {
-  const BulkMilkEntryScreen({super.key});
+  BulkMilkEntryScreen({super.key});
 
   @override
   ConsumerState<BulkMilkEntryScreen> createState() =>
@@ -22,7 +22,8 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
   // If range is null, we assume today (or single selected day if I added single picker, but range can cover single).
   // I'll initialize range to Today-Today to mimic single.
 
-  String _selectedTiming = 'Morning';
+  String _selectedTiming =
+      'Morning'; // We can keep internal 'Morning' or localize it
   final Map<int, TextEditingController> _quantityControllers = {};
   final TextEditingController _totalShedController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
@@ -59,7 +60,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
 
     while (!cur.isAfter(end)) {
       dates.add(DateFormat('yyyy-MM-dd').format(cur));
-      cur = cur.add(const Duration(days: 1));
+      cur = cur.add(Duration(days: 1));
     }
     return dates;
   }
@@ -73,7 +74,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         title: Text(
-          'Milk Entry',
+          'Milk Entry'.tr(ref),
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         iconTheme: IconThemeData(
@@ -84,7 +85,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
       body: animalsAsync.when(
         data: (animals) {
           if (animals.isEmpty) {
-            return const Center(child: Text('No animals found'));
+            return Center(child: Text('No alerts found'.tr(ref)));
           }
           final milkingAnimals = animals.where((a) {
             final type = a.animalType?.toLowerCase() ?? '';
@@ -106,21 +107,16 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
               _buildControlPanel(milkingAnimals.length),
               if (!_isDistributedMode)
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Search by ID or Tag',
-                      prefixIcon: const Icon(Icons.search),
+                      hintText: 'Search by Tag, RFID or ID'.tr(ref),
+                      prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
                     ),
                     onChanged: (v) => setState(() {}),
                   ),
@@ -134,7 +130,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(child: CircularProgressIndicator()),
         error: (e, s) => Center(child: Text('Error: $e')),
       ),
     );
@@ -148,7 +144,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
 
     return Container(
       color: Theme.of(context).cardColor,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         children: [
           // Date & Session Row
@@ -167,8 +163,8 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                       setState(() => _selectedDateRange = picked);
                   },
                   child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Dates',
+                    decoration: InputDecoration(
+                      labelText: 'Dates'.tr(ref),
                       border: OutlineInputBorder(),
                       suffixIcon: Icon(Icons.calendar_month),
                       contentPadding: EdgeInsets.symmetric(
@@ -184,27 +180,34 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<String>(
                   value: _selectedTiming,
-                  decoration: const InputDecoration(
-                    labelText: 'Session',
+                  decoration: InputDecoration(
+                    labelText: 'Session'.tr(ref),
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 8,
                     ),
                   ),
-                  items: ['Morning', 'Evening']
-                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                      .toList(),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'Morning',
+                      child: Text('Morning'.tr(ref)),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Evening',
+                      child: Text('Evening'.tr(ref)),
+                    ),
+                  ],
                   onChanged: (v) => setState(() => _selectedTiming = v!),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           // Toggle Mode
           Container(
             decoration: BoxDecoration(
@@ -218,7 +221,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                   child: GestureDetector(
                     onTap: () => setState(() => _isDistributedMode = false),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                         color: !_isDistributedMode
                             ? AppTheme.primary
@@ -226,7 +229,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'Per Animal',
+                        'Per Animal'.tr(ref),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: !_isDistributedMode
@@ -242,7 +245,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                   child: GestureDetector(
                     onTap: () => setState(() => _isDistributedMode = true),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                         color: _isDistributedMode
                             ? AppTheme.primary
@@ -250,7 +253,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'Shed Total',
+                        'Shed Total'.tr(ref),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: _isDistributedMode
@@ -268,10 +271,12 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
             ),
           ),
           if (_isDistributedMode) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(
-              "Active Animals Participating: $animalCount",
-              style: const TextStyle(
+              "Active Animals Participating: @count".trParams({
+                'count': animalCount.toString(),
+              }),
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.green,
               ),
@@ -285,37 +290,41 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
   Widget _buildDistributedView(int count) {
     return SingleChildScrollView(
       // Allow scrolling if keyboard opens
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24),
       child: Column(
         children: [
-          const Icon(Icons.hub, size: 48, color: Colors.orange),
-          const SizedBox(height: 16),
+          Icon(Icons.hub, size: 48, color: Colors.orange),
+          SizedBox(height: 16),
           Text(
-            "Enter Total Shed Production",
+            'Enter Total Shed Production'.tr(ref),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
-            "This will be distributed equally among $count animals.\nAvg: ${_calculateAvg(count)} L/animal",
+            "This will be distributed equally among @count animals.\nAvg: @avg L/animal"
+                .trParams({
+                  'count': count.toString(),
+                  'avg': _calculateAvg(count),
+                }),
             textAlign: TextAlign.center,
             style: TextStyle(color: Theme.of(context).hintColor),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           TextField(
             controller: _totalShedController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
             ),
-            decoration: const InputDecoration(
-              suffixText: 'Liters',
+            decoration: InputDecoration(
+              suffixText: 'Liters'.tr(ref),
               border: OutlineInputBorder(),
               hintText: '0.0',
             ),
@@ -334,9 +343,9 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
 
   Widget _buildDetailedList(List<InvestorAnimal> animals) {
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       itemCount: animals.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, __) => SizedBox(height: 12),
       itemBuilder: (context, index) {
         final animal = animals[index];
         final id =
@@ -358,7 +367,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
                 CircleAvatar(
@@ -369,20 +378,20 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                       0,
                       min(3, displayId.toString().length),
                     ),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.primary,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "ID: $displayId",
+                        'ID: @id'.trParams({'id': displayId}),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -403,15 +412,15 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                   width: 100,
                   child: TextField(
                     controller: _quantityControllers[id],
-                    keyboardType: const TextInputType.numberWithOptions(
+                    keyboardType: TextInputType.numberWithOptions(
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      labelText: 'Liters',
+                      labelText: 'Liters'.tr(ref),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding: EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 8,
                       ),
@@ -428,7 +437,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
 
   Widget _buildSubmitButton(List<InvestorAnimal> animals) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         boxShadow: [
@@ -444,7 +453,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
         color: AppTheme.primary,
         onPressed: _isSubmitting ? null : () => _submit(animals),
         child: _isSubmitting
-            ? const SizedBox(
+            ? SizedBox(
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
@@ -452,8 +461,8 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                   strokeWidth: 2,
                 ),
               )
-            : const Text(
-                'Submit Entries',
+            : Text(
+                'Submit Entries'.tr(ref),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -467,7 +476,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
     final dates = _getSelectedDates();
     if (dates.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one date')),
+        SnackBar(content: Text('Please select at least one date'.tr(ref))),
       );
       return;
     }
@@ -480,7 +489,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
       final total = _totalShedController.text.trim();
       if (total.isEmpty || (double.tryParse(total) ?? 0) <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter valid total quantity')),
+          SnackBar(content: Text('Please enter valid total quantity'.tr(ref))),
         );
         setState(() => _isSubmitting = false);
         return;
@@ -495,19 +504,27 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
         if (res != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Success! ${res['message'] ?? 'Entries Created'}'),
+              content: Text(
+                'Success! @message'.trParams({
+                  'message': res['message'] ?? 'Entries Created',
+                }),
+              ),
             ),
           );
           if (mounted) Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Failed to submit.')));
+          ).showSnackBar(SnackBar(content: Text('Failed to submit.'.tr(ref))));
         }
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error: @message'.trParams({'message': e.toString()}),
+            ),
+          ),
+        );
       }
     }
     // PER ANIMAL MODE
@@ -526,7 +543,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
       if (perAnimalData.isEmpty) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('No entries entered')));
+        ).showSnackBar(SnackBar(content: Text('No entries entered'.tr(ref))));
         setState(() => _isSubmitting = false);
         return;
       }
@@ -554,14 +571,23 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
 
       if (failCount == 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Successfully created $successCount entries')),
+          SnackBar(
+            content: Text(
+              'Successfully created @count entries'.trParams({
+                'count': successCount.toString(),
+              }),
+            ),
+          ),
         );
         if (mounted) Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Finished with $failCount errors. $successCount success.',
+              'Finished with @errors errors. @success success.'.trParams({
+                'errors': failCount.toString(),
+                'success': successCount.toString(),
+              }),
             ),
           ),
         );

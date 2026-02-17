@@ -3,14 +3,15 @@ import 'package:farm_vest/core/widgets/custom_card.dart';
 import 'package:farm_vest/core/widgets/custom_dialog.dart';
 import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
-
-class ViewHistoryDialog extends StatelessWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class ViewHistoryDialog extends ConsumerWidget {
   final String buffaloId;
 
-  const ViewHistoryDialog({super.key, required this.buffaloId});
+  ViewHistoryDialog({super.key, required this.buffaloId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Mock data for history
     final historyItems = [
       {
@@ -40,7 +41,7 @@ class ViewHistoryDialog extends StatelessWidget {
             children: [
               Text(
                 'History for $buffaloId',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.dark,
@@ -48,17 +49,17 @@ class ViewHistoryDialog extends StatelessWidget {
               ),
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close),
+                icon: Icon(Icons.close),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Flexible(
             child: SingleChildScrollView(
               child: Column(
                 children: historyItems.map((item) {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
+                    padding: EdgeInsets.only(bottom: 12.0),
                     child: CustomCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +76,7 @@ class ViewHistoryDialog extends StatelessWidget {
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(
+                                padding: EdgeInsets.symmetric(
                                   horizontal: 8,
                                   vertical: 4,
                                 ),
@@ -98,10 +99,10 @@ class ViewHistoryDialog extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Text(
                             item['issue']!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.dark,
@@ -115,11 +116,11 @@ class ViewHistoryDialog extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: CustomActionButton(
-              child: const Text('Close', style: TextStyle(color: Colors.white)),
+              child: Text('Close'.tr(ref), style: TextStyle(color: Colors.white)),
               onPressed: () => Navigator.pop(context),
               color: AppTheme.primary,
             ),

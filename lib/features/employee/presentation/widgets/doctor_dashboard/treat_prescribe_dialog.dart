@@ -1,20 +1,21 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
 
 import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:farm_vest/core/widgets/custom_dialog.dart';
 import 'package:flutter/material.dart';
-
-class TreatPrescribeDialog extends StatefulWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class TreatPrescribeDialog extends ConsumerStatefulWidget {
   final String buffaloId;
 
-  const TreatPrescribeDialog({super.key, required this.buffaloId});
+  TreatPrescribeDialog({super.key, required this.buffaloId});
 
   @override
   State<TreatPrescribeDialog> createState() => _TreatPrescribeDialogState();
 }
 
-class _TreatPrescribeDialogState extends State<TreatPrescribeDialog> {
+class _TreatPrescribeDialogState extends ConsumerState<TreatPrescribeDialog> {
   final TextEditingController _medicineController = TextEditingController();
   final TextEditingController _dosageController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
@@ -57,31 +58,31 @@ class _TreatPrescribeDialogState extends State<TreatPrescribeDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Prescribe Medicine',
+              Text(
+                'Prescribe Medicine'.tr(ref),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close),
+                icon: Icon(Icons.close),
               ),
             ],
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
 
           // Buffalo ID (read-only)
           CustomTextField(
             initialValue: widget.buffaloId,
             enabled: false,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppTheme.black,
             ),
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
 
           // Medicine name
           CustomTextField(
@@ -89,7 +90,7 @@ class _TreatPrescribeDialogState extends State<TreatPrescribeDialog> {
             controller: _medicineController,
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
 
           // Dosage
           CustomTextField(
@@ -97,14 +98,14 @@ class _TreatPrescribeDialogState extends State<TreatPrescribeDialog> {
             controller: _dosageController,
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
-          const Text(
-            'Diagnosis Notes:',
+          Text(
+            'Diagnosis Notes:'.tr(ref),
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
 
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
 
           // Diagnosis notes
           CustomTextField(
@@ -113,15 +114,15 @@ class _TreatPrescribeDialogState extends State<TreatPrescribeDialog> {
             controller: _notesController,
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           // Submit button
           SizedBox(
             width: double.infinity,
             height: 48,
             child: CustomActionButton(
-              child: const Text(
-                'Submit Prescription',
+              child: Text(
+                'Submit Prescription'.tr(ref),
                 style: TextStyle(color: Colors.white),
               ),
               onPressed: _isFormValid

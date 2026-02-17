@@ -17,9 +17,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class MonthlyVisitsScreen extends ConsumerStatefulWidget {
-  const MonthlyVisitsScreen({super.key});
+  MonthlyVisitsScreen({super.key});
 
   @override
   ConsumerState<MonthlyVisitsScreen> createState() =>
@@ -105,16 +105,16 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Book Your Visit'),
+        title: Text('Book Your Visit'.tr(ref)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.history),
+            icon: Icon(Icons.history),
             onPressed: () => _showBookingHistory(),
             tooltip: 'Booking History',
           ),
         ],
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           onPressed: () => NavigationHelper.safePopOrNavigate(
             context,
             fallbackRoute: '/customer-dashboard',
@@ -157,7 +157,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
               isDark: isDark,
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Slots Grid
             Expanded(
@@ -165,19 +165,19 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
-                  borderRadius: const BorderRadius.vertical(
+                  borderRadius: BorderRadius.vertical(
                     top: Radius.circular(20),
                   ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 10,
-                      offset: const Offset(0, -5),
+                      offset: Offset(0, -5),
                     ),
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
                   ),
@@ -188,7 +188,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Available Slots",
+                            "Available Slots".tr(ref),
                             style: AppTheme.headingMedium.copyWith(
                               color: theme.colorScheme.onSurface,
                             ),
@@ -204,7 +204,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                                     : AppTheme.black87,
                               ),
                               label: Text(
-                                "View Pass",
+                                "View Pass".tr(ref),
                                 style: TextStyle(
                                   color: isDark
                                       ? AppTheme.white
@@ -215,7 +215,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       Expanded(
                         child: availabilityAsync.when(
                           data: (data) => VisitTimeGrid(
@@ -234,15 +234,15 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                           ),
                           error: (e, s) => Center(
                             child: Text(
-                              "Could not load slots. Please try again.",
+                              "Could not load slots. Please try again.".tr(ref),
                             ),
                           ),
                           loading: () =>
-                              const Center(child: CircularProgressIndicator()),
+                              Center(child: CircularProgressIndicator()),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      const VisitLegend(),
+                      SizedBox(height: 20),
+                      VisitLegend(),
                     ],
                   ),
                 ),
@@ -254,8 +254,8 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.agriculture, size: 64, color: Colors.grey),
-                    const SizedBox(height: 16),
+                    Icon(Icons.agriculture, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
                     Text(
                       farmsAsync.isLoading
                           ? "Loading farms..."
@@ -283,7 +283,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
@@ -291,33 +291,33 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
         final isDark = theme.brightness == Brightness.dark;
 
         return Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Confirm Booking",
+                "Confirm Booking".tr(ref),
                 style: AppTheme.headingMedium.copyWith(
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(
                 "You are booking a visit at ${_selectedFarm?.farmName ?? ''} on:",
                 style: AppTheme.bodyMedium.copyWith(
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.calendar_month_outlined,
                     color: AppTheme.primary,
                     size: 20,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Text(
                     DateFormat('EEEE, d MMMM yyyy').format(_selectedDate),
                     style: AppTheme.bodyLarge.copyWith(
@@ -327,15 +327,15 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.access_time,
                     color: AppTheme.primary,
                     size: 20,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Text(
                     displayTime,
                     style: AppTheme.bodyLarge.copyWith(
@@ -345,20 +345,20 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => _processBooking(time),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    "Confirm & Generate pass",
+                  child: Text(
+                    "Confirm & Generate pass".tr(ref),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -408,7 +408,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (c) => const Center(child: CircularProgressIndicator()),
+      builder: (c) => Center(child: CircularProgressIndicator()),
     );
 
     try {
@@ -447,21 +447,21 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 64),
-              const SizedBox(height: 16),
-              Text("Booking Confirmed!", style: AppTheme.headingMedium),
-              const SizedBox(height: 8),
-              Text("Here is your entry pass", style: AppTheme.bodyMedium),
-              const SizedBox(height: 24),
+              Icon(Icons.check_circle, color: Colors.green, size: 64),
+              SizedBox(height: 16),
+              Text("Booking Confirmed!".tr(ref), style: AppTheme.headingMedium),
+              SizedBox(height: 8),
+              Text("Here is your entry pass".tr(ref), style: AppTheme.bodyMedium),
+              SizedBox(height: 24),
               _buildQrCode(visit),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text("Done"),
+                child: Text("Done".tr(ref)),
               ),
             ],
           ),
@@ -480,17 +480,17 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(24.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Your Entry Pass",
+                  "Your Entry Pass".tr(ref),
                   style: AppTheme.headingMedium.copyWith(
                     color: isDark ? AppTheme.white : AppTheme.black87,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   "${visit.visitDate} at ${_formatTimeWithAmPm(visit.startTime)}",
                   style: AppTheme.bodyLarge.copyWith(
@@ -498,7 +498,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                     color: AppTheme.primary,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   (visit.farmName != null && visit.farmLocation != null)
                       ? "${visit.farmName}, ${visit.farmLocation}"
@@ -507,22 +507,22 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                             "Unknown Farm"),
                   style: AppTheme.bodyMedium,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 _buildQrCode(visit),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   child: TextButton(
                     style: TextButton.styleFrom(
                       backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Close"),
+                    child: Text("Close".tr(ref)),
                   ),
                 ),
               ],
@@ -535,7 +535,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
 
   Widget _buildQrCode(Visit visit) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -554,7 +554,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
   void _showBookingHistory() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Consumer(
@@ -562,7 +562,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
           final historyAsync = ref.watch(myVisitsProvider);
 
           return Container(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(24.0),
             height: MediaQuery.of(context).size.height * 0.6,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -570,14 +570,14 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("My Bookings", style: AppTheme.headingMedium),
+                    Text("My Bookings".tr(ref), style: AppTheme.headingMedium),
                     IconButton(
                       onPressed: () => ref.invalidate(myVisitsProvider),
-                      icon: const Icon(Icons.refresh),
+                      icon: Icon(Icons.refresh),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Expanded(
                   child: historyAsync.when(
                     data: (visits) {
@@ -587,9 +587,9 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                       );
 
                       if (sortedVisits.isEmpty) {
-                        return const Center(
+                        return Center(
                           child: Text(
-                            "No bookings found",
+                            "No bookings found".tr(ref),
                             style: TextStyle(color: Colors.grey),
                           ),
                         );
@@ -607,18 +607,18 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                           }
 
                           final isPast = date.isBefore(
-                            DateTime.now().subtract(const Duration(days: 1)),
+                            DateTime.now().subtract(Duration(days: 1)),
                           );
 
                           return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
+                            margin: EdgeInsets.only(bottom: 12),
                             elevation: 2,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: ListTile(
                               leading: Container(
-                                padding: const EdgeInsets.all(8),
+                                padding: EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: isPast
                                       ? Colors.grey[200]
@@ -635,7 +635,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                               ),
                               title: Text(
                                 DateFormat('MMM d, yyyy').format(date),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -652,19 +652,19 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                                           : (visit.farmName ??
                                                 visit.farmLocation ??
                                                 ""),
-                                      style: const TextStyle(fontSize: 12),
+                                      style: TextStyle(fontSize: 12),
                                     ),
                                 ],
                               ),
                               trailing: isPast
-                                  ? const Chip(
+                                  ? Chip(
                                       label: Text(
-                                        "Completed",
+                                        "Completed".tr(ref),
                                         style: TextStyle(fontSize: 10),
                                       ),
                                     )
                                   : IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.qr_code,
                                         color: AppTheme.primary,
                                       ),
@@ -680,7 +680,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                     },
                     error: (e, s) => Center(child: Text("Error: $e")),
                     loading: () =>
-                        const Center(child: CircularProgressIndicator()),
+                        Center(child: CircularProgressIndicator()),
                   ),
                 ),
               ],

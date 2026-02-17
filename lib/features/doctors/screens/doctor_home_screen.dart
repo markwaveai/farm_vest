@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/dashboard_stat_card.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class DoctorHomeScreen extends ConsumerStatefulWidget {
-  const DoctorHomeScreen({super.key});
+  DoctorHomeScreen({super.key});
 
   @override
   ConsumerState<DoctorHomeScreen> createState() => _DoctorHomeScreenState();
@@ -39,7 +39,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
     final authState = ref.watch(authProvider);
     final user = authState.userData;
 
-    String displayName = "Dr. ";
+    String displayName = "${'Dr.'.tr(ref)} ";
     if (user != null &&
         (user.firstName.isNotEmpty || user.lastName.isNotEmpty)) {
       final fname = user.firstName.isNotEmpty
@@ -66,7 +66,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
         automaticallyImplyLeading: false,
         title: _currentIndex == 3
             ? Text(
-                "Buffalo Profile",
+                "Buffalo Profile".tr(ref),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -75,7 +75,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
               )
             : _currentIndex == 2
             ? Text(
-                "Transfer Tickets",
+                "Transfer Tickets".tr(ref),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -84,7 +84,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
               )
             : _currentIndex == 1
             ? Text(
-                "Vaccination Tickets",
+                "Vaccination Tickets".tr(ref),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -93,7 +93,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
               )
             : _currentIndex == 0
             ? Text(
-                "Health Tickets",
+                "Health Tickets".tr(ref),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -104,7 +104,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 alignment: Alignment.centerLeft,
                 child: RichText(
                   text: TextSpan(
-                    text: 'Hello ',
+                    text: '${'Hello'.tr(ref)} ',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 16,
@@ -112,7 +112,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                     children: [
                       TextSpan(
                         text: displayName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.orange,
                           fontWeight: FontWeight.bold,
                         ),
@@ -129,18 +129,18 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 Icons.swap_horiz_rounded,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
-              tooltip: 'Switch Role',
+              tooltip: 'Switch Role'.tr(ref),
             ),
           NotificationBellButton(
             fallbackRoute: '/doctor-dashboard',
             iconColor: Theme.of(context).colorScheme.onSurface,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           GestureDetector(
             onTap: () => context.push('/profile'),
             child: CircleAvatar(
               radius: 18,
-              backgroundColor: AppTheme.primary.withOpacity(0.1),
+              backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
               child: user?.imageUrl != null && user!.imageUrl!.isNotEmpty
                   ? ClipOval(
                       child: Image.network(
@@ -149,27 +149,27 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                         width: 36,
                         height: 36,
                         errorBuilder: (context, error, stackTrace) =>
-                            const Icon(
+                            Icon(
                               Icons.person,
                               size: 20,
                               color: AppTheme.primary,
                             ),
                       ),
                     )
-                  : const Icon(Icons.person, size: 20, color: AppTheme.primary),
+                  : Icon(Icons.person, size: 20, color: AppTheme.primary),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
         ],
       ),
       body: _currentIndex == 3
-          ? const BuffaloProfileView()
+          ? BuffaloProfileView()
           : _currentIndex == 2
-          ? const TransferTicketsView()
+          ? TransferTicketsView()
           : _currentIndex == 1
-          ? const HealthTicketsView(ticketType: 'VACCINATION')
+          ? HealthTicketsView(ticketType: 'VACCINATION')
           : _currentIndex == 0
-          ? const HealthTicketsView(ticketType: 'HEALTH')
+          ? HealthTicketsView(ticketType: 'HEALTH')
           : _buildDashboard(healthState, healthCounts, vaccinationCounts),
       bottomNavigationBar: EmployeeBottomNavigation(
         role: UserType.doctor,
@@ -201,14 +201,14 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withValues(alpha: 0.25),
                 blurRadius: 12,
-                offset: const Offset(0, 6),
+                offset: Offset(0, 6),
               ),
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(14),
             child: Image.asset(
               'assets/icons/home.png',
               color: Theme.of(context).brightness == Brightness.dark
@@ -229,19 +229,19 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
     return RefreshIndicator(
       onRefresh: () => ref.read(doctorsProvider.notifier).fetchTickets(),
       child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        physics: AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _sectionHeader(
-              title: 'Buffalo Health Tickets',
+              title: 'Buffalo Health Tickets'.tr(ref),
               ticketType: 'HEALTH',
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             _grid([
               DashboardStatCard(
-                title: 'Total Tickets',
+                title: 'Total Tickets'.tr(ref),
                 value: healthCounts['total'].toString().padLeft(2, '0'),
                 iconWidget: Image.asset(
                   'assets/icons/buffalo_head.png',
@@ -253,7 +253,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 onTap: () => setState(() => _currentIndex = 0),
               ),
               DashboardStatCard(
-                title: 'Pending Tickets',
+                title: 'Pending Tickets'.tr(ref),
                 value: healthCounts['pending'].toString().padLeft(2, '0'),
                 iconWidget: Image.asset(
                   'assets/icons/buffalo_head.png',
@@ -266,7 +266,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 onTap: () => setState(() => _currentIndex = 0),
               ),
               DashboardStatCard(
-                title: 'In Progress Tickets',
+                title: 'In Progress Tickets'.tr(ref),
                 value: healthCounts['inProgress'].toString().padLeft(2, '0'),
                 iconWidget: Image.asset(
                   'assets/icons/buffalo_head.png',
@@ -279,7 +279,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 onTap: () => setState(() => _currentIndex = 0),
               ),
               DashboardStatCard(
-                title: 'Completed Tickets',
+                title: 'Completed Tickets'.tr(ref),
                 value: healthCounts['completed'].toString().padLeft(2, '0'),
                 iconWidget: Image.asset(
                   'assets/icons/buffalo_head.png',
@@ -292,15 +292,15 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 onTap: () => setState(() => _currentIndex = 0),
               ),
             ]),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             _sectionHeader(
-              title: 'Vaccination Tickets',
+              title: 'Vaccination Tickets'.tr(ref),
               ticketType: 'VACCINATION',
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             _grid([
               DashboardStatCard(
-                title: 'Total Tickets',
+                title: 'Total Tickets'.tr(ref),
                 value: vaccinationCounts['total'].toString().padLeft(2, '0'),
                 iconWidget: Image.asset(
                   'assets/icons/injection.png',
@@ -312,7 +312,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 onTap: () => setState(() => _currentIndex = 1),
               ),
               DashboardStatCard(
-                title: 'Pending Tickets',
+                title: 'Pending Tickets'.tr(ref),
                 value: vaccinationCounts['pending'].toString().padLeft(2, '0'),
                 iconWidget: Image.asset(
                   'assets/icons/injection.png',
@@ -324,7 +324,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 onTap: () => setState(() => _currentIndex = 1),
               ),
               DashboardStatCard(
-                title: 'In Progress Tickets',
+                title: 'In Progress Tickets'.tr(ref),
                 value: vaccinationCounts['inProgress'].toString().padLeft(
                   2,
                   '0',
@@ -339,7 +339,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 onTap: () => setState(() => _currentIndex = 1),
               ),
               DashboardStatCard(
-                title: 'Completed Tickets',
+                title: 'Completed Tickets'.tr(ref),
                 value: vaccinationCounts['completed'].toString().padLeft(
                   2,
                   '0',
@@ -387,9 +387,9 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           },
           style: TextButton.styleFrom(
             backgroundColor: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.05)
+                ? Colors.white.withValues(alpha: 0.05)
                 : AppTheme.darkPrimary,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(
@@ -400,7 +400,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
             ),
           ),
           child: Text(
-            'View All',
+            'View All'.tr(ref),
             style: TextStyle(
               color: Theme.of(context).brightness == Brightness.dark
                   ? Theme.of(context).colorScheme.onSurface
@@ -417,7 +417,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
   Widget _grid(List<Widget> children) {
     return GridView.count(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics: NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
@@ -435,7 +435,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).cardColor,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
@@ -443,34 +443,34 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           child: Container(
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
-              borderRadius: const BorderRadius.vertical(
+              borderRadius: BorderRadius.vertical(
                 top: Radius.circular(24),
               ),
             ),
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Switch Active Role',
+                  'Switch Active Role'.tr(ref),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
-                  'Choose which portal you want to access',
+                  'Choose which portal you want to access'.tr(ref),
                   style: TextStyle(color: Theme.of(context).hintColor),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 ...availableRoles.map((role) {
                   final isSelected = role == currentRole;
 
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: EdgeInsets.only(bottom: 12),
                     child: ListTile(
                       onTap: isSelected
                           ? null
@@ -511,10 +511,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                         ),
                       ),
                       tileColor: isSelected
-                          ? role.color.withOpacity(0.05)
+                          ? role.color.withValues(alpha: 0.05)
                           : null,
                       leading: CircleAvatar(
-                        backgroundColor: role.color.withOpacity(0.1),
+                        backgroundColor: role.color.withValues(alpha: 0.1),
                         child: Icon(role.icon, color: role.color),
                       ),
                       title: Text(
@@ -528,7 +528,7 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                       ),
                       trailing: isSelected
                           ? Icon(Icons.check_circle, color: role.color)
-                          : const Icon(Icons.arrow_forward_ios, size: 14),
+                          : Icon(Icons.arrow_forward_ios, size: 14),
                     ),
                   );
                 }),

@@ -1,10 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 enum TicketPriority { low, medium, high, critical }
 
 enum TicketStatus { open, inProgress, resolved, closed }
@@ -31,16 +32,16 @@ class Ticket {
   });
 }
 
-class RaiseTicketScreen extends StatefulWidget {
+class RaiseTicketScreen extends ConsumerStatefulWidget {
   final bool hideAppBar;
 
-  const RaiseTicketScreen({super.key, this.hideAppBar = false});
+  RaiseTicketScreen({super.key, this.hideAppBar = false});
 
   @override
   State<RaiseTicketScreen> createState() => _RaiseTicketScreenState();
 }
 
-class _RaiseTicketScreenState extends State<RaiseTicketScreen>
+class _RaiseTicketScreenState extends ConsumerState<RaiseTicketScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
@@ -97,7 +98,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
         priority: TicketPriority.high,
         description:
             'Buffalo showing signs of illness, needs immediate attention',
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+        createdAt: DateTime.now().subtract(Duration(hours: 2)),
         status: TicketStatus.inProgress,
         assignedTo: 'Dr. Sharma',
       ),
@@ -107,7 +108,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
         issueType: 'Feed Problem',
         priority: TicketPriority.medium,
         description: 'Feed quality seems poor, animals not eating properly',
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        createdAt: DateTime.now().subtract(Duration(days: 1)),
         status: TicketStatus.open,
       ),
       Ticket(
@@ -116,7 +117,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
         issueType: 'Equipment Failure',
         priority: TicketPriority.low,
         description: 'Water pump in section B needs maintenance',
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
+        createdAt: DateTime.now().subtract(Duration(days: 2)),
         status: TicketStatus.resolved,
         assignedTo: 'Maintenance Team',
       ),
@@ -136,16 +137,16 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                   fontWeight: FontWeight.bold,
                 ),
                 controller: _tabController,
-                tabs: const [
+                tabs: [
                   Tab(text: 'Raise Ticket'),
                   Tab(text: 'My Tickets'),
                 ],
               ),
             )
           : AppBar(
-              title: const Text('Support Tickets'),
+              title: Text('Support Tickets'.tr(ref)),
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back),
                 onPressed: () => NavigationHelper.safePopOrNavigate(
                   context,
                   fallbackRoute: '/supervisor-dashboard',
@@ -157,7 +158,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                   fontWeight: FontWeight.bold,
                 ),
                 controller: _tabController,
-                tabs: const [
+                tabs: [
                   Tab(text: 'Raise Ticket'),
                   Tab(text: 'My Tickets'),
                 ],
@@ -172,20 +173,20 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
 
   Widget _buildRaiseTicketTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
+      padding: EdgeInsets.all(AppConstants.spacingM),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Create New Ticket', style: AppTheme.headingMedium),
-            const SizedBox(height: AppConstants.spacingL),
+            Text('Create New Ticket'.tr(ref), style: AppTheme.headingMedium),
+            SizedBox(height: AppConstants.spacingL),
 
             // Buffalo Selection
             DropdownButtonFormField<String>(
               // ignore: deprecated_member_use
               value: _selectedBuffalo,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Select Buffalo',
                 prefixIcon: Icon(Icons.pets),
               ),
@@ -202,13 +203,13 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                 });
               },
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             // Issue Type Selection
             DropdownButtonFormField<String>(
               // ignore: deprecated_member_use
               value: _selectedIssueType,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Issue Type',
                 prefixIcon: Icon(Icons.category),
               ),
@@ -225,13 +226,13 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                 });
               },
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             // Priority Selection
             DropdownButtonFormField<TicketPriority>(
               // ignore: deprecated_member_use
               value: _selectedPriority,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Priority',
                 prefixIcon: Icon(Icons.priority_high),
               ),
@@ -248,12 +249,12 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                 });
               },
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             // Description
             TextFormField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Description',
                 prefixIcon: Icon(Icons.description),
                 hintText: 'Describe the issue in detail...',
@@ -266,29 +267,29 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                 return null;
               },
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             // Upload Image Section
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(AppConstants.spacingM),
+              padding: EdgeInsets.all(AppConstants.spacingM),
               decoration: BoxDecoration(
                 border: Border.all(color: AppTheme.mediumGrey),
                 borderRadius: BorderRadius.circular(AppConstants.radiusM),
               ),
               child: Column(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.cloud_upload,
                     size: AppConstants.iconXL,
                     color: AppTheme.mediumGrey,
                   ),
-                  const SizedBox(height: AppConstants.spacingS),
-                  const Text(
-                    'Upload Image (Optional)',
+                  SizedBox(height: AppConstants.spacingS),
+                  Text(
+                    'Upload Image (Optional)'.tr(ref),
                     style: AppTheme.bodyMedium,
                   ),
-                  const SizedBox(height: AppConstants.spacingS),
+                  SizedBox(height: AppConstants.spacingS),
                   OutlinedButton(
                     onPressed: () {
                       // Handle image upload
@@ -297,12 +298,12 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                         'Image upload functionality',
                       );
                     },
-                    child: const Text('Choose Image'),
+                    child: Text('Choose Image'.tr(ref)),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: AppConstants.spacingL),
+            SizedBox(height: AppConstants.spacingL),
 
             // Submit Button
             SizedBox(
@@ -310,19 +311,19 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
               height: 50,
               child: ElevatedButton(
                 onPressed: _submitTicket,
-                child: const Text('Submit Ticket'),
+                child: Text('Submit Ticket'.tr(ref)),
               ),
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             // Note
             Container(
-              padding: const EdgeInsets.all(AppConstants.spacingM),
+              padding: EdgeInsets.all(AppConstants.spacingM),
               decoration: BoxDecoration(
                 color: AppTheme.secondary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppConstants.radiusM),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(
                     Icons.info,
@@ -332,7 +333,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                   SizedBox(width: AppConstants.spacingS),
                   Expanded(
                     child: Text(
-                      'Customer will be automatically notified about this ticket.',
+                      'Customer will be automatically notified about this ticket.'.tr(ref),
                       style: TextStyle(color: AppTheme.primary, fontSize: 12),
                     ),
                   ),
@@ -350,7 +351,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
       children: [
         // Filter Chips
         Container(
-          padding: const EdgeInsets.all(AppConstants.spacingM),
+          padding: EdgeInsets.all(AppConstants.spacingM),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -367,7 +368,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
         // Tickets List
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.symmetric(
+            padding: EdgeInsets.symmetric(
               horizontal: AppConstants.spacingM,
             ),
             itemCount: _tickets.length,
@@ -383,7 +384,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
 
   Widget _buildFilterChip(String label, bool isSelected) {
     return Container(
-      margin: const EdgeInsets.only(right: AppConstants.spacingS),
+      margin: EdgeInsets.only(right: AppConstants.spacingS),
       child: FilterChip(
         label: Text(label),
         selected: isSelected,
@@ -401,16 +402,16 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
     final statusInfo = _getStatusInfo(ticket.status);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: EdgeInsets.only(bottom: AppConstants.spacingM),
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
+        padding: EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: AppConstants.spacingS,
                     vertical: AppConstants.spacingXS,
                   ),
@@ -427,9 +428,9 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                     ),
                   ),
                 ),
-                const SizedBox(width: AppConstants.spacingS),
+                SizedBox(width: AppConstants.spacingS),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: AppConstants.spacingS,
                     vertical: AppConstants.spacingXS,
                   ),
@@ -445,7 +446,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                         size: 12,
                         color: priorityInfo.color,
                       ),
-                      const SizedBox(width: AppConstants.spacingXS),
+                      SizedBox(width: AppConstants.spacingXS),
                       Text(
                         _getPriorityName(ticket.priority),
                         style: TextStyle(
@@ -457,9 +458,9 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                     ],
                   ),
                 ),
-                const Spacer(),
+                Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: AppConstants.spacingS,
                     vertical: AppConstants.spacingXS,
                   ),
@@ -478,7 +479,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                 ),
               ],
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             Row(
               children: [
@@ -488,7 +489,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                 ),
               ],
             ),
-            const SizedBox(height: AppConstants.spacingS),
+            SizedBox(height: AppConstants.spacingS),
 
             Text(
               ticket.description,
@@ -496,7 +497,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             Row(
               children: [
@@ -505,7 +506,7 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                   size: AppConstants.iconS,
                   color: AppTheme.mediumGrey,
                 ),
-                const SizedBox(width: AppConstants.spacingXS),
+                SizedBox(width: AppConstants.spacingXS),
                 Text(
                   DateFormat('MMM dd, yyyy • hh:mm a').format(ticket.createdAt),
                   style: AppTheme.bodySmall.copyWith(
@@ -513,13 +514,13 @@ class _RaiseTicketScreenState extends State<RaiseTicketScreen>
                   ),
                 ),
                 if (ticket.assignedTo != null) ...[
-                  const SizedBox(width: AppConstants.spacingM),
+                  SizedBox(width: AppConstants.spacingM),
                   Icon(
                     Icons.person,
                     size: AppConstants.iconS,
                     color: AppTheme.mediumGrey,
                   ),
-                  const SizedBox(width: AppConstants.spacingXS),
+                  SizedBox(width: AppConstants.spacingXS),
                   Text(
                     ticket.assignedTo!,
                     style: AppTheme.bodySmall.copyWith(

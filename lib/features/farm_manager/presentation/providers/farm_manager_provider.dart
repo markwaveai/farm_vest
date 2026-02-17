@@ -15,7 +15,6 @@ import '../../data/models/animalkart_order_model.dart';
 import '../../data/models/farm_manager_dashboard_model.dart';
 import '../../data/models/animal_onboarding_entry.dart';
 import '../../data/models/shed_model.dart';
-
 class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
   final ImagePicker _picker = ImagePicker();
 

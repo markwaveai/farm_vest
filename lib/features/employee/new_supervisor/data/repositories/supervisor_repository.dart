@@ -6,7 +6,6 @@ import 'package:farm_vest/core/services/tickets_api_services.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 class SupervisorRepository {
   Future<Map<String, dynamic>> getMilkEntries() async {
     final prefs = await SharedPreferences.getInstance();

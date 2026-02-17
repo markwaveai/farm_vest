@@ -54,18 +54,18 @@ class AppRouter {
       // Auth Routes
       GoRoute(
         path: '/splash',
-        builder: (context, state) => const SplashScreen(),
+        builder: (context, state) => SplashScreen(),
       ),
 
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        builder: (context, state) =>  OnboardingScreen(),
       ),
 
       GoRoute(
         path: '/login',
         builder: (context, state) {
-          return const NewLoginScreen();
+          return  NewLoginScreen();
         },
       ),
 
@@ -75,7 +75,7 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/customer-dashboard',
-            builder: (context, state) => const InvestorDashboardScreen(),
+            builder: (context, state) =>  InvestorDashboardScreen(),
           ),
           // GoRoute(
           //   path: '/asset-valuation',
@@ -83,7 +83,7 @@ class AppRouter {
           // ),
           GoRoute(
             path: '/cctv-live',
-            builder: (context, state) => const CCTVMainScreen(),
+            builder: (context, state) =>  CCTVMainScreen(),
           ),
           // GoRoute(
           //   path: '/revenue',
@@ -91,7 +91,7 @@ class AppRouter {
           // ),
           GoRoute(
             path: '/profile',
-            builder: (context, state) => const ProfileScreen(),
+            builder: (context, state) =>  ProfileScreen(),
           ),
         ],
       ),
@@ -105,16 +105,16 @@ class AppRouter {
       ),
       GoRoute(
         path: '/monthly-visits',
-        builder: (context, state) => const MonthlyVisitsScreen(),
+        builder: (context, state) =>  MonthlyVisitsScreen(),
       ),
       GoRoute(
         path: '/manager-transfer-approvals',
-        builder: (context, state) => const ManagerTransferApprovalScreen(),
+        builder: (context, state) =>  ManagerTransferApprovalScreen(),
       ),
 
       GoRoute(
         path: '/support',
-        builder: (context, state) => const SupportScreen(),
+        builder: (context, state) =>  SupportScreen(),
       ),
       // GoRoute(
       //   path: '/buffalo-calves',
@@ -134,33 +134,33 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/supervisor-dashboard',
-            builder: (context, state) => const NewSupervisorDashboard(),
+            builder: (context, state) =>  NewSupervisorDashboard(),
           ),
           GoRoute(
             path: '/new-supervisor/buffalo',
-            builder: (context, state) => const SupervisorBuffaloScreen(),
+            builder: (context, state) =>  SupervisorBuffaloScreen(),
           ),
           GoRoute(
             path: '/new-supervisor/alerts',
-            builder: (context, state) => const ActualAlertScreen(),
+            builder: (context, state) =>  ActualAlertScreen(),
           ),
           GoRoute(
             path: '/new-supervisor/stats',
-            builder: (context, state) => const SupervisorStatsScreen(),
+            builder: (context, state) =>  SupervisorStatsScreen(),
           ),
           GoRoute(
             path: '/new-supervisor/more',
-            builder: (context, state) => const SupervisorMoreScreen(),
+            builder: (context, state) =>  SupervisorMoreScreen(),
           ),
           GoRoute(
             path: '/new-supervisor/bulk-milk-entry',
-            builder: (context, state) => const BulkMilkEntryScreen(),
+            builder: (context, state) =>  BulkMilkEntryScreen(),
           ),
         ],
       ),
       GoRoute(
         path: '/buffalo-grid',
-        builder: (context, state) => const BuffaloGridScreen(),
+        builder: (context, state) =>  BuffaloGridScreen(),
       ),
       GoRoute(
         path: '/buffalo-details/:location',
@@ -171,23 +171,23 @@ class AppRouter {
       ),
       GoRoute(
         path: '/farm-manager-dashboard',
-        builder: (context, state) => const FarmManagerDashboard(),
+        builder: (context, state) =>  FarmManagerDashboard(),
       ),
       GoRoute(
         path: '/onboard-animal',
-        builder: (context, state) => const OnboardAnimalScreen(),
+        builder: (context, state) =>  OnboardAnimalScreen(),
       ),
       GoRoute(
         path: '/leave-requests',
-        builder: (context, state) => const LeaveRequestsScreen(),
+        builder: (context, state) =>  LeaveRequestsScreen(),
       ),
       GoRoute(
         path: '/transfer-tickets',
-        builder: (context, state) => const TransferTicketsScreen(),
+        builder: (context, state) =>  TransferTicketsScreen(),
       ),
       GoRoute(
         path: '/create-leave-request',
-        builder: (context, state) => const CreateLeaveRequestScreen(),
+        builder: (context, state) =>  CreateLeaveRequestScreen(),
       ),
       GoRoute(
         path: '/buffalo-allocation',
@@ -203,15 +203,15 @@ class AppRouter {
       ),
       GoRoute(
         path: '/investor-details',
-        builder: (context, state) => const InvestorDetails(),
+        builder: (context, state) => InvestorDetails(),
       ),
       GoRoute(
         path: '/staff-list',
-        builder: (context, state) => const StaffListScreen(),
+        builder: (context, state) => StaffListScreen(),
       ),
       GoRoute(
         path: '/reports',
-        builder: (context, state) => const ReportsScreen(),
+        builder: (context, state) =>  ReportsScreen(),
       ),
       GoRoute(
         path: '/doctor-dashboard',
@@ -231,11 +231,11 @@ class AppRouter {
 
       GoRoute(
         path: '/vaccination-screen',
-        builder: (context, state) => const VaccineTicketsScreen(),
+        builder: (context, state) => VaccineTicketsScreen(),
       ),
       GoRoute(
         path: '/buffalo-profile',
-        builder: (context, state) => const BuffaloProfileScreen(),
+        builder: (context, state) => BuffaloProfileScreen(),
       ),
       GoRoute(
         path: '/buffalo-device-details',
@@ -255,23 +255,23 @@ class AppRouter {
       ),
       GoRoute(
         path: '/assistant-dashboard',
-        builder: (context, state) => const AssistantDashboardScreen(),
+        builder: (context, state) => AssistantDashboardScreen(),
       ),
       GoRoute(
         path: '/milk-production',
-        builder: (context, state) => const MilkProductionScreen(),
+        builder: (context, state) =>  MilkProductionScreen(),
       ),
       GoRoute(
         path: '/health-issues',
-        builder: (context, state) => const HealthIssuesScreen(),
+        builder: (context, state) => HealthIssuesScreen(),
       ),
       GoRoute(
         path: '/raise-ticket',
-        builder: (context, state) => const RaiseTicketScreen(),
+        builder: (context, state) => RaiseTicketScreen(),
       ),
       GoRoute(
         path: '/create-transfer-ticket',
-        builder: (context, state) => const CreateTransferTicketScreen(),
+        builder: (context, state) =>  CreateTransferTicketScreen(),
       ),
 
       // Common Routes

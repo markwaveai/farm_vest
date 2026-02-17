@@ -3,13 +3,14 @@ import 'package:farm_vest/features/investor/data/models/investor_animal_model.da
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import '../widgets/dashboard/buffalo_card.dart';
-
-class BuffaloCalvesScreen extends StatefulWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class BuffaloCalvesScreen extends ConsumerStatefulWidget {
   final List<InvestorAnimal> calves;
   final String parentId;
   final InvestorAnimal? parent;
 
-  const BuffaloCalvesScreen({
+  BuffaloCalvesScreen({
     super.key,
     required this.calves,
     required this.parentId,
@@ -20,7 +21,7 @@ class BuffaloCalvesScreen extends StatefulWidget {
   State<BuffaloCalvesScreen> createState() => _BuffaloCalvesScreenState();
 }
 
-class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
+class _BuffaloCalvesScreenState extends ConsumerState<BuffaloCalvesScreen> {
   late InvestorAnimal _rootNode;
 
   @override
@@ -34,7 +35,7 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
       _rootNode = InvestorAnimal(
         animalId: widget.parentId,
         rfid: kHyphen, // Don't use ID as RFID
-        images: const [],
+        images: [],
         farmName: 'FarmVest Unit',
         farmLocation: '',
         shedName: 'Checking...',
@@ -46,7 +47,7 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -64,12 +65,12 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
         elevation: 1,
       ),
       body: InteractiveViewer(
-        boundaryMargin: const EdgeInsets.all(100),
+        boundaryMargin: EdgeInsets.all(100),
         minScale: 0.1,
         maxScale: 2.0,
         constrained: false, // Allow infinite scrolling space
         child: Padding(
-          padding: const EdgeInsets.all(40.0),
+          padding: EdgeInsets.all(40.0),
           child: _RecursiveTreeBuilder(
             root: _rootNode,
             childrenOverride: rootChildren,
@@ -81,19 +82,19 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
   }
 }
 
-class _RecursiveTreeBuilder extends StatelessWidget {
+class _RecursiveTreeBuilder extends ConsumerWidget {
   final InvestorAnimal root;
   final List<InvestorAnimal>? childrenOverride;
   final bool isAbsoluteRoot;
 
-  const _RecursiveTreeBuilder({
+  _RecursiveTreeBuilder({
     required this.root,
     this.childrenOverride,
     this.isAbsoluteRoot = false,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // 1. Calculate the list of children to render
     final children = childrenOverride ?? [];
 
@@ -114,7 +115,7 @@ class _RecursiveTreeBuilder extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         parentWidget,
-        const SizedBox(height: 20), // Vertical spacing
+        SizedBox(height: 20), // Vertical spacing
         CustomPaint(
           size: Size(
             (children.isEmpty ? 1 : children.length) * 220.0,
@@ -130,7 +131,7 @@ class _RecursiveTreeBuilder extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: childrenWidgets.map((childWidget) {
             return Padding(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: 10,
               ), // Horizontal gap
               child: childWidget,
@@ -179,13 +180,13 @@ class _RecursiveTreeBuilder extends StatelessWidget {
               top: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppTheme.primary,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
-                  'PARENT',
+                child: Text(
+                  'PARENT'.tr(ref),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 10,

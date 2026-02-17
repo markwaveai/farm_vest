@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 enum ButtonVariant { filled, outlined }
 
 class CustomActionButton extends StatelessWidget {
@@ -17,7 +16,7 @@ class CustomActionButton extends StatelessWidget {
   final double height;
   final double? width;
   final Widget? child;
-  const CustomActionButton({
+  CustomActionButton({
     super.key,
     this.label,
     required this.onPressed,

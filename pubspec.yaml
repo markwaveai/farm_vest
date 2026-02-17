@@ -109,6 +109,7 @@ dependencies:
   firebase_messaging: ^15.2.10
   # flutter_app_badger: ^1.5.0  # Temporarily disabled for release build
   flutter_local_notifications: ^17.2.1
+  get: ^4.7.3
 
 
 dependency_overrides:
@@ -147,6 +148,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/buffalofit_icons/
+    - assets/lang/
 
     # - assets/animations/
 

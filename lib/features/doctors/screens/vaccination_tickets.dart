@@ -1,12 +1,13 @@
 import 'package:farm_vest/features/doctors/widgets/health_tickets_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-class VaccineTicketsScreen extends StatelessWidget {
-  const VaccineTicketsScreen({super.key});
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class VaccineTicketsScreen extends ConsumerWidget {
+  VaccineTicketsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -19,13 +20,13 @@ class VaccineTicketsScreen extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          "Vaccination Tickets",
+          "Vaccination Tickets".tr(ref),
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
       ),
-      body: const HealthTicketsView(
+      body: HealthTicketsView(
         ticketType: 'VACCINATION',
         initialFilter: "All",
       ),

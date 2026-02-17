@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
-
 import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:farm_vest/core/widgets/custom_dialog.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_dashboard_provider.dart';
@@ -11,16 +10,17 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:farm_vest/features/auth/data/repositories/auth_repository.dart';
 
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 enum QuickActionType { milkEntry, healthTicket, transferRequest, locateAnimal }
 
-const Map<QuickActionType, String> buttonLabels = {
-  QuickActionType.milkEntry: 'Submit Entry',
-  QuickActionType.healthTicket: 'Raise Health Ticket',
-  QuickActionType.transferRequest: 'Submit Transfer',
-  QuickActionType.locateAnimal: 'Search',
+Map<QuickActionType, String> buttonLabels = {
+  QuickActionType.milkEntry: 'submit_entry',
+  QuickActionType.healthTicket: 'raise_ticket',
+  QuickActionType.transferRequest: 'submit_transfer',
+  QuickActionType.locateAnimal: 'search',
 };
 
-const Map<QuickActionType, Color> buttonBackgroundColors = {
+Map<QuickActionType, Color> buttonBackgroundColors = {
   QuickActionType.milkEntry: AppTheme.lightPrimary,
   QuickActionType.healthTicket: Color.fromARGB(255, 244, 81, 69),
   QuickActionType.transferRequest: AppTheme.slate,
@@ -41,7 +41,7 @@ Future<void> showQuickActionDialog({
 
 class _QuickActionDialogContent extends ConsumerStatefulWidget {
   final QuickActionType type;
-  const _QuickActionDialogContent({required this.type});
+  _QuickActionDialogContent({required this.type});
 
   @override
   ConsumerState<_QuickActionDialogContent> createState() =>
@@ -84,18 +84,18 @@ class _QuickActionDialogContentState
 
     switch (widget.type) {
       case QuickActionType.milkEntry:
-        dialogTitle = 'Milk Entry';
+        dialogTitle = 'Milk Entry'.tr(ref);
         break;
       case QuickActionType.healthTicket:
-        dialogTitle = 'Report Health Ticket';
-        successMessage = 'Health ticket raised successfully!';
+        dialogTitle = 'Report Health Ticket'.tr(ref);
+        successMessage = 'Health ticket raised successfully!'.tr(ref);
         break;
       case QuickActionType.transferRequest:
-        dialogTitle = 'Transfer Request';
-        successMessage = 'Transfer request submitted!';
+        dialogTitle = 'Transfer Request'.tr(ref);
+        successMessage = 'Transfer request submitted!'.tr(ref);
         break;
       case QuickActionType.locateAnimal:
-        dialogTitle = 'Locate Buffalo Position';
+        dialogTitle = 'Locate Buffalo Position'.tr(ref);
         break;
     }
 
@@ -118,7 +118,7 @@ class _QuickActionDialogContentState
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: Icon(Icons.close),
                 onPressed: () {
                   ref
                       .read(supervisorDashboardProvider.notifier)
@@ -128,241 +128,253 @@ class _QuickActionDialogContentState
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Flexible(
             child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.6,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  if (widget.type == QuickActionType.milkEntry) ...[
-                    helperTextField(
-                      context,
-                      helperText: 'Please enter quantity in liters',
-                      field: CustomTextField(
-                        hint: 'Enter quantity',
-                        controller: quantityController,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTimingDropdown(
-                      context,
-                      selectedTiming,
-                      (val) => setState(() => selectedTiming = val!),
-                    ),
-                  ],
-
-                  if (widget.type == QuickActionType.healthTicket ||
-                      widget.type == QuickActionType.transferRequest ||
-                      widget.type == QuickActionType.locateAnimal) ...[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        helperTextField(
-                          context,
-                          helperText:
-                              widget.type == QuickActionType.locateAnimal
-                              ? 'Search Animal by ID or Tag'
-                              : 'Buffalo ID / RFID / Ear Tag',
-                          field: CustomTextField(
-                            hint: 'Enter Tag Number',
-                            controller: idController,
-                            focusNode: idFocusNode,
-                            onChanged: (val) {
-                              setState(() {}); // Rebuild to update button state
-                              ref
-                                  .read(supervisorDashboardProvider.notifier)
-                                  .searchSuggestions(val);
-                              _isSearchEnabled = val.trim().isNotEmpty;
-
-                              if (_selectedAnimalId != null &&
-                                  val != _selectedAnimalTag) {
-                                setState(() {
-                                  _selectedAnimalId = null;
-                                  _selectedAnimalTag = null;
-                                });
-                              }
-                            },
-                          ),
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    if (widget.type == QuickActionType.milkEntry) ...[
+                      helperTextField(
+                        context,
+                        helperText: 'Please enter quantity in liters'.tr(ref),
+                        field: CustomTextField(
+                          hint: 'Enter quantity'.tr(ref),
+                          controller: quantityController,
+                          keyboardType: TextInputType.number,
                         ),
-                        if (suggestions.isNotEmpty && _selectedAnimalId == null)
-                          Container(
-                            margin: const EdgeInsets.only(top: 4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).cardColor,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: Theme.of(context).dividerColor,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            constraints: const BoxConstraints(maxHeight: 150),
-                            child: ListView.separated(
-                              shrinkWrap: true,
-                              padding: EdgeInsets.zero,
-                              itemCount: suggestions.length,
-                              separatorBuilder: (_, __) =>
-                                  const Divider(height: 1),
-                              itemBuilder: (context, index) {
-                                final animal = suggestions[index];
-                                final tag =
-                                    animal.rfid ??
-                                    animal.earTagId ??
-                                    animal.animalId;
-                                return ListTile(
-                                  dense: true,
-                                  title: Text(
-                                    tag,
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    'ID: ${animal.animalId} • Row: ${animal.rowNumber ?? 'N/A'}',
-                                  ),
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedAnimalId = animal.internalId;
-                                      _selectedAnimalTag = tag;
-                                      _selectedAnimalIdString = animal.animalId;
-                                      idController.text = tag;
-                                    });
-                                    ref
-                                        .read(
-                                          supervisorDashboardProvider.notifier,
-                                        )
-                                        .clearSuggestions();
-                                  },
-                                );
+                      ),
+                      SizedBox(height: 12),
+                      _buildTimingDropdown(
+                        context,
+                        selectedTiming,
+                        (val) => setState(() => selectedTiming = val!),
+                      ),
+                    ],
+
+                    if (widget.type == QuickActionType.healthTicket ||
+                        widget.type == QuickActionType.transferRequest ||
+                        widget.type == QuickActionType.locateAnimal) ...[
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          helperTextField(
+                            context,
+                            helperText:
+                                widget.type == QuickActionType.locateAnimal
+                                ? 'Search Animal by ID or Tag'.tr(ref)
+                                : 'Buffalo ID / RFID / Ear Tag'.tr(ref),
+                            field: CustomTextField(
+                              hint: 'Enter Tag Number'.tr(ref),
+                              controller: idController,
+                              focusNode: idFocusNode,
+                              onChanged: (val) {
+                                setState(
+                                  () {},
+                                ); // Rebuild to update button state
+                                ref
+                                    .read(supervisorDashboardProvider.notifier)
+                                    .searchSuggestions(val);
+                                _isSearchEnabled = val.trim().isNotEmpty;
+
+                                if (_selectedAnimalId != null &&
+                                    val != _selectedAnimalTag) {
+                                  setState(() {
+                                    _selectedAnimalId = null;
+                                    _selectedAnimalTag = null;
+                                  });
+                                }
                               },
                             ),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+                          if (suggestions.isNotEmpty &&
+                              _selectedAnimalId == null)
+                            Container(
+                              margin: EdgeInsets.only(top: 4),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).cardColor,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Theme.of(context).dividerColor,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              constraints: BoxConstraints(maxHeight: 150),
+                              child: ListView.separated(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                itemCount: suggestions.length,
+                                separatorBuilder: (_, __) =>
+                                    Divider(height: 1),
+                                itemBuilder: (context, index) {
+                                  final animal = suggestions[index];
+                                  final tag =
+                                      animal.rfid ??
+                                      animal.earTagId ??
+                                      animal.animalId;
+                                  return ListTile(
+                                    dense: true,
+                                    title: Text(
+                                      tag,
+                                      style: TextStyle(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      'ID: @id • Row: @row'.trParams({
+                                        'id': animal.animalId,
+                                        'row': animal.rowNumber ?? 'N/A',
+                                      }),
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedAnimalId = animal.internalId;
+                                        _selectedAnimalTag = tag;
+                                        _selectedAnimalIdString =
+                                            animal.animalId;
+                                        idController.text = tag;
+                                      });
+                                      ref
+                                          .read(
+                                            supervisorDashboardProvider
+                                                .notifier,
+                                          )
+                                          .clearSuggestions();
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
+                      SizedBox(height: 12),
+                    ],
 
-                  if (widget.type == QuickActionType.healthTicket ||
-                      widget.type == QuickActionType.transferRequest) ...[
-                    helperTextField(
-                      context,
-                      helperText: 'Description / Reason',
-                      field: CustomTextField(
-                        hint: 'Enter detail here...',
-                        controller: reasonController,
-                        focusNode: reasonFocusNode,
-                        maxLines: 2,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (widget.type == QuickActionType.healthTicket) ...[
-                      _buildPriorityDropdown(
+                    if (widget.type == QuickActionType.healthTicket ||
+                        widget.type == QuickActionType.transferRequest) ...[
+                      helperTextField(
                         context,
-                        selectedPriority,
-                        (val) => setState(() => selectedPriority = val!),
+                        helperText: 'Description / Reason'.tr(ref),
+                        field: CustomTextField(
+                          hint: 'Enter detail here...'.tr(ref),
+                          controller: reasonController,
+                          focusNode: reasonFocusNode,
+                          maxLines: 2,
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      _buildDiseaseDropdown(
-                        context,
-                        selectedDisease,
-                        (val) => setState(() => selectedDisease = val!),
+                      SizedBox(height: 12),
+                      if (widget.type == QuickActionType.healthTicket) ...[
+                        _buildPriorityDropdown(
+                          context,
+                          selectedPriority,
+                          (val) => setState(() => selectedPriority = val!),
+                        ),
+                        SizedBox(height: 12),
+                        _buildDiseaseDropdown(
+                          context,
+                          selectedDisease,
+                          (val) => setState(() => selectedDisease = val!),
+                        ),
+                        SizedBox(height: 16),
+                        _buildMultiImagePicker(
+                          context,
+                          _pickedImages,
+                          onCameraPick: () async {
+                            final picker = ImagePicker();
+                            final image = await picker.pickImage(
+                              source: ImageSource.camera,
+                              imageQuality: 70,
+                            );
+                            if (image != null && _pickedImages.length < 5) {
+                              setState(
+                                () => _pickedImages.add(File(image.path)),
+                              );
+                            }
+                          },
+                          onGalleryPick: () async {
+                            final picker = ImagePicker();
+                            final images = await picker.pickMultiImage(
+                              imageQuality: 70,
+                            );
+                            if (images.isNotEmpty) {
+                              final remaining = 5 - _pickedImages.length;
+                              final toAdd = images
+                                  .take(remaining)
+                                  .map((x) => File(x.path))
+                                  .toList();
+                              setState(() => _pickedImages.addAll(toAdd));
+                            }
+                          },
+                          onRemove: (index) {
+                            setState(() => _pickedImages.removeAt(index));
+                          },
+                        ),
+                      ],
+                    ],
+
+                    if (widget.type == QuickActionType.locateAnimal) ...[
+                      CustomActionButton(
+                        width: double.infinity,
+                        color: _isSearchEnabled
+                            ? AppTheme.lightPrimary
+                            : Colors.grey,
+                        onPressed: _isSearchEnabled
+                            ? () {
+                                final query = idController.text.trim();
+                                if (query.isNotEmpty) {
+                                  ref
+                                      .read(
+                                        supervisorDashboardProvider.notifier,
+                                      )
+                                      .locateAnimal(query);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Please enter a tag or ID to search'.tr(ref),
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            : null,
+                        child: Text(
+                          'search'.tr(ref),
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      _buildMultiImagePicker(
-                        context,
-                        _pickedImages,
-                        onCameraPick: () async {
-                          final picker = ImagePicker();
-                          final image = await picker.pickImage(
-                            source: ImageSource.camera,
-                            imageQuality: 70,
-                          );
-                          if (image != null && _pickedImages.length < 5) {
-                            setState(() => _pickedImages.add(File(image.path)));
-                          }
-                        },
-                        onGalleryPick: () async {
-                          final picker = ImagePicker();
-                          final images = await picker.pickMultiImage(
-                            imageQuality: 70,
-                          );
-                          if (images.isNotEmpty) {
-                            final remaining = 5 - _pickedImages.length;
-                            final toAdd = images
-                                .take(remaining)
-                                .map((x) => File(x.path))
-                                .toList();
-                            setState(() => _pickedImages.addAll(toAdd));
-                          }
-                        },
-                        onRemove: (index) {
-                          setState(() => _pickedImages.removeAt(index));
-                        },
-                      ),
+                      SizedBox(height: 16),
+                      if (dashboardState.isLocatingAnimal)
+                        Center(child: CircularProgressIndicator())
+                      else if (dashboardState.error != null)
+                        Text(
+                          dashboardState.error!,
+                          style: TextStyle(color: Colors.red),
+                        )
+                      else if (dashboardState.animalLocation != null)
+                        _buildLocationResult(
+                          context,
+                          dashboardState.animalLocation!,
+                        ),
                     ],
                   ],
-
-                  if (widget.type == QuickActionType.locateAnimal) ...[
-                    CustomActionButton(
-                      width: double.infinity,
-                      color: _isSearchEnabled
-                          ? AppTheme.lightPrimary
-                          : Colors.grey,
-                      onPressed: _isSearchEnabled
-                          ? () {
-                              final query = idController.text.trim();
-                              if (query.isNotEmpty) {
-                                ref
-                                    .read(supervisorDashboardProvider.notifier)
-                                    .locateAnimal(query);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Please enter a tag or ID to search',
-                                    ),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            }
-                          : null,
-                      child: const Text(
-                        'Search',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    if (dashboardState.isLocatingAnimal)
-                      const Center(child: CircularProgressIndicator())
-                    else if (dashboardState.error != null)
-                      Text(
-                        dashboardState.error!,
-                        style: const TextStyle(color: Colors.red),
-                      )
-                    else if (dashboardState.animalLocation != null)
-                      _buildLocationResult(
-                        context,
-                        dashboardState.animalLocation!,
-                      ),
-                  ],
-                ],
+                ),
               ),
             ),
           ),
-          ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           if (widget.type != QuickActionType.locateAnimal)
             CustomActionButton(
               onPressed: _isSubmitting
@@ -372,9 +384,7 @@ class _QuickActionDialogContentState
                       if (widget.type == QuickActionType.milkEntry) {
                         if (quantityController.text.isEmpty) {
                           messenger.showSnackBar(
-                            const SnackBar(
-                              content: Text('Quantity is required'),
-                            ),
+                            SnackBar(content: Text('Quantity is required'.tr(ref))),
                           );
                           return;
                         }
@@ -390,8 +400,8 @@ class _QuickActionDialogContentState
                           if (res != null && mounted) {
                             Navigator.pop(context);
                             messenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('Milk entry added'),
+                              SnackBar(
+                                content: Text('Milk entry added'.tr(ref)),
                                 backgroundColor: Colors.green,
                               ),
                             );
@@ -413,16 +423,18 @@ class _QuickActionDialogContentState
                         if (_selectedAnimalId == null &&
                             idController.text.isEmpty) {
                           messenger.showSnackBar(
-                            const SnackBar(
-                              content: Text('Animal selection is required'),
+                            SnackBar(
+                              content: Text('Animal selection is required'.tr(ref)),
                             ),
                           );
                           return;
                         }
                         if (reasonController.text.isEmpty) {
                           messenger.showSnackBar(
-                            const SnackBar(
-                              content: Text('Reason/Description is required'),
+                            SnackBar(
+                              content: Text(
+                                'Reason/Description is required'.tr(ref),
+                              ),
                             ),
                           );
                           return;
@@ -515,7 +527,7 @@ class _QuickActionDialogContentState
                   buttonBackgroundColors[widget.type] ?? AppTheme.lightPrimary,
               width: double.infinity,
               child: _isSubmitting
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
@@ -524,8 +536,8 @@ class _QuickActionDialogContentState
                       ),
                     )
                   : Text(
-                      buttonLabels[widget.type] ?? 'Submit',
-                      style: const TextStyle(color: Colors.white),
+                      (buttonLabels[widget.type] ?? 'submit').tr(ref),
+                      style: TextStyle(color: Colors.white),
                     ),
             ),
         ],
@@ -543,25 +555,25 @@ Widget _buildTimingDropdown(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        'Select Timing',
+        'Select Timing'.tr(ref),
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: Theme.of(context).hintColor,
         ),
       ),
-      const SizedBox(height: 6),
+      SizedBox(height: 6),
       DropdownButtonFormField<String>(
         value: current,
         items: [
-          'Morning',
-          'Afternoon',
-          'Evening',
-        ].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+          'morning',
+          'afternoon',
+          'evening',
+        ].map((t) => DropdownMenuItem(value: t, child: Text(t.tr(ref)))).toList(),
         onChanged: onChanged,
         decoration: InputDecoration(
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 10,
           ),
@@ -580,25 +592,25 @@ Widget _buildPriorityDropdown(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        'Select Priority',
+        'Select Priority'.tr(ref),
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: Theme.of(context).hintColor,
         ),
       ),
-      const SizedBox(height: 6),
+      SizedBox(height: 6),
       DropdownButtonFormField<String>(
         value: current,
         items: [
-          'High',
-          'Medium',
-          'Low',
-        ].map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+          'high',
+          'medium',
+          'low',
+        ].map((p) => DropdownMenuItem(value: p, child: Text(p.tr(ref)))).toList(),
         onChanged: onChanged,
         decoration: InputDecoration(
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 10,
           ),
@@ -617,29 +629,29 @@ Widget _buildDiseaseDropdown(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        'Identify Disease',
+        'Identify Disease'.tr(ref),
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: Theme.of(context).hintColor,
         ),
       ),
-      const SizedBox(height: 6),
+      SizedBox(height: 6),
       DropdownButtonFormField<String>(
         value: current,
         items: [
-          'FEVER',
-          'MASTITIS',
-          'DIARRHEA',
-          'FOOT_ROT',
-          'ANEMIA',
-          'BLOAT',
-          'HEAT_STRESS',
-        ].map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
+          'fever',
+          'mastitis',
+          'diarrhea',
+          'foot_rot',
+          'anemia',
+          'bloat',
+          'heat_stress',
+        ].map((d) => DropdownMenuItem(value: d, child: Text(d.tr(ref)))).toList(),
         onChanged: onChanged,
         decoration: InputDecoration(
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 10,
           ),
@@ -660,14 +672,14 @@ Widget _buildMultiImagePicker(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        'Evidence Images (Optional, max 5)',
+        'Evidence Images (Optional, max 5)'.tr(ref),
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: Theme.of(context).hintColor,
         ),
       ),
-      const SizedBox(height: 8),
+      SizedBox(height: 8),
       SizedBox(
         height: 100,
         child: ListView(
@@ -677,7 +689,7 @@ Widget _buildMultiImagePicker(
               final index = entry.key;
               final file = entry.value;
               return Padding(
-                padding: const EdgeInsets.only(right: 8),
+                padding: EdgeInsets.only(right: 8),
                 child: Stack(
                   children: [
                     ClipRRect(
@@ -695,12 +707,12 @@ Widget _buildMultiImagePicker(
                       child: InkWell(
                         onTap: () => onRemove(index),
                         child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
                             color: Colors.red,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.close,
                             color: Colors.white,
                             size: 14,
@@ -718,14 +730,14 @@ Widget _buildMultiImagePicker(
                   _buildAddImageButton(
                     context,
                     Icons.camera_alt,
-                    'Camera',
+                    'Camera'.tr(ref),
                     onCameraPick,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   _buildAddImageButton(
                     context,
                     Icons.photo_library,
-                    'Gallery',
+                    'Gallery'.tr(ref),
                     onGalleryPick,
                   ),
                 ],
@@ -750,7 +762,7 @@ Widget _buildAddImageButton(
       height: 100,
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? Theme.of(context).dividerColor.withOpacity(0.1)
+            ? Theme.of(context).dividerColor.withValues(alpha: 0.1)
             : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Theme.of(context).dividerColor),
@@ -759,10 +771,10 @@ Widget _buildAddImageButton(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: AppTheme.primary),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(fontSize: 11, color: AppTheme.primary),
+            style: TextStyle(fontSize: 11, color: AppTheme.primary),
           ),
         ],
       ),
@@ -790,14 +802,14 @@ Widget _buildLocationResult(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Current Location',
+                  'Current Location'.tr(ref),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onSurface,
@@ -806,15 +818,19 @@ Widget _buildLocationResult(
                 Icon(Icons.directions, color: Theme.of(context).primaryColor),
               ],
             ),
-            const Divider(),
-            _buildLocationRow(context, 'Shed', location['shed_name']),
+            Divider(),
             _buildLocationRow(
               context,
-              'Row',
+              'Shed Location'.tr(ref),
+              location['shed_name'],
+            ),
+            _buildLocationRow(
+              context,
+              'row'.tr(ref),
               location['row_number']?.toString(),
             ),
-            _buildLocationRow(context, 'Slot', location['parking_id']),
-            _buildLocationRow(context, 'Health', location['health_status']),
+            _buildLocationRow(context, 'slot'.tr(ref), location['parking_id']),
+            _buildLocationRow(context, 'Health'.tr(ref), location['health_status']),
           ],
         ),
       ),
@@ -824,7 +840,7 @@ Widget _buildLocationResult(
 
 Widget _buildLocationRow(BuildContext context, String label, String? value) {
   return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
+    padding: EdgeInsets.symmetric(vertical: 4),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -857,7 +873,7 @@ Widget helperTextField(
           color: Theme.of(context).hintColor,
         ),
       ),
-      const SizedBox(height: 6),
+      SizedBox(height: 6),
       field,
     ],
   );

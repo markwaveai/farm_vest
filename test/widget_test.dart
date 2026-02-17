@@ -8,16 +8,28 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:farm_vest/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:device_preview/device_preview.dart';
 
 void main() {
   testWidgets('FarmVest app smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const FarmVestApp());
+    // 1. Mock SharedPreferences
+    SharedPreferences.setMockInitialValues({});
 
-    // Wait for splash screen animation
-    await tester.pump(const Duration(seconds: 3));
+    // 2. Ensure GetX is reset
+    Get.reset();
 
-    // Verify that we can find the FarmVest text or login elements
-    expect(find.textContaining('FarmVest'), findsWidgets);
+    // 3. Pump the app
+    await tester.pumpWidget(ProviderScope(child: FarmVestApp()));
+
+    // 4. Wait for splash screen (and ensure timer completes)
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+
+    // 5. Verify that we can find the FarmVest text (likely in Login screen now)
+    // Note: Splash screen has "FarmVest", Login might have it too.
+    // If localization is working, 'FarmVest' key should map to 'FarmVest' in English (default)
+    expect(find.text('FarmVest'), findsOneWidget);
   });
 }

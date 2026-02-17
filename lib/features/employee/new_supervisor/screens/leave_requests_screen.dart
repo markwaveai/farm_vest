@@ -3,9 +3,9 @@ import 'package:farm_vest/features/employee/new_supervisor/providers/leave_reque
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class LeaveRequestsScreen extends ConsumerStatefulWidget {
-  const LeaveRequestsScreen({super.key});
+  LeaveRequestsScreen({super.key});
 
   @override
   ConsumerState<LeaveRequestsScreen> createState() =>
@@ -44,26 +44,28 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Leave Request Details'),
+          title: Text('Leave Request Details'.tr(ref)),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Status: ${leaveRequest.status}',
+                  '${'Status'.tr(ref)}: ${leaveRequest.status.toLowerCase().tr(ref)}',
                   style: TextStyle(
                     color: _getStatusColor(leaveRequest.status),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text('Leave Type: ${leaveRequest.leaveType}'),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
-                  'From: ${leaveRequest.startDate} To: ${leaveRequest.endDate}',
+                  '${'Leave Type'.tr(ref)}: ${leaveRequest.leaveType.toLowerCase().tr(ref)}',
                 ),
-                const SizedBox(height: 8),
-                const Text('Reason:'),
+                SizedBox(height: 8),
+                Text(
+                  '${'From'.tr(ref)}: ${leaveRequest.startDate} ${'To'.tr(ref)}: ${leaveRequest.endDate}',
+                ),
+                SizedBox(height: 8),
+                Text('${'Reason'.tr(ref)}:'),
                 Text(leaveRequest.reason),
               ],
             ),
@@ -71,8 +73,8 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
           actions: <Widget>[
             if (leaveRequest.status == 'PENDING')
               TextButton(
-                child: const Text(
-                  'Cancel Request',
+                child: Text(
+                  'Cancel Request'.tr(ref),
                   style: TextStyle(color: Colors.red),
                 ),
                 onPressed: () {
@@ -83,7 +85,7 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
                 },
               ),
             TextButton(
-              child: const Text('Close'),
+              child: Text('Close'.tr(ref)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -103,7 +105,7 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         title: Text(
-          'Leave Requests',
+          'Leave Requests'.tr(ref),
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
@@ -115,7 +117,7 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
         ),
       ),
       body: leaveRequestState.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : leaveRequestState.error != null
           ? Center(child: Text(leaveRequestState.error!))
           : RefreshIndicator(
@@ -127,23 +129,25 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
                   final leaveRequest = leaveRequestState.leaveRequests[index];
                   return Card(
                     color: Theme.of(context).cardColor,
-                    margin: const EdgeInsets.symmetric(
+                    margin: EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 8,
                     ),
                     child: ListTile(
                       title: Text(
-                        '${leaveRequest.leaveType} Leave',
+                        '@type Leave'.trParams({
+                          'type': leaveRequest.leaveType.toLowerCase().tr(ref),
+                        }),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       subtitle: Text(
-                        '${leaveRequest.startDate} to ${leaveRequest.endDate}',
+                        '${leaveRequest.startDate} ${'To'.tr(ref)} ${leaveRequest.endDate}',
                         style: TextStyle(color: Theme.of(context).hintColor),
                       ),
                       trailing: Text(
-                        leaveRequest.status,
+                        leaveRequest.status.toLowerCase().tr(ref),
                         style: TextStyle(
                           color: _getStatusColor(leaveRequest.status),
                           fontWeight: FontWeight.bold,
@@ -162,7 +166,7 @@ class _LeaveRequestsScreenState extends ConsumerState<LeaveRequestsScreen> {
         onPressed: () {
           context.push('/create-leave-request');
         },
-        child: const Icon(Icons.add, color: Colors.white),
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }

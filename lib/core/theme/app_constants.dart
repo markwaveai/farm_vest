@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String kHyphen = '--';
+String kHyphen = '--';
 
 class AppConstants {
   static const String appName = 'FarmVest';

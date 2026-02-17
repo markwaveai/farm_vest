@@ -6,7 +6,7 @@ import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class ProfileHeader extends ConsumerStatefulWidget {
   final UserModel? user;
   final bool isEditing;
@@ -16,7 +16,7 @@ class ProfileHeader extends ConsumerStatefulWidget {
   final Function(File) onImageSelected;
   final Function() onImageRemoved;
 
-  const ProfileHeader({
+  ProfileHeader({
     super.key,
     required this.user,
     required this.isEditing,
@@ -42,8 +42,8 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from gallery'),
+                leading: Icon(Icons.photo_library),
+                title: Text('Choose from gallery'.tr(ref)),
                 onTap: () async {
                   Navigator.pop(ctx);
                   final file = await ref
@@ -55,8 +55,8 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Take a photo'),
+                leading: Icon(Icons.photo_camera),
+                title: Text('Take a photo'.tr(ref)),
                 onTap: () async {
                   Navigator.pop(ctx);
                   final file = await ref
@@ -69,9 +69,9 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
               ),
               if (hasImage)
                 ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text(
-                    'Remove photo',
+                  leading: Icon(Icons.delete, color: Colors.red),
+                  title: Text(
+                    'Remove photo'.tr(ref),
                     style: TextStyle(color: Colors.red),
                   ),
                   onTap: () {
@@ -90,21 +90,21 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove Profile Photo'),
-        content: const Text(
-          'Are you sure you want to remove your profile photo?',
+        title: Text('Remove Profile Photo'.tr(ref)),
+        content: Text(
+          'Are you sure you want to remove your profile photo?'.tr(ref),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr(ref)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               widget.onImageRemoved();
             },
-            child: const Text('Remove'),
+            child: Text('Remove'.tr(ref)),
           ),
         ],
       ),
@@ -136,7 +136,7 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
                           fit: BoxFit.cover,
                           loadingBuilder: (context, child, loadingProgress) {
                             if (loadingProgress == null) return child;
-                            return const Center(
+                            return Center(
                               child: SizedBox(
                                 width: 26,
                                 height: 26,
@@ -151,16 +151,16 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
                             debugPrint(
                               'Image load error for $remoteImageUrl: $error',
                             );
-                            return const Center(
+                            return Center(
                               child: Text(
-                                'Image not supported',
+                                'Image not supported'.tr(ref),
                                 style: AppTheme.bodySmall,
                                 textAlign: TextAlign.center,
                               ),
                             );
                           },
                         )
-                      : const Center(
+                      : Center(
                           child: Icon(
                             Icons.person,
                             size: 50,
@@ -175,14 +175,14 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
                     color: AppTheme.secondary,
                     shape: BoxShape.circle,
                   ),
                   child: InkWell(
                     onTap: () => _showImageSourceSheet(hasImage),
-                    child: const Icon(
+                    child: Icon(
                       Icons.camera_alt,
                       size: 20,
                       color: Colors.white,
@@ -192,7 +192,7 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
               ),
           ],
         ),
-        const SizedBox(height: AppConstants.spacingM),
+        SizedBox(height: AppConstants.spacingM),
         Text(
           widget.user?.name ?? '',
           style: AppTheme.headingMedium.copyWith(

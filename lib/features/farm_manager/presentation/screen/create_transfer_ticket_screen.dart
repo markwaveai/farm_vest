@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/core/services/tickets_api_services.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
@@ -5,17 +6,16 @@ import 'package:farm_vest/core/widgets/primary_button.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class CreateTransferTicketScreen extends StatefulWidget {
-  const CreateTransferTicketScreen({super.key});
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class CreateTransferTicketScreen extends ConsumerStatefulWidget {
+  CreateTransferTicketScreen({super.key});
 
   @override
   State<CreateTransferTicketScreen> createState() =>
       _CreateTransferTicketScreenState();
 }
 
-class _CreateTransferTicketScreenState
-    extends State<CreateTransferTicketScreen> {
+class _CreateTransferTicketScreenState extends ConsumerState<CreateTransferTicketScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _animalSearchController = TextEditingController();
@@ -67,7 +67,7 @@ class _CreateTransferTicketScreenState
     if (_selectedAnimalId == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Please select an animal')));
+      ).showSnackBar(SnackBar(content: Text('Please select an animal'.tr(ref))));
       return;
     }
 
@@ -92,8 +92,8 @@ class _CreateTransferTicketScreenState
       if (success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Transfer ticket created successfully'),
+            SnackBar(
+              content: Text('Transfer ticket created successfully'.tr(ref)),
             ),
           );
           Navigator.pop(context, true);
@@ -101,7 +101,7 @@ class _CreateTransferTicketScreenState
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to create ticket')),
+            SnackBar(content: Text('Failed to create ticket'.tr(ref))),
           );
         }
       }
@@ -124,7 +124,7 @@ class _CreateTransferTicketScreenState
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         title: Text(
-          "Create Transfer Ticket",
+          "Create Transfer Ticket".tr(ref),
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
@@ -133,17 +133,17 @@ class _CreateTransferTicketScreenState
         leading: BackButton(color: Theme.of(context).colorScheme.onSurface),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSectionTitle("Animal Selection"),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               if (_selectedAnimalId != null) ...[
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -151,19 +151,19 @@ class _CreateTransferTicketScreenState
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.pets, color: Colors.green),
-                      const SizedBox(width: 12),
+                      Icon(Icons.pets, color: Colors.green),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           "Selected: $_selectedAnimalRfid",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.green,
                           ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close, color: Colors.green),
+                        icon: Icon(Icons.close, color: Colors.green),
                         onPressed: () {
                           setState(() {
                             _selectedAnimalId = null;
@@ -181,7 +181,7 @@ class _CreateTransferTicketScreenState
                   controller: _animalSearchController,
                   decoration: InputDecoration(
                     hintText: "Search RFID / Ear Tag",
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: Icon(Icons.search),
                     filled: true,
                     fillColor: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white.withOpacity(0.05)
@@ -191,7 +191,7 @@ class _CreateTransferTicketScreenState
                       borderSide: BorderSide.none,
                     ),
                     suffixIcon: _isSearching
-                        ? const Padding(
+                        ? Padding(
                             padding: EdgeInsets.all(12),
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
@@ -206,7 +206,7 @@ class _CreateTransferTicketScreenState
                   },
                 ),
                 if (_searchResults.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
@@ -217,11 +217,11 @@ class _CreateTransferTicketScreenState
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    constraints: const BoxConstraints(maxHeight: 200),
+                    constraints: BoxConstraints(maxHeight: 200),
                     child: ListView.separated(
                       shrinkWrap: true,
                       itemCount: _searchResults.length,
-                      separatorBuilder: (c, i) => const Divider(height: 1),
+                      separatorBuilder: (c, i) => Divider(height: 1),
                       itemBuilder: (context, index) {
                         final animal = _searchResults[index];
                         final rfid =
@@ -245,31 +245,31 @@ class _CreateTransferTicketScreenState
                   ),
                 ],
               ],
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               _buildSectionTitle("Transfer Details"),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _direction,
                 decoration: _inputDecoration("Transfer Direction"),
-                items: const [
-                  DropdownMenuItem(value: 'OUT', child: Text("Moving OUT")),
-                  DropdownMenuItem(value: 'IN', child: Text("Moving IN")),
+                items: [
+                  DropdownMenuItem(value: 'OUT', child: Text("Moving OUT".tr(ref))),
+                  DropdownMenuItem(value: 'IN', child: Text("Moving IN".tr(ref))),
                 ],
                 onChanged: (val) => setState(() => _direction = val!),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _priority,
                 decoration: _inputDecoration("Priority"),
-                items: const [
-                  DropdownMenuItem(value: 'LOW', child: Text("Low")),
-                  DropdownMenuItem(value: 'MEDIUM', child: Text("Medium")),
-                  DropdownMenuItem(value: 'HIGH', child: Text("High")),
-                  DropdownMenuItem(value: 'URGENT', child: Text("Urgent")),
+                items: [
+                  DropdownMenuItem(value: 'LOW', child: Text("Low".tr(ref))),
+                  DropdownMenuItem(value: 'MEDIUM', child: Text("Medium".tr(ref))),
+                  DropdownMenuItem(value: 'HIGH', child: Text("High".tr(ref))),
+                  DropdownMenuItem(value: 'URGENT', child: Text("Urgent".tr(ref))),
                 ],
                 onChanged: (val) => setState(() => _priority = val!),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               CustomTextField(
                 controller: _descriptionController,
                 hint: "Reason for transfer...",
@@ -277,7 +277,7 @@ class _CreateTransferTicketScreenState
                 validator: (v) =>
                     v == null || v.isEmpty ? "Description is required" : null,
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
               PrimaryButton(
                 text: "Create Ticket",
                 onPressed: _submitTicket,

@@ -16,11 +16,11 @@ import '../widgets/onboarding/animal_entry_form.dart';
 import '../widgets/onboarding/collapsible_section_title.dart';
 import '../widgets/onboarding/info_card.dart';
 import '../widgets/onboarding/order_card.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class OnboardAnimalScreen extends ConsumerStatefulWidget {
   final bool hideAppBar;
 
-  const OnboardAnimalScreen({super.key, this.hideAppBar = false});
+  OnboardAnimalScreen({super.key, this.hideAppBar = false});
 
   @override
   ConsumerState<OnboardAnimalScreen> createState() =>
@@ -143,7 +143,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
             );
 
             return Dialog(
-              insetPadding: const EdgeInsets.all(20),
+              insetPadding: EdgeInsets.all(20),
               backgroundColor: Colors.transparent,
               child: Container(
                 constraints: BoxConstraints(
@@ -157,7 +157,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                     BoxShadow(
                       color: Theme.of(context).colorScheme.shadow,
                       blurRadius: 20,
-                      offset: const Offset(0, 10),
+                      offset: Offset(0, 10),
                     ),
                   ],
                 ),
@@ -166,7 +166,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                   children: [
                     // Header
                     Container(
-                      padding: const EdgeInsets.all(24),
+                      padding: EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -178,7 +178,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
-                        borderRadius: const BorderRadius.only(
+                        borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(24),
                           topRight: Radius.circular(24),
                         ),
@@ -186,18 +186,18 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.receipt_long,
                               color: Colors.white,
                               size: 24,
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,15 +206,15 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                   mobile.isEmpty
                                       ? 'All Paid Orders'
                                       : 'Orders for $mobile',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                SizedBox(height: 4),
                                 Text(
-                                  'Select an order to continue',
+                                  'Select an order to continue'.tr(ref),
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.white.withOpacity(0.8),
@@ -225,7 +225,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                           ),
                           IconButton(
                             onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.close, color: Colors.white),
+                            icon: Icon(Icons.close, color: Colors.white),
                           ),
                         ],
                       ),
@@ -234,7 +234,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                     // Content
                     Flexible(
                       child: Container(
-                        padding: const EdgeInsets.all(24),
+                        padding: EdgeInsets.all(24),
                         child: ordersAsync.when(
                           data: (paidOrdersData) {
                             final orders = paidOrdersData.orders;
@@ -246,12 +246,12 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
 
                             if (filteredOrders.isEmpty) {
                               return Container(
-                                padding: const EdgeInsets.all(40),
+                                padding: EdgeInsets.all(40),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.all(20),
+                                      padding: EdgeInsets.all(20),
                                       decoration: BoxDecoration(
                                         color: AppTheme.lightGrey,
                                         shape: BoxShape.circle,
@@ -262,9 +262,9 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                         color: Theme.of(context).disabledColor,
                                       ),
                                     ),
-                                    const SizedBox(height: 16),
+                                    SizedBox(height: 16),
                                     Text(
-                                      'No paid orders found',
+                                      'No paid orders found'.tr(ref),
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w600,
@@ -273,7 +273,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                         ).colorScheme.onSurface,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8),
                                     Text(
                                       mobile.isEmpty
                                           ? 'There are no paid orders available.'
@@ -297,7 +297,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                   child: ListView.separated(
                                     itemCount: filteredOrders.length,
                                     separatorBuilder: (_, __) =>
-                                        const SizedBox(height: 12),
+                                        SizedBox(height: 12),
                                     itemBuilder: (context, index) {
                                       final item = filteredOrders[index];
                                       return OrderCard(
@@ -326,9 +326,9 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                     Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
-                                const SizedBox(height: 16),
+                                SizedBox(height: 16),
                                 Text(
-                                  'Loading orders...',
+                                  'Loading orders...'.tr(ref),
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Theme.of(context).hintColor,
@@ -342,7 +342,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.all(20),
+                                  padding: EdgeInsets.all(20),
                                   decoration: BoxDecoration(
                                     color: AppTheme.errorRed.withOpacity(0.1),
                                     shape: BoxShape.circle,
@@ -353,16 +353,16 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                                     color: AppTheme.errorRed,
                                   ),
                                 ),
-                                const SizedBox(height: 16),
+                                SizedBox(height: 16),
                                 Text(
-                                  'Error loading orders',
+                                  'Error loading orders'.tr(ref),
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
                                     color: AppTheme.errorRed,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                SizedBox(height: 8),
                                 Text(
                                   err.toString(),
                                   style: TextStyle(
@@ -502,22 +502,22 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Row(
+          title: Row(
             children: [
               Icon(Icons.warning_amber_rounded, color: Colors.orange),
               SizedBox(width: 8),
-              Text('Important Warning'),
+              Text('Important Warning'.tr(ref)),
             ],
           ),
-          content: const Text(
-            'Please make sure without CPF buffalo visualization you maintain your own risk buffalo management.',
+          content: Text(
+            'Please make sure without CPF buffalo visualization you maintain your own risk buffalo management.'.tr(ref),
             style: TextStyle(fontSize: 14),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
               child: Text(
-                'Cancel',
+                'Cancel'.tr(ref),
                 style: TextStyle(color: Theme.of(context).hintColor),
               ),
             ),
@@ -528,7 +528,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                 foregroundColor: Colors.white,
                 elevation: 0,
               ),
-              child: const Text('Proceed Anyway'),
+              child: Text('Proceed Anyway'.tr(ref)),
             ),
           ],
         ),
@@ -589,8 +589,8 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 8),
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
                 Text('Successfully onboarded ${allAnimals.length} animals!'),
               ],
             ),
@@ -643,7 +643,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
           : AppBar(
               backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
               title: Text(
-                'Buffalo Onboarding',
+                'Buffalo Onboarding'.tr(ref),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
@@ -670,13 +670,13 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
               ),
             ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Search Section
             SectionTitle('Find Investor Orders'),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -684,7 +684,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                   child: CustomTextField(
                     hint: 'Enter mobile number...',
                     controller: searchController,
-                    prefixIcon: const Icon(Icons.phone_android_rounded),
+                    prefixIcon: Icon(Icons.phone_android_rounded),
                     keyboardType: TextInputType.phone,
                     maxLength: 10,
                     showCounter: false,
@@ -692,7 +692,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                     // Theme aware text field is handled by CustomTextField but we ensure its consistent
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 ElevatedButton(
                   onPressed: searchController.text.trim().length < 10
                       ? null
@@ -704,26 +704,26 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Find Orders'),
+                  child: Text('Find Orders'.tr(ref)),
                 ),
               ],
             ),
 
             if (dashboardState.error != null)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: EdgeInsets.only(top: 8),
                 child: Text(
                   dashboardState.error!,
-                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                  style: TextStyle(color: Colors.red, fontSize: 12),
                 ),
               ),
 
             if (order != null) ...[
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // Farm Selection Dropdown
               SectionTitle('Select Target Farm'),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               DropdownButtonFormField<int>(
                 value: dashboardState.farms.any((f) => f.id == _selectedFarmId)
                     ? _selectedFarmId
@@ -768,7 +768,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                 },
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // Investor Summary Card
               InfoCard(
@@ -782,7 +782,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                 ],
               ),
 
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Investment Summary Card
               InfoCard(
@@ -827,20 +827,20 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                 ],
               ),
 
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
 
               SectionTitle('Animals to Onboard'),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
-                'Enter identification details for each animal',
+                'Enter identification details for each animal'.tr(ref),
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context).hintColor,
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Buffalo Forms
               if (buffaloEntries.isNotEmpty) ...[
@@ -850,7 +850,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                   onToggle: () =>
                       setState(() => _isBuffaloExpanded = !_isBuffaloExpanded),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 if (_isBuffaloExpanded)
                   ...buffaloEntries.asMap().entries.map((entry) {
@@ -895,10 +895,10 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                   }),
               ],
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // Removed Global Image Selector in favor of per-animal validation
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               if (kDebugMode &&
                   (buffaloEntries.isNotEmpty || calfEntries.isNotEmpty))
@@ -927,19 +927,19 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                         }
                       });
                     },
-                    icon: const Icon(Icons.auto_fix_high),
-                    label: const Text('Autofill Test Data'),
+                    icon: Icon(Icons.auto_fix_high),
+                    label: Text('Autofill Test Data'.tr(ref)),
                     style: TextButton.styleFrom(
                       foregroundColor: AppTheme.secondary,
                     ),
                   ),
                 ),
 
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // CPF Status Checkbox
               Container(
-                margin: const EdgeInsets.only(bottom: 16),
+                margin: EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: _isCpfPaid
                       ? AppTheme.successGreen.withOpacity(0.05)
@@ -952,8 +952,8 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                   ),
                 ),
                 child: CheckboxListTile(
-                  title: const Text(
-                    "CPF (Care & Protection Fee) Paid",
+                  title: Text(
+                    "CPF (Care & Protection Fee) Paid".tr(ref),
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
@@ -978,14 +978,14 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                 ),
               ),
 
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               CustomActionButton(
                 onPressed: _isFormValid() ? _submit : null,
                 color: AppTheme.primary,
                 width: double.infinity,
                 child: _isSubmitting
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
@@ -993,15 +993,15 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text(
-                        'Confirm Onboarding',
+                    : Text(
+                        'Confirm Onboarding'.tr(ref),
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: 40),
             ],
           ],
         ),

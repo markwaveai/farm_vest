@@ -7,8 +7,9 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
-
-class BuffaloCard extends StatelessWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class BuffaloCard extends ConsumerWidget {
   final InvestorAnimal animal;
   final bool isGridView;
   final bool showLiveButton;
@@ -23,7 +24,7 @@ class BuffaloCard extends StatelessWidget {
   //   'assets/images/murrah1.jpg',
   //];
 
-  const BuffaloCard({
+  BuffaloCard({
     super.key,
     required this.animal,
     this.isGridView = true,
@@ -41,7 +42,7 @@ class BuffaloCard extends StatelessWidget {
   bool get isCalf => animal.animalType?.toLowerCase().contains('calf') ?? false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Prioritize passed imageUrl, then fallback to stable asset image
     final displayImageUrl = (animal.images.isNotEmpty)
         ? animal.images.first
@@ -56,7 +57,7 @@ class BuffaloCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
@@ -75,7 +76,7 @@ class BuffaloCard extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
             blurRadius: 12,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -429,7 +430,7 @@ class BuffaloCard extends StatelessWidget {
             style: TextStyle(
               fontSize: fontSize,
               color: isDark
-                  ? const Color.fromARGB(255, 237, 230, 230)
+                  ? Color.fromARGB(255, 237, 230, 230)
                   : AppTheme.dark,
               fontWeight: FontWeight.w600,
             ),
@@ -478,7 +479,7 @@ class BuffaloCard extends StatelessWidget {
               theme.colorScheme.primary.withValues(alpha: 0.85),
             ],
           ),
-          borderRadius: const BorderRadius.only(
+          borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(16),
             bottomRight: Radius.circular(16),
           ),
@@ -497,7 +498,7 @@ class BuffaloCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                'RFID',
+                'RFID'.tr(ref),
                 style: TextStyle(
                   fontSize: badgeFont,
                   color: AppTheme.primary,
@@ -554,7 +555,7 @@ class BuffaloCard extends StatelessWidget {
           BoxShadow(
             color: statusColor.withValues(alpha: 0.3),
             blurRadius: 4,
-            offset: const Offset(0, 1),
+            offset: Offset(0, 1),
           ),
         ],
       ),
@@ -596,7 +597,7 @@ class BuffaloCard extends StatelessWidget {
             Icon(Icons.pets, size: iconSize, color: AppTheme.white),
             SizedBox(width: isSmallPhone ? 3 : 4),
             Text(
-              'Calves',
+              'Calves'.tr(ref),
               style: TextStyle(
                 color: AppTheme.white,
                 fontSize: fontSize,
@@ -632,7 +633,7 @@ class BuffaloCard extends StatelessWidget {
             BoxShadow(
               color: AppTheme.errorRed.withValues(alpha: 0.4),
               blurRadius: 4,
-              offset: const Offset(0, 1),
+              offset: Offset(0, 1),
             ),
           ],
         ),
@@ -642,7 +643,7 @@ class BuffaloCard extends StatelessWidget {
             Icon(Icons.videocam, size: iconSize, color: AppTheme.white),
             SizedBox(width: isSmallPhone ? 3 : 4),
             Text(
-              'Live',
+              'Live'.tr(ref),
               style: TextStyle(
                 color: AppTheme.white,
                 fontSize: fontSize,

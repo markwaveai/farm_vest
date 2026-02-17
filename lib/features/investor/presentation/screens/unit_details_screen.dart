@@ -1,19 +1,20 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
-
-class UnitDetailsScreen extends StatefulWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class UnitDetailsScreen extends ConsumerStatefulWidget {
   final InvestorAnimal? animal;
-  const UnitDetailsScreen({super.key, this.animal});
+  UnitDetailsScreen({super.key, this.animal});
 
   @override
   State<UnitDetailsScreen> createState() => _UnitDetailsScreenState();
 }
 
-class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
+class _UnitDetailsScreenState extends ConsumerState<UnitDetailsScreen> {
   int _currentImageIndex = 0;
 
   @override
@@ -22,7 +23,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         NavigationHelper.safePopOrNavigate(
           context,
@@ -31,9 +32,9 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Unit Details'),
+          title: Text('Unit Details'.tr(ref)),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back),
             onPressed: () => NavigationHelper.safePopOrNavigate(
               context,
               fallbackRoute: '/customer-dashboard',
@@ -41,7 +42,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
           ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.spacingM),
+          padding: EdgeInsets.all(AppConstants.spacingM),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -76,7 +77,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                                 );
                                 // Container(
                                 //   color: Colors.grey[200],
-                                //   child: const Center(
+                                //   child: Center(
                                 //     child: Icon(
                                 //       Icons.image_not_supported,
                                 //       color: Colors.grey,
@@ -98,7 +99,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                             );
                             // Container(
                             //   color: Colors.grey[200],
-                            //   child: const Center(
+                            //   child: Center(
                             //     child: Icon(
                             //       Icons.image_not_supported,
                             //       color: Colors.grey,
@@ -134,7 +135,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                             children: List.generate(
                               animal.images.length,
                               (index) => Container(
-                                margin: const EdgeInsets.symmetric(
+                                margin: EdgeInsets.symmetric(
                                   horizontal: 4,
                                 ),
                                 width: _currentImageIndex == index ? 24 : 8,
@@ -155,7 +156,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                         top: AppConstants.spacingM,
                         right: AppConstants.spacingM,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding: EdgeInsets.symmetric(
                             horizontal: AppConstants.spacingS,
                             vertical: AppConstants.spacingXS,
                           ),
@@ -172,13 +173,13 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.2),
                                 blurRadius: 4,
-                                offset: const Offset(0, 2),
+                                offset: Offset(0, 2),
                               ),
                             ],
                           ),
                           child: Text(
-                            animal?.healthStatus.toUpperCase() ?? 'UNKNOWN',
-                            style: const TextStyle(
+                            animal?.healthStatus.toUpperCase() ?? 'UNKNOWN'.tr(ref),
+                            style: TextStyle(
                               color: AppTheme.white,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -190,72 +191,74 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: AppConstants.spacingL),
+              SizedBox(height: AppConstants.spacingL),
 
               // Unit Information
               Text(
-                'Unit Information',
+                'Unit Information'.tr(ref),
                 style: AppTheme.headingMedium.copyWith(
                   color: isDark ? Colors.white : Colors.black,
                 ),
               ),
 
-              //const Text('Unit Information', style: AppTheme.headingMedium),
-              const SizedBox(height: AppConstants.spacingM),
+              //Text('Unit Information'.tr(ref), style: AppTheme.headingMedium),
+              SizedBox(height: AppConstants.spacingM),
 
               _buildInfoCard(context, [
-                _buildInfoRow(context, 'RFID:', animal?.rfid ?? kHyphen),
+                _buildInfoRow(context, 'RFID:'.tr(ref), animal?.rfid ?? kHyphen),
                 _buildInfoRow(
                   context,
-                  'Neck Band ID:',
+                  'Neck Band ID:'.tr(ref),
                   animal?.neckBandId?.isEmpty == true
                       ? kHyphen
                       : animal?.neckBandId ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Ear Tag ID:',
+                  'Ear Tag ID:'.tr(ref),
                   animal?.earTagId?.isEmpty == true
                       ? kHyphen
                       : animal?.earTagId ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Age:',
-                  animal?.age != null ? '${animal!.age} Months' : kHyphen,
+                  'Age:'.tr(ref),
+                  animal?.age != null
+                      ? '${animal!.age} ${'Months'.tr(ref)}'
+                      : kHyphen,
                 ),
 
                 _buildInfoRow(
                   context,
-                  'Breed Type:',
+                  'Breed Type:'.tr(ref),
                   animal?.breed?.isEmpty == true
                       ? kHyphen
                       : animal?.breed ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Farm Name:',
+                  'Farm Name:'.tr(ref),
                   animal?.farmName?.isEmpty == true
                       ? kHyphen
                       : animal?.farmName ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Shed Name:',
+                  'Shed Name:'.tr(ref),
                   animal?.shedName?.toString() == null
                       ? kHyphen
                       : animal?.shedName.toString() ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Parking ID:',
+                  'Parking ID:'.tr(ref),
                   animal?.parkingId?.isEmpty == true
                       ? kHyphen
                       : animal?.parkingId ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Location:',
+                  'Location:'.tr(ref),
                   animal?.farmLocation?.isEmpty == true
                       ? kHyphen
                       : animal?.farmLocation ?? kHyphen,
@@ -263,53 +266,53 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                 if (animal?.onboardedAt != null)
                   _buildInfoRow(
                     context,
-                    'Onboarded At:',
+                    'Onboarded At:'.tr(ref),
                     animal?.onboardedAt != null
                         ? DateFormat('dd MMM yyyy').format(animal!.onboardedAt!)
                         : kHyphen,
                   ),
               ]),
-              const SizedBox(height: AppConstants.spacingL),
+              SizedBox(height: AppConstants.spacingL),
 
               // Health Summary
               Text(
-                'Health Summary',
+                'Health Summary'.tr(ref),
                 style: AppTheme.headingMedium.copyWith(
                   color: isDark ? Colors.white : Colors.black,
                 ),
               ),
-              // const Text('Health Summary', style: AppTheme.headingMedium),
-              const SizedBox(height: AppConstants.spacingM),
+              // Text('Health Summary'.tr(ref), style: AppTheme.headingMedium),
+              SizedBox(height: AppConstants.spacingM),
 
               _buildAlertsGrid(context),
-              const SizedBox(height: AppConstants.spacingL),
+              SizedBox(height: AppConstants.spacingL),
 
               // Action Buttons
-              // const Text('Quick Actions', style: AppTheme.headingMedium),
-              // const SizedBox(height: AppConstants.spacingM),
+              // Text('Quick Actions'.tr(ref), style: AppTheme.headingMedium),
+              // SizedBox(height: AppConstants.spacingM),
 
               // Row(
               //   children: [
               //     Expanded(
               //       child: ElevatedButton.icon(
               //         onPressed: () => context.go('/health-records'),
-              //         icon: const Icon(Icons.medical_services),
-              //         label: const Text('Health Record'),
+              //         icon: Icon(Icons.medical_services),
+              //         label: Text('Health Record'.tr(ref)),
               //         style: ElevatedButton.styleFrom(
-              //           padding: const EdgeInsets.symmetric(
+              //           padding: EdgeInsets.symmetric(
               //             vertical: AppConstants.spacingM,
               //           ),
               //         ),
               //       ),
               //     ),
-              //     const SizedBox(width: AppConstants.spacingM),
+              //     SizedBox(width: AppConstants.spacingM),
               //     Expanded(
               //       child: OutlinedButton.icon(
               //         onPressed: () => context.go('/cctv-live'),
-              //         icon: const Icon(Icons.videocam),
-              //         label: const Text('View CCTV'),
+              //         icon: Icon(Icons.videocam),
+              //         label: Text('View CCTV'.tr(ref)),
               //         style: OutlinedButton.styleFrom(
-              //           padding: const EdgeInsets.symmetric(
+              //           padding: EdgeInsets.symmetric(
               //             vertical: AppConstants.spacingM,
               //           ),
               //         ),
@@ -317,25 +320,25 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
               //     ),
               //   ],
               // ),
-              // const SizedBox(height: AppConstants.spacingL),
+              // SizedBox(height: AppConstants.spacingL),
 
               // // Last Updated
               // Container(
               //   width: double.infinity,
-              //   padding: const EdgeInsets.all(AppConstants.spacingM),
+              //   padding: EdgeInsets.all(AppConstants.spacingM),
               //   decoration: BoxDecoration(
               //     color: AppTheme.lightGrey,
               //     borderRadius: BorderRadius.circular(AppConstants.radiusM),
               //   ),
               //   child: Row(
               //     children: [
-              //       const Icon(
+              //       Icon(
               //         Icons.update,
               //         color: AppTheme.mediumGrey,
               //         size: AppConstants.iconS,
               //       ),
-              //       const SizedBox(width: AppConstants.spacingS),
-              //       const Text('Last updated: ', style: AppTheme.bodySmall),
+              //       SizedBox(width: AppConstants.spacingS),
+              //       Text('Last updated: '.tr(ref), style: AppTheme.bodySmall),
               //       Text(
               //         'Today at 10:30 AM',
               //         style: AppTheme.bodySmall.copyWith(
@@ -345,7 +348,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
               //     ],
               //   ),
               // ),
-              // const SizedBox(height: AppConstants.spacingL),
+              // SizedBox(height: AppConstants.spacingL),
             ],
           ),
         ),
@@ -362,14 +365,14 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
         border: Border.all(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
         ),
       ),
-      padding: const EdgeInsets.all(AppConstants.spacingM),
+      padding: EdgeInsets.all(AppConstants.spacingM),
       child: Column(children: children),
     );
   }
@@ -377,7 +380,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
   Widget _buildInfoRow(BuildContext context, String label, String value) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConstants.spacingS),
+      padding: EdgeInsets.symmetric(vertical: AppConstants.spacingS),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -388,7 +391,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(width: AppConstants.spacingM),
+          SizedBox(width: AppConstants.spacingM),
           Expanded(
             child: Text(
               value,
@@ -438,8 +441,8 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
 
     return GridView.builder(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      physics: NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: AppConstants.spacingM,
         mainAxisSpacing: AppConstants.spacingM,
@@ -457,55 +460,55 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
       },
     );
   }
-Widget _buildCategoryCard(
-  BuildContext context,
-  String label,
-  IconData icon, {
-  required bool isOrange,
-}) {
-  final baseColor = isOrange ? AppTheme.secondary : AppTheme.primary;
-  final gradientColors = isOrange
-      ? [AppTheme.secondary, AppTheme.lightSecondary]
-      : [AppTheme.primary, AppTheme.lightGreen];
 
-  return Opacity(
-    opacity: 0.8, 
-    child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: gradientColors,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: baseColor.withValues(alpha: 0.15), 
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+  Widget _buildCategoryCard(
+    BuildContext context,
+    String label,
+    IconData icon, {
+    required bool isOrange,
+  }) {
+    final baseColor = isOrange ? AppTheme.secondary : AppTheme.primary;
+    final gradientColors = isOrange
+        ? [AppTheme.secondary, AppTheme.lightSecondary]
+        : [AppTheme.primary, AppTheme.lightGreen];
+
+    return Opacity(
+      opacity: 0.8,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppConstants.radiusL),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradientColors,
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white, size: 32),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+          boxShadow: [
+            BoxShadow(
+              color: baseColor.withValues(alpha: 0.15),
+              blurRadius: 4,
+              offset: Offset(0, 2),
             ),
-            textAlign: TextAlign.center,
-          ),
-        
-        ],
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 32),
+            SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 
@@ -537,7 +540,7 @@ Widget _buildCategoryCard(
 //           BoxShadow(
 //             color: baseColor.withValues(alpha: 0.3),
 //             blurRadius: 8,
-//             offset: const Offset(0, 4),
+//             offset: Offset(0, 4),
 //           ),
 //         ],
 //       ),
@@ -550,10 +553,10 @@ Widget _buildCategoryCard(
 //             mainAxisAlignment: MainAxisAlignment.center,
 //             children: [
 //               Icon(icon, color: Colors.white, size: 32),
-//               const SizedBox(height: 8),
+//               SizedBox(height: 8),
 //               Text(
 //                 label,
-//                 style: const TextStyle(
+//                 style: TextStyle(
 //                   color: Colors.white,
 //                   fontWeight: FontWeight.bold,
 //                   fontSize: 14,

@@ -1,7 +1,6 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 class ModernTextField extends StatefulWidget {
   final String label;
   final String hint;
@@ -12,7 +11,7 @@ class ModernTextField extends StatefulWidget {
   final int? maxLength;
   final TextCapitalization textCapitalization;
   final String? Function(String?)? validator;
-  const ModernTextField({
+  ModernTextField({
     super.key,
     required this.label,
     required this.hint,
@@ -72,7 +71,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
             color: Theme.of(context).hintColor,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         // Container(
         //   height: 48,
         //   decoration: BoxDecoration(
@@ -122,7 +121,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(
+            contentPadding: EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),

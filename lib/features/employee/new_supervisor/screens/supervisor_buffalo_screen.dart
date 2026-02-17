@@ -4,9 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class SupervisorBuffaloScreen extends ConsumerStatefulWidget {
-  const SupervisorBuffaloScreen({super.key});
+  SupervisorBuffaloScreen({super.key});
 
   @override
   ConsumerState<SupervisorBuffaloScreen> createState() =>
@@ -47,20 +47,20 @@ class _SupervisorBuffaloScreenState
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back),
             onPressed: () => context.go('/supervisor-dashboard'),
           ),
-          title: const Text('Animals List'),
+          title: Text('Animals List'.tr(ref)),
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(70),
+            preferredSize: Size.fromHeight(70),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Search by Tag, RFID or ID',
+                  hintText: 'Search by Tag, RFID or ID'.tr(ref),
                   prefixIcon: IconButton(
-                    icon: const Icon(Icons.search),
+                    icon: Icon(Icons.search),
                     onPressed: () {
                       final value = _searchController.text.trim();
                       ref.read(animalSearchQueryProvider.notifier).state =
@@ -68,14 +68,14 @@ class _SupervisorBuffaloScreenState
                     },
                   ),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.clear),
+                    icon: Icon(Icons.clear),
                     onPressed: () {
                       _searchController.clear();
                       ref.read(animalSearchQueryProvider.notifier).state =
                           'all';
                     },
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                  contentPadding: EdgeInsets.symmetric(vertical: 0),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -102,10 +102,14 @@ class _SupervisorBuffaloScreenState
               return !type.contains('calf');
             }).toList();
 
-            return _buildAnimalList(buffaloes, 'No animals found');
+            return _buildAnimalList(buffaloes, 'No alerts found'.tr(ref));
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(child: Text('Error: $err')),
+          loading: () => Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(
+            child: Text(
+              'Error: @message'.trParams({'message': err.toString()}),
+            ),
+          ),
         ),
       ),
     );
@@ -116,13 +120,13 @@ class _SupervisorBuffaloScreenState
       return Center(child: Text(emptyMessage));
     }
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       itemCount: animals.length,
       itemBuilder: (context, index) {
         final animal = animals[index];
 
         return Card(
-          margin: const EdgeInsets.only(bottom: 12),
+          margin: EdgeInsets.only(bottom: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -132,11 +136,14 @@ class _SupervisorBuffaloScreenState
               child: Icon(Icons.pets, color: Theme.of(context).primaryColor),
             ),
             title: Text(
-              animal.rfid ?? 'Unknown RFID',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              animal.rfid ?? 'Unknown RFID'.tr(ref),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-              'Tag: ${animal.earTagId ?? 'N/A'} | Shed: ${animal.shedName ?? 'N/A'}',
+              'Tag: @tag | Shed: @shed'.trParams({
+                'tag': animal.earTagId ?? 'N/A',
+                'shed': animal.shedName ?? 'N/A',
+              }),
               style: TextStyle(
                 color: Theme.of(context).hintColor,
                 fontSize: 12,
@@ -144,24 +151,29 @@ class _SupervisorBuffaloScreenState
             ),
             children: [
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDetailRow('ID', animal.animalId),
-                    _buildDetailRow('Breed', animal.breed),
-                    _buildDetailRow('Age', '${animal.age ?? 'N/A'} months'),
-                    _buildDetailRow('Type', animal.animalType),
-                    _buildDetailRow('Health', animal.healthStatus),
-                    _buildDetailRow('Status', animal.status),
+                    _buildDetailRow('ID'.tr(ref), animal.animalId),
+                    _buildDetailRow('Breed'.tr(ref), animal.breed),
+                    _buildDetailRow(
+                      'Age'.tr(ref),
+                      '@count months'.trParams({
+                        'count': animal.age?.toString() ?? 'N/A',
+                      }),
+                    ),
+                    _buildDetailRow('Type'.tr(ref), animal.animalType),
+                    _buildDetailRow('Health'.tr(ref), animal.healthStatus),
+                    _buildDetailRow('Status'.tr(ref), animal.status),
                     if (animal.onboardedAt != null)
                       _buildDetailRow(
-                        'Onboarded',
+                        'Onboarded'.tr(ref),
                         DateFormat('dd MMM yyyy').format(animal.onboardedAt!),
                       ),
-                    const Divider(),
-                    _buildDetailRow('Farm', animal.farmName),
-                    _buildDetailRow('Investor', animal.investorName),
+                    Divider(),
+                    _buildDetailRow('Farm'.tr(ref), animal.farmName),
+                    _buildDetailRow('Investor'.tr(ref), animal.investorName),
                   ],
                 ),
               ),
@@ -174,7 +186,7 @@ class _SupervisorBuffaloScreenState
 
   Widget _buildDetailRow(String label, dynamic value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -187,7 +199,7 @@ class _SupervisorBuffaloScreenState
           ),
           Text(
             value?.toString() ?? 'N/A',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
       ),

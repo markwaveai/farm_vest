@@ -1,18 +1,19 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
 
 import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:farm_vest/core/widgets/custom_dialog.dart';
 import 'package:flutter/material.dart';
-
-class LogRoutineVisitDialog extends StatefulWidget {
-  const LogRoutineVisitDialog({super.key});
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class LogRoutineVisitDialog extends ConsumerStatefulWidget {
+  LogRoutineVisitDialog({super.key});
 
   @override
   State<LogRoutineVisitDialog> createState() => _LogRoutineVisitDialogState();
 }
 
-class _LogRoutineVisitDialogState extends State<LogRoutineVisitDialog> {
+class _LogRoutineVisitDialogState extends ConsumerState<LogRoutineVisitDialog> {
   final _formKey = GlobalKey<FormState>();
   final _buffaloIdController = TextEditingController();
   final _observationController = TextEditingController();
@@ -51,8 +52,8 @@ class _LogRoutineVisitDialogState extends State<LogRoutineVisitDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Log Routine Visit',
+                Text(
+                  'Log Routine Visit'.tr(ref),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -61,11 +62,11 @@ class _LogRoutineVisitDialogState extends State<LogRoutineVisitDialog> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             CustomTextField(
               controller: _buffaloIdController,
               hint: 'Buffalo ID',
@@ -77,7 +78,7 @@ class _LogRoutineVisitDialogState extends State<LogRoutineVisitDialog> {
               },
               onChanged: (_) => _validateForm(),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             CustomTextField(
               controller: _observationController,
               hint: 'Visit Observation',
@@ -90,7 +91,7 @@ class _LogRoutineVisitDialogState extends State<LogRoutineVisitDialog> {
               },
               onChanged: (_) => _validateForm(),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             CustomTextField(
               controller: _healthStatusController,
               hint: 'Health Status (e.g. Healthy, Sick)',
@@ -102,17 +103,17 @@ class _LogRoutineVisitDialogState extends State<LogRoutineVisitDialog> {
               },
               onChanged: (_) => _validateForm(),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             CustomTextField(
               controller: _nextVisitDateController,
               hint: 'Next Visit Date (Optional)',
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: CustomActionButton(
-                child: const Text(
-                  'Log Visit',
+                child: Text(
+                  'Log Visit'.tr(ref),
                   style: TextStyle(color: Colors.white),
                 ),
                 onPressed: _isButtonEnabled

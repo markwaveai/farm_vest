@@ -1,30 +1,29 @@
 import 'package:flutter/material.dart';
-
-class BuffaloDetailsScreen extends StatelessWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class BuffaloDetailsScreen extends ConsumerWidget {
   final String location;
 
-  const BuffaloDetailsScreen({super.key, required this.location});
+  BuffaloDetailsScreen({super.key, required this.location});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Buffalo Details'),
-      ),
+      appBar: AppBar(title: Text('Buffalo Details'.tr(ref))),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Details for Buffalo at:',
+              'Details for Buffalo at:'.tr(ref),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text(
               location,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             // TODO: Fetch and display more buffalo details here
           ],

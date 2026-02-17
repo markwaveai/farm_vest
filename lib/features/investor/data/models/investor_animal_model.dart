@@ -1,5 +1,4 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
-
 /// Model for investor animal data from /api/investors/animals endpoint.
 ///
 /// This model represents a simplified animal view for investors,
@@ -43,7 +42,7 @@ class InvestorAnimal {
   final String? tagNumber;
 
   /// Creates an instance of [InvestorAnimal].
-  const InvestorAnimal({
+  InvestorAnimal({
     required this.animalId,
     this.internalId,
     this.rfid,
@@ -268,7 +267,7 @@ class InvestorAnimalsResponse {
   final String? parentRfid;
 
   /// Creates an instance of [InvestorAnimalsResponse].
-  const InvestorAnimalsResponse({
+  InvestorAnimalsResponse({
     required this.status,
     required this.count,
     required this.data,

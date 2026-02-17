@@ -21,7 +21,7 @@ class InvestorProfileDetails {
   final String memberSince;
 
   /// Creates an instance of [InvestorProfileDetails].
-  const InvestorProfileDetails({
+  InvestorProfileDetails({
     required this.firstName,
     required this.lastName,
     required this.phoneNumber,
@@ -115,7 +115,7 @@ class InvestorSummary {
   final double revenue;
 
   /// Creates an instance of [InvestorSummary].
-  const InvestorSummary({
+  InvestorSummary({
     required this.profileDetails,
     required this.totalBuffaloes,
     required this.totalCalves,
@@ -201,7 +201,7 @@ class InvestorSummaryResponse {
   final InvestorSummary data;
 
   /// Creates an instance of [InvestorSummaryResponse].
-  const InvestorSummaryResponse({required this.status, required this.data});
+  InvestorSummaryResponse({required this.status, required this.data});
 
   /// Creates an [InvestorSummaryResponse] from JSON data.
   ///

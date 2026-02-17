@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:farm_vest/features/investor/data/models/investor_summary_model.dart';
 import 'package:farm_vest/features/investor/presentation/providers/data/investor_data_providers.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 /* -------------------------------------------------------------------------- */
 /*                          STATISTICS PROVIDERS                              */
 /* -------------------------------------------------------------------------- */
@@ -65,9 +65,9 @@ final buffaloStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((ref) {
 /// profileAsync.when(
 ///   data: (profile) => profile != null
 ///       ? Text('Welcome, ${profile.fullName}')
-///       : Text('No profile'),
+///       : Text('No profile'.tr(ref)),
 ///   loading: () => CircularProgressIndicator(),
-///   error: (err, stack) => Text('Error loading profile'),
+///   error: (err, stack) => Text('Error loading profile'.tr(ref)),
 /// );
 /// ```
 final investorProfileProvider = Provider<AsyncValue<InvestorProfileDetails?>>((

@@ -3,9 +3,9 @@ import 'package:farm_vest/core/widgets/custom_button.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/farm_manager_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class ManagerTransferApprovalScreen extends ConsumerStatefulWidget {
-  const ManagerTransferApprovalScreen({super.key});
+  ManagerTransferApprovalScreen({super.key});
 
   @override
   ConsumerState<ManagerTransferApprovalScreen> createState() =>
@@ -37,7 +37,7 @@ class _ManagerTransferApprovalScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading transfers: $e'),
+            content: Text('${'Error loading transfers'.tr(ref)}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -48,15 +48,15 @@ class _ManagerTransferApprovalScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Transfer Approvals')),
+      appBar: AppBar(title: Text('Transfer Approvals'.tr(ref))),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : _pendingTransfers.isEmpty
           ? _buildEmptyState()
           : RefreshIndicator(
               onRefresh: _loadTransfers,
               child: ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 itemCount: _pendingTransfers.length,
                 itemBuilder: (context, index) {
                   final transfer = _pendingTransfers[index];
@@ -77,9 +77,9 @@ class _ManagerTransferApprovalScreenState
             size: 64,
             color: Colors.grey.shade400,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
-            'No pending approvals',
+            'No pending approvals'.tr(ref),
             style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
           ),
         ],
@@ -102,11 +102,11 @@ class _ManagerTransferApprovalScreenState
     final isOut = direction == 'OUT';
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -120,10 +120,10 @@ class _ManagerTransferApprovalScreenState
                       color: isOut ? Colors.orange : Colors.blue,
                       size: 20,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Text(
                       animalTag,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -131,17 +131,17 @@ class _ManagerTransferApprovalScreenState
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.orange),
                   ),
-                  child: const Text(
-                    'PENDING',
+                  child: Text(
+                    'PENDING'.tr(ref),
                     style: TextStyle(
                       color: Colors.orange,
                       fontWeight: FontWeight.w600,
@@ -151,7 +151,7 @@ class _ManagerTransferApprovalScreenState
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -159,7 +159,7 @@ class _ManagerTransferApprovalScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'From',
+                        'From'.tr(ref),
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 12,
@@ -167,18 +167,18 @@ class _ManagerTransferApprovalScreenState
                       ),
                       Text(
                         sourceShed,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.arrow_forward, color: AppTheme.primary),
+                Icon(Icons.arrow_forward, color: AppTheme.primary),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'To',
+                        'To'.tr(ref),
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 12,
@@ -186,7 +186,7 @@ class _ManagerTransferApprovalScreenState
                       ),
                       Text(
                         destShed,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -194,7 +194,7 @@ class _ManagerTransferApprovalScreenState
               ],
             ),
             if (description.isNotEmpty) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Text(
                 description,
                 style: TextStyle(color: Colors.grey.shade700),
@@ -202,7 +202,7 @@ class _ManagerTransferApprovalScreenState
                 overflow: TextOverflow.ellipsis,
               ),
             ],
-            const Divider(height: 24),
+            Divider(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -220,20 +220,23 @@ class _ManagerTransferApprovalScreenState
                       variant: ButtonVariant.outlined,
                       textColor: Colors.red,
                       onPressed: () => _rejectTransfer(transfer['id']),
-                      child: const Text(
-                        'Reject',
+                      child: Text(
+                        'Reject'.tr(ref),
                         style: TextStyle(fontSize: 12, color: Colors.red),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     CustomActionButton(
                       height: 32,
                       width: 80,
                       color: Colors.green,
                       onPressed: () => _approveTransfer(transfer['id']),
-                      child: const Text(
-                        'Approve',
-                        style: TextStyle(color: Colors.white, fontSize: 11),
+                      child: Text(
+                        'Approve'.tr(ref),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                        ),
                       ),
                     ),
                   ],
@@ -262,8 +265,8 @@ class _ManagerTransferApprovalScreenState
       await ref.read(farmManagerProvider.notifier).approveTransfer(id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Transfer approved'),
+          SnackBar(
+            content: Text('Transfer approved'.tr(ref)),
             backgroundColor: Colors.green,
           ),
         );
@@ -272,7 +275,10 @@ class _ManagerTransferApprovalScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('${'Error'.tr(ref)}: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
       setState(() => _isLoading = false);
@@ -287,13 +293,16 @@ class _ManagerTransferApprovalScreenState
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Transfer rejected')));
+        ).showSnackBar(SnackBar(content: Text('Transfer rejected'.tr(ref))));
       }
       _loadTransfers();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('${'Error'.tr(ref)}: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
       setState(() => _isLoading = false);

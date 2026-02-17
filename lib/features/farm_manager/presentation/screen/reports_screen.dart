@@ -6,11 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class ReportsScreen extends ConsumerStatefulWidget {
   final bool hideAppBar;
 
-  const ReportsScreen({super.key, this.hideAppBar = false});
+  ReportsScreen({super.key, this.hideAppBar = false});
 
   @override
   ConsumerState<ReportsScreen> createState() => _ReportsScreenState();
@@ -46,7 +46,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                 backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                 elevation: 0,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: Icon(Icons.arrow_back),
                   onPressed: () {
                     // ref.read(milkReportProvider.notifier).clear(); // Handled by autoDispose
                     if (context.canPop()) {
@@ -62,7 +62,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   },
                 ),
                 title: Text(
-                  "Farm Reports",
+                  "Farm Reports".tr(ref),
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.onSurface,
@@ -73,33 +73,33 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   indicatorWeight: 3,
                   labelColor: AppTheme.primary,
                   unselectedLabelColor: Theme.of(context).hintColor,
-                  tabs: const [
-                    Tab(text: "Daily"),
-                    Tab(text: "Weekly"),
+                  tabs: [
+                    Tab(text: "Daily".tr(ref)),
+                    Tab(text: "Weekly".tr(ref)),
                   ],
                 ),
               ),
         body: TabBarView(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _datePickerField(context),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   DropdownButtonFormField<String>(
                     value: _selectedSession,
-                    decoration: _inputDecoration("Session"),
-                    items: const [
+                    decoration: _inputDecoration("Session".tr(ref)),
+                    items: [
                       DropdownMenuItem(
                         value: 'Morning',
-                        child: Text('Morning'),
+                        child: Text('Morning'.tr(ref)),
                       ),
                       DropdownMenuItem(
                         value: 'Evening',
-                        child: Text('Evening'),
+                        child: Text('Evening'.tr(ref)),
                       ),
                     ],
                     onChanged: (value) {
@@ -109,7 +109,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                     },
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   _getReportButton(
                     _isDateSelected
@@ -126,34 +126,34 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                           }
                         : null,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   Consumer(
                     builder: (context, ref, _) {
                       final state = ref.watch(milkReportProvider);
 
                       if (state.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
+                        return Center(child: CircularProgressIndicator());
                       }
 
                       if (state.error != null) {
                         return Text(
                           state.error!,
-                          style: const TextStyle(color: Colors.red),
+                          style: TextStyle(color: Colors.red),
                         );
                       }
 
-                      if (state.data == null) return const SizedBox();
+                      if (state.data == null) return SizedBox();
 
                       final reportList = state.data['data'];
 
                       if (reportList is! List || reportList.isEmpty) {
-                        return const Text("No daily report found");
+                        return Text("No daily report found".tr(ref));
                       }
 
                       final report = reportList[0];
                       return _milkReportCard(
-                        title: "Daily Milk Report",
+                        title: "Daily Milk Report".tr(ref),
                         timing: report['timing'],
                         entryDate: report['entry_date'] ?? "-",
                         quantity: "${report['quantity'] ?? '-'}",
@@ -167,12 +167,12 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             ),
 
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _datePickerField(context),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   // _getReportButton(() {
 
                   // }),
@@ -188,24 +188,24 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                           }
                         : null,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Consumer(
                     builder: (context, ref, _) {
                       final state = ref.watch(milkReportProvider);
 
                       if (state.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
+                        return Center(child: CircularProgressIndicator());
                       }
 
                       if (state.error != null) {
                         return Text(
                           state.error!,
-                          style: const TextStyle(color: Colors.red),
+                          style: TextStyle(color: Colors.red),
                         );
                       }
 
                       if (state.data == null || state.data['data'] == null) {
-                        return const SizedBox();
+                        return SizedBox();
                       }
 
                       final report = state.data['data'];
@@ -214,7 +214,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                         return Column(
                           children: report.map<Widget>((item) {
                             return _milkReportCard(
-                              title: "Weekly Milk Report",
+                              title: "Weekly Milk Report".tr(ref),
                               entryDate: item['entry_date'] ?? "-",
                               quantity: "${item['quantity'] ?? '-'}",
                               titleColor: Colors.green,
@@ -224,7 +224,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                         );
                       }
 
-                      return const SizedBox();
+                      return SizedBox();
                     },
                   ),
                 ],
@@ -257,9 +257,9 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
       child: IgnorePointer(
         child: CustomTextField(
           controller: _dateController,
-          hint: "Select Date",
+          hint: "Select Date".tr(ref),
           enabled: true,
-          prefixIcon: const Icon(Icons.calendar_today, size: 18),
+          prefixIcon: Icon(Icons.calendar_today, size: 18),
         ),
       ),
     );
@@ -282,7 +282,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
-        child: const Text("Get Report", style: TextStyle(fontSize: 16)),
+        child: Text("Get Report".tr(ref), style: TextStyle(fontSize: 16)),
       ),
     );
   }
@@ -313,7 +313,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     Color valueColor = AppTheme.black,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -347,18 +347,18 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     Color quantityColor = AppTheme.lightPrimary,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -368,9 +368,9 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
           // Title badge
           Center(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: titleColor.withOpacity(0.15),
+                color: titleColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -383,9 +383,9 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          const Divider(),
-          const SizedBox(height: 12),
+          SizedBox(height: 16),
+          Divider(),
+          SizedBox(height: 12),
 
           Row(
             children: [
@@ -397,7 +397,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                     color: Colors.blue,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
               ],
 
               Expanded(
@@ -407,12 +407,12 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   color: Colors.purple,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
 
               Expanded(
                 child: _infoBadge(
                   icon: Icons.opacity,
-                  text: "$quantity Litres",
+                  text: "$quantity ${'Litres'.tr(ref)}",
                   color: quantityColor,
                 ),
               ),
@@ -430,9 +430,9 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -440,7 +440,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Icon(icon, size: 16, color: color),
-          const SizedBox(width: 6),
+          SizedBox(width: 6),
           Flexible(
             child: Text(
               text,

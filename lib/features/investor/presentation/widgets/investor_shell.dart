@@ -8,10 +8,11 @@ import 'package:farm_vest/core/utils/app_enums.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class InvestorShell extends ConsumerStatefulWidget {
   final Widget child;
 
-  const InvestorShell({super.key, required this.child});
+  InvestorShell({super.key, required this.child});
 
   @override
   ConsumerState<InvestorShell> createState() => _InvestorShellState();
@@ -69,7 +70,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
         final router = GoRouter.of(context);
@@ -91,7 +92,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
             ? null
             : AppBar(
                 elevation: 4,
-                shadowColor: Colors.black.withOpacity(0.1),
+                shadowColor: Colors.black.withValues(alpha: 0.1),
                 centerTitle: false, // Move logo to corner (left)
                 titleSpacing: 16,
                 title: Image.asset(
@@ -102,21 +103,23 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
                 actions: [
                   if (ref.watch(authProvider).availableRoles.length > 1)
                     IconButton(
-                      icon: const Icon(Icons.swap_horiz_rounded),
+                      icon: Icon(Icons.swap_horiz_rounded),
                       onPressed: _showSwitchRoleBottomSheet,
-                      tooltip: 'Switch Role',
+                      tooltip: 'Switch Role'.tr(ref),
                     ),
-                  const NotificationBellButton(
+                  NotificationBellButton(
                     fallbackRoute: '/customer-dashboard',
                   ),
                   // Profile icon in top right
                   Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
+                    padding: EdgeInsets.only(right: 16.0),
                     child: GestureDetector(
                       onTap: () => context.push('/profile'),
                       child: CircleAvatar(
                         radius: 20,
-                        backgroundColor: AppTheme.primary.withOpacity(0.1),
+                        backgroundColor: AppTheme.primary.withValues(
+                          alpha: 0.1,
+                        ),
                         child:
                             userData?.imageUrl != "" &&
                                 userData?.imageUrl != null
@@ -155,31 +158,31 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
     switch (role) {
       case UserType.farmManager:
         return {
-          'label': 'Farm Manager',
+          'label': 'Farm Manager'.tr(ref),
           'icon': Icons.agriculture,
           'color': Colors.green,
         };
       case UserType.supervisor:
         return {
-          'label': 'Supervisor',
+          'label': 'Supervisor'.tr(ref),
           'icon': Icons.assignment_ind,
           'color': Colors.orange,
         };
       case UserType.doctor:
         return {
-          'label': 'Doctor',
+          'label': 'Doctor'.tr(ref),
           'icon': Icons.medical_services,
           'color': Colors.red,
         };
       case UserType.assistant:
         return {
-          'label': 'Assistant Doctor',
+          'label': 'Assistant Doctor'.tr(ref),
           'icon': Icons.health_and_safety,
           'color': Colors.teal,
         };
       case UserType.customer:
         return {
-          'label': 'Investor',
+          'label': 'Investor'.tr(ref),
           'icon': Icons.trending_up,
           'color': Colors.indigo,
         };
@@ -194,32 +197,35 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Switch Active Role',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                'Switch Active Role'.tr(ref),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Choose which portal you want to access',
+              SizedBox(height: 8),
+              Text(
+                'Choose which portal you want to access'.tr(ref),
                 style: TextStyle(color: Colors.grey),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               ...availableRoles.map((role) {
                 final info = _getRoleInfo(role);
                 final isSelected = role == currentRole;
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     onTap: isSelected
                         ? null
@@ -258,11 +264,11 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
                       ),
                     ),
                     tileColor: isSelected
-                        ? (info['color'] as Color).withOpacity(0.05)
+                        ? (info['color'] as Color).withValues(alpha: 0.05)
                         : null,
                     leading: CircleAvatar(
-                      backgroundColor: (info['color'] as Color).withOpacity(
-                        0.1,
+                      backgroundColor: (info['color'] as Color).withValues(
+                        alpha: 0.1,
                       ),
                       child: Icon(
                         info['icon'] as IconData,
@@ -282,7 +288,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
                             Icons.check_circle,
                             color: info['color'] as Color,
                           )
-                        : const Icon(Icons.arrow_forward_ios, size: 14),
+                        : Icon(Icons.arrow_forward_ios, size: 14),
                   ),
                 );
               }).toList(),

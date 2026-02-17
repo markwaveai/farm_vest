@@ -1,17 +1,18 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/models/ticket_model.dart';
 import 'package:flutter/material.dart';
-
-class TreatmentDetailsScreen extends StatefulWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class TreatmentDetailsScreen extends ConsumerStatefulWidget {
   final Ticket ticket;
 
-  const TreatmentDetailsScreen({super.key, required this.ticket});
+  TreatmentDetailsScreen({super.key, required this.ticket});
 
   @override
   State<TreatmentDetailsScreen> createState() => _TreatmentDetailsScreenState();
 }
 
-class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
+class _TreatmentDetailsScreenState extends ConsumerState<TreatmentDetailsScreen> {
   final _tempController = TextEditingController();
   final _notesController = TextEditingController();
   String _activityLevel = 'Normal'; // Low, Normal, HyperActive
@@ -28,7 +29,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Treatment Details',
+          'Treatment Details'.tr(ref),
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -45,103 +46,103 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Buffalo ID',
+              'Buffalo ID'.tr(ref),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _buildReadOnlyField(
               context,
               '',
               widget.ticket.animalId ?? 'Unknown',
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
-              'Shed Location',
+              'Shed Location'.tr(ref),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _buildReadOnlyField(context, '', 'Shed 04'), // Mock or fetch
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
-              'Current Vital Signs',
+              'Current Vital Signs'.tr(ref),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             _buildMetricInput(
               context,
-              'Body Temperature',
+              'Body Temperature'.tr(ref),
               '102.3',
               '°F',
               _tempController,
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
-              'Activity Level',
+              'Activity Level'.tr(ref),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Row(
               children: [
                 _buildRadioOption(
                   context,
-                  'Low',
-                  'Low',
+                  'Low'.tr(ref),
+                  'Low'.tr(ref),
                   (val) => setState(() => _activityLevel = val!),
                 ),
                 _buildRadioOption(
                   context,
-                  'Normal',
-                  'Normal',
+                  'Normal'.tr(ref),
+                  'Normal'.tr(ref),
                   (val) => setState(() => _activityLevel = val!),
                 ),
                 _buildRadioOption(
                   context,
-                  'HyperActive',
-                  'HyperActive',
+                  'HyperActive'.tr(ref),
+                  'HyperActive'.tr(ref),
                   (val) => setState(() => _activityLevel = val!),
                 ),
               ],
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
-              'Notes',
+              'Notes'.tr(ref),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextField(
               controller: _notesController,
               maxLines: 4,
               style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
-                hintText: 'Enter treatment notes...',
+                hintText: 'Enter treatment notes...'.tr(ref),
                 hintStyle: TextStyle(color: Theme.of(context).hintColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -162,16 +163,16 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Row(
               children: [
-                _buildActionRadio(context, 'Quarantine', 'Quarantine'),
-                const SizedBox(width: 20),
-                _buildActionRadio(context, 'Observation', 'Observation'),
+                _buildActionRadio(context, 'Quarantine', 'Quarantine'.tr(ref)),
+                SizedBox(width: 20),
+                _buildActionRadio(context, 'Observation', 'Observation'.tr(ref)),
               ],
             ),
 
-            const SizedBox(height: 40),
+            SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -181,9 +182,9 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('Submit'),
+                child: Text('Submit'.tr(ref)),
               ),
             ),
           ],
@@ -199,13 +200,13 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
         if (label.isNotEmpty) ...[
           Text(
             label,
-            style: const TextStyle(color: AppTheme.grey, fontSize: 13),
+            style: TextStyle(color: AppTheme.grey, fontSize: 13),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
         ],
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white.withOpacity(0.05)
@@ -247,7 +248,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextField(
           controller: controller,
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
@@ -297,7 +298,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
           label,
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
       ],
     );
   }
@@ -333,18 +334,18 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 color: Theme.of(context).brightness == Brightness.dark
                     ? Colors.white.withOpacity(0.05)
                     : AppTheme.darkPrimary,
-                borderRadius: const BorderRadius.vertical(
+                borderRadius: BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
               ),
               width: double.infinity,
               child: Text(
-                'HEALTH SUCCESSFULLY COMPLETED',
+                'HEALTH SUCCESSFULLY COMPLETED'.tr(ref),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).brightness == Brightness.dark
@@ -356,14 +357,14 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24),
               child: Column(
                 children: [
                   Text(
-                    'Date: ${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}',
+                    '${'Date'.tr(ref)}: ${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}',
                     style: TextStyle(color: Theme.of(context).hintColor),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.asset(
@@ -385,16 +386,16 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   Text(
-                    'Successfully submitted not buffalo treatment details.',
+                    'Successfully submitted buffalo treatment details.'.tr(ref),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -425,10 +426,10 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
                               ? Colors.white12
                               : Colors.transparent,
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: Text(
-                        'Done',
+                        'Done'.tr(ref),
                         style: TextStyle(
                           color: Theme.of(context).brightness == Brightness.dark
                               ? Theme.of(context).colorScheme.onSurface

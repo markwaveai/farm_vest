@@ -3,13 +3,13 @@ import 'package:farm_vest/features/investor/data/models/visit_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-
-class VisitSlotSummary extends StatelessWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class VisitSlotSummary extends ConsumerWidget {
   final AsyncValue<VisitAvailability> asyncData;
   final bool hasBooked;
   final DateTime selectedDate;
 
-  const VisitSlotSummary({
+  VisitSlotSummary({
     super.key,
     required this.asyncData,
     required this.hasBooked,
@@ -17,14 +17,14 @@ class VisitSlotSummary extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     int totalAvailable = 0;
     asyncData.whenData((data) {
       totalAvailable = data.availableSlots.length;
     });
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Card(
         elevation: 6,
         shadowColor: Colors.black.withOpacity(0.12),
@@ -39,7 +39,7 @@ class VisitSlotSummary extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            padding: EdgeInsets.fromLTRB(16, 14, 16, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -51,21 +51,21 @@ class VisitSlotSummary extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.insights,
                               size: 18,
                               color: AppTheme.primary,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             Text(
-                              'Slots Summary',
+                              'Slots Summary'.tr(ref),
                               style: AppTheme.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: 6),
                         Text(
                           DateFormat('MMMM d, yyyy').format(selectedDate),
                           style: AppTheme.bodySmall.copyWith(
@@ -77,7 +77,7 @@ class VisitSlotSummary extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
@@ -88,7 +88,7 @@ class VisitSlotSummary extends StatelessWidget {
                         icon: Icons.event_available,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     if (hasBooked)
                       Expanded(
                         child: _buildSummaryPill(
@@ -124,7 +124,7 @@ class VisitSlotSummary extends StatelessWidget {
     required IconData icon,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: AppTheme.white,
         borderRadius: BorderRadius.circular(14),
@@ -140,7 +140,7 @@ class VisitSlotSummary extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: 2),
           Text(
             value,
             style: AppTheme.bodyMedium.copyWith(

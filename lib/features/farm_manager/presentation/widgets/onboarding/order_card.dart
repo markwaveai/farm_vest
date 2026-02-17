@@ -2,15 +2,16 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/farm_manager/data/models/animalkart_order_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-class OrderCard extends StatelessWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class OrderCard extends ConsumerWidget {
   final AnimalkartOrder item;
   final VoidCallback onTap;
 
-  const OrderCard({super.key, required this.item, required this.onTap});
+  OrderCard({super.key, required this.item, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
@@ -22,7 +23,7 @@ class OrderCard extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 16,
-            offset: const Offset(0, 8),
+            offset: Offset(0, 8),
           ),
         ],
       ),
@@ -32,7 +33,7 @@ class OrderCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -41,7 +42,7 @@ class OrderCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
@@ -54,20 +55,20 @@ class OrderCard extends StatelessWidget {
                         size: 28,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             item.investor.fullName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Row(
                             children: [
                               Icon(
@@ -75,7 +76,7 @@ class OrderCard extends StatelessWidget {
                                 size: 14,
                                 color: Theme.of(context).hintColor,
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: 4),
                               Text(
                                 item.investor.mobile,
                                 style: TextStyle(
@@ -86,7 +87,7 @@ class OrderCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 2),
+                          SizedBox(height: 2),
                           Text(
                             'Order ID: ${item.order.id}',
                             style: TextStyle(
@@ -106,12 +107,12 @@ class OrderCard extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 Divider(
                   height: 1,
                   color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
                 // Primary Stats Row
                 Row(
@@ -126,7 +127,7 @@ class OrderCard extends StatelessWidget {
                         Colors.blue,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: _buildCountBlock(
                         context,
@@ -140,11 +141,11 @@ class OrderCard extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
                 // Bottom Row: Total Cost
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
                   ),
@@ -164,9 +165,9 @@ class OrderCard extends StatelessWidget {
                             size: 16,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Text(
-                            'Investment Value',
+                            'Investment Value'.tr(ref),
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -203,7 +204,7 @@ class OrderCard extends StatelessWidget {
     Color color,
   ) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
@@ -215,7 +216,7 @@ class OrderCard extends StatelessWidget {
           Row(
             children: [
               Icon(icon, size: 14, color: color),
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
@@ -226,21 +227,21 @@ class OrderCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 total,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
                   height: 1,
                 ),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: 4),
               Text(
-                'Total',
+                'Total'.tr(ref),
                 style: TextStyle(
                   fontSize: 11,
                   color: Theme.of(context).hintColor,
@@ -249,21 +250,21 @@ class OrderCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Row(
             children: [
               Container(
                 width: 6,
                 height: 6,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.orange,
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               Text(
                 '$inTransit In-Transit',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: Colors.orange,

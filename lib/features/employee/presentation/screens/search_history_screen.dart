@@ -1,18 +1,19 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
 
 import 'package:farm_vest/core/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
-
-class SearchHistoryScreen extends StatefulWidget {
-  const SearchHistoryScreen({super.key});
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class SearchHistoryScreen extends ConsumerStatefulWidget {
+  SearchHistoryScreen({super.key});
 
   @override
   State<SearchHistoryScreen> createState() => _SearchHistoryScreenState();
 }
 
-class _SearchHistoryScreenState extends State<SearchHistoryScreen> {
+class _SearchHistoryScreenState extends ConsumerState<SearchHistoryScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   // Mock data
@@ -51,31 +52,31 @@ class _SearchHistoryScreenState extends State<SearchHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Search History',
+        title: Text(
+          'Search History'.tr(ref),
           style: TextStyle(color: AppTheme.dark, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppTheme.dark),
+        iconTheme: IconThemeData(color: AppTheme.dark),
       ),
       backgroundColor: Colors.grey[50],
       body: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
+        padding: EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           children: [
             CustomTextField(
               hint: 'Search by Buffalo ID or Issue...',
               controller: _searchController,
               onChanged: _filterRecords,
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: Icon(Icons.search),
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
             Expanded(
               child: _filteredRecords.isEmpty
                   ? Center(
                       child: Text(
-                        'No records found',
+                        'No records found'.tr(ref),
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                     )
@@ -84,26 +85,26 @@ class _SearchHistoryScreenState extends State<SearchHistoryScreen> {
                       itemBuilder: (context, index) {
                         final record = _filteredRecords[index];
                         return Padding(
-                          padding: const EdgeInsets.only(
+                          padding: EdgeInsets.only(
                             bottom: AppConstants.spacingS,
                           ),
                           child: CustomCard(
                             child: ListTile(
                               contentPadding: EdgeInsets.zero,
                               leading: Container(
-                                padding: const EdgeInsets.all(8),
+                                padding: EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: Colors.orange.withOpacity(0.1),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.history,
                                   color: Colors.orange,
                                 ),
                               ),
                               title: Text(
                                 record['id']!,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                   color: AppTheme.dark,
@@ -112,7 +113,7 @@ class _SearchHistoryScreenState extends State<SearchHistoryScreen> {
                               subtitle: Text(
                                 '${record['issue']} • ${record['date']}',
                               ),
-                              trailing: const Icon(Icons.chevron_right),
+                              trailing: Icon(Icons.chevron_right),
                               onTap: () {
                                 // TODO: Navigate to detail view
                               },

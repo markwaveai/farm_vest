@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/services/biometric_service.dart';
 
 import 'package:farm_vest/core/theme/app_theme.dart';
@@ -10,8 +11,8 @@ import 'package:farm_vest/features/farm_manager/presentation/widgets/onboarding/
 import 'package:farm_vest/features/farm_manager/presentation/widgets/onboarding/status_pill.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
-class AnimalEntryForm extends StatefulWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class AnimalEntryForm extends ConsumerStatefulWidget {
   final AnimalOnboardingEntry entry;
   final int index;
   final VoidCallback onRemove;
@@ -20,7 +21,7 @@ class AnimalEntryForm extends StatefulWidget {
   final List<AnimalOnboardingEntry> calfEntries;
   final AnimalOnboardingEntry? calfEntry;
 
-  const AnimalEntryForm({
+  AnimalEntryForm({
     super.key,
     required this.entry,
     required this.index,
@@ -35,7 +36,7 @@ class AnimalEntryForm extends StatefulWidget {
   State<AnimalEntryForm> createState() => _AnimalEntryFormState();
 }
 
-class _AnimalEntryFormState extends State<AnimalEntryForm> {
+class _AnimalEntryFormState extends ConsumerState<AnimalEntryForm> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: AppTheme.errorRed),
@@ -100,15 +101,15 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Select Image Source',
+              Text(
+                'Select Image Source'.tr(ref),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Divider(color: AppTheme.grey1.withOpacity(0.5)),
               ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Camera'),
+                leading: Icon(Icons.camera_alt),
+                title: Text('Camera'.tr(ref)),
                 onTap: () async {
                   Navigator.pop(context);
                   final picker = ImagePicker();
@@ -122,8 +123,8 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Gallery'),
+                leading: Icon(Icons.photo_library),
+                title: Text('Gallery'.tr(ref)),
                 onTap: () async {
                   Navigator.pop(context);
                   final picker = ImagePicker();
@@ -161,7 +162,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
     showDialog(
       context: context,
       builder: (_) => Dialog(
-        insetPadding: const EdgeInsets.all(16),
+        insetPadding: EdgeInsets.all(16),
         backgroundColor: Colors.transparent,
         child: SingleChildScrollView(
           child: AnimalEntryForm(
@@ -198,7 +199,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
         : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 24),
+      margin: EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -207,7 +208,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
           BoxShadow(
             color: Theme.of(context).shadowColor.withValues(alpha: 0.06),
             blurRadius: 20,
-            offset: const Offset(0, 8),
+            offset: Offset(0, 8),
             spreadRadius: -4,
           ),
         ],
@@ -216,14 +217,12 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
         children: [
           // Header Section
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
               color: Theme.of(
                 context,
               ).colorScheme.primary.withValues(alpha: 0.04), // Very subtle fill
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
-              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
               border: Border(
                 bottom: BorderSide(color: Theme.of(context).dividerColor),
               ),
@@ -232,7 +231,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
               children: [
                 // Icon + Number
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
                     shape: BoxShape.circle,
@@ -242,7 +241,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           context,
                         ).colorScheme.primary.withValues(alpha: 0.15),
                         blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
@@ -255,7 +254,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,7 +268,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           height: 1.2,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2),
                       if (animal.earTag.isNotEmpty)
                         Text(
                           'Tag: ${animal.earTag}',
@@ -281,7 +280,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                         )
                       else
                         Text(
-                          'Enter details below',
+                          'Enter details below'.tr(ref),
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).hintColor,
@@ -305,10 +304,10 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     icon: Icons.edit,
                   ),
 
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 IconButton(
                   onPressed: widget.onRemove,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline_rounded,
                     color: AppTheme.errorRed,
                     size: 20,
@@ -324,7 +323,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
 
           // Form Body
           Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -344,7 +343,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      SizedBox(width: 20),
                       Expanded(
                         child: ModernTextField(
                           label: 'Tag Number',
@@ -359,7 +358,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                 ],
 
                 // Previous First Row: RFID & Ear Tag
@@ -379,7 +378,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                         },
                       ),
                     ),
-                    const SizedBox(width: 20),
+                    SizedBox(width: 20),
                     Expanded(
                       child: ModernTextField(
                         label: 'Ear Tag',
@@ -396,7 +395,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
                 // Second Row: Age, Breed/Parent
                 Row(
@@ -416,7 +415,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      SizedBox(width: 20),
                     ],
                     Expanded(
                       child: ModernTextField(
@@ -449,7 +448,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
                 // Third Row: Status (Buffalo Only)
                 if (isBuffalo) ...[
@@ -463,14 +462,14 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Status',
+                                'Status'.tr(ref),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: Theme.of(context).hintColor,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8),
                               Container(
                                 height: 48,
                                 decoration: BoxDecoration(
@@ -487,7 +486,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                   value: animal.status.isNotEmpty
                                       ? animal.status
                                       : null,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     border: InputBorder.none,
                                     isDense: true,
                                     contentPadding: EdgeInsets.symmetric(
@@ -495,9 +494,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                       vertical: 12,
                                     ),
                                   ),
-                                  icon: const Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                  ),
+                                  icon: Icon(Icons.keyboard_arrow_down_rounded),
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -505,22 +502,22 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                       context,
                                     ).colorScheme.onSurface,
                                   ),
-                                  items: const [
+                                  items: [
                                     DropdownMenuItem(
                                       value: 'high_yield',
-                                      child: Text('High Yield'),
+                                      child: Text('High Yield'.tr(ref)),
                                     ),
                                     DropdownMenuItem(
                                       value: 'low_yield',
-                                      child: Text('Low Yield'),
+                                      child: Text('Low Yield'.tr(ref)),
                                     ),
                                     DropdownMenuItem(
                                       value: 'dry',
-                                      child: Text('Dry'),
+                                      child: Text('Dry'.tr(ref)),
                                     ),
                                     DropdownMenuItem(
                                       value: 'pregnant',
-                                      child: Text('Pregnant'),
+                                      child: Text('Pregnant'.tr(ref)),
                                     ),
                                   ],
                                   onChanged: (value) {
@@ -534,21 +531,21 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 20),
+                        SizedBox(width: 20),
                       ],
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Health Status',
+                              'Health Status'.tr(ref),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: Theme.of(context).hintColor,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Container(
                               height: 48,
                               decoration: BoxDecoration(
@@ -565,7 +562,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                 value: animal.healthStatus.isNotEmpty
                                     ? animal.healthStatus.toLowerCase()
                                     : 'healthy',
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   border: InputBorder.none,
                                   isDense: true,
                                   contentPadding: EdgeInsets.symmetric(
@@ -573,9 +570,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                     vertical: 12,
                                   ),
                                 ),
-                                icon: const Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                ),
+                                icon: Icon(Icons.keyboard_arrow_down_rounded),
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -584,22 +579,22 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                   ).colorScheme.onSurface,
                                 ),
                                 isExpanded: true,
-                                items: const [
+                                items: [
                                   DropdownMenuItem(
                                     value: 'healthy',
-                                    child: Text('Healthy'),
+                                    child: Text('Healthy'.tr(ref)),
                                   ),
                                   DropdownMenuItem(
                                     value: 'sick',
-                                    child: Text('Sick'),
+                                    child: Text('Sick'.tr(ref)),
                                   ),
                                   DropdownMenuItem(
                                     value: 'treatment',
-                                    child: Text('Under Treatment'),
+                                    child: Text('Under Treatment'.tr(ref)),
                                   ),
                                   DropdownMenuItem(
                                     value: 'recovered',
-                                    child: Text('Recovered'),
+                                    child: Text('Recovered'.tr(ref)),
                                   ),
                                 ],
                                 onChanged: (value) {
@@ -618,12 +613,12 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                 ],
 
-                const SizedBox.shrink(),
+                SizedBox.shrink(),
 
-                if (isBuffalo) const SizedBox(height: 24),
+                if (isBuffalo) SizedBox(height: 24),
 
                 // Images Section
                 Column(
@@ -642,7 +637,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     SizedBox(
                       height: 80,
                       child: ListView(
@@ -680,9 +675,9 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                     ).colorScheme.primary,
                                     size: 24,
                                   ),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: 4),
                                   Text(
-                                    'Add',
+                                    'Add'.tr(ref),
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: Theme.of(
@@ -701,7 +696,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                             final idx = entry.key;
                             final img = entry.value;
                             return Padding(
-                              padding: const EdgeInsets.only(left: 12),
+                              padding: EdgeInsets.only(left: 12),
                               child: Stack(
                                 clipBehavior: Clip.none,
                                 children: [
@@ -727,7 +722,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                         color: Colors.black45,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
-                                      child: const Center(
+                                      child: Center(
                                         child: SizedBox(
                                           width: 20,
                                           height: 20,
@@ -749,7 +744,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                         widget.onUpdate();
                                       },
                                       child: Container(
-                                        padding: const EdgeInsets.all(4),
+                                        padding: EdgeInsets.all(4),
                                         decoration: BoxDecoration(
                                           color: Theme.of(context).cardColor,
                                           shape: BoxShape.circle,
@@ -762,7 +757,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                                             ),
                                           ],
                                         ),
-                                        child: const Icon(
+                                        child: Icon(
                                           Icons.close,
                                           size: 12,
                                           color: AppTheme.errorRed,
@@ -785,12 +780,12 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
 
           if (isBuffalo && widget.calfEntry != null) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: InkWell(
                 onTap: _openCalfDialog,
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Theme.of(
                       context,
@@ -805,7 +800,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: Theme.of(context).cardColor,
                           shape: BoxShape.circle,
@@ -816,18 +811,18 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           size: 20,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Calf Details",
+                          Text(
+                            "Calf Details".tr(ref),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          SizedBox(height: 2),
                           Text(
                             widget.calfEntry!.earTag.isNotEmpty
                                 ? "Tag: ${widget.calfEntry!.earTag}"
@@ -839,7 +834,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           ),
                         ],
                       ),
-                      const Spacer(),
+                      Spacer(),
                       Icon(
                         Icons.arrow_forward_ios_rounded,
                         size: 14,

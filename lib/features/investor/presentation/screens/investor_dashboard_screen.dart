@@ -13,8 +13,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class InvestorDashboardScreen extends ConsumerStatefulWidget {
-  const InvestorDashboardScreen({super.key});
+  InvestorDashboardScreen({super.key});
 
   @override
   ConsumerState<InvestorDashboardScreen> createState() =>
@@ -62,24 +63,24 @@ class _InvestorDashboardScreenState
           onRefresh: () async {
             _refreshData();
             // Wait for data to refresh (optional, as providers handle loading state)
-            await Future.delayed(const Duration(seconds: 1));
+            await Future.delayed(Duration(seconds: 1));
           },
           child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
+            physics: AlwaysScrollableScrollPhysics(),
             slivers: [
               // Consolidated Stats & Financial Overview
-              const SliverToBoxAdapter(child: DashboardStatsCard()),
+              SliverToBoxAdapter(child: DashboardStatsCard()),
 
               // Monthly Visits Card
-              const SliverToBoxAdapter(child: MonthlyVisitCard()),
+              SliverToBoxAdapter(child: MonthlyVisitCard()),
 
               // Search & Filter
-              const SliverToBoxAdapter(child: SearchAndFilterBar()),
+              SliverToBoxAdapter(child: SearchAndFilterBar()),
 
               // "My Buffaloes" Header and Toggle
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
                   ),
@@ -87,7 +88,7 @@ class _InvestorDashboardScreenState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'My Buffaloes',
+                        'My Buffaloes'.tr(ref),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -112,18 +113,18 @@ class _InvestorDashboardScreenState
               buffalosAsync.when(
                 data: (data) {
                   if (data.isEmpty) {
-                    return const SliverFillRemaining(
+                    return SliverFillRemaining(
                       hasScrollBody: false,
-                      child: Center(child: Text('No buffaloes found')),
+                      child: Center(child: Text('No buffaloes found'.tr(ref))),
                     );
                   }
 
                   if (_isGridView) {
                     return SliverPadding(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.all(8),
                       sliver: SliverGrid(
                         gridDelegate:
-                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                            SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 220,
                               mainAxisSpacing: 8,
                               crossAxisSpacing: 8,
@@ -153,7 +154,7 @@ class _InvestorDashboardScreenState
                     );
                   } else {
                     return SliverPadding(
-                      padding: const EdgeInsets.symmetric(
+                      padding: EdgeInsets.symmetric(
                         vertical: 8,
                         horizontal: 8,
                       ),
@@ -182,7 +183,7 @@ class _InvestorDashboardScreenState
                     );
                   }
                 },
-                loading: () => const SliverFillRemaining(
+                loading: () => SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
                 ),
                 error: (err, stack) => SliverFillRemaining(
@@ -191,7 +192,7 @@ class _InvestorDashboardScreenState
               ),
 
               // Bottom padding
-              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(child: SizedBox(height: 20)),
             ],
           ),
         ),
@@ -205,7 +206,7 @@ class _InvestorDashboardScreenState
     String? buffaloId,
   ) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Invoice feature coming soon available")),
+      SnackBar(content: Text("Invoice feature coming soon available".tr(ref))),
     );
   }
 

@@ -1,10 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 enum IssueType { death, fever, infection, quarantine, recovery }
 
 class HealthIssue {
@@ -25,16 +26,16 @@ class HealthIssue {
   });
 }
 
-class HealthIssuesScreen extends StatefulWidget {
+class HealthIssuesScreen extends ConsumerStatefulWidget {
   final bool hideAppBar;
 
-  const HealthIssuesScreen({super.key, this.hideAppBar = false});
+  HealthIssuesScreen({super.key, this.hideAppBar = false});
 
   @override
   State<HealthIssuesScreen> createState() => _HealthIssuesScreenState();
 }
 
-class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
+class _HealthIssuesScreenState extends ConsumerState<HealthIssuesScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   String _selectedBuffalo = 'BUF-001';
@@ -73,21 +74,21 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
         buffaloId: 'BUF-003',
         type: IssueType.fever,
         description: 'High temperature detected during morning check',
-        reportedAt: DateTime.now().subtract(const Duration(hours: 2)),
+        reportedAt: DateTime.now().subtract(Duration(hours: 2)),
         status: 'Under Treatment',
       ),
       HealthIssue(
         buffaloId: 'BUF-007',
         type: IssueType.infection,
         description: 'Minor wound infection on left leg',
-        reportedAt: DateTime.now().subtract(const Duration(days: 1)),
+        reportedAt: DateTime.now().subtract(Duration(days: 1)),
         status: 'Pending Doctor Review',
       ),
       HealthIssue(
         buffaloId: 'BUF-012',
         type: IssueType.quarantine,
         description: 'Precautionary quarantine after contact with sick animal',
-        reportedAt: DateTime.now().subtract(const Duration(days: 2)),
+        reportedAt: DateTime.now().subtract(Duration(days: 2)),
         status: 'In Quarantine',
         requiresTransfer: true,
       ),
@@ -100,9 +101,9 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
       appBar: widget.hideAppBar
           ? null
           : AppBar(
-              title: const Text('Health Issues'),
+              title: Text('Health Issues'.tr(ref)),
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back),
                 onPressed: () => NavigationHelper.safePopOrNavigate(
                   context,
                   fallbackRoute: '/supervisor-dashboard',
@@ -110,30 +111,30 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
               ),
             ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
+        padding: EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Report New Issue Form
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(AppConstants.spacingL),
+                padding: EdgeInsets.all(AppConstants.spacingL),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Report Health Issue',
+                      Text(
+                        'Report Health Issue'.tr(ref),
                         style: AppTheme.headingMedium,
                       ),
-                      const SizedBox(height: AppConstants.spacingL),
+                      SizedBox(height: AppConstants.spacingL),
 
                       // Buffalo Selection
                       DropdownButtonFormField<String>(
                         // ignore: deprecated_member_use
                         value: _selectedBuffalo,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Select Buffalo',
                           prefixIcon: Icon(Icons.pets),
                         ),
@@ -150,13 +151,13 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                           });
                         },
                       ),
-                      const SizedBox(height: AppConstants.spacingM),
+                      SizedBox(height: AppConstants.spacingM),
 
                       // Issue Type Selection
                       DropdownButtonFormField<IssueType>(
                         // ignore: deprecated_member_use
                         value: _selectedIssueType,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Issue Type',
                           prefixIcon: Icon(Icons.medical_services),
                         ),
@@ -173,12 +174,12 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                           });
                         },
                       ),
-                      const SizedBox(height: AppConstants.spacingM),
+                      SizedBox(height: AppConstants.spacingM),
 
                       // Description
                       TextFormField(
                         controller: _descriptionController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Description',
                           prefixIcon: Icon(Icons.description),
                           hintText: 'Describe the health issue in detail...',
@@ -191,13 +192,13 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: AppConstants.spacingM),
+                      SizedBox(height: AppConstants.spacingM),
 
                       // Transfer Required Checkbox
                       CheckboxListTile(
-                        title: const Text('Requires Transfer'),
-                        subtitle: const Text(
-                          'Check if animal needs to be moved to isolation',
+                        title: Text('Requires Transfer'.tr(ref)),
+                        subtitle: Text(
+                          'Check if animal needs to be moved to isolation'.tr(ref),
                         ),
                         // ignore: deprecated_member_use
                         value: _requiresTransfer,
@@ -208,7 +209,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                         },
                         controlAffinity: ListTileControlAffinity.leading,
                       ),
-                      const SizedBox(height: AppConstants.spacingL),
+                      SizedBox(height: AppConstants.spacingL),
 
                       // Submit Button
                       SizedBox(
@@ -216,7 +217,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                         height: 50,
                         child: ElevatedButton(
                           onPressed: _submitHealthIssue,
-                          child: const Text('Submit Report'),
+                          child: Text('Submit Report'.tr(ref)),
                         ),
                       ),
                     ],
@@ -224,31 +225,31 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: AppConstants.spacingL),
+            SizedBox(height: AppConstants.spacingL),
 
             // Recent Issues
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Recent Health Issues',
+                Text(
+                  'Recent Health Issues'.tr(ref),
                   style: AppTheme.headingMedium,
                 ),
                 TextButton.icon(
                   onPressed: () {
                     // Navigate to full timeline
                   },
-                  icon: const Icon(Icons.timeline),
-                  label: const Text('View Timeline'),
+                  icon: Icon(Icons.timeline),
+                  label: Text('View Timeline'.tr(ref)),
                 ),
               ],
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             // Health Issues List
             ListView.builder(
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+              physics: NeverScrollableScrollPhysics(),
               itemCount: _healthIssues.length,
               itemBuilder: (context, index) {
                 final issue = _healthIssues[index];
@@ -265,9 +266,9 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
     final issueInfo = _getIssueInfo(issue.type);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: EdgeInsets.only(bottom: AppConstants.spacingM),
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
+        padding: EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -286,7 +287,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                     size: AppConstants.iconM,
                   ),
                 ),
-                const SizedBox(width: AppConstants.spacingM),
+                SizedBox(width: AppConstants.spacingM),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,9 +298,9 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                             issue.buffaloId,
                             style: AppTheme.headingSmall.copyWith(fontSize: 16),
                           ),
-                          const SizedBox(width: AppConstants.spacingS),
+                          SizedBox(width: AppConstants.spacingS),
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                               horizontal: AppConstants.spacingS,
                               vertical: AppConstants.spacingXS,
                             ),
@@ -320,7 +321,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppConstants.spacingXS),
+                      SizedBox(height: AppConstants.spacingXS),
                       Text(
                         DateFormat(
                           'MMM dd, yyyy • hh:mm a',
@@ -333,7 +334,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: AppConstants.spacingS,
                     vertical: AppConstants.spacingXS,
                   ),
@@ -352,16 +353,16 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             // Description
             Text(issue.description, style: AppTheme.bodyMedium),
 
             // Transfer Required
             if (issue.requiresTransfer) ...[
-              const SizedBox(height: AppConstants.spacingM),
+              SizedBox(height: AppConstants.spacingM),
               Container(
-                padding: const EdgeInsets.all(AppConstants.spacingM),
+                padding: EdgeInsets.all(AppConstants.spacingM),
                 decoration: BoxDecoration(
                   color: AppTheme.warningOrange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -371,24 +372,24 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.warning,
                       color: AppTheme.warningOrange,
                       size: AppConstants.iconS,
                     ),
-                    const SizedBox(width: AppConstants.spacingS),
-                    const Text(
-                      'Transfer Required - Pending Farm Manager Approval',
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Transfer Required - Pending Farm Manager Approval'.tr(ref),
                       style: TextStyle(
                         color: AppTheme.warningOrange,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),
                     ),
-                    const Spacer(),
+                    Spacer(),
                     TextButton(
                       onPressed: () => _showTransferApprovalDialog(issue),
-                      child: const Text('View Status'),
+                      child: Text('View Status'.tr(ref)),
                     ),
                   ],
                 ),
@@ -477,30 +478,30 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Transfer Approval Required'),
+        title: Text('Transfer Approval Required'.tr(ref)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Buffalo: ${issue.buffaloId}'),
             Text('Issue: ${_getIssueTypeName(issue.type)}'),
-            const SizedBox(height: AppConstants.spacingM),
-            const Text(
-              'This case requires animal transfer to isolation. Farm Manager approval is needed.',
+            SizedBox(height: AppConstants.spacingM),
+            Text(
+              'This case requires animal transfer to isolation. Farm Manager approval is needed.'.tr(ref),
               style: AppTheme.bodyMedium,
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
             Container(
-              padding: const EdgeInsets.all(AppConstants.spacingM),
+              padding: EdgeInsets.all(AppConstants.spacingM),
               decoration: BoxDecoration(
                 color: AppTheme.lightGrey,
                 borderRadius: BorderRadius.circular(AppConstants.radiusM),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Approval Status: Pending',
+                    'Approval Status: Pending'.tr(ref),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: AppTheme.warningOrange,
@@ -508,7 +509,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                   ),
                   SizedBox(height: AppConstants.spacingS),
                   Text(
-                    'You will be notified once the Farm Manager reviews and approves the transfer request.',
+                    'You will be notified once the Farm Manager reviews and approves the transfer request.'.tr(ref),
                     style: AppTheme.bodySmall,
                   ),
                 ],
@@ -525,7 +526,7 @@ class _HealthIssuesScreenState extends State<HealthIssuesScreen> {
                 'Health issue reported. Transfer approval pending.',
               );
             },
-            child: const Text('Understood'),
+            child: Text('Understood'.tr(ref)),
           ),
         ],
       ),

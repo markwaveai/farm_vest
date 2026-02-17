@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class BuffaloGridScreen extends ConsumerStatefulWidget {
-  const BuffaloGridScreen({super.key});
+  BuffaloGridScreen({super.key});
 
   @override
   ConsumerState<BuffaloGridScreen> createState() => _BuffaloGridScreenState();
@@ -18,10 +19,10 @@ class _BuffaloGridScreenState extends ConsumerState<BuffaloGridScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text('Buffalo Shed A')),
+      appBar: AppBar(title: Text('Buffalo Shed A'.tr(ref))),
       body: GridView.builder(
-        padding: const EdgeInsets.all(8.0),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        padding: EdgeInsets.all(8.0),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
@@ -61,7 +62,7 @@ class _BuffaloGridScreenState extends ConsumerState<BuffaloGridScreen> {
                           ? Theme.of(context).primaryColor
                           : Theme.of(context).disabledColor,
                     ),
-                    const SizedBox(height: 8.0),
+                    SizedBox(height: 8.0),
                     Text(
                       location,
                       style: TextStyle(

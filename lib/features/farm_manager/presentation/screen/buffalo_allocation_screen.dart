@@ -12,7 +12,7 @@ import '../../data/models/farm_manager_dashboard_model.dart';
 import '../../data/models/shed_model.dart';
 import 'package:farm_vest/features/farm_manager/data/models/allocated_animal_details.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class BuffaloAllocationScreen extends ConsumerStatefulWidget {
   final int? initialFarmId;
   final int? initialShedId;
@@ -20,7 +20,7 @@ class BuffaloAllocationScreen extends ConsumerStatefulWidget {
   final String? initialAnimalId;
   final bool hideAppBar;
 
-  const BuffaloAllocationScreen({
+  BuffaloAllocationScreen({
     super.key,
     this.initialShedId,
     this.targetParkingId,
@@ -167,7 +167,7 @@ class _BuffaloAllocationScreenState
       }
     }
 
-    String appBarTitle = 'Shed Allocation';
+    String appBarTitle = 'Shed Allocation'.tr(ref);
     if (userRole == UserType.farmManager &&
         selectedShedId != null &&
         dashboardState.sheds.isNotEmpty) {
@@ -175,7 +175,7 @@ class _BuffaloAllocationScreenState
         (s) => s.id == selectedShedId,
         orElse: () => dashboardState.sheds.first,
       );
-      appBarTitle = 'Shed: ${shed.shedName}';
+      appBarTitle = '${'Shed'.tr(ref)}: ${shed.shedName}';
     }
 
     return Scaffold(
@@ -185,7 +185,7 @@ class _BuffaloAllocationScreenState
           : AppBar(
               title: Text(
                 appBarTitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 20,
                   color: Colors.white,
@@ -196,13 +196,13 @@ class _BuffaloAllocationScreenState
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: Container(
-                margin: const EdgeInsets.only(left: 8),
+                margin: EdgeInsets.only(left: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back_ios_new_rounded,
                     color: Colors.white,
                     size: 20,
@@ -225,7 +225,7 @@ class _BuffaloAllocationScreenState
                     dashboardState.sheds.isNotEmpty &&
                     !dashboardState.isLoading)
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.videocam_rounded,
                       color: Colors.white,
                     ),
@@ -237,7 +237,7 @@ class _BuffaloAllocationScreenState
                     },
                   ),
                 IconButton(
-                  icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                  icon: Icon(Icons.refresh_rounded, color: Colors.white),
                   onPressed: () {
                     if (selectedShedId != null) {
                       ref
@@ -248,13 +248,13 @@ class _BuffaloAllocationScreenState
                 ),
                 // Finalize button visible for both Manager and Supervisor
                 Container(
-                  margin: const EdgeInsets.only(right: 16),
+                  margin: EdgeInsets.only(right: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.check_rounded),
+                    icon: Icon(Icons.check_rounded),
                     onPressed: _finalizeAllocations,
                     color: Colors.blueGrey,
                   ),
@@ -266,8 +266,8 @@ class _BuffaloAllocationScreenState
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      AppTheme.primary.withOpacity(0.9),
-                      AppTheme.primary.withOpacity(0.0),
+                      AppTheme.primary.withValues(alpha: 0.9),
+                      AppTheme.primary.withValues(alpha: 0.0),
                     ],
                   ),
                 ),
@@ -279,14 +279,14 @@ class _BuffaloAllocationScreenState
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppTheme.primary.withOpacity(0.05),
-              Colors.blueGrey.shade50.withOpacity(0.5),
+              AppTheme.primary.withValues(alpha: 0.05),
+              Colors.blueGrey.shade50.withValues(alpha: 0.5),
             ],
           ),
         ),
         child: Column(
           children: [
-            const SizedBox(height: 100), // Space for transparent AppBar
+            SizedBox(height: 100), // Space for transparent AppBar
             // Shed Selector
             _buildShedSelector(dashboardState),
 
@@ -299,11 +299,11 @@ class _BuffaloAllocationScreenState
                       Icon(
                         Icons.warehouse_rounded,
                         size: 64,
-                        color: AppTheme.grey1.withOpacity(0.3),
+                        color: AppTheme.grey1.withValues(alpha: 0.3),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Text(
-                        'Please select a shed to start allocation',
+                        'Please select a shed to start allocation'.tr(ref),
                         style: TextStyle(color: AppTheme.grey1, fontSize: 14),
                       ),
                     ],
@@ -311,7 +311,7 @@ class _BuffaloAllocationScreenState
                 ),
               )
             else if (dashboardState.isLoading)
-              const Expanded(child: Center(child: CircularProgressIndicator()))
+              Expanded(child: Center(child: CircularProgressIndicator()))
             else if (dashboardState.currentShedAvailability != null) ...[
               // Header Stats Card
               _buildStatsHeader(dashboardState.currentShedAvailability!),
@@ -323,10 +323,10 @@ class _BuffaloAllocationScreenState
               // Shed Grid - Row Carousel
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
+                  padding: EdgeInsets.fromLTRB(0, 12, 0, 24),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 10),
                     itemCount:
                         dashboardState.currentShedAvailability!.rows.length,
                     itemBuilder: (context, index) {
@@ -362,16 +362,16 @@ class _BuffaloAllocationScreenState
 
     // If it's a supervisor or there's only one shed, hide the selector
     if (authState.role == UserType.supervisor || displayedSheds.length <= 1) {
-      return const SizedBox.shrink();
+      return SizedBox.shrink();
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           child: Text(
-            'SELECT SHED UNIT',
+            'SELECT SHED UNIT'.tr(ref),
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
@@ -385,11 +385,11 @@ class _BuffaloAllocationScreenState
           child: ListView.builder(
             controller: _shedScrollController,
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16),
             itemCount: displayedSheds.length + (state.hasMoreSheds ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == displayedSheds.length) {
-                return const Center(
+                return Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
                     child: CircularProgressIndicator(strokeWidth: 2),
@@ -401,28 +401,28 @@ class _BuffaloAllocationScreenState
               final isSelected = selectedShedId == shed.id;
 
               return Padding(
-                padding: const EdgeInsets.only(right: 12, bottom: 8),
+                padding: EdgeInsets.only(right: 12, bottom: 8),
                 child: GestureDetector(
                   onTap: () => _onShedSelected(shed.id),
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
+                    duration: Duration(milliseconds: 300),
                     width: 150,
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isSelected ? AppTheme.primary : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
                           color: (isSelected ? AppTheme.primary : Colors.black)
-                              .withOpacity(0.05),
+                              .withValues(alpha: 0.05),
                           blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          offset: Offset(0, 4),
                         ),
                       ],
                       border: Border.all(
                         color: isSelected
                             ? AppTheme.primary
-                            : AppTheme.primary.withOpacity(0.1),
+                            : AppTheme.primary.withValues(alpha: 0.1),
                         width: 1,
                       ),
                     ),
@@ -440,13 +440,13 @@ class _BuffaloAllocationScreenState
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
-                          '${shed.availablePositions} left',
+                          '${shed.availablePositions} ${'left'.tr(ref)}',
                           style: TextStyle(
                             fontSize: 10,
                             color: isSelected
-                                ? Colors.white.withOpacity(0.9)
+                                ? Colors.white.withValues(alpha: 0.9)
                                 : AppTheme.grey1,
                           ),
                         ),
@@ -513,30 +513,34 @@ class _BuffaloAllocationScreenState
             }
 
             return AlertDialog(
-              title: const Text('Assign CCTV Angles'),
+              title: Text('Assign CCTV Angles'.tr(ref)),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Configure Global (Default) cameras or specific blocks (20 animals each).',
-                      style: TextStyle(fontSize: 12, color: AppTheme.grey1),
+                    Text(
+                      'Configure Global (Default) cameras or specific blocks (20 animals each).'.tr(ref)
+                          .tr(ref),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.grey1,
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     DropdownButton<int>(
                       value: selectedGroupIdx,
                       isExpanded: true,
                       items: [
-                        const DropdownMenuItem(
+                        DropdownMenuItem(
                           value: -1,
-                          child: Text("Global (Default)"),
+                          child: Text("Global (Default)".tr(ref)),
                         ),
                         ...List.generate(
                           15,
                           (i) => DropdownMenuItem(
                             value: i,
                             child: Text(
-                              "Block ${i + 1} (Slots ${i * 20 + 1}-${(i + 1) * 20})",
+                              "${'Block'.tr(ref)} ${i + 1} (${'Slots'.tr(ref)} ${i * 20 + 1}-${(i + 1) * 20})",
                             ),
                           ),
                         ),
@@ -562,14 +566,14 @@ class _BuffaloAllocationScreenState
                         });
                       },
                     ),
-                    const SizedBox(height: 16),
-                    _buildCctvField(c1, 'Angle 1'),
-                    const SizedBox(height: 8),
-                    _buildCctvField(c2, 'Angle 2'),
-                    const SizedBox(height: 8),
-                    _buildCctvField(c3, 'Angle 3'),
-                    const SizedBox(height: 8),
-                    _buildCctvField(c4, 'Angle 4'),
+                    SizedBox(height: 16),
+                    _buildCctvField(c1, '${'Angle'.tr(ref)} 1'),
+                    SizedBox(height: 8),
+                    _buildCctvField(c2, '${'Angle'.tr(ref)} 2'),
+                    SizedBox(height: 8),
+                    _buildCctvField(c3, '${'Angle'.tr(ref)} 3'),
+                    SizedBox(height: 8),
+                    _buildCctvField(c4, '${'Angle'.tr(ref)} 4'),
                   ],
                 ),
               ),
@@ -581,11 +585,11 @@ class _BuffaloAllocationScreenState
                     c3.text = 'http://161.97.182.208:8888/stream3/index.m3u8';
                     c4.text = 'http://161.97.182.208:8888/stream4/index.m3u8';
                   },
-                  child: const Text('Fill Test URLs'),
+                  child: Text('Fill Test URLs'.tr(ref)),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: Text('Cancel'.tr(ref)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -616,15 +620,15 @@ class _BuffaloAllocationScreenState
                             .read(farmManagerProvider.notifier)
                             .fetchSheds(farmId: selectedFarmId ?? null);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('CCTV Configuration Updated'),
+                          SnackBar(
+                            content: Text('CCTV Configuration Updated'.tr(ref)),
                             backgroundColor: Colors.green,
                           ),
                         );
                       } else if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Failed to update configuration'),
+                          SnackBar(
+                            content: Text('Failed to update configuration'.tr(ref)),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -633,7 +637,7 @@ class _BuffaloAllocationScreenState
                       // Ignore
                     }
                   },
-                  child: const Text('Save'),
+                  child: Text('Save'.tr(ref)),
                 ),
               ],
             );
@@ -650,7 +654,7 @@ class _BuffaloAllocationScreenState
         labelText: label,
         hintText: 'rtsp://... or https://...',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
     );
   }
@@ -666,17 +670,17 @@ class _BuffaloAllocationScreenState
     );
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(20),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.8)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.1),
+            color: AppTheme.primary.withValues(alpha: 0.1),
             blurRadius: 20,
-            offset: const Offset(0, 10),
+            offset: Offset(0, 10),
           ),
         ],
       ),
@@ -691,14 +695,14 @@ class _BuffaloAllocationScreenState
           ),
           Container(height: 40, width: 1, color: Colors.grey.shade300),
           _buildPremiumStat(
-            'Shed Pick',
+            'Shed Pick'.tr(ref),
             '${totalOccupied + currentDraft.length}',
             Icons.pets_rounded,
             AppTheme.successGreen,
           ),
           Container(height: 40, width: 1, color: Colors.grey.shade300),
           _buildPremiumStat(
-            'Total Draft',
+            'Total Draft'.tr(ref),
             '$totalAllocatedInAllSheds',
             Icons.assignment_turned_in_rounded,
             AppTheme.primary,
@@ -726,14 +730,14 @@ class _BuffaloAllocationScreenState
 
     return Container(
       height: 120, // Increased height for investor name
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: EdgeInsets.symmetric(vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              'Select Animal to Allocate',
+              'Select Animal to Allocate'.tr(ref),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -741,10 +745,10 @@ class _BuffaloAllocationScreenState
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               itemCount: pendingAnimals.length,
               itemBuilder: (context, index) {
@@ -804,21 +808,21 @@ class _BuffaloAllocationScreenState
                   },
                   child: Container(
                     width: 100, // Widened for name
-                    margin: const EdgeInsets.only(right: 12),
+                    margin: EdgeInsets.only(right: 12),
                     decoration: BoxDecoration(
                       color: isSelected ? AppTheme.primary : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected
                             ? AppTheme.primary
-                            : AppTheme.primary.withOpacity(0.2),
+                            : AppTheme.primary.withValues(alpha: 0.2),
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
                           color: AppTheme.primary.withOpacity(0.1),
                           blurRadius: 8,
-                          offset: const Offset(0, 4),
+                          offset: Offset(0, 4),
                         ),
                       ],
                     ),
@@ -829,11 +833,11 @@ class _BuffaloAllocationScreenState
                           Container(
                             width: 80,
                             height: 45,
-                            margin: const EdgeInsets.only(bottom: 4),
+                            margin: EdgeInsets.only(bottom: 4),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
                               color: isSelected
-                                  ? Colors.white.withOpacity(0.1)
+                                  ? Colors.white.withValues(alpha: 0.1)
                                   : Colors.grey.shade50,
                               image: DecorationImage(
                                 image: NetworkImage(imageUrl),
@@ -847,7 +851,7 @@ class _BuffaloAllocationScreenState
                             color: isSelected ? Colors.white : AppTheme.primary,
                             size: 20,
                           ),
-                        if (imageUrl == null) const SizedBox(height: 4),
+                        if (imageUrl == null) SizedBox(height: 4),
                         Text(
                           displayRfid.contains('-')
                               ? displayRfid.split('-').last
@@ -861,7 +865,7 @@ class _BuffaloAllocationScreenState
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: 2),
                         Text(
                           investorName.split(' ').first,
                           style: TextStyle(
@@ -875,13 +879,13 @@ class _BuffaloAllocationScreenState
                           overflow: TextOverflow.ellipsis,
                         ),
                         if (onboardedTime.isNotEmpty) ...[
-                          const SizedBox(height: 2),
+                          SizedBox(height: 2),
                           Text(
                             onboardedTime,
                             style: TextStyle(
                               fontSize: 8,
                               color: isSelected
-                                  ? Colors.white.withOpacity(0.8)
+                                  ? Colors.white.withValues(alpha: 0.8)
                                   : AppTheme.grey1,
                             ),
                           ),
@@ -909,18 +913,18 @@ class _BuffaloAllocationScreenState
         Row(
           children: [
             Icon(icon, size: 16, color: color),
-            const SizedBox(width: 4),
+            SizedBox(width: 4),
             Text(
               value,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: AppTheme.dark.withOpacity(0.9),
+                color: AppTheme.dark.withValues(alpha: 0.9),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
@@ -936,26 +940,26 @@ class _BuffaloAllocationScreenState
 
   Widget _buildGlassColumn(String rowName, RowAvailability rowData) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 6),
+      margin: EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6),
+        color: Colors.white.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.4)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 15,
-            offset: const Offset(0, 8),
+            offset: Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.08),
-              borderRadius: const BorderRadius.vertical(
+              color: AppTheme.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.vertical(
                 top: Radius.circular(24),
               ),
             ),
@@ -965,14 +969,14 @@ class _BuffaloAllocationScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.videocam_rounded,
                       size: 14,
                       color: AppTheme.primary,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 4,
                       ),
@@ -981,14 +985,14 @@ class _BuffaloAllocationScreenState
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.primary.withOpacity(0.1),
+                            color: AppTheme.primary.withValues(alpha: 0.1),
                             blurRadius: 4,
-                            offset: const Offset(0, 2),
+                            offset: Offset(0, 2),
                           ),
                         ],
                       ),
                       child: Text(
-                        'ROW $rowName',
+                        '${'ROW'.tr(ref)} $rowName',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           color: AppTheme.primary,
@@ -999,14 +1003,14 @@ class _BuffaloAllocationScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                const Row(
+                SizedBox(height: 6),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircleAvatar(backgroundColor: Colors.red, radius: 3),
                     SizedBox(width: 6),
                     Text(
-                      'LIVE FEED',
+                      'LIVE FEED'.tr(ref),
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
@@ -1021,11 +1025,11 @@ class _BuffaloAllocationScreenState
           ),
           Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
+              borderRadius: BorderRadius.vertical(
                 bottom: Radius.circular(24),
               ),
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: EdgeInsets.symmetric(vertical: 12),
                 itemCount: rowData.available.length + rowData.filled.length,
                 itemBuilder: (context, slotIndex) {
                   // Reconstruct position ID (e.g., A1, B2)
@@ -1044,7 +1048,7 @@ class _BuffaloAllocationScreenState
                   });
 
                   // Ensure we don't go out of bounds
-                  if (slotIndex >= allPositions.length) return const SizedBox();
+                  if (slotIndex >= allPositions.length) return SizedBox();
 
                   final posId = allPositions[slotIndex];
                   final isFilled = rowData.filled.contains(posId);
@@ -1093,7 +1097,7 @@ class _BuffaloAllocationScreenState
 
     return Container(
       height: 60,
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      margin: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -1106,8 +1110,8 @@ class _BuffaloAllocationScreenState
               child: Container(
                 width: 2,
                 color: (isOccupied || isBeingAllocated)
-                    ? AppTheme.primary.withOpacity(0.3)
-                    : Colors.grey.withOpacity(0.2),
+                    ? AppTheme.primary.withValues(alpha: 0.3)
+                    : Colors.grey.withValues(alpha: 0.2),
               ),
             ),
           ),
@@ -1116,7 +1120,7 @@ class _BuffaloAllocationScreenState
             decoration: BoxDecoration(
               color: (isOccupied || isBeingAllocated)
                   ? Colors.white
-                  : Colors.white.withOpacity(0.5),
+                  : Colors.white.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(16),
 
               border: Border.all(
@@ -1126,7 +1130,7 @@ class _BuffaloAllocationScreenState
                     ? Colors
                           .green // Highlight target with GREEN
                     : isOccupied
-                    ? AppTheme.primary.withOpacity(0.1)
+                    ? AppTheme.primary.withValues(alpha: 0.1)
                     : Colors.transparent,
                 width: (isBeingAllocated || isTarget)
                     ? 3
@@ -1146,7 +1150,7 @@ class _BuffaloAllocationScreenState
                                   alpha: 0.3,
                                 ), // Stronger shadow for target
                         blurRadius: isTarget ? 16 : 12,
-                        offset: const Offset(0, 6),
+                        offset: Offset(0, 6),
                       ),
                     ]
                   : [],
@@ -1174,8 +1178,8 @@ class _BuffaloAllocationScreenState
                           .getToken();
                       if (token != null && mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Fetching animal details...'),
+                          SnackBar(
+                            content: Text('Fetching animal details...'.tr(ref)),
                             duration: Duration(milliseconds: 500),
                           ),
                         );
@@ -1230,7 +1234,7 @@ class _BuffaloAllocationScreenState
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(8.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -1240,7 +1244,7 @@ class _BuffaloAllocationScreenState
                           size: 16,
                           color: isTarget ? Colors.green : AppTheme.primary,
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
                           posId,
                           style: TextStyle(
@@ -1255,10 +1259,10 @@ class _BuffaloAllocationScreenState
                           size: 16,
                           color: isTarget ? Colors.green : AppTheme.secondary,
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
                           draftAnimalId.split('-').last,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
                             color: AppTheme.secondary,
@@ -1275,7 +1279,7 @@ class _BuffaloAllocationScreenState
                                 : FontWeight.w600,
                             color: isTarget
                                 ? Colors.red
-                                : AppTheme.grey1.withOpacity(0.5),
+                                : AppTheme.grey1.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -1294,7 +1298,7 @@ class _BuffaloAllocationScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Allocated Animal Details'),
+        title: Text('Allocated Animal Details'.tr(ref)),
         content: SizedBox(
           width: double.maxFinite,
           child: SingleChildScrollView(
@@ -1303,14 +1307,17 @@ class _BuffaloAllocationScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Animal Details
-                const Text(
-                  'Animal Information',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Text(
+                  'Animal Information'.tr(ref),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
-                const Divider(),
+                Divider(),
                 if (data.animalDetails.images.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: EdgeInsets.only(bottom: 12),
                     child: Container(
                       height: 180,
                       width: double.infinity,
@@ -1329,12 +1336,12 @@ class _BuffaloAllocationScreenState
                           fit: BoxFit.contain,
                           loadingBuilder: (context, child, loadingProgress) {
                             if (loadingProgress == null) return child;
-                            return const Center(
+                            return Center(
                               child: CircularProgressIndicator(strokeWidth: 2),
                             );
                           },
                           errorBuilder: (context, error, stackTrace) =>
-                              const Center(
+                              Center(
                                 child: Icon(
                                   Icons.error_outline,
                                   color: Colors.grey,
@@ -1345,123 +1352,153 @@ class _BuffaloAllocationScreenState
                     ),
                   ),
                 _buildDetailRow(
-                  'Animal ID',
+                  'Animal ID'.tr(ref),
                   data.animalDetails.animalId.toString(),
                 ),
-                _buildDetailRow('Breed', data.animalDetails.breedName ?? 'N/A'),
-                _buildDetailRow('Status', data.animalDetails.status ?? 'N/A'),
                 _buildDetailRow(
-                  'Health Status',
+                  'Breed'.tr(ref),
+                  data.animalDetails.breedName ?? 'N/A',
+                ),
+                _buildDetailRow(
+                  'Status'.tr(ref),
+                  data.animalDetails.status ?? 'N/A',
+                ),
+                _buildDetailRow(
+                  'Health Status'.tr(ref),
                   data.animalDetails.healthStatus ?? 'N/A',
                 ),
                 _buildDetailRow(
-                  'Age (Months)',
+                  'Age (Months)'.tr(ref),
                   data.animalDetails.ageMonths?.toString() ?? 'N/A',
                 ),
-                _buildDetailRow('RFID Tag', data.animalDetails.rfidTagNumber),
-                _buildDetailRow('Ear Tag', data.animalDetails.earTag ?? 'N/A'),
-                _buildDetailRow('Row', data.animalDetails.rowNumber ?? 'N/A'),
-                _buildDetailRow('Slot', data.animalDetails.parkingId ?? 'N/A'),
                 _buildDetailRow(
-                  'Onboarded',
+                  'RFID Tag'.tr(ref),
+                  data.animalDetails.rfidTagNumber,
+                ),
+                _buildDetailRow(
+                  'Ear Tag'.tr(ref),
+                  data.animalDetails.earTag ?? 'N/A',
+                ),
+                _buildDetailRow(
+                  'Row'.tr(ref),
+                  data.animalDetails.rowNumber ?? 'N/A',
+                ),
+                _buildDetailRow(
+                  'Slot'.tr(ref),
+                  data.animalDetails.parkingId ?? 'N/A',
+                ),
+                _buildDetailRow(
+                  'Onboarded'.tr(ref),
                   AppConstants.formatDateTime(data.animalDetails.onboardedAt),
                 ),
 
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // Investor Details
-                const Text(
-                  'Investor Details',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Text(
+                  'Investor Details'.tr(ref),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
-                const Divider(),
-                _buildDetailRow('Name', data.investorDetails.fullName),
-                _buildDetailRow('Mobile', data.investorDetails.mobile),
-                _buildDetailRow('Email', data.investorDetails.email ?? 'N/A'),
+                Divider(),
+                _buildDetailRow('Name'.tr(ref), data.investorDetails.fullName),
+                _buildDetailRow('Mobile'.tr(ref), data.investorDetails.mobile),
+                _buildDetailRow(
+                  'Email'.tr(ref),
+                  data.investorDetails.email ?? 'N/A',
+                ),
 
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // Farm & Shed Details
-                const Text(
-                  'Location Details',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Text(
+                  'Location Details'.tr(ref),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
-                const Divider(),
-                _buildDetailRow('Farm', data.farmDetails.farmName),
-                _buildDetailRow('Location', data.farmDetails.location),
-                _buildDetailRow('Shed', data.shedDetails.shedName),
+                Divider(),
+                _buildDetailRow('Farm'.tr(ref), data.farmDetails.farmName),
+                _buildDetailRow('Location'.tr(ref), data.farmDetails.location),
+                _buildDetailRow('Shed'.tr(ref), data.shedDetails.shedName),
                 _buildDetailRow(
-                  'Current Buffaloes',
+                  'Current Buffaloes'.tr(ref),
                   data.shedDetails.buffaloesCount.toString(),
                 ),
                 _buildDetailRow(
-                  'Capacity',
+                  'Capacity'.tr(ref),
                   data.shedDetails.capacity.toString(),
                 ),
 
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // Assigned Staff
-                const Text(
-                  'Assigned Staff',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Text(
+                  'Assigned Staff'.tr(ref),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
-                const Divider(),
+                Divider(),
 
                 if (data.farmManager != null) ...[
-                  const Text(
-                    'Farm Manager',
+                  Text(
+                    'Farm Manager'.tr(ref),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: AppTheme.primary,
                     ),
                   ),
-                  _buildDetailRow('Name', data.farmManager!.fullName),
-                  _buildDetailRow('Mobile', data.farmManager!.mobile),
-                  const SizedBox(height: 8),
+                  _buildDetailRow('Name'.tr(ref), data.farmManager!.fullName),
+                  _buildDetailRow('Mobile'.tr(ref), data.farmManager!.mobile),
+                  SizedBox(height: 8),
                 ],
 
                 if (data.supervisor != null) ...[
-                  const Text(
-                    'Supervisor',
+                  Text(
+                    'Supervisor'.tr(ref),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: AppTheme.primary,
                     ),
                   ),
-                  _buildDetailRow('Name', data.supervisor!.fullName),
-                  _buildDetailRow('Mobile', data.supervisor!.mobile),
-                  const SizedBox(height: 8),
+                  _buildDetailRow('Name'.tr(ref), data.supervisor!.fullName),
+                  _buildDetailRow('Mobile'.tr(ref), data.supervisor!.mobile),
+                  SizedBox(height: 8),
                 ],
 
                 if (data.doctor != null) ...[
-                  const Text(
-                    'Doctor',
+                  Text(
+                    'Doctor'.tr(ref),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: AppTheme.primary,
                     ),
                   ),
-                  _buildDetailRow('Name', data.doctor!.fullName),
-                  _buildDetailRow('Mobile', data.doctor!.mobile),
-                  const SizedBox(height: 8),
+                  _buildDetailRow('Name'.tr(ref), data.doctor!.fullName),
+                  _buildDetailRow('Mobile'.tr(ref), data.doctor!.mobile),
+                  SizedBox(height: 8),
                 ],
 
                 if (data.assistantDoctor != null) ...[
-                  const Text(
-                    'Assistant Doctor',
+                  Text(
+                    'Assistant Doctor'.tr(ref),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: AppTheme.primary,
                     ),
                   ),
-                  _buildDetailRow('Name', data.assistantDoctor!.fullName),
-                  _buildDetailRow('Mobile', data.assistantDoctor!.mobile),
-                  const SizedBox(height: 8),
+                  _buildDetailRow('Name'.tr(ref), data.assistantDoctor!.fullName),
+                  _buildDetailRow('Mobile'.tr(ref), data.assistantDoctor!.mobile),
+                  SizedBox(height: 8),
                 ],
               ],
             ),
@@ -1470,7 +1507,7 @@ class _BuffaloAllocationScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('Close'.tr(ref)),
           ),
         ],
       ),
@@ -1479,7 +1516,7 @@ class _BuffaloAllocationScreenState
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1497,7 +1534,7 @@ class _BuffaloAllocationScreenState
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
           ),
         ],
@@ -1515,8 +1552,10 @@ class _BuffaloAllocationScreenState
     if (totalDraftCount == 0) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No animals selected for allocation'),
+          SnackBar(
+            content: Text(
+              'No animals selected for allocation'.tr(ref),
+            ), // Fixed: Removed .tr(ref) to keep const, or remove const
             backgroundColor: AppTheme.warningOrange,
           ),
         );
@@ -1531,18 +1570,18 @@ class _BuffaloAllocationScreenState
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Incomplete Allocation'),
+          title: Text('Incomplete Allocation'.tr(ref)),
           content: Text(
-            'You have ${onboardedAnimals.length - totalDraftCount} animals left to allocate. Do you want to proceed anyway?',
+            '${'You have'.tr(ref)} ${onboardedAnimals.length - totalDraftCount} ${'animals left to allocate. Do you want to proceed anyway?'.tr(ref)}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text('Cancel'.tr(ref)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Proceed'),
+              child: Text('Proceed'.tr(ref)),
             ),
           ],
         ),
@@ -1559,7 +1598,7 @@ class _BuffaloAllocationScreenState
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      builder: (context) => Center(child: CircularProgressIndicator()),
     );
 
     try {
@@ -1634,8 +1673,8 @@ class _BuffaloAllocationScreenState
         SnackBar(
           content: Text(
             overallSuccess
-                ? 'All animals allocated successfully across $successCount sheds!'
-                : 'Allocated in $successCount sheds. $failCount sheds failed.',
+                ? '${'All animals allocated successfully across'.tr(ref)} $successCount ${'sheds!'.tr(ref)}'
+                : '${'Allocated in'.tr(ref)} $successCount ${'sheds.'.tr(ref)} $failCount ${'sheds failed.'.tr(ref)}',
           ),
           backgroundColor: overallSuccess
               ? AppTheme.successGreen
@@ -1659,8 +1698,8 @@ class _BuffaloAllocationScreenState
           .fetchUnallocatedAnimals(farmId: selectedFarmId);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to allocate animals to any shed.'),
+        SnackBar(
+          content: Text('Failed to allocate animals to any shed.'.tr(ref)),
           backgroundColor: Colors.red,
         ),
       );

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-
-class InvestorCard extends StatelessWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class InvestorCard extends ConsumerWidget {
   final String name;
   final String location;
   final String amount;
   final String date;
   final String status;
 
-  const InvestorCard({
+  InvestorCard({
     super.key,
     required this.name,
     required this.location,
@@ -30,7 +31,7 @@ class InvestorCard extends StatelessWidget {
   Widget _label(String text) {
     return Text(
       text.toUpperCase(),
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 11,
         color: Colors.grey,
         fontWeight: FontWeight.w600,
@@ -40,13 +41,13 @@ class InvestorCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(18),
+      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(18),
@@ -54,7 +55,7 @@ class InvestorCard extends StatelessWidget {
           BoxShadow(
             color: isDark ? Colors.black.withOpacity(0.3) : Colors.black12,
             blurRadius: 12,
-            offset: const Offset(0, 6),
+            offset: Offset(0, 6),
           ),
         ],
       ),
@@ -62,7 +63,7 @@ class InvestorCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _label("Name"),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Row(
             children: [
               Expanded(
@@ -76,7 +77,7 @@ class InvestorCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 4,
                 ),
@@ -96,14 +97,14 @@ class InvestorCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
 
           _label("Location"),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Row(
             children: [
               Icon(Icons.location_on, size: 16, color: theme.hintColor),
-              const SizedBox(width: 4),
+              SizedBox(width: 4),
               Text(
                 location,
                 style: TextStyle(color: theme.colorScheme.onSurface),
@@ -111,7 +112,7 @@ class InvestorCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,20 +122,20 @@ class InvestorCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _label("Investment"),
-                    const SizedBox(height: 4),
-                    const Text(
-                      "Animals",
+                    SizedBox(height: 4),
+                    Text(
+                      "Animals".tr(ref),
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     Text(
                       amount,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.green,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2),
                     Text(
                       date,
                       style: TextStyle(fontSize: 12, color: theme.hintColor),
@@ -146,15 +147,15 @@ class InvestorCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _label("Contact"),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.call, color: Colors.green),
+                        icon: Icon(Icons.call, color: Colors.green),
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: const Icon(Icons.email, color: Colors.blue),
+                        icon: Icon(Icons.email, color: Colors.blue),
                         onPressed: () {},
                       ),
                     ],

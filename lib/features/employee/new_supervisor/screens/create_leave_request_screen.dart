@@ -2,9 +2,9 @@ import 'package:farm_vest/features/employee/new_supervisor/providers/leave_reque
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class CreateLeaveRequestScreen extends ConsumerStatefulWidget {
-  const CreateLeaveRequestScreen({super.key});
+  CreateLeaveRequestScreen({super.key});
 
   @override
   ConsumerState<CreateLeaveRequestScreen> createState() =>
@@ -31,16 +31,16 @@ class _CreateLeaveRequestScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Leave Request'),
+        title: Text('Create Leave Request'.tr(ref)),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             context.pop();
           },
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
@@ -64,18 +64,18 @@ class _CreateLeaveRequestScreenState
                         }
                       },
                       child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Start Date',
+                        decoration: InputDecoration(
+                          labelText: 'Start Date'.tr(ref),
                           border: OutlineInputBorder(),
                         ),
                         child: Text(
                           _startDate?.toLocal().toString().split(' ')[0] ??
-                              'Select date',
+                              'Select date'.tr(ref),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16),
                   Expanded(
                     child: InkWell(
                       onTap: () async {
@@ -92,25 +92,25 @@ class _CreateLeaveRequestScreenState
                         }
                       },
                       child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'End Date',
+                        decoration: InputDecoration(
+                          labelText: 'End Date'.tr(ref),
                           border: OutlineInputBorder(),
                         ),
                         child: Text(
                           _endDate?.toLocal().toString().split(' ')[0] ??
-                              'Select date',
+                              'Select date'.tr(ref),
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Leave Type Dropdown
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Leave Type',
+                decoration: InputDecoration(
+                  labelText: 'Leave Type'.tr(ref),
                   border: OutlineInputBorder(),
                 ),
                 value: _leaveType,
@@ -126,7 +126,7 @@ class _CreateLeaveRequestScreenState
                         .map(
                           (label) => DropdownMenuItem(
                             value: label,
-                            child: Text(label),
+                            child: Text(label.toLowerCase().tr(ref)),
                           ),
                         )
                         .toList(),
@@ -136,24 +136,24 @@ class _CreateLeaveRequestScreenState
                   });
                 },
                 validator: (value) =>
-                    value == null ? 'Please select a leave type' : null,
+                    value == null ? 'Please select a leave type'.tr(ref) : null,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Reason Text Field
               TextFormField(
                 controller: _reasonController,
-                decoration: const InputDecoration(
-                  labelText: 'Reason',
+                decoration: InputDecoration(
+                  labelText: 'Reason'.tr(ref),
                   border: OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
                 maxLines: 4,
                 validator: (value) => value == null || value.isEmpty
-                    ? 'Please enter a reason'
+                    ? 'Please enter a reason'.tr(ref)
                     : null,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // Submit Button
               ElevatedButton(
@@ -170,9 +170,7 @@ class _CreateLeaveRequestScreenState
                     if (response != null && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: const Text(
-                            'Leave request created successfully',
-                          ),
+                          content: Text('Leave request created successfully'.tr(ref)),
                           backgroundColor: Theme.of(
                             context,
                           ).colorScheme.secondary,
@@ -191,13 +189,13 @@ class _CreateLeaveRequestScreenState
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: leaveRequestState.isLoading
                     ? CircularProgressIndicator(
                         color: Theme.of(context).colorScheme.onPrimary,
                       )
-                    : const Text('Submit Request'),
+                    : Text('Submit Request'.tr(ref)),
               ),
             ],
           ),

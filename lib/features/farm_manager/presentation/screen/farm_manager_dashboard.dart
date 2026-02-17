@@ -18,9 +18,9 @@ import 'package:farm_vest/features/farm_manager/presentation/screen/onboard_anim
 import 'package:farm_vest/features/farm_manager/presentation/screen/buffalo_allocation_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/reports_screen.dart';
 import 'package:farm_vest/features/doctors/widgets/buffalo_profile_view.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class FarmManagerDashboard extends ConsumerStatefulWidget {
-  const FarmManagerDashboard({super.key});
+  FarmManagerDashboard({super.key});
 
   @override
   ConsumerState<FarmManagerDashboard> createState() =>
@@ -52,7 +52,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
           color: Colors.transparent,
           child: Container(
             width: MediaQuery.of(context).size.width * 0.9,
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(24),
@@ -65,18 +65,18 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: Icon(Icons.close),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 child,
               ],
             ),
@@ -138,7 +138,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                       onSubmitted: (_) => performSearch(),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   InkWell(
                     onTap: performSearch,
                     child: Container(
@@ -149,30 +149,30 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: isSearching
-                          ? const Center(
+                          ? Center(
                               child: CircularProgressIndicator(
                                 color: Colors.white,
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Icon(Icons.search, color: Colors.white),
+                          : Icon(Icons.search, color: Colors.white),
                     ),
                   ),
                 ],
               ),
               if (results.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                const Text(
-                  "Search Results",
+                SizedBox(height: 16),
+                Text(
+                  "Search Results".tr(ref),
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 SizedBox(
                   height: 300,
                   width: double.maxFinite,
                   child: ListView.separated(
                     itemCount: results.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    separatorBuilder: (_, __) => Divider(height: 1),
                     itemBuilder: (context, index) {
                       final animal = results[index];
                       final rfid = animal.rfid ?? animal.animalId;
@@ -182,21 +182,21 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: AppTheme.primary.withOpacity(0.1),
-                          child: const Icon(
+                          child: Icon(
                             Icons.pets,
                             color: AppTheme.primary,
                           ),
                         ),
                         title: Text(
                           "Animal: $rfid",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
                           "Shed: $shedName",
-                          style: const TextStyle(fontSize: 12),
+                          style: TextStyle(fontSize: 12),
                         ),
                         onTap: () {
                           if (hasAllocation) {
@@ -215,10 +215,10 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                   ),
                 ),
               ] else if (!isSearching && query.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                const Center(
+                SizedBox(height: 24),
+                Center(
                   child: Text(
-                    "No animals found",
+                    "No animals found".tr(ref),
                     style: TextStyle(color: Colors.grey),
                   ),
                 ),
@@ -292,7 +292,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                     children: [
                       TextSpan(
                         text: displayName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.orange,
                           fontWeight: FontWeight.bold,
                         ),
@@ -303,7 +303,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
               )
             : Text(
                 appBarTitle,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
         actions: [
           if (ref.watch(authProvider).availableRoles.length > 1)
@@ -326,7 +326,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             fallbackRoute: '/farm-manager-dashboard',
             iconColor: Theme.of(context).colorScheme.onSurface,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           GestureDetector(
             onTap: () => context.push('/profile'),
             child: CircleAvatar(
@@ -340,28 +340,28 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                         width: 36,
                         height: 36,
                         errorBuilder: (context, error, stackTrace) =>
-                            const Icon(
+                            Icon(
                               Icons.person,
                               size: 20,
                               color: AppTheme.primary,
                             ),
                       ),
                     )
-                  : const Icon(Icons.person, size: 20, color: AppTheme.primary),
+                  : Icon(Icons.person, size: 20, color: AppTheme.primary),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
         ],
       ),
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          const OnboardAnimalScreen(hideAppBar: true), // 0
-          const BuffaloAllocationScreen(hideAppBar: true), // 1
-          const ReportsScreen(hideAppBar: true), // 2
-          const BuffaloProfileView(), // 3
+          OnboardAnimalScreen(hideAppBar: true), // 0
+          BuffaloAllocationScreen(hideAppBar: true), // 1
+          ReportsScreen(hideAppBar: true), // 2
+          BuffaloProfileView(), // 3
           ds.isLoading
-              ? const Center(
+              ? Center(
                   child: CircularProgressIndicator(color: AppTheme.primary),
                 )
               : ds.error != null
@@ -374,23 +374,23 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                     await ref.read(staffListProvider.notifier).loadStaff();
                   },
                   child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.all(20),
+                    physics: BouncingScrollPhysics(),
+                    padding: EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildSectionHeader("Overview Management"),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         _buildStatsGrid(ds, ss),
-                        const SizedBox(height: 32),
+                        SizedBox(height: 32),
                         _buildSectionHeader("Operations"),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         _buildQuickActionGrid(),
-                        const SizedBox(height: 32),
+                        SizedBox(height: 32),
                         _buildSectionHeader("Pending Allocation"),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         _buildRecentActivity(ds),
-                        const SizedBox(height: 100),
+                        SizedBox(height: 100),
                       ],
                     ),
                   ),
@@ -427,12 +427,12 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
               BoxShadow(
                 color: Colors.black.withOpacity(0.25),
                 blurRadius: 12,
-                offset: const Offset(0, 6),
+                offset: Offset(0, 6),
               ),
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(14),
             child: Image.asset(
               'assets/icons/home.png',
               color: Theme.of(context).brightness == Brightness.dark
@@ -461,7 +461,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics: NeverScrollableScrollPhysics(),
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
       childAspectRatio: 1.4,
@@ -516,7 +516,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
@@ -526,7 +526,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                   ? Colors.black.withOpacity(0.2)
                   : Colors.black.withOpacity(0.03),
               blurRadius: 10,
-              offset: const Offset(0, 4),
+              offset: Offset(0, 4),
             ),
           ],
         ),
@@ -565,7 +565,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
   Widget _buildQuickActionGrid() {
     return GridView.count(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics: NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
@@ -574,43 +574,43 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
         _buildActionItem(
           'Manage Staff',
           Icons.people_outline,
-          const Color(0xFF673AB7),
+          Color(0xFF673AB7),
           () => context.go('/staff-list'),
         ),
         _buildActionItem(
           'Reports',
           Icons.bar_chart_rounded,
-          const Color(0xFF3F51B5),
+          Color(0xFF3F51B5),
           () => context.push('/reports'),
         ),
         _buildActionItem(
           'Onboard Animal',
           Icons.add_box_outlined,
-          const Color(0xFF009688),
+          Color(0xFF009688),
           () => context.go('/onboard-animal'),
         ),
         _buildActionItem(
           'Create Transfer',
           Icons.move_up_rounded,
-          const Color(0xFF607D8B),
+          Color(0xFF607D8B),
           () => context.push('/create-transfer-ticket'),
         ),
         _buildActionItem(
           'Transfers List',
           Icons.compare_arrows_rounded,
-          const Color(0xFF9C27B0),
+          Color(0xFF9C27B0),
           () => context.push('/manager-transfer-approvals'),
         ),
         _buildActionItem(
           'Search Animal',
           Icons.search_rounded,
-          const Color(0xFFFF9800),
+          Color(0xFFFF9800),
           () => _searchDialog(context),
         ),
         _buildActionItem(
           'Health Tickets',
           Icons.medical_services_outlined,
-          const Color(0xFFF44336),
+          Color(0xFFF44336),
           () => context.push('/all-health-tickets'),
         ),
       ],
@@ -627,7 +627,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
           color: color.withOpacity(0.06),
           borderRadius: BorderRadius.circular(24),
@@ -636,7 +636,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
         child: Column(
           children: [
             Icon(icon, color: color, size: 30),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Text(
               label,
               textAlign: TextAlign.center,
@@ -655,7 +655,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
   Widget _buildRecentActivity(FarmManagerDashboardState ds) {
     if (ds.onboardedAnimalIds.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
@@ -667,7 +667,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
           ),
         ),
         child: Text(
-          "Everything is allocated!",
+          "Everything is allocated!".tr(ref),
           style: TextStyle(color: Theme.of(context).hintColor),
         ),
       );
@@ -693,7 +693,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
         }
 
         return Container(
-          margin: const EdgeInsets.only(bottom: 12),
+          margin: EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
@@ -707,7 +707,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             ],
           ),
           child: ListTile(
-            leading: const CircleAvatar(
+            leading: CircleAvatar(
               backgroundColor: Color(0xFFF1F8E9),
               child: Icon(Icons.pets_rounded, size: 18, color: Colors.green),
             ),
@@ -720,7 +720,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
               ),
             ),
             subtitle: Text(
-              "Status: Pending",
+              "Status: Pending".tr(ref),
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).hintColor,
@@ -743,9 +743,9 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
-          const SizedBox(height: 16),
-          const Text(
-            "Failed to load dashboard",
+          SizedBox(height: 16),
+          Text(
+            "Failed to load dashboard".tr(ref),
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Text(
@@ -753,11 +753,11 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
             style: TextStyle(color: Colors.grey.shade600),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           ElevatedButton(
             onPressed: () =>
                 ref.read(farmManagerProvider.notifier).refreshDashboard(),
-            child: const Text("Retry"),
+            child: Text("Retry".tr(ref)),
           ),
         ],
       ),
@@ -807,32 +807,32 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Switch Active Role',
+              Text(
+                'Switch Active Role'.tr(ref),
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Choose which portal you want to access',
+              SizedBox(height: 8),
+              Text(
+                'Choose which portal you want to access'.tr(ref),
                 style: TextStyle(color: Colors.grey),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               ...availableRoles.map((role) {
                 final info = _getRoleInfo(role);
                 final isSelected = role == currentRole;
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     onTap: isSelected
                         ? null
@@ -895,7 +895,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
                             Icons.check_circle,
                             color: info['color'] as Color,
                           )
-                        : const Icon(Icons.arrow_forward_ios, size: 14),
+                        : Icon(Icons.arrow_forward_ios, size: 14),
                   ),
                 );
               }).toList(),

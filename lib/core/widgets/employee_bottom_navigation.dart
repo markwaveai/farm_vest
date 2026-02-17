@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
-
 class NavItemData {
   final String label;
   final String icon;
@@ -13,7 +12,7 @@ class EmployeeBottomNavigation extends StatelessWidget {
   final ValueChanged<int> onTap;
   final UserType role;
 
-  const EmployeeBottomNavigation({
+  EmployeeBottomNavigation({
     super.key,
     required this.currentIndex,
     required this.onTap,
@@ -60,7 +59,7 @@ class EmployeeBottomNavigation extends StatelessWidget {
     final roleItems = _getRoleItems();
 
     return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
+      shape: CircularNotchedRectangle(),
       notchMargin: 8.0,
       color: Theme.of(context).cardColor,
       surfaceTintColor: Theme.of(context).cardColor,
@@ -76,7 +75,7 @@ class EmployeeBottomNavigation extends StatelessWidget {
         children: [
           _navItem(context, roleItems[0].icon, roleItems[0].label, 0),
           _navItem(context, roleItems[1].icon, roleItems[1].label, 1),
-          const SizedBox(width: 48), // Space for FAB
+          SizedBox(width: 48), // Space for FAB
           _navItem(context, roleItems[2].icon, roleItems[2].label, 2),
           _navItem(context, 'assets/icons/buffalo_icon.png', 'Buffalo', 3),
         ],
@@ -106,7 +105,7 @@ class EmployeeBottomNavigation extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+              duration: Duration(milliseconds: 200),
               padding: EdgeInsets.all(isSelected ? 0 : 2),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -121,7 +120,7 @@ class EmployeeBottomNavigation extends StatelessWidget {
                 color: color,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               label,
               textAlign: TextAlign.center,

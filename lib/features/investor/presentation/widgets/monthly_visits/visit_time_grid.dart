@@ -2,8 +2,9 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-class VisitTimeGrid extends StatelessWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class VisitTimeGrid extends ConsumerWidget {
   final List<String> availableSlots;
   final String? selectedSlotTime;
   final DateTime selectedDate;
@@ -11,7 +12,7 @@ class VisitTimeGrid extends StatelessWidget {
   final bool isDark;
   final ValueChanged<String> onSlotSelected;
 
-  const VisitTimeGrid({
+  VisitTimeGrid({
     super.key,
     required this.availableSlots,
     required this.selectedSlotTime,
@@ -22,16 +23,16 @@ class VisitTimeGrid extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (availableSlots.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.event_busy, size: 48, color: Colors.grey[300]),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text(
-              "No slots available",
+              "No slots available".tr(ref),
               style: TextStyle(color: Colors.grey[600]),
             ),
           ],
@@ -46,7 +47,7 @@ class VisitTimeGrid extends StatelessWidget {
         selectedDate.day == now.day;
 
     return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         childAspectRatio: 1.5,
         crossAxisSpacing: 12,

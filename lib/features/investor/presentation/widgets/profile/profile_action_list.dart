@@ -10,9 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class ProfileActionList extends ConsumerStatefulWidget {
-  const ProfileActionList({super.key});
+  ProfileActionList({super.key});
 
   @override
   ConsumerState<ProfileActionList> createState() => _ProfileActionListState();
@@ -58,18 +58,18 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
       final shouldDisable = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('Disable App Lock'),
-          content: const Text(
-            'Are you sure you want to disable fingerprint lock?',
+          title: Text('Disable App Lock'.tr(ref)),
+          content: Text(
+            'Are you sure you want to disable fingerprint lock?'.tr(ref),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text('Cancel'.tr(ref)),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Disable'),
+              child: Text('Disable'.tr(ref)),
             ),
           ],
         ),
@@ -88,12 +88,12 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text('Logout'.tr(ref)),
+        content: Text('Are you sure you want to logout?'.tr(ref)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr(ref)),
           ),
           TextButton(
             onPressed: () async {
@@ -102,8 +102,8 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
                 context.go('/login');
               }
             },
-            child: const Text(
-              'Logout',
+            child: Text(
+              'Logout'.tr(ref),
               style: TextStyle(color: AppTheme.errorRed),
             ),
           ),
@@ -125,22 +125,22 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text(
-          'Are you sure you want to delete your account? This action is permanent and will remove all your data. You will be redirected to our website to complete the process.',
+        title: Text('Delete Account'.tr(ref)),
+        content: Text(
+          'Are you sure you want to delete your account? This action is permanent and will remove all your data. You will be redirected to our website to complete the process.'.tr(ref),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr(ref)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _launchURL(AppConstants.deleteAccountUrl);
             },
-            child: const Text(
-              'Delete',
+            child: Text(
+              'Delete'.tr(ref),
               style: TextStyle(color: AppTheme.errorRed),
             ),
           ),
@@ -156,31 +156,31 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Switch Active Role',
+              Text(
+                'Switch Active Role'.tr(ref),
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
-                'Choose which portal you want to access',
+                'Choose which portal you want to access'.tr(ref),
                 style: TextStyle(color: AppTheme.mediumGrey),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               ...availableRoles.map((role) {
                 final isSelected = role == currentRole;
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     onTap: isSelected
                         ? null
@@ -231,7 +231,7 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
                     ),
                     trailing: isSelected
                         ? Icon(Icons.check_circle, color: role.color)
-                        : const Icon(Icons.arrow_forward_ios, size: 14),
+                        : Icon(Icons.arrow_forward_ios, size: 14),
                   ),
                 );
               }),
@@ -255,15 +255,15 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
               borderRadius: BorderRadius.circular(8),
             ),
             tileColor: theme.colorScheme.surface,
-            leading: const Icon(Icons.swap_horiz, color: AppTheme.primary),
-            title: const Text('Switch Role'),
+            leading: Icon(Icons.swap_horiz, color: AppTheme.primary),
+            title: Text('Switch Role'.tr(ref)),
             subtitle: Text(
               'Currently as ${(authState.role ?? UserType.customer).label}',
             ),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            trailing: Icon(Icons.arrow_forward_ios, size: 16),
             onTap: _showSwitchRoleBottomSheet,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
         ],
         if (_isBiometricSupported)
           ListTile(
@@ -271,15 +271,15 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
               borderRadius: BorderRadius.circular(8),
             ),
             tileColor: theme.colorScheme.surface,
-            leading: const Icon(Icons.fingerprint, color: AppTheme.primary),
-            title: const Text('App Lock'),
-            subtitle: const Text('Use biometric to unlock the app'),
+            leading: Icon(Icons.fingerprint, color: AppTheme.primary),
+            title: Text('App Lock'.tr(ref)),
+            subtitle: Text('Use biometric to unlock the app'.tr(ref)),
             trailing: Switch(
               value: _isBiometricEnabled,
               onChanged: _toggleBiometric,
             ),
           ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           tileColor: theme.colorScheme.surface,
@@ -289,7 +289,7 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
                 : Icons.dark_mode,
             color: AppTheme.primary,
           ),
-          title: const Text('Dark Mode'),
+          title: Text('Dark Mode'.tr(ref)),
           subtitle: Text(
             theme.brightness == Brightness.dark ? 'Enabled' : 'Disabled',
           ),
@@ -300,37 +300,37 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
             },
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           tileColor: theme.colorScheme.surface,
-          leading: const Icon(Icons.help_outline, color: AppTheme.primary),
-          title: const Text('Help & Support'),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          leading: Icon(Icons.help_outline, color: AppTheme.primary),
+          title: Text('Help & Support'.tr(ref)),
+          trailing: Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () => context.go('/support'),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           tileColor: theme.colorScheme.surface,
-          leading: const Icon(Icons.logout, color: AppTheme.errorRed),
-          title: const Text(
-            'Logout',
+          leading: Icon(Icons.logout, color: AppTheme.errorRed),
+          title: Text(
+            'Logout'.tr(ref),
             style: TextStyle(color: AppTheme.errorRed),
           ),
           onTap: _showLogoutDialog,
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           tileColor: theme.colorScheme.surface,
-          leading: const Icon(Icons.delete, color: AppTheme.errorRed),
-          title: const Text(
-            'Delete Account',
+          leading: Icon(Icons.delete, color: AppTheme.errorRed),
+          title: Text(
+            'Delete Account'.tr(ref),
             style: TextStyle(color: AppTheme.errorRed),
           ),
 
-          // trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          // trailing: Icon(Icons.arrow_forward_ios, size: 16),
           onTap: _showDeleteAccountDialog,
         ),
       ],

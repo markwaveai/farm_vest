@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/services/biometric_service.dart'
     show BiometricService;
 import 'package:farm_vest/core/utils/app_enums.dart';
@@ -8,15 +9,15 @@ import 'package:farm_vest/features/investor/presentation/widgets/support/chat_bu
 import 'package:farm_vest/features/investor/presentation/widgets/support/typing_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
-class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class ChatScreen extends ConsumerStatefulWidget {
+  ChatScreen({super.key});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   bool _isTyping = false;
   final ImagePicker _picker = ImagePicker();
@@ -56,7 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.clear();
 
     // Simulate AI reply
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(Duration(seconds: 1), () {
       if (!mounted) return;
       setState(() {
         _isTyping = false;
@@ -75,19 +76,19 @@ class _ChatScreenState extends State<ChatScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('End Chat'),
-        content: const Text('Are you sure you want to end this session?'),
+        title: Text('End Chat'.tr(ref)),
+        content: Text('Are you sure you want to end this session?'.tr(ref)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr(ref)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog
               Navigator.pop(context); // Close chat screen
             },
-            child: const Text('End Chat', style: TextStyle(color: Colors.red)),
+            child: Text('End Chat'.tr(ref), style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -98,12 +99,12 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat with us"),
+        title: Text("Chat with us".tr(ref)),
         actions: [
           TextButton(
             onPressed: _endChat,
-            child: const Text(
-              "End Chat",
+            child: Text(
+              "End Chat".tr(ref),
               style: TextStyle(color: Colors.orange),
             ),
           ),
@@ -113,11 +114,11 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(12),
               itemCount: _messages.length + (_isTyping ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == _messages.length) {
-                  return const Align(
+                  return Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: EdgeInsets.symmetric(
@@ -141,7 +142,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildInput() {
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -153,7 +154,7 @@ class _ChatScreenState extends State<ChatScreen> {
             // 🔹 IMAGE THUMBNAIL INSIDE INPUT
             if (_selectedImage != null)
               Padding(
-                padding: const EdgeInsets.only(right: 6),
+                padding: EdgeInsets.only(right: 6),
                 child: Stack(
                   alignment: Alignment.topRight,
                   children: [
@@ -165,7 +166,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       onTap: () {
                         setState(() => _selectedImage = null);
                       },
-                      child: const CircleAvatar(
+                      child: CircleAvatar(
                         radius: 8,
                         backgroundColor: Colors.black54,
                         child: Icon(Icons.close, size: 10, color: Colors.white),
@@ -189,7 +190,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
             // 🔹 IMAGE PICKER
             IconButton(
-              icon: const Icon(Icons.photo_sharp),
+              icon: Icon(Icons.photo_sharp),
               onPressed: () {
                 _pickFromGallery(compress: true, isDocument: true);
               },
@@ -197,7 +198,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
             // 🔹 SEND BUTTON
             IconButton(
-              icon: const Icon(Icons.send, color: Colors.deepPurple),
+              icon: Icon(Icons.send, color: Colors.deepPurple),
               onPressed: _sendMessage,
             ),
           ],
@@ -233,7 +234,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to pick image')));
+      ).showSnackBar(SnackBar(content: Text('Failed to pick image'.tr(ref))));
     }
   }
 }

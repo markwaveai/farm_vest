@@ -13,9 +13,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../../../../core/providers/environment_provider.dart';
 import '../../../../core/theme/app_constants.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class NewLoginScreen extends ConsumerStatefulWidget {
-  const NewLoginScreen({super.key});
+  NewLoginScreen({super.key});
 
   @override
   ConsumerState<NewLoginScreen> createState() => _NewLoginScreenState();
@@ -56,7 +56,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   void _startTimer() {
     _remainingSeconds = 24;
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_remainingSeconds > 0) {
         setState(() => _remainingSeconds--);
       } else {
@@ -173,7 +173,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
       _logoTapCount = 0;
       _showDeveloperCodeDialog();
     } else {
-      _tapResetTimer = Timer(const Duration(seconds: 2), () {
+      _tapResetTimer = Timer(Duration(seconds: 2), () {
         _logoTapCount = 0;
       });
     }
@@ -184,17 +184,17 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Developer Mode'),
+        title: Text('Developer Mode'.tr(ref)),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           obscureText: true,
-          decoration: const InputDecoration(hintText: 'Enter Developer Code'),
+          decoration: InputDecoration(hintText: 'Enter Developer Code'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr(ref)),
           ),
           TextButton(
             onPressed: () async {
@@ -202,10 +202,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                 Navigator.pop(context);
                 _showEnvironmentSelection();
               } else {
-                ToastUtils.showError(context, 'Invalid Code');
+                ToastUtils.showError(context, 'Invalid Code'.tr(ref));
               }
             },
-            child: const Text('Submit'),
+            child: Text('Submit'.tr(ref)),
           ),
         ],
       ),
@@ -216,16 +216,16 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Environment'),
-        content: const Text('Choose which server to connect to:'),
+        title: Text('Select Environment'.tr(ref)),
+        content: Text('Choose which server to connect to:'.tr(ref)),
         actions: [
           TextButton(
             onPressed: () => _switchEnvironment(false),
-            child: const Text('LIVE'),
+            child: Text('LIVE'.tr(ref)),
           ),
           TextButton(
             onPressed: () => _switchEnvironment(true),
-            child: const Text('STAGING (Testing)'),
+            child: Text('STAGING (Testing)'.tr(ref)),
           ),
         ],
       ),
@@ -269,7 +269,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   ]
                 : [
                     AppTheme.primary,
-                    AppTheme.primary.withOpacity(0.85),
+                    AppTheme.primary.withValues(alpha: 0.85),
                     AppTheme.darkPrimary,
                   ],
           ),
@@ -279,7 +279,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             children: [
               // Header with back button
               Padding(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
                 ),
@@ -305,21 +305,21 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                         }
                       },
                       icon: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: Colors.white10,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.arrow_back_ios_new,
                           color: AppTheme.white,
                           size: 18,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Back',
+                    SizedBox(width: 8),
+                    Text(
+                      'Back'.tr(ref),
                       style: TextStyle(
                         color: AppTheme.white,
                         fontSize: 16,
@@ -330,7 +330,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
 
               // App Logo Area - Hides when keyboard is up to save space
               if (!_showRoleSelection &&
@@ -338,14 +338,14 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                 Hero(
                   tag: 'app_logo',
                   child: Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
                           color: isDark
-                              ? Colors.white.withOpacity(0.05)
-                              : Colors.black.withOpacity(0.1),
+                              ? Colors.white.withValues(alpha: 0.05)
+                              : Colors.black.withValues(alpha: 0.1),
                           blurRadius: 40,
                           spreadRadius: 5,
                         ),
@@ -367,11 +367,11 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   ),
                 ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
 
               // Title and subtitle
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
+                duration: Duration(milliseconds: 300),
                 child: Column(
                   key: ValueKey(
                     _showRoleSelection
@@ -381,24 +381,26 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   children: [
                     Text(
                       _showRoleSelection
-                          ? 'Select Role'
-                          : (_isOtpSent ? 'Verify Your Phone' : 'Welcome Back'),
-                      style: const TextStyle(
+                          ? 'Select Role'.tr(ref)
+                          : (_isOtpSent
+                                ? 'Verify Your Phone'.tr(ref)
+                                : 'Welcome Back'.tr(ref)),
+                      style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.white,
                         letterSpacing: -0.5,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      padding: EdgeInsets.symmetric(horizontal: 40),
                       child: Text(
                         _showRoleSelection
-                            ? 'Choose how you want to log in'
+                            ? 'Choose how you want to log in'.tr(ref)
                             : (_isOtpSent
-                                  ? 'Enter the 6-digit code sent to\n+91 $_phoneNumber'
-                                  : 'Enter your phone number to access your account'),
+                                  ? '${'Enter the 6-digit code sent to'.tr(ref)}\n+91 $_phoneNumber'
+                                  : 'Enter your phone number to access your account'.tr(ref)),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
@@ -412,7 +414,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 40),
+              SizedBox(height: 40),
 
               // Form/Role Container - Expanded to take remaining space
               Expanded(
@@ -420,7 +422,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
-                    borderRadius: const BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(40),
                       topRight: Radius.circular(40),
                     ),
@@ -428,7 +430,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                       BoxShadow(
                         color: isDark ? Colors.black45 : Colors.black12,
                         blurRadius: 20,
-                        offset: const Offset(0, -5),
+                        offset: Offset(0, -5),
                       ),
                     ],
                   ),
@@ -446,41 +448,41 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
   Widget _buildLoginForm(AuthState authState, ThemeData theme, bool isDark) {
     return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+      physics: BouncingScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 10), // Shrunk the top spacing
+          SizedBox(height: 10), // Shrunk the top spacing
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
+            duration: Duration(milliseconds: 400),
             child: _isOtpSent
                 ? _buildOtpDisplay(theme, isDark)
                 : _buildPhoneNumberDisplay(theme, isDark),
           ),
-          const SizedBox(height: 40),
+          SizedBox(height: 40),
           if (_isOtpSent) ...[
             _buildTimerSection(theme),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
           ],
           PrimaryButton(
-            text: _isOtpSent ? 'Verify & Login' : 'Continue',
+            text: _isOtpSent ? 'Verify & Login'.tr(ref) : 'Continue'.tr(ref),
             isLoading: authState.isLoading,
             onPressed: (_isOtpSent
                 ? (_otp.length == 6 ? _handleContinue : null)
                 : (_phoneNumber.length == 10 ? _handleContinue : null)),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           if (!_isOtpSent)
             Text(
-              'By continuing, you agree to our Terms & Privacy Policy',
+              'By continuing, you agree to our Terms & Privacy Policy'.tr(ref),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
-          const SizedBox(height: 40),
+          SizedBox(height: 40),
         ],
       ),
     );
@@ -488,13 +490,13 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
   Widget _buildRoleSelection(ThemeData theme, bool isDark) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       itemCount: _availableRoles.length,
       itemBuilder: (context, index) {
         final role = _availableRoles[index];
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: EdgeInsets.only(bottom: 16),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -504,7 +506,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
               },
               borderRadius: BorderRadius.circular(20),
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
@@ -523,14 +525,14 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: role.color.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(role.icon, color: role.color, size: 28),
                     ),
-                    const SizedBox(width: 20),
+                    SizedBox(width: 20),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,9 +545,9 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                               color: theme.colorScheme.onSurface,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Text(
-                            'Log in as ${role.label}',
+                            '${'Log in as'.tr(ref)} ${role.label}',
                             style: TextStyle(
                               fontSize: 14,
                               color: theme.colorScheme.onSurface.withValues(
@@ -575,7 +577,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: theme.colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
@@ -588,7 +590,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                 size: 16,
                 color: theme.colorScheme.primary,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 '00:${_remainingSeconds.toString().padLeft(2, '0')}',
                 style: TextStyle(
@@ -600,12 +602,12 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Didn't receive the code? ",
+              'Didn\'t receive the code? '.tr(ref),
               style: TextStyle(
                 fontSize: 14,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -614,7 +616,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             GestureDetector(
               onTap: _handleResend,
               child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
+                duration: Duration(milliseconds: 200),
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -622,7 +624,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                       ? theme.colorScheme.primary
                       : theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
-                child: const Text('Resend OTP'),
+                child: Text('Resend OTP'.tr(ref)),
               ),
             ),
           ],
@@ -636,14 +638,14 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Mobile Number',
+          'Mobile Number'.tr(ref),
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
             color: isDark
@@ -654,23 +656,23 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
               color: theme.colorScheme.primary.withValues(alpha: 0.1),
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
               // Country code picker style
               Row(
                 children: [
-                  const Text('🇮🇳', style: TextStyle(fontSize: 22)),
-                  const SizedBox(width: 8),
+                  Text('🇮🇳'.tr(ref), style: TextStyle(fontSize: 22)),
+                  SizedBox(width: 8),
                   Text(
-                    '+91',
+                    '+91'.tr(ref),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: 4),
                   Icon(
                     Icons.keyboard_arrow_down,
                     size: 18,
@@ -678,13 +680,13 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   ),
                 ],
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Container(
                 height: 30,
                 width: 1,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               // Input
               Expanded(
                 child: TextField(
@@ -703,7 +705,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     letterSpacing: 2.0,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'Enter Your Phone Number',
+                    hintText: 'Enter Your Phone Number'.tr(ref),
 
                     hintStyle: TextStyle(
                       fontSize: 12,
@@ -715,7 +717,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     counterText: '',
-                    contentPadding: const EdgeInsets.symmetric(
+                    contentPadding: EdgeInsets.symmetric(
                       vertical: 16,
                       horizontal: 0,
                     ),
@@ -755,7 +757,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           BoxShadow(
             color: theme.colorScheme.primary.withValues(alpha: 0.1),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -771,7 +773,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
 
           defaultPinTheme: defaultPinTheme,
           focusedPinTheme: focusedPinTheme,
-          separatorBuilder: (index) => const SizedBox(width: 8),
+          separatorBuilder: (index) => SizedBox(width: 8),
           hapticFeedbackType: HapticFeedbackType.lightImpact,
           onChanged: (value) => setState(() => _otp = value),
           onCompleted: (value) {

@@ -1,13 +1,12 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-
 class VisitLegend extends StatelessWidget {
-  const VisitLegend({super.key});
+  VisitLegend({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(15),
@@ -43,10 +42,10 @@ class VisitLegend extends StatelessWidget {
             border: borderColor != null ? Border.all(color: borderColor) : null,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
       ],
     );

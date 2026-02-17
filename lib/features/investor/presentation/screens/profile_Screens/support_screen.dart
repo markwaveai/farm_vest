@@ -4,7 +4,8 @@ import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:farm_vest/features/investor/presentation/screens/profile_Screens/live_chart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 class FAQ {
   final String question;
   final String answer;
@@ -13,14 +14,14 @@ class FAQ {
   FAQ({required this.question, required this.answer, required this.icon});
 }
 
-class SupportScreen extends StatefulWidget {
-  const SupportScreen({super.key});
+class SupportScreen extends ConsumerStatefulWidget {
+  SupportScreen({super.key});
 
   @override
   State<SupportScreen> createState() => _SupportScreenState();
 }
 
-class _SupportScreenState extends State<SupportScreen> {
+class _SupportScreenState extends ConsumerState<SupportScreen> {
   final List<FAQ> _faqs = [
     FAQ(
       question: 'How do I book a monthly visit?',
@@ -61,10 +62,10 @@ class _SupportScreenState extends State<SupportScreen> {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         NavigationHelper.safePopOrNavigate(
           context,
@@ -73,9 +74,9 @@ class _SupportScreenState extends State<SupportScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Support & FAQ'),
+          title: Text('Support & FAQ'.tr(ref)),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back),
             onPressed: () => NavigationHelper.safePopOrNavigate(
               context,
               fallbackRoute: '/customer-dashboard',
@@ -83,24 +84,24 @@ class _SupportScreenState extends State<SupportScreen> {
           ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.spacingM),
+          padding: EdgeInsets.all(AppConstants.spacingM),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Quick Actions
               Text(
-                'Quick Actions',
+                'Quick Actions'.tr(ref),
                 style: AppTheme.headingMedium.copyWith(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
                       : Colors.black,
                 ),
               ),
-              const SizedBox(height: AppConstants.spacingM),
+              SizedBox(height: AppConstants.spacingM),
 
               GridView.count(
                 shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+                physics: NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
                 crossAxisSpacing: AppConstants.spacingM,
                 mainAxisSpacing: AppConstants.spacingM,
@@ -143,44 +144,44 @@ class _SupportScreenState extends State<SupportScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppConstants.spacingL),
+              SizedBox(height: AppConstants.spacingL),
 
               // Emergency Contact
               Card(
                 color: AppTheme.errorRed.withValues(alpha: 0.1),
                 child: Padding(
-                  padding: const EdgeInsets.all(AppConstants.spacingM),
+                  padding: EdgeInsets.all(AppConstants.spacingM),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.emergency,
                         color: AppTheme.errorRed,
                         size: AppConstants.iconL,
                       ),
-                      const SizedBox(width: AppConstants.spacingM),
+                      SizedBox(width: AppConstants.spacingM),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Emergency Support',
+                            Text(
+                              'Emergency Support'.tr(ref),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.errorRed,
                               ),
                             ),
-                            const SizedBox(height: AppConstants.spacingXS),
-                            const Text(
-                              'For urgent health issues or emergencies',
+                            SizedBox(height: AppConstants.spacingXS),
+                            Text(
+                              'For urgent health issues or emergencies'.tr(ref),
                               style: AppTheme.bodySmall,
                             ),
-                            const SizedBox(height: AppConstants.spacingS),
+                            SizedBox(height: AppConstants.spacingS),
                             ElevatedButton(
                               onPressed: () => _callEmergency(),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.errorRed,
                               ),
-                              child: const Text('Call Now'),
+                              child: Text('Call Now'.tr(ref)),
                             ),
                           ],
                         ),
@@ -189,39 +190,39 @@ class _SupportScreenState extends State<SupportScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: AppConstants.spacingL),
+              SizedBox(height: AppConstants.spacingL),
 
               // FAQs
               Text(
-                'Frequently Asked Questions',
+                'Frequently Asked Questions'.tr(ref),
                 style: AppTheme.headingMedium.copyWith(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
                       : Colors.black,
                 ),
               ),
-              const SizedBox(height: AppConstants.spacingM),
+              SizedBox(height: AppConstants.spacingM),
 
               ...(_faqs.map((faq) => _buildFAQCard(faq))),
 
-              const SizedBox(height: AppConstants.spacingL),
+              SizedBox(height: AppConstants.spacingL),
 
               // Contact Information
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(AppConstants.spacingM),
+                  padding: EdgeInsets.all(AppConstants.spacingM),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Contact Information',
+                        'Contact Information'.tr(ref),
                         style: AppTheme.headingSmall.copyWith(
                           color: Theme.of(context).brightness == Brightness.dark
                               ? Colors.white
                               : Colors.black,
                         ),
                       ),
-                      const SizedBox(height: AppConstants.spacingM),
+                      SizedBox(height: AppConstants.spacingM),
 
                       _buildContactInfo(Icons.phone, 'Phone', '+91 7702710290'),
                       _buildContactInfo(
@@ -243,21 +244,21 @@ class _SupportScreenState extends State<SupportScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: AppConstants.spacingL),
+              SizedBox(height: AppConstants.spacingL),
 
               // App Version
               Center(
                 child: Column(
                   children: [
                     Text(
-                      'FarmVest v1.0.0',
+                      'FarmVest v1.0.0'.tr(ref),
                       style: AppTheme.bodySmall.copyWith(
                         color: Theme.of(context).brightness == Brightness.dark
                             ? Colors.white70
                             : Colors.black54,
                       ),
                     ),
-                    const SizedBox(height: AppConstants.spacingXS),
+                    SizedBox(height: AppConstants.spacingXS),
                     Text(
                       AppConstants.poweredBy,
                       style: AppTheme.bodySmall.copyWith(
@@ -285,17 +286,17 @@ class _SupportScreenState extends State<SupportScreen> {
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
-      color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      color: isDark ? Color(0xFF1E1E1E) : Colors.white,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppConstants.radiusL),
         child: Padding(
-          padding: const EdgeInsets.all(AppConstants.spacingM),
+          padding: EdgeInsets.all(AppConstants.spacingM),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, color: color, size: AppConstants.iconL),
-              const SizedBox(height: AppConstants.spacingS),
+              SizedBox(height: AppConstants.spacingS),
               Text(
                 title,
                 style: AppTheme.bodyMedium.copyWith(
@@ -304,7 +305,7 @@ class _SupportScreenState extends State<SupportScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppConstants.spacingXS),
+              SizedBox(height: AppConstants.spacingXS),
               Text(
                 subtitle,
                 softWrap: true,
@@ -323,8 +324,8 @@ class _SupportScreenState extends State<SupportScreen> {
   Widget _buildFAQCard(FAQ faq) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      margin: EdgeInsets.only(bottom: AppConstants.spacingM),
+      color: isDark ? Color(0xFF1E1E1E) : Colors.white,
       child: ExpansionTile(
         leading: Icon(faq.icon, color: AppTheme.primary),
         title: Text(
@@ -338,7 +339,7 @@ class _SupportScreenState extends State<SupportScreen> {
         iconColor: AppTheme.primary,
         children: [
           Padding(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
+            padding: EdgeInsets.all(AppConstants.spacingM),
             child: Text(
               faq.answer,
               style: AppTheme.bodyMedium.copyWith(
@@ -354,11 +355,11 @@ class _SupportScreenState extends State<SupportScreen> {
   Widget _buildContactInfo(IconData icon, String label, String value) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      padding: EdgeInsets.only(bottom: AppConstants.spacingM),
       child: Row(
         children: [
           Icon(icon, color: AppTheme.primary, size: AppConstants.iconM),
-          const SizedBox(width: AppConstants.spacingM),
+          SizedBox(width: AppConstants.spacingM),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -388,38 +389,38 @@ class _SupportScreenState extends State<SupportScreen> {
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(AppConstants.spacingL),
+        padding: EdgeInsets.all(AppConstants.spacingL),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Contact Support', style: AppTheme.headingMedium),
-            const SizedBox(height: AppConstants.spacingL),
+            Text('Contact Support'.tr(ref), style: AppTheme.headingMedium),
+            SizedBox(height: AppConstants.spacingL),
 
             ListTile(
-              leading: const Icon(Icons.chat, color: AppTheme.primary),
-              title: const Text('Live Chat'),
-              subtitle: const Text('Chat with our support team'),
+              leading: Icon(Icons.chat, color: AppTheme.primary),
+              title: Text('Live Chat'.tr(ref)),
+              subtitle: Text('Chat with our support team'.tr(ref)),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ChatScreen()),
+                  MaterialPageRoute(builder: (context) => ChatScreen()),
                 );
                 ToastUtils.showInfo(context, 'Opening live chat...');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.phone, color: AppTheme.primary),
-              title: const Text('Phone Call'),
-              subtitle: const Text('+91 77027 10290'),
+              leading: Icon(Icons.phone, color: AppTheme.primary),
+              title: Text('Phone Call'.tr(ref)),
+              subtitle: Text('+91 77027 10290'.tr(ref)),
               onTap: () {
                 Navigator.pop(context);
                 _makePhoneCall();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.email, color: AppTheme.primary),
-              title: const Text('Email'),
-              subtitle: const Text('contact@markwave.ai'),
+              leading: Icon(Icons.email, color: AppTheme.primary),
+              title: Text('Email'.tr(ref)),
+              subtitle: Text('contact@markwave.ai'.tr(ref)),
               onTap: () {
                 Navigator.pop(context);
                 ToastUtils.showInfo(context, 'Opening email app...');
@@ -435,10 +436,10 @@ class _SupportScreenState extends State<SupportScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => const RaiseSupportTicketSheet(),
+      builder: (_) => RaiseSupportTicketSheet(),
     );
   }
 
@@ -446,10 +447,10 @@ class _SupportScreenState extends State<SupportScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => const TicketHistorySheet(),
+      builder: (_) => TicketHistorySheet(),
     );
   }
 
@@ -457,36 +458,36 @@ class _SupportScreenState extends State<SupportScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('App Instructions'),
-        content: const SingleChildScrollView(
+        title: Text('App Instructions'.tr(ref)),
+        content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('1. Dashboard', style: AppTheme.bodyMedium),
+              Text('1. Dashboard'.tr(ref), style: AppTheme.bodyMedium),
               Text(
-                'Access all features from the main dashboard. Each card takes you to a specific section.',
+                'Access all features from the main dashboard. Each card takes you to a specific section.'.tr(ref),
                 style: AppTheme.bodySmall,
               ),
               SizedBox(height: AppConstants.spacingM),
 
-              Text('2. Unit Details', style: AppTheme.bodyMedium),
+              Text('2. Unit Details'.tr(ref), style: AppTheme.bodyMedium),
               Text(
-                'View detailed information about your buffalo including health status and basic info.',
+                'View detailed information about your buffalo including health status and basic info.'.tr(ref),
                 style: AppTheme.bodySmall,
               ),
               SizedBox(height: AppConstants.spacingM),
 
-              Text('3. Live CCTV', style: AppTheme.bodyMedium),
+              Text('3. Live CCTV'.tr(ref), style: AppTheme.bodyMedium),
               Text(
-                'Monitor your unit in real-time. Use fullscreen mode for better viewing.',
+                'Monitor your unit in real-time. Use fullscreen mode for better viewing.'.tr(ref),
                 style: AppTheme.bodySmall,
               ),
               SizedBox(height: AppConstants.spacingM),
 
-              Text('4. Monthly Visits', style: AppTheme.bodyMedium),
+              Text('4. Monthly Visits'.tr(ref), style: AppTheme.bodyMedium),
               Text(
-                'Book up to 10 visits per month. Available slots are shown in green.',
+                'Book up to 10 visits per month. Available slots are shown in green.'.tr(ref),
                 style: AppTheme.bodySmall,
               ),
             ],
@@ -495,7 +496,7 @@ class _SupportScreenState extends State<SupportScreen> {
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Got it'),
+            child: Text('Got it'.tr(ref)),
           ),
         ],
       ),
@@ -511,15 +512,15 @@ class _SupportScreenState extends State<SupportScreen> {
   }
 }
 
-class RaiseSupportTicketSheet extends StatefulWidget {
-  const RaiseSupportTicketSheet({super.key});
+class RaiseSupportTicketSheet extends ConsumerStatefulWidget {
+  RaiseSupportTicketSheet({super.key});
 
   @override
   State<RaiseSupportTicketSheet> createState() =>
       _RaiseSupportTicketSheetState();
 }
 
-class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
+class _RaiseSupportTicketSheetState extends ConsumerState<RaiseSupportTicketSheet> {
   final TextEditingController _issueController = TextEditingController();
   String _selectedPriority = 'Medium';
 
@@ -541,7 +542,7 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Padding(
@@ -560,7 +561,7 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
             child: Container(
               width: 40,
               height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
                 color: Colors.grey.shade400,
                 borderRadius: BorderRadius.circular(4),
@@ -569,18 +570,18 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
           ),
 
           // Title
-          const Text('Raise a Support Ticket', style: AppTheme.headingMedium),
-          const SizedBox(height: 6),
-          const Text(
-            'Tell us what went wrong. Our team will get back to you shortly.',
+          Text('Raise a Support Ticket'.tr(ref), style: AppTheme.headingMedium),
+          SizedBox(height: 6),
+          Text(
+            'Tell us what went wrong. Our team will get back to you shortly.'.tr(ref),
             style: AppTheme.bodySmall,
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Priority selector
-          const Text('Priority', style: AppTheme.bodyMedium),
-          const SizedBox(height: 8),
+          Text('Priority'.tr(ref), style: AppTheme.bodyMedium),
+          SizedBox(height: 8),
 
           Wrap(
             spacing: 8,
@@ -602,11 +603,11 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
             }).toList(),
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Issue description
-          const Text('Describe the issue', style: AppTheme.bodyMedium),
-          const SizedBox(height: 8),
+          Text('Describe the issue'.tr(ref), style: AppTheme.bodyMedium),
+          SizedBox(height: 8),
 
           TextField(
             controller: _issueController,
@@ -623,7 +624,7 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
             ),
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
           // Submit button
           SizedBox(
@@ -633,12 +634,12 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
                   ? null
                   : _submitTicket,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('Submit Ticket'),
+              child: Text('Submit Ticket'.tr(ref)),
             ),
           ),
         ],
@@ -672,14 +673,14 @@ class SupportTicket {
   });
 }
 
-class TicketHistorySheet extends StatefulWidget {
-  const TicketHistorySheet({super.key});
+class TicketHistorySheet extends ConsumerStatefulWidget {
+  TicketHistorySheet({super.key});
 
   @override
   State<TicketHistorySheet> createState() => _TicketHistorySheetState();
 }
 
-class _TicketHistorySheetState extends State<TicketHistorySheet>
+class _TicketHistorySheetState extends ConsumerState<TicketHistorySheet>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -688,14 +689,14 @@ class _TicketHistorySheetState extends State<TicketHistorySheet>
       id: '1',
       issue: 'Live CCTV not loading',
       priority: 'High',
-      createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      createdAt: DateTime.now().subtract(Duration(days: 1)),
       isClosed: false,
     ),
     SupportTicket(
       id: '2',
       issue: 'Monthly visit booking issue',
       priority: 'Medium',
-      createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      createdAt: DateTime.now().subtract(Duration(days: 5)),
       isClosed: true,
     ),
   ];
@@ -707,25 +708,25 @@ class _TicketHistorySheetState extends State<TicketHistorySheet>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
+      padding: EdgeInsets.all(AppConstants.spacingM),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Support Ticket History', style: AppTheme.headingMedium),
-          const SizedBox(height: 12),
+          Text('Support Ticket History'.tr(ref), style: AppTheme.headingMedium),
+          SizedBox(height: 12),
 
           TabBar(
             controller: _tabController,
             labelColor: AppTheme.primary,
-            tabs: const [
+            tabs: [
               Tab(text: 'Active'),
               Tab(text: 'Closed'),
             ],
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
 
           SizedBox(
             height: 350,
@@ -746,7 +747,7 @@ class _TicketHistorySheetState extends State<TicketHistorySheet>
     final filtered = tickets.where((t) => t.isClosed == isClosed).toList();
 
     if (filtered.isEmpty) {
-      return const Center(child: Text('No tickets found'));
+      return Center(child: Text('No tickets found'.tr(ref)));
     }
 
     return ListView.builder(
@@ -766,23 +767,23 @@ class _TicketHistorySheetState extends State<TicketHistorySheet>
   }
 }
 
-class _TicketCard extends StatelessWidget {
+class _TicketCard extends ConsumerWidget {
   final SupportTicket ticket;
   final bool showDelete;
   final VoidCallback? onDelete;
 
-  const _TicketCard({
+  _TicketCard({
     required this.ticket,
     this.showDelete = false,
     this.onDelete,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -798,7 +799,7 @@ class _TicketCard extends StatelessWidget {
                 ),
                 if (showDelete)
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.delete_outline,
                       color: AppTheme.errorRed,
                     ),
@@ -806,9 +807,9 @@ class _TicketCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             Text('Priority: ${ticket.priority}', style: AppTheme.bodySmall),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               'Raised on: ${ticket.createdAt.day}/${ticket.createdAt.month}/${ticket.createdAt.year}',
               style: AppTheme.bodySmall,

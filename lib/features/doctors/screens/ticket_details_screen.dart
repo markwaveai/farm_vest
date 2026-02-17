@@ -2,19 +2,20 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/models/ticket_model.dart';
 import 'package:farm_vest/features/doctors/screens/treatment_details_screen.dart';
 import 'package:flutter/material.dart';
-
-class TicketDetailsScreen extends StatelessWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class TicketDetailsScreen extends ConsumerWidget {
   final Ticket ticket;
 
-  const TicketDetailsScreen({super.key, required this.ticket});
+  TicketDetailsScreen({super.key, required this.ticket});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Health Tickets',
+          'Health Tickets'.tr(ref),
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         elevation: 0,
@@ -22,7 +23,7 @@ class TicketDetailsScreen extends StatelessWidget {
         foregroundColor: Theme.of(context).colorScheme.onSurface,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           children: [
             // Status Tabs (Mock UI for visual consistency with design)
@@ -30,23 +31,23 @@ class TicketDetailsScreen extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildTab(context, 'All', false),
-                  const SizedBox(width: 8),
-                  _buildTab(context, 'Pending', false),
-                  const SizedBox(width: 8),
+                  _buildTab(context, 'All'.tr(ref), false),
+                  SizedBox(width: 8),
+                  _buildTab(context, 'Pending'.tr(ref), false),
+                  SizedBox(width: 8),
                   _buildTab(
                     context,
-                    'Approved',
+                    'Approved'.tr(ref),
                     true,
                   ), // Highlights current status roughly
-                  const SizedBox(width: 8),
-                  _buildTab(context, 'In Progress', false),
-                  const SizedBox(width: 8),
-                  _buildTab(context, 'Completed', false),
+                  SizedBox(width: 8),
+                  _buildTab(context, 'In Progress'.tr(ref), false),
+                  SizedBox(width: 8),
+                  _buildTab(context, 'Completed'.tr(ref), false),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Card
             Container(
@@ -56,10 +57,10 @@ class TicketDetailsScreen extends StatelessWidget {
                 boxShadow: [
                   BoxShadow(
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.black.withOpacity(0.2)
-                        : Colors.black.withOpacity(0.05),
+                        ? Colors.black.withValues(alpha: 0.2)
+                        : Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    offset: Offset(0, 4),
                   ),
                 ],
               ),
@@ -67,16 +68,16 @@ class TicketDetailsScreen extends StatelessWidget {
                 children: [
                   // Header
                   Container(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    decoration: const BoxDecoration(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
                       color: AppTheme.darkPrimary,
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(16),
                       ),
                     ),
                     width: double.infinity,
-                    child: const Text(
-                      'Buffalo Health Ticket Details',
+                    child: Text(
+                      'Buffalo Health Ticket Details'.tr(ref),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
@@ -87,53 +88,59 @@ class TicketDetailsScreen extends StatelessWidget {
                   ),
 
                   Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(20),
                     child: Column(
                       children: [
                         _buildDetailRow(
                           context,
-                          'Buffalo ID :',
-                          ticket.animalId ?? 'Unknown',
+                          'Buffalo ID :'.tr(ref),
+                          ticket.animalId ?? 'Unknown'.tr(ref),
                         ),
                         _buildDetailRow(
                           context,
-                          'Request Type :',
+                          'Request Type :'.tr(ref),
                           ticket.ticketType,
                         ), // 'Health Ticket + Medical Assistance'
                         _buildDetailRow(
                           context,
-                          'Reason :',
+                          'Reason :'.tr(ref),
                           ticket.description,
                         ), // 'Persistent coughing...'
                         _buildDetailRow(
                           context,
-                          'Status :',
+                          'Status :'.tr(ref),
                           ticket.status,
                           isStatus: true,
                         ),
                         _buildDetailRow(
                           context,
-                          'Requested By :',
-                          'Supervisor Shed 03',
+                          'Requested By :'.tr(ref),
+                          'Supervisor Shed 03', // Mock
                         ), // Mock or metadata
                         _buildDetailRow(
                           context,
-                          'Date Of Incident :',
-                          ticket.createdAt?.toString().split(' ')[0] ?? 'N/A',
+                          'Date Of Incident :'.tr(ref),
+                          ticket.createdAt?.toString().split(' ')[0] ??
+                              'N/A'.tr(ref),
                         ),
                         _buildDetailRow(
                           context,
-                          'RFID Tag ID :',
-                          ticket.rfid ?? 'N/A',
+                          'RFID Tag ID :'.tr(ref),
+                          ticket.rfid ?? 'N/A'.tr(ref),
                         ),
-                        _buildDetailRow(context, 'Photo :', '', isImage: true),
+                        _buildDetailRow(
+                          context,
+                          'Photo :'.tr(ref),
+                          '',
+                          isImage: true,
+                        ),
                       ],
                     ),
                   ),
 
                   // Button
                   Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(20),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -151,9 +158,9 @@ class TicketDetailsScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text('Mark Status'),
+                        child: Text('Mark Status'.tr(ref)),
                       ),
                     ),
                   ),
@@ -168,12 +175,12 @@ class TicketDetailsScreen extends StatelessWidget {
 
   Widget _buildTab(BuildContext context, String text, bool isSelected) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: isSelected
             ? AppTheme.orange
             : (Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withOpacity(0.05)
+                  ? Colors.white.withValues(alpha: 0.05)
                   : AppTheme.white),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
@@ -204,7 +211,7 @@ class TicketDetailsScreen extends StatelessWidget {
     bool isImage = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -213,7 +220,9 @@ class TicketDetailsScreen extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
               ),
@@ -232,11 +241,11 @@ class TicketDetailsScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
                           color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white.withOpacity(0.05)
+                              ? Colors.white.withValues(alpha: 0.05)
                               : Colors.grey[200],
                           height: 60,
                           width: 80,
-                          child: const Icon(Icons.broken_image),
+                          child: Icon(Icons.broken_image),
                         ),
                       ),
                     ),
@@ -246,8 +255,8 @@ class TicketDetailsScreen extends StatelessWidget {
                     style: TextStyle(
                       color: isStatus
                           ? AppTheme.lightPrimary
-                          : Theme.of(context).colorScheme.onSurface.withOpacity(
-                              0.7,
+                          : Theme.of(context).colorScheme.onSurface.withValues(
+                              alpha: 0.7,
                             ), // Status color logic can be improved
                       fontWeight: isStatus
                           ? FontWeight.bold

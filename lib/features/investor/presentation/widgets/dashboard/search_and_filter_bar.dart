@@ -3,9 +3,9 @@ import 'package:farm_vest/features/investor/presentation/providers/investor_prov
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class SearchAndFilterBar extends ConsumerStatefulWidget {
-  const SearchAndFilterBar({super.key});
+  SearchAndFilterBar({super.key});
 
   @override
   ConsumerState<SearchAndFilterBar> createState() => _SearchAndFilterBarState();
@@ -51,7 +51,7 @@ class _SearchAndFilterBarState extends ConsumerState<SearchAndFilterBar> {
     });
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         children: [
           TextField(
@@ -78,7 +78,7 @@ class _SearchAndFilterBarState extends ConsumerState<SearchAndFilterBar> {
               fillColor: isDark
                   ? AppTheme.darkSurfaceVariant
                   : Colors.grey[100],
-              contentPadding: const EdgeInsets.symmetric(
+              contentPadding: EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 0,
               ),
@@ -96,7 +96,7 @@ class _SearchAndFilterBarState extends ConsumerState<SearchAndFilterBar> {
               ref.read(buffaloFilterProvider.notifier).setSearchQuery(value);
             },
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
         ],
       ),
     );
@@ -115,7 +115,7 @@ class _SearchAndFilterBarState extends ConsumerState<SearchAndFilterBar> {
 }
 
 class _FilterSheetContent extends ConsumerStatefulWidget {
-  const _FilterSheetContent();
+  _FilterSheetContent();
 
   @override
   ConsumerState<_FilterSheetContent> createState() =>
@@ -143,7 +143,7 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
     final allHealthStatuses = ref.watch(allHealthStatusesProvider);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,7 +151,7 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Filters', style: Theme.of(context).textTheme.titleLarge),
+              Text('Filters'.tr(ref), style: Theme.of(context).textTheme.titleLarge),
               Row(
                 children: [
                   TextButton(
@@ -162,17 +162,17 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
                         currentLocations.clear();
                       });
                     },
-                    child: const Text('Clear All'),
+                    child: Text('Clear All'.tr(ref)),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
             ],
           ),
-          const Divider(),
+          Divider(),
           _buildFilterSection(
             title: 'Health Status',
             items: ['all', ...allHealthStatuses],
@@ -207,7 +207,7 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
             },
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 16, bottom: 8),
+            padding: EdgeInsets.only(top: 16, bottom: 8),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -223,13 +223,13 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Apply Filters',
+                child: Text(
+                  'Apply Filters'.tr(ref),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -259,9 +259,9 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
       children: [
         Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -321,7 +321,7 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
             );
           }).toList(),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
       ],
     );
   }

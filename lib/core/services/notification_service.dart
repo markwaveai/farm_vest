@@ -10,7 +10,6 @@ import 'package:farm_vest/core/router/app_router.dart';
 import 'dart:io';
 // import 'package:flutter_app_badger/flutter_app_badger.dart';  // Temporarily disabled for release build
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint("Handling a background message: ${message.messageId}");
@@ -143,7 +142,7 @@ class NotificationService {
     });
 
     // Create the channel on the device (Android 8.0+)
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    AndroidNotificationChannel channel = AndroidNotificationChannel(
       'farmvest_notifications', // id
       'FarmVest Notifications', // title
       description: 'This channel is used for important notifications.',
@@ -188,7 +187,7 @@ class NotificationService {
   void startPolling() {
     _pollTimer?.cancel();
     fetchUnreadCount();
-    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _pollTimer = Timer.periodic(Duration(seconds: 30), (_) {
       fetchUnreadCount();
     });
   }
@@ -294,7 +293,7 @@ class NotificationService {
         String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
         int retryCount = 0;
         while (apnsToken == null && retryCount < 10) {
-          await Future.delayed(const Duration(seconds: 1));
+          await Future.delayed(Duration(seconds: 1));
           apnsToken = await FirebaseMessaging.instance.getAPNSToken();
           retryCount++;
           debugPrint('Waiting for APNS token... (Attempt $retryCount)');

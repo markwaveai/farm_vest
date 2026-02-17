@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
@@ -7,15 +8,16 @@ import 'package:intl/intl.dart';
 import 'package:farm_vest/core/services/notification_service.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 
-class NotificationsScreen extends StatefulWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class NotificationsScreen extends ConsumerStatefulWidget {
   final String fallbackRoute;
-  const NotificationsScreen({super.key, required this.fallbackRoute});
+  NotificationsScreen({super.key, required this.fallbackRoute});
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
+class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   final NotificationService _notificationService = NotificationService();
   List<AppNotification> _notifications = [];
 
@@ -61,7 +63,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         NavigationHelper.safePopOrNavigate(
           context,
@@ -70,10 +72,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Notifications'),
+          title: Text('Notifications'.tr(ref)),
           automaticallyImplyLeading: true,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back),
             onPressed: () => NavigationHelper.safePopOrNavigate(
               context,
               fallbackRoute: widget.fallbackRoute,
@@ -82,20 +84,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           actions: [
             if (_notifications.isNotEmpty) ...[
               IconButton(
-                icon: const Icon(Icons.done_all),
+                icon: Icon(Icons.done_all),
                 onPressed: () {
                   _notificationService.markAllAsRead();
-                  ToastUtils.showInfo(
-                    context,
-                    'All notifications marked as read',
-                  );
+                  ToastUtils.showInfo(context, 'All notifications marked as read'.tr(ref));
                 },
-                tooltip: 'Mark all as read',
+                tooltip: 'Mark all as read'.tr(ref),
               ),
               IconButton(
-                icon: const Icon(Icons.clear_all),
+                icon: Icon(Icons.clear_all),
                 onPressed: () => _showClearAllDialog(),
-                tooltip: 'Clear all',
+                tooltip: 'Clear all'.tr(ref),
               ),
             ],
           ],
@@ -103,7 +102,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         body: _notifications.isEmpty
             ? _buildEmptyState()
             : SingleChildScrollView(
-                padding: const EdgeInsets.all(AppConstants.spacingM),
+                padding: EdgeInsets.all(AppConstants.spacingM),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -111,12 +110,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     if (_notifications.isNotEmpty) ...[
                       Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(AppConstants.spacingM),
+                          padding: EdgeInsets.all(AppConstants.spacingM),
                           child: Row(
                             children: [
                               Expanded(
                                 child: _buildSummaryItem(
-                                  'Total',
+                                  'Total'.tr(ref),
                                   _notifications.length.toString(),
                                   Icons.notifications,
                                   AppTheme.primary,
@@ -124,7 +123,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               ),
                               Expanded(
                                 child: _buildSummaryItem(
-                                  'Unread',
+                                  'Unread'.tr(ref),
                                   unreadNotifications.length.toString(),
                                   Icons.mark_email_unread,
                                   AppTheme.warningOrange,
@@ -132,7 +131,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               ),
                               Expanded(
                                 child: _buildSummaryItem(
-                                  'Read',
+                                  'Read'.tr(ref),
                                   readNotifications.length.toString(),
                                   Icons.mark_email_read,
                                   AppTheme.successGreen,
@@ -142,26 +141,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: AppConstants.spacingL),
+                      SizedBox(height: AppConstants.spacingL),
                     ],
 
                     // Unread Notifications
                     if (unreadNotifications.isNotEmpty) ...[
-                      const Text('Unread', style: AppTheme.headingMedium),
-                      const SizedBox(height: AppConstants.spacingM),
+                      Text('Unread'.tr(ref), style: AppTheme.headingMedium),
+                      SizedBox(height: AppConstants.spacingM),
                       ...unreadNotifications.map(
                         (notification) => _buildNotificationCard(
                           notification,
                           isUnread: true,
                         ),
                       ),
-                      const SizedBox(height: AppConstants.spacingL),
+                      SizedBox(height: AppConstants.spacingL),
                     ],
 
                     // Read Notifications
                     if (readNotifications.isNotEmpty) ...[
-                      const Text('Read', style: AppTheme.headingMedium),
-                      const SizedBox(height: AppConstants.spacingM),
+                      Text('Read'.tr(ref), style: AppTheme.headingMedium),
+                      SizedBox(height: AppConstants.spacingM),
                       ...readNotifications.map(
                         (notification) => _buildNotificationCard(
                           notification,
@@ -177,16 +176,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_none, size: 64, color: AppTheme.mediumGrey),
+          Icon(
+            Icons.notifications_none,
+            size: 64,
+            color: AppTheme.mediumGrey,
+          ),
           SizedBox(height: AppConstants.spacingM),
-          Text('No notifications', style: AppTheme.headingMedium),
+          Text('No notifications'.tr(ref), style: AppTheme.headingMedium),
           SizedBox(height: AppConstants.spacingS),
           Text(
-            'You\'re all caught up!',
+            'You\'re all caught up!'.tr(ref),
             style: AppTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
@@ -204,7 +207,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Column(
       children: [
         Icon(icon, color: color, size: AppConstants.iconM),
-        const SizedBox(height: AppConstants.spacingS),
+        SizedBox(height: AppConstants.spacingS),
         Text(value, style: AppTheme.headingSmall.copyWith(color: color)),
         Text(label, style: AppTheme.bodySmall),
       ],
@@ -219,7 +222,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final icon = NotificationColors.getIcon(notification.type);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: EdgeInsets.only(bottom: AppConstants.spacingM),
       color: isUnread ? color.withValues(alpha: 0.05) : null,
       child: InkWell(
         onTap: () {
@@ -234,7 +237,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         },
         borderRadius: BorderRadius.circular(AppConstants.radiusL),
         child: Padding(
-          padding: const EdgeInsets.all(AppConstants.spacingM),
+          padding: EdgeInsets.all(AppConstants.spacingM),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -248,7 +251,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
                 child: Icon(icon, color: color, size: AppConstants.iconM),
               ),
-              const SizedBox(width: AppConstants.spacingM),
+              SizedBox(width: AppConstants.spacingM),
 
               // Content
               Expanded(
@@ -271,14 +274,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           Container(
                             width: 8,
                             height: 8,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: AppTheme.primary,
                               shape: BoxShape.circle,
                             ),
                           ),
                       ],
                     ),
-                    const SizedBox(height: AppConstants.spacingS),
+                    SizedBox(height: AppConstants.spacingS),
                     Text(
                       notification.message,
                       style: AppTheme.bodyMedium.copyWith(
@@ -287,7 +290,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             : AppTheme.mediumGrey,
                       ),
                     ),
-                    const SizedBox(height: AppConstants.spacingS),
+                    SizedBox(height: AppConstants.spacingS),
                     Row(
                       children: [
                         Text(
@@ -316,28 +319,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 },
                 itemBuilder: (context) => [
                   if (isUnread)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'mark_read',
                       child: Row(
                         children: [
                           Icon(Icons.mark_email_read),
                           SizedBox(width: AppConstants.spacingS),
-                          Text('Mark as read'),
+                          Text('Mark as read'.tr(ref)),
                         ],
                       ),
                     ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
                         Icon(Icons.delete),
                         SizedBox(width: AppConstants.spacingS),
-                        Text('Delete'),
+                        Text('Delete'.tr(ref)),
                       ],
                     ),
                   ),
                 ],
-                child: const Icon(Icons.more_vert, color: AppTheme.mediumGrey),
+                child: Icon(Icons.more_vert, color: AppTheme.mediumGrey),
               ),
             ],
           ),
@@ -351,13 +354,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final difference = now.difference(timestamp);
 
     if (difference.inMinutes < 1) {
-      return 'Just now';
+      return 'Just now'.tr(ref);
     } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
+      return '@countm ago'.trParams({'count': difference.inMinutes.toString()});
     } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
+      return '@counth ago'.trParams({'count': difference.inHours.toString()});
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
+      return '@countd ago'.trParams({'count': difference.inDays.toString()});
     } else {
       return DateFormat('MMM dd, yyyy').format(timestamp);
     }
@@ -367,23 +370,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear All Notifications'),
-        content: const Text(
-          'Are you sure you want to clear all notifications? This action cannot be undone.',
-        ),
+        title: Text('Clear All Notifications'.tr(ref)),
+        content: Text('Are you sure you want to clear all notifications? This action cannot be undone.'.tr(ref)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr(ref)),
           ),
           ElevatedButton(
             onPressed: () {
               _notificationService.clearAll();
               Navigator.pop(context);
-              ToastUtils.showInfo(context, 'Notification settings updated');
+              ToastUtils.showInfo(context, 'All notifications cleared'.tr(ref));
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorRed),
-            child: const Text('Clear All'),
+            child: Text('Clear all'.tr(ref)),
           ),
         ],
       ),

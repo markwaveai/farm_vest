@@ -16,6 +16,7 @@ import 'milk_production_screen.dart';
 import 'raise_ticket_screen.dart';
 import 'package:farm_vest/features/doctors/widgets/buffalo_profile_view.dart';
 
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class AssignedTask {
   final String taskId;
   final String buffaloId;
@@ -55,7 +56,7 @@ class MonitoringRecord {
 }
 
 class AssistantDashboardScreen extends ConsumerStatefulWidget {
-  const AssistantDashboardScreen({super.key});
+  AssistantDashboardScreen({super.key});
 
   @override
   ConsumerState<AssistantDashboardScreen> createState() =>
@@ -82,8 +83,8 @@ class _AssistantDashboardScreenState
         buffaloId: 'BUF-003',
         taskType: 'Temperature Monitoring',
         assignedBy: 'Dr. Patel',
-        assignedAt: DateTime.now().subtract(const Duration(hours: 2)),
-        deadline: DateTime.now().add(const Duration(hours: 4)),
+        assignedAt: DateTime.now().subtract(Duration(hours: 2)),
+        deadline: DateTime.now().add(Duration(hours: 4)),
         status: 'In Progress',
         instructions:
             'Monitor temperature every 2 hours and report if above 102°F',
@@ -93,8 +94,8 @@ class _AssistantDashboardScreenState
         buffaloId: 'BUF-007',
         taskType: 'Medicine Administration',
         assignedBy: 'Dr. Sharma',
-        assignedAt: DateTime.now().subtract(const Duration(hours: 6)),
-        deadline: DateTime.now().add(const Duration(hours: 2)),
+        assignedAt: DateTime.now().subtract(Duration(hours: 6)),
+        deadline: DateTime.now().add(Duration(hours: 2)),
         status: 'Pending',
         instructions: 'Administer antibiotic injection twice daily',
       ),
@@ -103,8 +104,8 @@ class _AssistantDashboardScreenState
         buffaloId: 'BUF-012',
         taskType: 'Recovery Monitoring',
         assignedBy: 'Dr. Patel',
-        assignedAt: DateTime.now().subtract(const Duration(days: 1)),
-        deadline: DateTime.now().add(const Duration(hours: 8)),
+        assignedAt: DateTime.now().subtract(Duration(days: 1)),
+        deadline: DateTime.now().add(Duration(hours: 8)),
         status: 'Completed',
         instructions: 'Monitor recovery progress and update status',
       ),
@@ -118,21 +119,21 @@ class _AssistantDashboardScreenState
         temperature: 101.5,
         eatingStatus: 'Good',
         medicineGiven: true,
-        recordedAt: DateTime.now().subtract(const Duration(hours: 1)),
+        recordedAt: DateTime.now().subtract(Duration(hours: 1)),
       ),
       MonitoringRecord(
         buffaloId: 'BUF-007',
         temperature: 100.8,
         eatingStatus: 'Fair',
         medicineGiven: true,
-        recordedAt: DateTime.now().subtract(const Duration(hours: 3)),
+        recordedAt: DateTime.now().subtract(Duration(hours: 3)),
       ),
       MonitoringRecord(
         buffaloId: 'BUF-012',
         temperature: 100.2,
         eatingStatus: 'Excellent',
         medicineGiven: false,
-        recordedAt: DateTime.now().subtract(const Duration(hours: 5)),
+        recordedAt: DateTime.now().subtract(Duration(hours: 5)),
       ),
     ];
   }
@@ -140,17 +141,17 @@ class _AssistantDashboardScreenState
   String _getTitle(int index) {
     switch (index) {
       case 0:
-        return 'Health Issues';
+        return 'Health Issues'.tr(ref);
       case 1:
-        return 'Milk Production';
+        return 'Milk Production'.tr(ref);
       case 2:
-        return 'Raise Ticket';
+        return 'Raise Ticket'.tr(ref);
       case 3:
-        return 'Buffalo Profile';
+        return 'Buffalo Profile'.tr(ref);
       case 4:
-        return 'Assistant Dashboard';
+        return 'Assistant Dashboard'.tr(ref);
       default:
-        return 'Assistant Dashboard';
+        return 'Assistant Dashboard'.tr(ref);
     }
   }
 
@@ -158,7 +159,7 @@ class _AssistantDashboardScreenState
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         if (_currentIndex != 4) {
           setState(() {
@@ -178,14 +179,12 @@ class _AssistantDashboardScreenState
           actions: [
             if (ref.watch(authProvider).availableRoles.length > 1)
               IconButton(
-                icon: const Icon(Icons.swap_horiz),
+                icon: Icon(Icons.swap_horiz),
                 onPressed: _showSwitchRoleBottomSheet,
-                tooltip: 'Switch Role',
+                tooltip: 'Switch Role'.tr(ref),
               ),
-            const NotificationBellButton(
-              fallbackRoute: '/assistant-dashboard',
-            ),
-            const SizedBox(width: 8),
+            NotificationBellButton(fallbackRoute: '/assistant-dashboard'),
+            SizedBox(width: 8),
             GestureDetector(
               onTap: () => context.push('/profile'),
               child: CircleAvatar(
@@ -201,30 +200,30 @@ class _AssistantDashboardScreenState
                           width: 36,
                           height: 36,
                           errorBuilder: (context, error, stackTrace) =>
-                              const Icon(
+                              Icon(
                                 Icons.person,
                                 size: 20,
                                 color: AppTheme.primary,
                               ),
                         ),
                       )
-                    : const Icon(
+                    : Icon(
                         Icons.person,
                         size: 20,
                         color: AppTheme.primary,
                       ),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
           ],
         ),
         body: IndexedStack(
           index: _currentIndex,
           children: [
-            const HealthIssuesScreen(hideAppBar: true),
-            const MilkProductionScreen(hideAppBar: true),
-            const RaiseTicketScreen(hideAppBar: true),
-            const BuffaloProfileView(),
+            HealthIssuesScreen(hideAppBar: true),
+            MilkProductionScreen(hideAppBar: true),
+            RaiseTicketScreen(hideAppBar: true),
+            BuffaloProfileView(),
             _buildDashboardHome(),
           ],
         ),
@@ -258,12 +257,12 @@ class _AssistantDashboardScreenState
                 BoxShadow(
                   color: Colors.black.withOpacity(0.25),
                   blurRadius: 12,
-                  offset: const Offset(0, 6),
+                  offset: Offset(0, 6),
                 ),
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(14),
               child: Image.asset(
                 'assets/icons/home.png',
                 color: Theme.of(context).brightness == Brightness.dark
@@ -279,14 +278,14 @@ class _AssistantDashboardScreenState
 
   Widget _buildDashboardHome() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
+      padding: EdgeInsets.all(AppConstants.spacingM),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Welcome Section
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(AppConstants.spacingL),
+            padding: EdgeInsets.all(AppConstants.spacingL),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -301,113 +300,120 @@ class _AssistantDashboardScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Welcome, Assistant Kumar!',
+                Text(
+                  'Welcome, @name!'.trParams({
+                    'name':
+                        ref.watch(authProvider).userData?.name ??
+                        'Assistant Kumar',
+                  }),
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.white,
                   ),
                 ),
-                const SizedBox(height: AppConstants.spacingS),
-                const Text(
-                  'Supporting healthcare operations',
+                SizedBox(height: AppConstants.spacingS),
+                Text(
+                  'Supporting healthcare operations'.tr(ref),
                   style: TextStyle(fontSize: 16, color: AppTheme.white),
                 ),
-                const SizedBox(height: AppConstants.spacingM),
+                SizedBox(height: AppConstants.spacingM),
                 Row(
                   children: [
-                    _buildQuickStat('Active Tasks', '8'),
-                    const SizedBox(width: AppConstants.spacingL),
-                    _buildQuickStat('Completed', '15'),
+                    _buildQuickStat('Active Tasks'.tr(ref), '8'),
+                    SizedBox(width: AppConstants.spacingL),
+                    _buildQuickStat('Completed'.tr(ref), '15'),
                   ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: AppConstants.spacingL),
+          SizedBox(height: AppConstants.spacingL),
 
           // Quick Actions
-          Text('Quick Actions', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: AppConstants.spacingM),
+          Text(
+            'Quick Actions'.tr(ref),
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          SizedBox(height: AppConstants.spacingM),
 
           GridView.count(
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+            physics: NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
             crossAxisSpacing: AppConstants.spacingM,
             mainAxisSpacing: AppConstants.spacingM,
             childAspectRatio: 1.1,
             children: [
               EmployeeDashboardCard(
-                title: 'Assigned Tasks',
-                subtitle: 'View your tasks',
+                title: 'Assigned Tasks'.tr(ref),
+                subtitle: 'View your tasks'.tr(ref),
                 icon: Icons.assignment,
                 color: Theme.of(context).colorScheme.primary,
                 onTap: () => _showAssignedTasks(),
               ),
               EmployeeDashboardCard(
-                title: 'Daily Monitoring',
-                subtitle: 'Record observations',
+                title: 'Daily Monitoring'.tr(ref),
+                subtitle: 'Record observations'.tr(ref),
                 icon: Icons.monitor_heart,
                 color: AppTheme.secondary,
                 onTap: () => _showDailyMonitoring(),
               ),
               EmployeeDashboardCard(
-                title: 'Treatment Execution',
-                subtitle: 'Follow instructions',
+                title: 'Treatment Execution'.tr(ref),
+                subtitle: 'Follow instructions'.tr(ref),
                 icon: Icons.medication,
                 color: AppTheme.darkSecondary,
                 onTap: () => _showTreatmentExecution(),
               ),
               EmployeeDashboardCard(
-                title: 'Completed Updates',
-                subtitle: 'Update progress',
+                title: 'Completed Updates'.tr(ref),
+                subtitle: 'Update progress'.tr(ref),
                 icon: Icons.check_circle,
                 color: AppTheme.successGreen,
                 onTap: () => _showCompletedUpdates(),
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingL),
+          SizedBox(height: AppConstants.spacingL),
 
           // Assigned Tasks
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Today\'s Assigned Tasks',
+                'Today\'s Assigned Tasks'.tr(ref),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               TextButton(
                 onPressed: () => _showAssignedTasks(),
-                child: const Text('View All'),
+                child: Text('View All'.tr(ref)),
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingM),
+          SizedBox(height: AppConstants.spacingM),
 
           ListView.builder(
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+            physics: NeverScrollableScrollPhysics(),
             itemCount: _assignedTasks.take(3).length,
             itemBuilder: (context, index) {
               final task = _assignedTasks[index];
               return _buildTaskCard(task);
             },
           ),
-          const SizedBox(height: AppConstants.spacingL),
+          SizedBox(height: AppConstants.spacingL),
 
           // Recent Monitoring Records
           Text(
-            'Recent Monitoring Records',
+            'Recent Monitoring Records'.tr(ref),
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          const SizedBox(height: AppConstants.spacingM),
+          SizedBox(height: AppConstants.spacingM),
 
           ListView.builder(
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+            physics: NeverScrollableScrollPhysics(),
             itemCount: _monitoringRecords.take(3).length,
             itemBuilder: (context, index) {
               final record = _monitoringRecords[index];
@@ -427,31 +433,31 @@ class _AssistantDashboardScreenState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Switch Active Role',
+              Text(
+                'Switch Active Role'.tr(ref),
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
-                'Choose which portal you want to access',
+                'Choose which portal you want to access'.tr(ref),
                 style: TextStyle(color: AppTheme.mediumGrey),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               ...availableRoles.map((role) {
                 final isSelected = role == currentRole;
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     onTap: isSelected
                         ? null
@@ -505,7 +511,7 @@ class _AssistantDashboardScreenState
                     ),
                     trailing: isSelected
                         ? Icon(Icons.check_circle, color: role.color)
-                        : const Icon(Icons.arrow_forward_ios, size: 14),
+                        : Icon(Icons.arrow_forward_ios, size: 14),
                   ),
                 );
               }),
@@ -522,7 +528,7 @@ class _AssistantDashboardScreenState
       children: [
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: AppTheme.white,
@@ -530,7 +536,7 @@ class _AssistantDashboardScreenState
         ),
         Text(
           label,
-          style: const TextStyle(fontSize: 14, color: AppTheme.white),
+          style: TextStyle(fontSize: 14, color: AppTheme.white),
         ),
       ],
     );
@@ -556,23 +562,21 @@ class _AssistantDashboardScreenState
         DateTime.now().isAfter(task.deadline) && task.status != 'Completed';
 
     return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: EdgeInsets.only(bottom: AppConstants.spacingM),
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
+        padding: EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: AppConstants.spacingS,
                     vertical: AppConstants.spacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(
-                      0.1,
-                    ), // Fixed: Use withOpacity
+                    color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Text(
@@ -585,9 +589,9 @@ class _AssistantDashboardScreenState
                   ),
                 ),
                 if (isOverdue) ...[
-                  const SizedBox(width: AppConstants.spacingS),
+                  SizedBox(width: AppConstants.spacingS),
                   Container(
-                    padding: const EdgeInsets.symmetric(
+                    padding: EdgeInsets.symmetric(
                       horizontal: AppConstants.spacingS,
                       vertical: AppConstants.spacingXS,
                     ),
@@ -597,8 +601,8 @@ class _AssistantDashboardScreenState
                       ), // Fixed: Use withOpacity
                       borderRadius: BorderRadius.circular(AppConstants.radiusS),
                     ),
-                    child: const Text(
-                      'OVERDUE',
+                    child: Text(
+                      'OVERDUE'.tr(ref),
                       style: TextStyle(
                         color: AppTheme.errorRed,
                         fontSize: 12,
@@ -607,7 +611,7 @@ class _AssistantDashboardScreenState
                     ),
                   ),
                 ],
-                const Spacer(),
+                Spacer(),
                 Text(
                   task.taskId,
                   style: Theme.of(
@@ -616,7 +620,7 @@ class _AssistantDashboardScreenState
                 ),
               ],
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             Text(
               '${task.buffaloId} - ${task.taskType}',
@@ -624,7 +628,7 @@ class _AssistantDashboardScreenState
                 context,
               ).textTheme.titleMedium?.copyWith(fontSize: 16),
             ),
-            const SizedBox(height: AppConstants.spacingS),
+            SizedBox(height: AppConstants.spacingS),
 
             if (task.instructions != null) ...[
               Text(
@@ -633,7 +637,7 @@ class _AssistantDashboardScreenState
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: AppConstants.spacingS),
+              SizedBox(height: AppConstants.spacingS),
             ],
 
             Row(
@@ -643,22 +647,22 @@ class _AssistantDashboardScreenState
                   size: AppConstants.iconS,
                   color: AppTheme.mediumGrey,
                 ),
-                const SizedBox(width: AppConstants.spacingXS),
+                SizedBox(width: AppConstants.spacingXS),
                 Text(
                   task.assignedBy,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: AppTheme.mediumGrey),
                 ),
-                const SizedBox(width: AppConstants.spacingM),
+                SizedBox(width: AppConstants.spacingM),
                 Icon(
                   Icons.schedule,
                   size: AppConstants.iconS,
                   color: isOverdue ? AppTheme.errorRed : AppTheme.mediumGrey,
                 ),
-                const SizedBox(width: AppConstants.spacingXS),
+                SizedBox(width: AppConstants.spacingXS),
                 Text(
-                  'Due: ${DateFormat('MMM dd, hh:mm a').format(task.deadline)}',
+                  '${'Due'.tr(ref)}: ${DateFormat('MMM dd, hh:mm a').format(task.deadline)}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: isOverdue ? AppTheme.errorRed : AppTheme.mediumGrey,
                   ),
@@ -667,20 +671,20 @@ class _AssistantDashboardScreenState
             ),
 
             if (task.status != 'Completed') ...[
-              const SizedBox(height: AppConstants.spacingM),
+              SizedBox(height: AppConstants.spacingM),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => _viewTaskDetails(task),
-                      child: const Text('View Details'),
+                      child: Text('View Details'.tr(ref)),
                     ),
                   ),
-                  const SizedBox(width: AppConstants.spacingM),
+                  SizedBox(width: AppConstants.spacingM),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => _updateTaskStatus(task),
-                      child: const Text('Update'),
+                      child: Text('Update'.tr(ref)),
                     ),
                   ),
                 ],
@@ -694,9 +698,9 @@ class _AssistantDashboardScreenState
 
   Widget _buildMonitoringCard(MonitoringRecord record) {
     return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: EdgeInsets.only(bottom: AppConstants.spacingM),
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
+        padding: EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -708,7 +712,7 @@ class _AssistantDashboardScreenState
                     context,
                   ).textTheme.titleMedium?.copyWith(fontSize: 16),
                 ),
-                const Spacer(),
+                Spacer(),
                 Text(
                   DateFormat('MMM dd, hh:mm a').format(record.recordedAt),
                   style: Theme.of(
@@ -717,13 +721,13 @@ class _AssistantDashboardScreenState
                 ),
               ],
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
 
             Row(
               children: [
                 Expanded(
                   child: _buildMonitoringItem(
-                    'Temperature',
+                    'Temperature'.tr(ref),
                     '${record.temperature}°F',
                     Icons.thermostat,
                     record.temperature > 102
@@ -733,7 +737,7 @@ class _AssistantDashboardScreenState
                 ),
                 Expanded(
                   child: _buildMonitoringItem(
-                    'Eating',
+                    'Eating'.tr(ref),
                     record.eatingStatus,
                     Icons.restaurant,
                     Theme.of(context).colorScheme.primary,
@@ -741,8 +745,8 @@ class _AssistantDashboardScreenState
                 ),
                 Expanded(
                   child: _buildMonitoringItem(
-                    'Medicine',
-                    record.medicineGiven ? 'Given' : 'Not Given',
+                    'Medicine'.tr(ref),
+                    record.medicineGiven ? 'Given'.tr(ref) : 'Not Given'.tr(ref),
                     Icons.medication,
                     record.medicineGiven
                         ? AppTheme.successGreen
@@ -766,7 +770,7 @@ class _AssistantDashboardScreenState
     return Column(
       children: [
         Icon(icon, color: color, size: AppConstants.iconM),
-        const SizedBox(height: AppConstants.spacingS),
+        SizedBox(height: AppConstants.spacingS),
         Text(
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -785,14 +789,14 @@ class _AssistantDashboardScreenState
       isScrollControlled: true,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.7,
-        padding: const EdgeInsets.all(AppConstants.spacingL),
+        padding: EdgeInsets.all(AppConstants.spacingL),
         child: Column(
           children: [
             Text(
-              'Assigned Tasks',
+              'Assigned Tasks'.tr(ref),
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: AppConstants.spacingL),
+            SizedBox(height: AppConstants.spacingL),
             Expanded(
               child: ListView.builder(
                 itemCount: _assignedTasks.length,
@@ -812,14 +816,14 @@ class _AssistantDashboardScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Daily Monitoring'),
-        content: const Text(
-          'Daily monitoring functionality will be implemented here.',
+        title: Text('Daily Monitoring'.tr(ref)),
+        content: Text(
+          'Daily monitoring functionality will be implemented here.'.tr(ref),
         ),
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('Close'.tr(ref)),
           ),
         ],
       ),
@@ -830,14 +834,14 @@ class _AssistantDashboardScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Treatment Execution'),
-        content: const Text(
-          'Treatment execution functionality will be implemented here.',
+        title: Text('Treatment Execution'.tr(ref)),
+        content: Text(
+          'Treatment execution functionality will be implemented here.'.tr(ref),
         ),
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('Close'.tr(ref)),
           ),
         ],
       ),
@@ -848,12 +852,12 @@ class _AssistantDashboardScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Recovery Update'),
+        title: Text('Recovery Update'.tr(ref)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Mark buffalo as fully recovered?'),
-            const SizedBox(height: AppConstants.spacingM),
+            Text('Mark buffalo as fully recovered?'.tr(ref)),
+            SizedBox(height: AppConstants.spacingM),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -862,14 +866,14 @@ class _AssistantDashboardScreenState
                   'Recovery update sent to customer!',
                 );
               },
-              child: const Text('Recovery Done'),
+              child: Text('Recovery Done'.tr(ref)),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr(ref)),
           ),
         ],
       ),
@@ -891,13 +895,13 @@ class _AssistantDashboardScreenState
             Text(
               'Deadline: ${DateFormat('MMM dd, yyyy hh:mm a').format(task.deadline)}',
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
             if (task.instructions != null) ...[
               Text(
-                'Instructions:',
+                'Instructions:'.tr(ref),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: AppConstants.spacingS),
+              SizedBox(height: AppConstants.spacingS),
               Text(task.instructions!),
             ],
           ],
@@ -905,7 +909,7 @@ class _AssistantDashboardScreenState
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('Close'.tr(ref)),
           ),
         ],
       ),
@@ -916,14 +920,14 @@ class _AssistantDashboardScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Update Task Status'),
+        title: Text('Update Task Status'.tr(ref)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Task: ${task.taskId}'),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingM),
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Status'),
+              decoration: InputDecoration(labelText: 'Status'),
               items: ['In Progress', 'Completed', 'Need Help']
                   .map(
                     (status) =>
@@ -937,7 +941,7 @@ class _AssistantDashboardScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr(ref)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -947,7 +951,7 @@ class _AssistantDashboardScreenState
                 'Task status updated successfully!',
               );
             },
-            child: const Text('Update'),
+            child: Text('Update'.tr(ref)),
           ),
         ],
       ),

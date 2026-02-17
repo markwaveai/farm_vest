@@ -2,10 +2,11 @@
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:video_player/video_player.dart';
 // import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 // import '../providers/buffalo_provider.dart';
 
 // class CCTVLiveScreen extends ConsumerStatefulWidget {
-//   const CCTVLiveScreen({super.key});
+//   CCTVLiveScreen({super.key});
 
 //   @override
 //   ConsumerState<CCTVLiveScreen> createState() => _CCTVLiveScreenState();
@@ -81,13 +82,13 @@
 //     return Scaffold(
 //       backgroundColor: Colors.black,
 //       appBar: AppBar(
-//         title: const Text(
+//         title: Text(
 //           'Live Camera Feed',
 //           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
 //         ),
 //         backgroundColor: Colors.black,
 //         elevation: 0,
-//         iconTheme: const IconThemeData(color: Colors.white),
+//         iconTheme: IconThemeData(color: Colors.white),
 //       ),
 //       body: SafeArea(
 //         child: feedsAsync.when(
@@ -112,7 +113,7 @@
 //                 if (feeds.length > 1) _buildShedSelector(feeds),
 
 //                 Padding(
-//                   padding: const EdgeInsets.symmetric(
+//                   padding: EdgeInsets.symmetric(
 //                     horizontal: 16,
 //                     vertical: 8,
 //                   ),
@@ -121,14 +122,14 @@
 //                     children: [
 //                       Text(
 //                         'Shed: $shedName',
-//                         style: const TextStyle(
+//                         style: TextStyle(
 //                           color: Colors.white70,
 //                           fontSize: 14,
 //                         ),
 //                       ),
 //                       Text(
 //                         'Angle ${_mainAngleIndex + 1}',
-//                         style: const TextStyle(
+//                         style: TextStyle(
 //                           color: AppTheme.secondary,
 //                           fontWeight: FontWeight.bold,
 //                         ),
@@ -140,7 +141,7 @@
 //                 Expanded(
 //                   flex: 3,
 //                   child: Container(
-//                     margin: const EdgeInsets.all(8),
+//                     margin: EdgeInsets.all(8),
 //                     decoration: BoxDecoration(
 //                       borderRadius: BorderRadius.circular(16),
 //                       border: Border.all(color: Colors.white24),
@@ -152,7 +153,7 @@
 //                   ),
 //                 ),
 
-//                 const Padding(
+//                 Padding(
 //                   padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
 //                   child: Text(
 //                     'Viewing Angles',
@@ -167,7 +168,7 @@
 //                 SizedBox(
 //                   height: 110,
 //                   child: ListView.builder(
-//                     padding: const EdgeInsets.symmetric(horizontal: 8),
+//                     padding: EdgeInsets.symmetric(horizontal: 8),
 //                     scrollDirection: Axis.horizontal,
 //                     itemCount: controllers.length,
 //                     itemBuilder: (context, index) {
@@ -175,7 +176,7 @@
 //                     },
 //                   ),
 //                 ),
-//                 const SizedBox(height: 20),
+//                 SizedBox(height: 20),
 //               ],
 //             );
 //           },
@@ -187,7 +188,7 @@
 //   Widget _buildShedSelector(List<Map<String, dynamic>> feeds) {
 //     return Container(
 //       height: 50,
-//       margin: const EdgeInsets.symmetric(vertical: 8),
+//       margin: EdgeInsets.symmetric(vertical: 8),
 //       child: ListView.builder(
 //         scrollDirection: Axis.horizontal,
 //         itemCount: feeds.length,
@@ -199,8 +200,8 @@
 //               _mainAngleIndex = 0;
 //             }),
 //             child: Container(
-//               margin: const EdgeInsets.symmetric(horizontal: 8),
-//               padding: const EdgeInsets.symmetric(horizontal: 16),
+//               margin: EdgeInsets.symmetric(horizontal: 8),
+//               padding: EdgeInsets.symmetric(horizontal: 16),
 //               alignment: Alignment.center,
 //               decoration: BoxDecoration(
 //                 color: isSelected ? AppTheme.primary : Colors.white10,
@@ -221,7 +222,7 @@
 //   }
 
 //   Widget _buildLoadingState() {
-//     return const Center(
+//     return Center(
 //       child: Column(
 //         mainAxisAlignment: MainAxisAlignment.center,
 //         children: [
@@ -239,25 +240,25 @@
 //   Widget _buildErrorState(String message) {
 //     return Center(
 //       child: Padding(
-//         padding: const EdgeInsets.all(24.0),
+//         padding: EdgeInsets.all(24.0),
 //         child: Column(
 //           mainAxisAlignment: MainAxisAlignment.center,
 //           children: [
-//             const Icon(
+//             Icon(
 //               Icons.videocam_off_rounded,
 //               size: 64,
 //               color: Colors.white24,
 //             ),
-//             const SizedBox(height: 16),
+//             SizedBox(height: 16),
 //             Text(
 //               message,
 //               textAlign: TextAlign.center,
-//               style: const TextStyle(color: Colors.white70),
+//               style: TextStyle(color: Colors.white70),
 //             ),
-//             const SizedBox(height: 24),
+//             SizedBox(height: 24),
 //             ElevatedButton(
 //               onPressed: () => _initAllFeeds(),
-//               child: const Text('Retry'),
+//               child: Text('Retry'.tr(ref)),
 //             ),
 //           ],
 //         ),
@@ -267,7 +268,7 @@
 
 //   Widget _buildVideoPlayer(VideoPlayerController controller) {
 //     if (!controller.value.isInitialized) {
-//       return const Center(child: CircularProgressIndicator());
+//       return Center(child: CircularProgressIndicator());
 //     }
 //     return AspectRatio(
 //       aspectRatio: controller.value.aspectRatio,
@@ -281,7 +282,7 @@
 //     return GestureDetector(
 //       onTap: () => _onAngleTapped(index),
 //       child: Container(
-//         margin: const EdgeInsets.symmetric(horizontal: 6.0),
+//         margin: EdgeInsets.symmetric(horizontal: 6.0),
 //         decoration: BoxDecoration(
 //           border: Border.all(
 //             color: isSelected ? AppTheme.secondary : Colors.white12,
@@ -303,11 +304,11 @@
 //                 right: 0,
 //                 child: Container(
 //                   color: Colors.black54,
-//                   padding: const EdgeInsets.symmetric(vertical: 2),
+//                   padding: EdgeInsets.symmetric(vertical: 2),
 //                   child: Text(
 //                     'Angle ${index + 1}',
 //                     textAlign: TextAlign.center,
-//                     style: const TextStyle(
+//                     style: TextStyle(
 //                       color: Colors.white,
 //                       fontSize: 10,
 //                       fontWeight: FontWeight.bold,

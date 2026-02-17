@@ -2,12 +2,13 @@ import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
-
-class CheckInventoryScreen extends StatelessWidget {
-  const CheckInventoryScreen({super.key});
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class CheckInventoryScreen extends ConsumerWidget {
+  CheckInventoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final inventory = [
       {
         'name': 'Antibiotics (Bottle)',
@@ -26,17 +27,17 @@ class CheckInventoryScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Inventory',
+        title: Text(
+          'Inventory'.tr(ref),
           style: TextStyle(color: AppTheme.dark, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppTheme.dark),
+        iconTheme: IconThemeData(color: AppTheme.dark),
       ),
       backgroundColor: Colors.grey[50],
       body: ListView.builder(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
+        padding: EdgeInsets.all(AppConstants.spacingM),
         itemCount: inventory.length,
         itemBuilder: (context, index) {
           final item = inventory[index];
@@ -51,28 +52,28 @@ class CheckInventoryScreen extends StatelessWidget {
           }
 
           return Padding(
-            padding: const EdgeInsets.only(bottom: AppConstants.spacingS),
+            padding: EdgeInsets.only(bottom: AppConstants.spacingS),
             child: CustomCard(
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.inventory_2, color: Colors.blue),
+                  child: Icon(Icons.inventory_2, color: Colors.blue),
                 ),
                 title: Text(
                   item['name']!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
                 subtitle: Text('Quantity: ${item['quantity']}'),
                 trailing: Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 4,
                   ),

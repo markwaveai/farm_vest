@@ -73,7 +73,7 @@ class AnimalApiServices {
       if (response.statusCode == 200) {
         return InvestorAnimalsResponse.fromJson(jsonDecode(response.body));
       }
-      return const InvestorAnimalsResponse(status: 'error', count: 0, data: []);
+      return InvestorAnimalsResponse(status: 'error', count: 0, data: []);
     } catch (e) {
       throw AppException(e.toString());
     }
@@ -148,7 +148,7 @@ class AnimalApiServices {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success' && data['data'] != null) {
-          print("Animal Details Response: ${data['data']}");
+          // print("Animal Details Response: ${data['data']}");
           return Map<String, dynamic>.from(data['data']);
         }
       }

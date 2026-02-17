@@ -7,9 +7,9 @@ import 'package:farm_vest/features/investor/data/models/investor_animal_model.da
 import 'package:farm_vest/core/models/ticket_model.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class TransferTicketsView extends ConsumerStatefulWidget {
-  const TransferTicketsView({super.key});
+  TransferTicketsView({super.key});
 
   @override
   ConsumerState<TransferTicketsView> createState() =>
@@ -85,8 +85,8 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.arrow_upward, size: 18),
-                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_upward, size: 18),
+                    SizedBox(width: 4),
                     Text('OUT (${_outTransfers.length})'),
                   ],
                 ),
@@ -95,8 +95,8 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.arrow_downward, size: 18),
-                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_downward, size: 18),
+                    SizedBox(width: 4),
                     Text('IN (${_inTransfers.length})'),
                   ],
                 ),
@@ -105,7 +105,7 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
           ),
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator())
                 : TabBarView(
                     controller: _tabController,
                     children: [
@@ -119,9 +119,9 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateTransferDialog(context),
         backgroundColor: AppTheme.primary,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'New Transfer',
+        icon: Icon(Icons.add, color: Colors.white),
+        label: Text(
+          'New Transfer'.tr(ref),
           style: TextStyle(color: Colors.white),
         ),
       ),
@@ -139,7 +139,7 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
               size: 64,
               color: Theme.of(context).hintColor,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text(
               isOut
                   ? 'No outgoing transfer requests'
@@ -157,7 +157,7 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
     return RefreshIndicator(
       onRefresh: _loadTransfers,
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         itemCount: transfers.length,
         itemBuilder: (context, index) {
           final transfer = transfers[index];
@@ -190,12 +190,12 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
     }
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       elevation: 2,
       color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -209,7 +209,7 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
                       color: isOut ? Colors.red : Colors.green,
                       size: 20,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Text(
                       animalTag,
                       style: TextStyle(
@@ -221,7 +221,7 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 4,
                   ),
@@ -241,7 +241,7 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -249,7 +249,7 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'From',
+                        'From'.tr(ref),
                         style: TextStyle(
                           color: Theme.of(context).hintColor,
                           fontSize: 12,
@@ -265,13 +265,13 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
                     ],
                   ),
                 ),
-                const Icon(Icons.arrow_forward, color: AppTheme.primary),
+                Icon(Icons.arrow_forward, color: AppTheme.primary),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'To',
+                        'To'.tr(ref),
                         style: TextStyle(
                           color: Theme.of(context).hintColor,
                           fontSize: 12,
@@ -290,7 +290,7 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
               ],
             ),
             if (description.isNotEmpty) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Text(
                 description,
                 style: TextStyle(
@@ -302,7 +302,7 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
                 overflow: TextOverflow.ellipsis,
               ),
             ],
-            const Divider(height: 24),
+            Divider(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -323,8 +323,8 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
                         extra: {'animalId': animalId},
                       );
                     },
-                    child: const Text(
-                      'Allocate Slot',
+                    child: Text(
+                      'Allocate Slot'.tr(ref),
                       style: TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ),
@@ -350,17 +350,17 @@ class _TransferTicketsViewState extends ConsumerState<TransferTicketsView>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       backgroundColor: Theme.of(context).cardColor,
-      builder: (context) => const CreateTransferSheet(),
+      builder: (context) => CreateTransferSheet(),
     ).then((_) => _loadTransfers());
   }
 }
 
 class CreateTransferSheet extends ConsumerStatefulWidget {
-  const CreateTransferSheet({super.key});
+  CreateTransferSheet({super.key});
 
   @override
   ConsumerState<CreateTransferSheet> createState() =>
@@ -426,7 +426,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         left: 24,
@@ -443,7 +443,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Create Transfer Request',
+                  'Create Transfer Request'.tr(ref),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -452,7 +452,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                 ),
                 IconButton(
                   icon: Container(
-                    padding: const EdgeInsets.all(4),
+                    padding: EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: Theme.of(context).brightness == Brightness.dark
                           ? Colors.white12
@@ -469,16 +469,16 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
-              'Transfer Direction',
+              'Transfer Direction'.tr(ref),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).hintColor,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -486,30 +486,30 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                     'OUT',
                     'Send Out',
                     Icons.arrow_upward_rounded,
-                    const Color(0xFFF44336),
+                    Color(0xFFF44336),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: _buildDirectionButton(
                     'IN',
                     'Receive',
                     Icons.arrow_downward_rounded,
-                    const Color(0xFF4CAF50),
+                    Color(0xFF4CAF50),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
-              'Select Animal',
+              'Select Animal'.tr(ref),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).hintColor,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: _animalController,
               focusNode: _focusNode,
@@ -536,8 +536,8 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                 filled: true,
                 fillColor: Theme.of(context).brightness == Brightness.dark
                     ? Colors.white.withOpacity(0.05)
-                    : const Color(0xFFF8F9FA),
-                contentPadding: const EdgeInsets.symmetric(
+                    : Color(0xFFF8F9FA),
+                contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 14,
                 ),
@@ -555,7 +555,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
+                  borderSide: BorderSide(
                     color: AppTheme.primary,
                     width: 2,
                   ),
@@ -564,8 +564,8 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
             ),
             if (suggestions.isNotEmpty && _selectedAnimalId == null)
               Container(
-                margin: const EdgeInsets.only(top: 8),
-                constraints: const BoxConstraints(maxHeight: 200),
+                margin: EdgeInsets.only(top: 8),
+                constraints: BoxConstraints(maxHeight: 200),
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
@@ -578,7 +578,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      offset: Offset(0, 4),
                     ),
                   ],
                 ),
@@ -592,7 +592,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                         animal.rfid ?? animal.earTagId ?? animal.animalId;
                     return ListTile(
                       dense: true,
-                      leading: const CircleAvatar(
+                      leading: CircleAvatar(
                         radius: 14,
                         backgroundColor: Color(0xFFE8F5E9),
                         child: Icon(
@@ -634,16 +634,16 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                   },
                 ),
               ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
-              'Current Location',
+              'Current Location'.tr(ref),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).hintColor,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: _outController,
               readOnly: true,
@@ -654,7 +654,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                 filled: true,
                 fillColor: Theme.of(context).brightness == Brightness.dark
                     ? Colors.white.withOpacity(0.05)
-                    : const Color(0xFFF8F9FA),
+                    : Color(0xFFF8F9FA),
                 prefixIcon: Icon(
                   Icons.location_on_rounded,
                   color: Theme.of(context).hintColor,
@@ -669,24 +669,24 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
-              'Destination Shed (Optional)',
+              'Destination Shed (Optional)'.tr(ref),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).hintColor,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             _isShedsLoading
-                ? const Center(child: LinearProgressIndicator())
+                ? Center(child: LinearProgressIndicator())
                 : Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       color: Theme.of(context).brightness == Brightness.dark
                           ? Colors.white.withOpacity(0.05)
-                          : const Color(0xFFF8F9FA),
+                          : Color(0xFFF8F9FA),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: Theme.of(context).brightness == Brightness.dark
@@ -703,7 +703,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                         hint: Text(
-                          'Select target shed',
+                          'Select target shed'.tr(ref),
                           style: TextStyle(color: Theme.of(context).hintColor),
                         ),
                         items: _sheds
@@ -729,22 +729,22 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                       ),
                     ),
                   ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
-              'Priority',
+              'Priority'.tr(ref),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).hintColor,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: Theme.of(context).brightness == Brightness.dark
                     ? Colors.white.withOpacity(0.05)
-                    : const Color(0xFFF8F9FA),
+                    : Color(0xFFF8F9FA),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: Theme.of(context).brightness == Brightness.dark
@@ -775,16 +775,16 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
-              'Reason for Transfer',
+              'Reason for Transfer'.tr(ref),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).hintColor,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: _reasonController,
               focusNode: _reasonFocusNode,
@@ -796,7 +796,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                 filled: true,
                 fillColor: Theme.of(context).brightness == Brightness.dark
                     ? Colors.white.withOpacity(0.05)
-                    : const Color(0xFFF8F9FA),
+                    : Color(0xFFF8F9FA),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -811,7 +811,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               height: 54,
@@ -830,7 +830,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                   ),
                 ),
                 child: _isSubmitting
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 24,
                         width: 24,
                         child: CircularProgressIndicator(
@@ -838,8 +838,8 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text(
-                        'Confirm Transfer',
+                    : Text(
+                        'Confirm Transfer'.tr(ref),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -864,14 +864,14 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
       onTap: () => setState(() => _direction = value),
       borderRadius: BorderRadius.circular(16),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           color: isSelected
               ? color.withOpacity(0.08)
               : (Theme.of(context).brightness == Brightness.dark
                     ? Colors.white.withOpacity(0.05)
-                    : const Color(0xFFF8F9FA)),
+                    : Color(0xFFF8F9FA)),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? color : Colors.transparent,
@@ -886,7 +886,7 @@ class _CreateTransferSheetState extends ConsumerState<CreateTransferSheet> {
               color: isSelected ? color : Theme.of(context).hintColor,
               size: 18,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(

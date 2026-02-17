@@ -2,14 +2,14 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/investor/data/models/visit_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-class VisitFarmSelector extends StatelessWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class VisitFarmSelector extends ConsumerWidget {
   final AsyncValue<List<InvestorFarm>> farmsAsync;
   final InvestorFarm? selectedFarm;
   final ValueChanged<InvestorFarm?> onFarmSelected;
   final ThemeData theme;
 
-  const VisitFarmSelector({
+  VisitFarmSelector({
     super.key,
     required this.farmsAsync,
     required this.selectedFarm,
@@ -18,15 +18,15 @@ class VisitFarmSelector extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
             blurRadius: 4,
           ),
         ],
@@ -35,21 +35,21 @@ class VisitFarmSelector extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Select Farm",
+            "Select Farm".tr(ref),
             style: AppTheme.bodySmall.copyWith(
               color: Colors.grey[600],
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           farmsAsync.when(
             data: (farms) {
               if (farms.isEmpty) {
-                return const Text("No farms found assigned to you.");
+                return Text("No farms found assigned to you.".tr(ref));
               }
 
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(8),
@@ -58,7 +58,7 @@ class VisitFarmSelector extends StatelessWidget {
                   child: DropdownButton<InvestorFarm>(
                     value: selectedFarm,
                     isExpanded: true,
-                    hint: const Text("Choose a farm"),
+                    hint: Text("Choose a farm".tr(ref)),
                     items: farms.map((farm) {
                       return DropdownMenuItem(
                         value: farm,
@@ -74,7 +74,7 @@ class VisitFarmSelector extends StatelessWidget {
               );
             },
             error: (e, s) => Text("Failed to load farms: $e"),
-            loading: () => const LinearProgressIndicator(),
+            loading: () => LinearProgressIndicator(),
           ),
         ],
       ),

@@ -12,11 +12,11 @@ import 'package:go_router/go_router.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:shimmer/shimmer.dart';
-
 import 'package:farm_vest/features/employee/new_supervisor/widgets/supervisor_views.dart';
 
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class NewSupervisorDashboard extends ConsumerStatefulWidget {
-  const NewSupervisorDashboard({super.key});
+  NewSupervisorDashboard({super.key});
 
   @override
   ConsumerState<NewSupervisorDashboard> createState() =>
@@ -40,24 +40,24 @@ class _NewSupervisorDashboardState
     final farmLocation = user?.farmLocation ?? "Location";
     final displayName = user?.firstName ?? "Supervisor";
 
-    String appBarTitle = 'Dashboard';
+    String appBarTitle = 'Assistant Dashboard'.tr(ref);
     bool showProfileInfo = _currentIndex == 4;
 
     switch (_currentIndex) {
       case 0:
-        appBarTitle = 'Milk Entry';
+        appBarTitle = 'Milk Entry'.tr(ref);
         break;
       case 1:
-        appBarTitle = 'Alerts';
+        appBarTitle = 'Alerts'.tr(ref);
         break;
       case 2:
-        appBarTitle = 'Farm Statistics';
+        appBarTitle = 'Farm Statistics'.tr(ref);
         break;
       case 3:
-        appBarTitle = 'Buffalo Profile';
+        appBarTitle = 'Buffalo Profile'.tr(ref);
         break;
       case 4:
-        appBarTitle = "Hello, $displayName";
+        appBarTitle = 'Hello, @name'.trParams({'name': displayName});
         break;
     }
 
@@ -81,19 +81,19 @@ class _NewSupervisorDashboardState
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     "$farmName • $shedName",
                     style: TextStyle(
                       fontSize: screenWidth * 0.035,
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.9),
+                      ).colorScheme.onSurface.withValues(alpha: 0.9),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   Text(
-                    "Location: $farmLocation",
+                    'Location: @location'.trParams({'location': farmLocation}),
                     style: TextStyle(
                       fontSize: screenWidth * 0.03,
                       color: Theme.of(context).hintColor,
@@ -103,23 +103,23 @@ class _NewSupervisorDashboardState
               )
             : Text(
                 appBarTitle,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
         actions: [
           if (authState.availableRoles.length > 1)
             IconButton(
               onPressed: () => _showSwitchRoleBottomSheet(context, ref),
-              icon: const Icon(
+              icon: Icon(
                 Icons.swap_horiz_rounded,
                 color: AppTheme.primary,
               ),
-              tooltip: 'Switch Role',
+              tooltip: 'Switch Role'.tr(ref),
             ),
           NotificationBellButton(
             fallbackRoute: '/supervisor-dashboard',
             iconColor: AppTheme.primary,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           GestureDetector(
             onTap: () => context.push('/profile'),
             child: CircleAvatar(
@@ -133,26 +133,26 @@ class _NewSupervisorDashboardState
                         width: 36,
                         height: 36,
                         errorBuilder: (context, error, stackTrace) =>
-                            const Icon(
+                            Icon(
                               Icons.person,
                               size: 20,
                               color: AppTheme.primary,
                             ),
                       ),
                     )
-                  : const Icon(Icons.person, size: 20, color: AppTheme.primary),
+                  : Icon(Icons.person, size: 20, color: AppTheme.primary),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
         ],
       ),
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          const BulkMilkEntryView(), // 0
-          const SupervisorAlertsView(), // 1
-          const SupervisorStatsView(), // 2
-          const BuffaloProfileView(), // 3
+          BulkMilkEntryView(), // 0
+          SupervisorAlertsView(), // 1
+          SupervisorStatsView(), // 2
+          BuffaloProfileView(), // 3
           _buildDashboardContent(dashboardState, screenWidth, user), // 4
         ],
       ),
@@ -186,12 +186,12 @@ class _NewSupervisorDashboardState
               BoxShadow(
                 color: Colors.black.withOpacity(0.25),
                 blurRadius: 12,
-                offset: const Offset(0, 6),
+                offset: Offset(0, 6),
               ),
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(14),
             child: Image.asset(
               'assets/icons/home.png',
               color: Theme.of(context).brightness == Brightness.dark
@@ -218,7 +218,7 @@ class _NewSupervisorDashboardState
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -228,7 +228,7 @@ class _NewSupervisorDashboardState
             mainAxisSpacing: 12,
             childAspectRatio: 1.4,
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+            physics: NeverScrollableScrollPhysics(),
             children: [
               CustomCard(
                 color: AppTheme.primary,
@@ -240,7 +240,7 @@ class _NewSupervisorDashboardState
                   context,
                   Icons.pets,
                   dashboardState.stats.totalAnimals,
-                  'Total Animals',
+                  'Total Animals'.tr(ref),
                   AppTheme.primary,
                 ),
               ),
@@ -252,7 +252,7 @@ class _NewSupervisorDashboardState
                   context,
                   Icons.water_drop,
                   dashboardState.stats.milkToday,
-                  'Milk Today',
+                  'Milk Today'.tr(ref),
                   AppTheme.lightSecondary,
                 ),
               ),
@@ -264,7 +264,7 @@ class _NewSupervisorDashboardState
                   context,
                   Icons.warning,
                   dashboardState.stats.activeIssues,
-                  'Active Issues',
+                  'Active Issues'.tr(ref),
                   AppTheme.warningOrange,
                 ),
               ),
@@ -276,7 +276,7 @@ class _NewSupervisorDashboardState
                   context,
                   Icons.move_down,
                   dashboardState.stats.transfers,
-                  'Transfers',
+                  'Transfers'.tr(ref),
                   AppTheme.darkGrey,
                 ),
               ),
@@ -292,9 +292,7 @@ class _NewSupervisorDashboardState
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('No shed assigned to your profile'),
-                      ),
+                      SnackBar(content: Text('No shed assigned to your profile'.tr(ref))),
                     );
                   }
                 },
@@ -302,7 +300,7 @@ class _NewSupervisorDashboardState
                   context,
                   Icons.hourglass_empty_rounded,
                   dashboardState.stats.pendingAllocations,
-                  'Pending Allocation',
+                  'Pending Allocation'.tr(ref),
                   Colors.pink,
                 ),
               ),
@@ -314,23 +312,23 @@ class _NewSupervisorDashboardState
                   context,
                   Icons.confirmation_number_outlined,
                   dashboardState.stats.allTicketsCount,
-                  'Total Tickets',
+                  'Total Tickets'.tr(ref),
                   Colors.purple,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           if (dashboardState.unallocatedAnimals.isNotEmpty) ...[
             Text(
-              "Unallocated Animals",
+              'Unallocated Animals'.tr(ref),
               style: TextStyle(
                 fontSize: screenWidth * 0.045,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             SizedBox(
               height: 120,
               child: ListView.builder(
@@ -346,24 +344,24 @@ class _NewSupervisorDashboardState
                 },
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
           ],
           Text(
-            "Quick Actions",
+            'Quick Actions'.tr(ref),
             style: TextStyle(
               fontSize: screenWidth * 0.045,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           GridView.count(
             crossAxisCount: 2,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
             childAspectRatio: 1.6,
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+            physics: NeverScrollableScrollPhysics(),
             children: [
               CustomCard(
                 type: DashboardCardType.quickAction,
@@ -371,7 +369,7 @@ class _NewSupervisorDashboardState
                 child: _buildQuickActionContent(
                   context,
                   Icons.water_drop,
-                  'Milk Entry',
+                  'Milk Entry'.tr(ref),
                   Colors.orange,
                 ),
               ),
@@ -385,7 +383,7 @@ class _NewSupervisorDashboardState
                 child: _buildQuickActionContent(
                   context,
                   Icons.medical_services,
-                  'Health ticket',
+                  'Health ticket'.tr(ref),
                   AppTheme.errorRed,
                 ),
               ),
@@ -395,7 +393,7 @@ class _NewSupervisorDashboardState
                 child: _buildQuickActionContent(
                   context,
                   Icons.notification_important_rounded,
-                  'Alerts & Issues',
+                  'Alerts & Issues'.tr(ref),
                   AppTheme.warningOrange,
                 ),
               ),
@@ -409,7 +407,7 @@ class _NewSupervisorDashboardState
                 child: _buildQuickActionContent(
                   context,
                   Icons.search,
-                  'Locate Animal',
+                  'Locate Animal'.tr(ref),
                   Colors.orange,
                 ),
               ),
@@ -424,16 +422,14 @@ class _NewSupervisorDashboardState
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('No shed assigned to your profile'),
-                      ),
+                      SnackBar(content: Text('No shed assigned to your profile'.tr(ref))),
                     );
                   }
                 },
                 child: _buildQuickActionContent(
                   context,
                   Icons.grid_view_rounded,
-                  'Shed Allocation',
+                  'Shed Allocation'.tr(ref),
                   AppTheme.primary,
                 ),
               ),
@@ -443,13 +439,13 @@ class _NewSupervisorDashboardState
                 child: _buildQuickActionContent(
                   context,
                   Icons.add_business_rounded,
-                  'Buffalo Onboarding',
+                  'Buffalo Onboarding'.tr(ref),
                   AppTheme.primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 100),
+          SizedBox(height: 100),
         ],
       ),
     );
@@ -465,9 +461,9 @@ class _NewSupervisorDashboardState
             mainAxisSpacing: 16,
             childAspectRatio: 1.2,
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            children: List.generate(4, (index) => const ShimmerCard()),
+            physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.all(16),
+            children: List.generate(4, (index) => ShimmerCard()),
           ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.03),
           Shimmer.fromColors(
@@ -492,9 +488,9 @@ class _NewSupervisorDashboardState
             mainAxisSpacing: 16,
             childAspectRatio: 1.2,
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            children: List.generate(4, (index) => const ShimmerCard()),
+            physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.all(16),
+            children: List.generate(4, (index) => ShimmerCard()),
           ),
         ],
       ),
@@ -518,7 +514,7 @@ class _NewSupervisorDashboardState
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(icon, color: iconColor, size: iconSize),
-        const SizedBox(height: 2),
+        SizedBox(height: 2),
         Text(
           subtitle,
           style: TextStyle(
@@ -552,14 +548,14 @@ class _NewSupervisorDashboardState
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: iconColor.withOpacity(0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: iconColor, size: iconSize),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Text(
           label,
           textAlign: TextAlign.center,
@@ -581,35 +577,35 @@ class _NewSupervisorDashboardState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Switch Active Role',
+                'Switch Active Role'.tr(ref),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
-                'Choose which portal you want to access',
+                'Choose which portal you want to access'.tr(ref),
                 style: TextStyle(color: Theme.of(context).hintColor),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               ...availableRoles.map((role) {
                 final isSelected = role == currentRole;
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     onTap: isSelected
                         ? null
@@ -663,7 +659,7 @@ class _NewSupervisorDashboardState
                     ),
                     trailing: isSelected
                         ? Icon(Icons.check_circle, color: role.color)
-                        : const Icon(Icons.arrow_forward_ios, size: 14),
+                        : Icon(Icons.arrow_forward_ios, size: 14),
                   ),
                 );
               }),
@@ -684,7 +680,7 @@ class _NewSupervisorDashboardState
 
     return Container(
       width: 140,
-      margin: const EdgeInsets.only(right: 12),
+      margin: EdgeInsets.only(right: 12),
       child: Material(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -699,15 +695,13 @@ class _NewSupervisorDashboardState
                 extra: {'shedId': shedId, 'animalId': animal['rfid']},
               );
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('No shed assigned to your profile'),
-                ),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('No shed assigned to your profile'.tr(ref))));
             }
           },
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
@@ -721,7 +715,7 @@ class _NewSupervisorDashboardState
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 6,
                     vertical: 2,
                   ),
@@ -729,8 +723,8 @@ class _NewSupervisorDashboardState
                     color: AppTheme.errorRed.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text(
-                    'UNALLOCATED',
+                  child: Text(
+                    'UNALLOCATED'.tr(ref),
                     style: TextStyle(
                       fontSize: 8,
                       fontWeight: FontWeight.bold,
@@ -738,7 +732,7 @@ class _NewSupervisorDashboardState
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   rfid,
                   style: TextStyle(
@@ -748,7 +742,7 @@ class _NewSupervisorDashboardState
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   investor,
                   style: TextStyle(

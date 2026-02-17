@@ -2,7 +2,6 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-
 /// Defines the different types of users in the application
 enum UserType {
   customer('customer'),

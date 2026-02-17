@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-
 class CustomCurvedNavigationBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final List<CurvedNavigationBarItem> items;
 
-  const CustomCurvedNavigationBar({
+  CustomCurvedNavigationBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
@@ -23,7 +22,7 @@ class CustomCurvedNavigationBar extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
-            offset: const Offset(0, -5),
+            offset: Offset(0, -5),
           ),
         ],
       ),
@@ -52,7 +51,7 @@ class CustomCurvedNavigationBar extends StatelessWidget {
                 ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.videocam, color: Colors.white, size: 28),
+                icon: Icon(Icons.videocam, color: Colors.white, size: 28),
                 onPressed: () => onTap(2), // Middle item index
               ),
             ),
@@ -67,13 +66,13 @@ class CustomCurvedNavigationBar extends StatelessWidget {
 
               // Skip middle item as it's handled separately
               if (index == 2) {
-                return const SizedBox(width: 60); // Space for middle button
+                return SizedBox(width: 60); // Space for middle button
               }
 
               return GestureDetector(
                 onTap: () => onTap(index),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: EdgeInsets.symmetric(vertical: 12),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -82,7 +81,7 @@ class CustomCurvedNavigationBar extends StatelessWidget {
                         color: isSelected ? AppTheme.primary : Colors.grey[600],
                         size: 24,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       Text(
                         item.label,
                         style: TextStyle(
@@ -124,20 +123,20 @@ class CurvedNavigationPainter extends CustomPainter {
     // Left curve
     path.arcToPoint(
       Offset((size.width / 2) - 15, 20),
-      radius: const Radius.circular(20),
+      radius: Radius.circular(20),
       clockwise: false,
     );
 
     // Top curve
     path.arcToPoint(
       Offset((size.width / 2) + 15, 20),
-      radius: const Radius.circular(30),
+      radius: Radius.circular(30),
     );
 
     // Right curve
     path.arcToPoint(
       Offset((size.width / 2) + 30, 5),
-      radius: const Radius.circular(20),
+      radius: Radius.circular(20),
       clockwise: false,
     );
 
@@ -161,7 +160,7 @@ class CurvedNavigationBarItem {
   final IconData activeIcon;
   final String label;
 
-  const CurvedNavigationBarItem({
+  CurvedNavigationBarItem({
     required this.icon,
     required this.activeIcon,
     required this.label,

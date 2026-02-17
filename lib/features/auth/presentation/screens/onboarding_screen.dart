@@ -1,16 +1,17 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-
-class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class OnboardingScreen extends ConsumerStatefulWidget {
+  OnboardingScreen({super.key});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -61,7 +62,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _nextPage() {
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 400),
+        duration: Duration(milliseconds: 400),
         curve: Curves.easeInOut,
       );
     } else {
@@ -82,13 +83,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             // Skip button
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Align(
                 alignment: Alignment.topRight,
                 child: TextButton(
                   onPressed: _skipOnboarding,
                   child: Text(
-                    'Skip',
+                    'Skip'.tr(ref),
                     style: AppTheme.bodyMedium.copyWith(
                       color: AppTheme.mediumGrey,
                       fontWeight: FontWeight.w600,
@@ -112,7 +113,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             // Page indicators
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+              padding: EdgeInsets.symmetric(vertical: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
@@ -124,7 +125,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             // Next button
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+              padding: EdgeInsets.fromLTRB(24, 0, 24, 32),
               child: SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -140,7 +141,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   child: Text(
                     _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.5,
@@ -162,10 +163,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return SingleChildScrollView(
       physics: isSmallPhone
-          ? const BouncingScrollPhysics()
-          : const NeverScrollableScrollPhysics(),
+          ? BouncingScrollPhysics()
+          : NeverScrollableScrollPhysics(),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
             SizedBox(height: isSmallPhone ? 16 : 32),
@@ -180,7 +181,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               textAlign: TextAlign.center,
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
 
             // Description
             Text(
@@ -253,8 +254,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildIndicator(bool isActive) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.symmetric(horizontal: 4),
+      duration: Duration(milliseconds: 300),
+      margin: EdgeInsets.symmetric(horizontal: 4),
       height: 8,
       width: isActive ? 24 : 8,
       decoration: BoxDecoration(

@@ -2,9 +2,9 @@ import 'package:farm_vest/features/doctors/widgets/transfer_tickets_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class TransferTicketsScreen extends ConsumerWidget {
-  const TransferTicketsScreen({super.key});
+  TransferTicketsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,13 +19,13 @@ class TransferTicketsScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Transfer Tickets',
+          'Transfer Tickets'.tr(ref),
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
       ),
-      body: const TransferTicketsView(),
+      body: TransferTicketsView(),
     );
   }
 }

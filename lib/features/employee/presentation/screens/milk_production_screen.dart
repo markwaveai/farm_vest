@@ -1,10 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 // 1. Updated model to be more flexible
 class MilkProductionEntry {
   final DateTime date;
@@ -18,16 +19,16 @@ class MilkProductionEntry {
   });
 }
 
-class MilkProductionScreen extends StatefulWidget {
+class MilkProductionScreen extends ConsumerStatefulWidget {
   final bool hideAppBar;
 
-  const MilkProductionScreen({super.key, this.hideAppBar = false});
+  MilkProductionScreen({super.key, this.hideAppBar = false});
 
   @override
   State<MilkProductionScreen> createState() => _MilkProductionScreenState();
 }
 
-class _MilkProductionScreenState extends State<MilkProductionScreen> {
+class _MilkProductionScreenState extends ConsumerState<MilkProductionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _litresController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
@@ -67,9 +68,9 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
       ],
       DateFormat(
         'yyyy-MM-dd',
-      ).format(DateTime.now().subtract(const Duration(days: 1))): [
+      ).format(DateTime.now().subtract(Duration(days: 1))): [
         MilkProductionEntry(
-          date: DateTime.now().subtract(const Duration(days: 1)),
+          date: DateTime.now().subtract(Duration(days: 1)),
           timing: 'Morning',
           litres: 82,
         ),
@@ -87,9 +88,9 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
       appBar: widget.hideAppBar
           ? null
           : AppBar(
-              title: const Text('Milk Production Entry'),
+              title: Text('Milk Production Entry'.tr(ref)),
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back),
                 onPressed: () => NavigationHelper.safePopOrNavigate(
                   context,
                   fallbackRoute: '/supervisor-dashboard',
@@ -97,25 +98,25 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
               ),
             ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
+        padding: EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(AppConstants.spacingL),
+                padding: EdgeInsets.all(AppConstants.spacingL),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Add New Entry',
+                      Text(
+                        'Add New Entry'.tr(ref),
                         style: AppTheme.headingMedium,
                       ),
-                      const SizedBox(height: AppConstants.spacingL),
+                      SizedBox(height: AppConstants.spacingL),
                       _buildDatePicker(),
-                      const SizedBox(height: AppConstants.spacingL),
+                      SizedBox(height: AppConstants.spacingL),
                       // 2. Refactored to a single entry form with timings
                       Row(
                         children: [
@@ -123,7 +124,7 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
                             child: TextFormField(
                               controller: _litresController,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Litres',
                                 suffixText: 'L',
                               ),
@@ -138,12 +139,12 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
                               },
                             ),
                           ),
-                          const SizedBox(width: AppConstants.spacingM),
+                          SizedBox(width: AppConstants.spacingM),
                           // 3. The new timings dropdown
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               value: _selectedTiming,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Timing',
                               ),
                               items: ['Morning', 'Afternoon', 'Evening']
@@ -163,13 +164,13 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppConstants.spacingL),
+                      SizedBox(height: AppConstants.spacingL),
                       SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
                           onPressed: _submitEntry,
-                          child: const Text('Submit Entry'),
+                          child: Text('Submit Entry'.tr(ref)),
                         ),
                       ),
                     ],
@@ -177,15 +178,15 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: AppConstants.spacingL),
-            const Text('Today\'s Entries', style: AppTheme.headingMedium),
-            const SizedBox(height: AppConstants.spacingM),
+            SizedBox(height: AppConstants.spacingL),
+            Text('Today\'s Entries'.tr(ref), style: AppTheme.headingMedium),
+            SizedBox(height: AppConstants.spacingM),
             // 4. Updated list to show flexible entries
             entriesForSelectedDate.isEmpty
-                ? const Center(child: Text('No entries for this date.'))
+                ? Center(child: Text('No entries for this date.'.tr(ref)))
                 : ListView.builder(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                    physics: NeverScrollableScrollPhysics(),
                     itemCount: entriesForSelectedDate.length,
                     itemBuilder: (context, index) {
                       final entry = entriesForSelectedDate[index];
@@ -203,21 +204,21 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
       onTap: _selectDate,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(AppConstants.spacingM),
+        padding: EdgeInsets.all(AppConstants.spacingM),
         decoration: BoxDecoration(
           border: Border.all(color: AppTheme.mediumGrey),
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today, color: AppTheme.primary),
-            const SizedBox(width: AppConstants.spacingM),
+            Icon(Icons.calendar_today, color: AppTheme.primary),
+            SizedBox(width: AppConstants.spacingM),
             Text(
               DateFormat('MMM dd, yyyy').format(_selectedDate),
               style: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
             ),
-            const Spacer(),
-            const Icon(Icons.arrow_drop_down, color: AppTheme.mediumGrey),
+            Spacer(),
+            Icon(Icons.arrow_drop_down, color: AppTheme.mediumGrey),
           ],
         ),
       ),
@@ -242,7 +243,7 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
     }
 
     return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: EdgeInsets.only(bottom: AppConstants.spacingM),
       child: ListTile(
         leading: CircleAvatar(child: Icon(icon, color: color)),
         title: Text('${entry.litres} Litres', style: AppTheme.headingSmall),
@@ -256,7 +257,7 @@ class _MilkProductionScreenState extends State<MilkProductionScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 30)),
+      firstDate: DateTime.now().subtract(Duration(days: 30)),
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _selectedDate) {

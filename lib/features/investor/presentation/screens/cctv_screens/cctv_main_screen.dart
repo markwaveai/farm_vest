@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class CCTVMainScreen extends ConsumerStatefulWidget {
-  const CCTVMainScreen({super.key});
+  CCTVMainScreen({super.key});
 
   @override
   ConsumerState<CCTVMainScreen> createState() => _CCTVMainScreenState();
@@ -97,7 +97,7 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
           _isGridView
               ? 'Select Camera Unit'
               : _cameraNames[_activeCameraIndex ?? 0],
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -128,7 +128,7 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
         actions: [
           if (!_isGridView)
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.grid_view_rounded,
                 color: AppTheme.secondary,
                 size: 26,
@@ -151,18 +151,18 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
 
   Widget _buildGridView() {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(left: 4, bottom: 12),
             child: Row(
               children: [
                 CircleAvatar(backgroundColor: Colors.green, radius: 4),
                 SizedBox(width: 8),
                 Text(
-                  'AVAILABLE LIVE UNITS',
+                  'AVAILABLE LIVE UNITS'.tr(ref),
                   style: TextStyle(
                     color: Colors.white70,
                     letterSpacing: 1.2,
@@ -175,7 +175,7 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
           ),
           Expanded(
             child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
@@ -212,8 +212,8 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
             ),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-              decoration: const BoxDecoration(
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+              decoration: BoxDecoration(
                 color: Colors.black54,
                 borderRadius: BorderRadius.vertical(
                   bottom: Radius.circular(16),
@@ -222,7 +222,7 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
               child: Text(
                 _cameraNames[index],
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white70,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -236,14 +236,14 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
   }
 
   Widget _buildFocusedView() {
-    if (_controller == null) return const SizedBox.shrink();
+    if (_controller == null) return SizedBox.shrink();
 
     return Column(
       children: [
         Expanded(
           flex: 5,
           child: Container(
-            margin: const EdgeInsets.all(12),
+            margin: EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.white10),
@@ -276,7 +276,7 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
                           Icon(
                             Icons.fiber_manual_record,
@@ -285,7 +285,7 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
                           ),
                           SizedBox(width: 4),
                           Text(
-                            'LIVE',
+                            'LIVE'.tr(ref),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 10,
@@ -303,12 +303,12 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
         ),
 
         // Horizontal list of other cameras
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [
               Text(
-                'Switch Unit',
+                'Switch Unit'.tr(ref),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -322,7 +322,7 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
           height: 80,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.symmetric(horizontal: 12),
             itemCount: _videoUrls.length,
             itemBuilder: (context, index) {
               final isSelected = index == _activeCameraIndex;
@@ -330,7 +330,7 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
                 onTap: () => _onCameraSelected(index),
                 child: Container(
                   width: 120,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  margin: EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     color: isSelected ? AppTheme.secondary : Colors.grey[900],
                     borderRadius: BorderRadius.circular(12),
@@ -354,7 +354,7 @@ class _CCTVMainScreenState extends ConsumerState<CCTVMainScreen> {
             },
           ),
         ),
-        const Spacer(),
+        Spacer(),
       ],
     );
   }

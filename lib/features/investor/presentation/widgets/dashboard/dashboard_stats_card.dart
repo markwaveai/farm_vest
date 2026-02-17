@@ -5,9 +5,8 @@ import 'package:farm_vest/features/investor/presentation/providers/investor_prov
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 class DashboardStatsCard extends ConsumerWidget {
-  const DashboardStatsCard({super.key});
+  DashboardStatsCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,7 +39,7 @@ class DashboardStatsCard extends ConsumerWidget {
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
-              offset: const Offset(0, 4),
+              offset: Offset(0, 4),
             ),
           ],
           border: Border.all(
@@ -73,7 +72,7 @@ class DashboardStatsCard extends ConsumerWidget {
                   height: 26,
                   width: 26,
                   fit: BoxFit.contain,
-                  colorFilter: const ColorFilter.mode(
+                  colorFilter: ColorFilter.mode(
                     Colors.red,
                     BlendMode.srcIn,
                   ),
@@ -108,7 +107,7 @@ class DashboardStatsCard extends ConsumerWidget {
           ],
         ),
       ),
-      loading: () => const Center(
+      loading: () => Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: CircularProgressIndicator(strokeWidth: 2),
@@ -116,10 +115,10 @@ class DashboardStatsCard extends ConsumerWidget {
       ),
       error: (err, stack) => Center(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(8.0),
           child: Text(
             'Error: $err',
-            style: const TextStyle(fontSize: 12, color: Colors.red),
+            style: TextStyle(fontSize: 12, color: Colors.red),
           ),
         ),
       ),

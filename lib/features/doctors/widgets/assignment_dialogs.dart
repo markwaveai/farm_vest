@@ -1,12 +1,13 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-
-class AssignTicketDialog extends StatefulWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class AssignTicketDialog extends ConsumerStatefulWidget {
   final String ticketId;
   final String buffaloId;
   final Function(String assistantName) onAssign;
 
-  const AssignTicketDialog({
+  AssignTicketDialog({
     super.key,
     required this.ticketId,
     required this.buffaloId,
@@ -17,7 +18,7 @@ class AssignTicketDialog extends StatefulWidget {
   State<AssignTicketDialog> createState() => _AssignTicketDialogState();
 }
 
-class _AssignTicketDialogState extends State<AssignTicketDialog> {
+class _AssignTicketDialogState extends ConsumerState<AssignTicketDialog> {
   String? _selectedAssistant;
   final List<String> _assistants = [
     'Dr. Sudheer',
@@ -27,7 +28,7 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
   ]; // Mock data
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Dialog(
       backgroundColor: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -35,14 +36,14 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: const BoxDecoration(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
               color: AppTheme.darkPrimary,
               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             ),
             width: double.infinity,
-            child: const Text(
-              'Assigned to Assistant',
+            child: Text(
+              'Assigned to Assistant'.tr(ref),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,
@@ -52,14 +53,14 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildDetailRow('Case:', widget.ticketId),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildDetailRow('Buffalo:', widget.buffaloId),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 DropdownButtonFormField<String>(
                   value: _selectedAssistant,
                   decoration: InputDecoration(
@@ -81,7 +82,7 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
                             : Colors.grey.shade300,
                       ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12),
                   ),
                   items: _assistants.map((String value) {
                     return DropdownMenuItem<String>(
@@ -104,7 +105,7 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
@@ -112,16 +113,16 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
                         onPressed: () => Navigator.pop(context),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppTheme.darkPrimary,
-                          side: const BorderSide(color: AppTheme.darkPrimary),
+                          side: BorderSide(color: AppTheme.darkPrimary),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: const Text('Cancel'),
+                        child: Text('Cancel'.tr(ref)),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: _selectedAssistant != null
@@ -143,9 +144,9 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: const Text('Assign'),
+                        child: Text('Assign'.tr(ref)),
                       ),
                     ),
                   ],
@@ -183,18 +184,18 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
   }
 }
 
-class AssignmentSuccessDialog extends StatelessWidget {
+class AssignmentSuccessDialog extends ConsumerWidget {
   final String ticketId;
   final String assignedTo;
 
-  const AssignmentSuccessDialog({
+  AssignmentSuccessDialog({
     super.key,
     required this.ticketId,
     required this.assignedTo,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Dialog(
       backgroundColor: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -202,14 +203,14 @@ class AssignmentSuccessDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: const BoxDecoration(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
               color: AppTheme.darkPrimary,
               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             ),
             width: double.infinity,
-            child: const Text(
-              'Assigned to Assistant',
+            child: Text(
+              'Assigned to Assistant'.tr(ref),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,
@@ -219,7 +220,7 @@ class AssignmentSuccessDialog extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Column(
               children: [
                 ClipRRect(
@@ -243,7 +244,7 @@ class AssignmentSuccessDialog extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Text(
                   '$ticketId Ticket has been successfully Assigned to $assignedTo',
                   textAlign: TextAlign.center,
@@ -252,7 +253,7 @@ class AssignmentSuccessDialog extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -262,9 +263,9 @@ class AssignmentSuccessDialog extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('Done'),
+                    child: Text('Done'.tr(ref)),
                   ),
                 ),
               ],

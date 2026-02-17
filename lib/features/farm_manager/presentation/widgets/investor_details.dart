@@ -6,9 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'investor_card_widget.dart';
-
+import 'package:farm_vest/core/localization/translation_helpers.dart';
 class InvestorDetails extends ConsumerStatefulWidget {
-  const InvestorDetails({super.key});
+  InvestorDetails({super.key});
 
   @override
   ConsumerState<InvestorDetails> createState() => _InvestorDetailsState();
@@ -30,35 +30,35 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
       context: context,
       builder: (context) {
         return SimpleDialog(
-          title: const Text('Filter by Status'),
+          title: Text('Filter by Status'.tr(ref)),
           children: [
             SimpleDialogOption(
               onPressed: () {
                 notifier.setStatusFilter('all');
                 Navigator.pop(context);
               },
-              child: const Text('All'),
+              child: Text('All'.tr(ref)),
             ),
             SimpleDialogOption(
               onPressed: () {
                 notifier.setStatusFilter('active');
                 Navigator.pop(context);
               },
-              child: const Text('Active'),
+              child: Text('Active'.tr(ref)),
             ),
             SimpleDialogOption(
               onPressed: () {
                 notifier.setStatusFilter('inactive');
                 Navigator.pop(context);
               },
-              child: const Text('Inactive'),
+              child: Text('Inactive'.tr(ref)),
             ),
             SimpleDialogOption(
               onPressed: () {
                 notifier.setStatusFilter('exited');
                 Navigator.pop(context);
               },
-              child: const Text('Exited'),
+              child: Text('Exited'.tr(ref)),
             ),
           ],
         );
@@ -105,7 +105,7 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
                 ref.read(investorListProvider.notifier).setSearchQuery(query);
               },
             )
-          : const Text("Investors Data"),
+          : Text("Investors Data".tr(ref)),
       titleTextStyle: TextStyle(
         fontSize: 22,
         color: theme.appBarTheme.foregroundColor,
@@ -159,7 +159,7 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: investorState.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : investorState.investors.isEmpty
           ? Center(
               child: Text(
@@ -172,7 +172,7 @@ class _InvestorDetailsState extends ConsumerState<InvestorDetails> {
               ),
             )
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               itemCount: investorState.investors.length,
               itemBuilder: (context, index) {
                 final investor = investorState.investors[index];

@@ -1,7 +1,8 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-
-class HealthTicketCard extends StatelessWidget {
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+class HealthTicketCard extends ConsumerWidget {
   final String ticketId;
   final String description;
   final String timeAgo;
@@ -11,7 +12,7 @@ class HealthTicketCard extends StatelessWidget {
   final VoidCallback? onActionTap; // For "Treatment" or "Add Vaccine"
   final bool isVaccination; // To toggle between Treatment and Add Vaccine
 
-  const HealthTicketCard({
+  HealthTicketCard({
     super.key,
     required this.ticketId,
     required this.description,
@@ -24,9 +25,9 @@ class HealthTicketCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
@@ -55,20 +56,20 @@ class HealthTicketCard extends StatelessWidget {
 
   Widget _cardHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
             ? Colors.white.withOpacity(0.05)
             : AppTheme.darkPrimary,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Row(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             backgroundColor: Colors.white24,
             child: Icon(Icons.pets, color: Colors.white),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(
             child: Text(
               ticketId,
@@ -96,7 +97,7 @@ class HealthTicketCard extends StatelessWidget {
 
   Widget _cardBody(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -112,11 +113,11 @@ class HealthTicketCard extends StatelessWidget {
                 ? Colors.white12
                 : AppTheme.grey1,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Row(
             children: [
               _iconText(context, Icons.remove_red_eye, "View Profile"),
-              const SizedBox(width: 20),
+              SizedBox(width: 20),
               GestureDetector(
                 onTap: onActionTap,
                 child: _iconText(
@@ -127,7 +128,7 @@ class HealthTicketCard extends StatelessWidget {
                   isVaccination ? "Add Vaccine" : "Treatment",
                 ),
               ),
-              const Spacer(),
+              Spacer(),
               _statusChip(context),
             ],
           ),
@@ -138,7 +139,7 @@ class HealthTicketCard extends StatelessWidget {
 
   Widget _cardBottom(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+      padding: EdgeInsets.fromLTRB(14, 0, 14, 14),
       child: Row(
         children: [
           GestureDetector(
@@ -149,7 +150,7 @@ class HealthTicketCard extends StatelessWidget {
               "Ticket Details",
             ),
           ),
-          // const Spacer(),
+          // Spacer(),
           if (onAssignTap != null) ...[
             SizedBox(width: 20),
             ElevatedButton(
@@ -161,7 +162,7 @@ class HealthTicketCard extends StatelessWidget {
               ),
               onPressed: onAssignTap,
               child: Text(
-                "Assign",
+                "Assign".tr(ref),
                 style: TextStyle(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Theme.of(context).colorScheme.onSurface
@@ -207,7 +208,7 @@ class HealthTicketCard extends StatelessWidget {
     // Using the 'design' style for the specified statuses
     if (isSolid) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(20),
@@ -224,7 +225,7 @@ class HealthTicketCard extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 2),
       decoration: BoxDecoration(
         color: bgColor.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
@@ -246,7 +247,7 @@ class HealthTicketCard extends StatelessWidget {
               ? Theme.of(context).colorScheme.onSurface
               : AppTheme.darkPrimary,
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: 6),
         Text(
           text,
           style: TextStyle(

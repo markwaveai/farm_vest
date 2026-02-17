@@ -1,18 +1,19 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/core/widgets/employee_bottom_navigation.dart';
 import 'package:farm_vest/features/doctors/widgets/buffalo_profile_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-
-class BuffaloProfileScreen extends StatefulWidget {
-  const BuffaloProfileScreen({super.key});
+import 'package:farm_vest/core/localization/translation_helpers.dart';
+class BuffaloProfileScreen extends ConsumerStatefulWidget {
+  BuffaloProfileScreen({super.key});
 
   @override
   State<BuffaloProfileScreen> createState() => _BuffaloProfileScreenState();
 }
 
-class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
+class _BuffaloProfileScreenState extends ConsumerState<BuffaloProfileScreen> {
   int _currentIndex = 3;
 
   @override
@@ -21,7 +22,7 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          "Buffalo Profile",
+          "Buffalo Profile".tr(ref),
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -41,7 +42,7 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
           ),
         ],
       ),
-      body: const BuffaloProfileView(),
+      body: BuffaloProfileView(),
       bottomNavigationBar: EmployeeBottomNavigation(
         role: UserType.doctor,
         currentIndex: _currentIndex,
@@ -88,12 +89,12 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
               BoxShadow(
                 color: Colors.black.withOpacity(0.25),
                 blurRadius: 12,
-                offset: const Offset(0, 6),
+                offset: Offset(0, 6),
               ),
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(14),
             child: Image.asset(
               'assets/icons/home.png',
               color: Theme.of(context).brightness == Brightness.dark
