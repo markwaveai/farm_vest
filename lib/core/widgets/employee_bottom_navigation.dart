@@ -32,17 +32,17 @@ class EmployeeBottomNavigation extends StatelessWidget {
         return [
           NavItemData('Milk Entry', 'assets/icons/injection.png'),
           NavItemData('Alerts', 'assets/icons/Notification_icon.png'),
-          NavItemData('Stats', 'assets/icons/app_icon.png'),
+          NavItemData('Stats', 'assets/icons/stats.png'),
         ];
       case UserType.farmManager:
         return [
           NavItemData('Onboard', 'assets/icons/new_heat.png'),
           NavItemData('Allocation', 'assets/icons/swap.png'),
-          NavItemData('Reports', 'assets/icons/app_icon.png'),
+          NavItemData('Reports', 'assets/icons/stats.png'),
         ];
       case UserType.assistant:
         return [
-          NavItemData('Tasks', 'assets/icons/app_icon.png'),
+          NavItemData('Tasks', 'assets/icons/task.png'),
           NavItemData('Monitoring', 'assets/icons/heart.png'),
           NavItemData('Treatments', 'assets/icons/rx.png'),
         ];

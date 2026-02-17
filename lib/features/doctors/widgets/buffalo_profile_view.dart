@@ -699,6 +699,8 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
                       'age': animal.age?.toString(),
                       'breed': animal.breed,
                       'weight': null, // InvestorAnimal doesn't have weight yet
+                      'status': animal.status,
+                      'animal': animal,
                     },
                   );
                 },

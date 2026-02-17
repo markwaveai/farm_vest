@@ -1,6 +1,7 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/employee/new_supervisor/data/models/buffalo_telemetry_model.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/buffalo_telemetry_provider.dart';
+import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,6 +16,8 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
   final String? age;
   final String? breed;
   final String? weight;
+  final String? status;
+  final InvestorAnimal? animal;
 
   const BuffaloDeviceDetailsScreen({
     super.key,
@@ -25,6 +28,8 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     this.age,
     this.breed,
     this.weight,
+    this.animal,
+    this.status,
   });
 
   @override
@@ -48,7 +53,8 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
               _buildSliverAppBar(context, theme, isDark),
               SliverToBoxAdapter(
                 child: telemetryAsync.when(
-                  data: (data) => _buildBody(context, ref, data, theme, isDark),
+                  data: (data) =>
+                      _buildBody(context, ref, data, theme, isDark, animal),
                   loading: () => SizedBox(
                     height: 400,
                     child: Center(
@@ -84,14 +90,14 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
             ),
           ),
         ),
-        Positioned(
-          bottom: 100,
-          left: -50,
-          child: Opacity(
-            opacity: isDark ? 0.01 : 0.03,
-            child: Image.asset('assets/icons/sitting.png', width: 400),
-          ),
-        ),
+        // Positioned(
+        //   bottom: 100,
+        //   left: -50,
+        //   child: Opacity(
+        //     opacity: isDark ? 0.01 : 0.03,
+        //     child: Image.asset('assets/icons/sitting.png', width: 400),
+        //   ),
+        // ),
       ],
     );
   }
@@ -137,13 +143,14 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     BuffaloTelemetry data,
     ThemeData theme,
     bool isDark,
+    InvestorAnimal? animal,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           const SizedBox(height: 25),
-          _buildProfileHero(data, theme, isDark),
+          _buildProfileHero(data, theme, isDark, animal),
           const SizedBox(height: 25),
           _buildAlertSection(data, theme, isDark),
           const SizedBox(height: 30),
@@ -162,6 +169,7 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
     BuffaloTelemetry data,
     ThemeData theme,
     bool isDark,
+    InvestorAnimal? animal, // Optional in case it's not passed
   ) {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -201,7 +209,7 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Image.asset(
-                    'assets/icons/buffalo_icon.png',
+                    'assets/icons/Murrah_buffalo icon.png',
                     fit: BoxFit.contain,
                     color: theme.colorScheme.primary.withOpacity(0.8),
                   ),
@@ -212,13 +220,32 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      tagNumber ?? 'Buffalo Unit',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        color: theme.colorScheme.onSurface,
-                      ),
+                    Row(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Tag Number: ',
+                                style: TextStyle(
+                                  fontSize: 12, // smaller size
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              TextSpan(
+                                text: tagNumber ?? 'Buffalo Unit',
+                                style: TextStyle(
+                                  fontSize: 20, // Reduced from 22
+                                  fontWeight:
+                                      FontWeight.w700, // Reduced from w900
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -240,19 +267,19 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildModernStat('WEIGHT', weight ?? '540', 'kg', theme),
+              _buildModernStat('STATUS',status ?? animal?.status ?? 'N/A','',theme,),
               Container(
                 width: 1,
                 height: 30,
                 color: theme.dividerColor.withOpacity(0.2),
               ),
-              _buildModernStat('AGE', age ?? '4.2', 'Yrs', theme),
+              _buildModernStat('AGE',animal?.age?.toString() ?? age ?? 'N/A','M',theme,),
               Container(
                 width: 1,
                 height: 30,
                 color: theme.dividerColor.withOpacity(0.2),
               ),
-              _buildModernStat('BREED', breed ?? 'Murrah', '', theme),
+              _buildModernStat('BREED',animal?.breed ?? breed ?? 'N/A','',theme,),
             ],
           ),
         ],
@@ -273,7 +300,6 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
           style: TextStyle(
             color: theme.colorScheme.onSurface.withOpacity(0.4),
             fontSize: 10,
-            fontWeight: FontWeight.w900,
             letterSpacing: 1,
           ),
         ),
@@ -285,8 +311,8 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
                 text: value,
                 style: TextStyle(
                   color: theme.colorScheme.onSurface,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               TextSpan(
@@ -294,7 +320,7 @@ class BuffaloDeviceDetailsScreen extends ConsumerWidget {
                 style: TextStyle(
                   color: theme.colorScheme.onSurface.withOpacity(0.4),
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.normal, // Reduced from bold
                 ),
               ),
             ],

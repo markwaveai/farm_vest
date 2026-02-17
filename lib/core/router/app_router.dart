@@ -246,6 +246,10 @@ class AppRouter {
             beltId: extras['beltId'],
             rfid: extras['rfid'],
             tagNumber: extras['tagNumber'],
+            age: extras['age'],
+            breed: extras['breed'],
+            status: extras['status'],
+            animal: extras['animal'],
           );
         },
       ),
