@@ -171,6 +171,9 @@ class NotificationService {
     // Print FCM Token
     await printFCMToken();
 
+    // Subscribe to test IoT topic
+    // await subscribeToTopic('iot_alert'); // Removed static subscription
+
     // Start polling unread count every 30 seconds
     startPolling();
   }

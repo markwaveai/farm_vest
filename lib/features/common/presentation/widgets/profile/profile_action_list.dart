@@ -96,23 +96,41 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
   }
 
   void _showLogoutDialog() {
+    // 0. Safety check at entry
+    if (!mounted) return;
+
+    // 1. Capture notifier
+    final authNotifier = ref.read(authProvider.notifier);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      useRootNavigator: true, // Ensure we are using root navigator for dialog
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () async {
-              Navigator.pop(context); // Dismiss dialog
-              await ref.read(authProvider.notifier).logout();
-              if (mounted) {
-                context.go('/login');
-              }
+            onPressed: () {
+              // 1. Close dialog immediately
+              Navigator.of(dialogContext).pop();
+
+              // 2. Perform logout (Fire and forget style to avoid blocking)
+              // We handle the async operation without awaiting it in the UI thread
+              // to prevent keeping the widget 'alive' longer than needed if it's unmounting.
+              authNotifier
+                  .logout()
+                  .then((_) {
+                    if (mounted) {
+                      context.go('/login');
+                    }
+                  })
+                  .catchError((e) {
+                    debugPrint("Logout error: $e");
+                  });
             },
             child: const Text(
               'Logout',
@@ -136,6 +154,7 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (context) => AlertDialog(
         title: const Text('Delete Account'),
         content: const Text(
@@ -162,12 +181,17 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
   }
 
   void _showSwitchRoleBottomSheet() {
+    if (!mounted) return;
+
     final availableRoles = ref.read(authProvider).availableRoles;
     final currentRole = ref.read(authProvider).role;
+    // Capture notifier early for safety
+    final authNotifier = ref.read(authProvider.notifier);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -196,30 +220,29 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
                   child: ListTile(
                     onTap: isSelected
                         ? null
-                        : () async {
-                            Navigator.pop(context);
-                            await ref
-                                .read(authProvider.notifier)
-                                .selectRole(role);
+                        : () {
+                            Navigator.of(context).pop();
 
-                            if (!mounted) return;
-                            switch (role) {
-                              case UserType.farmManager:
-                                context.go('/farm-manager-dashboard');
-                                break;
-                              case UserType.supervisor:
-                                context.go('/supervisor-dashboard');
-                                break;
-                              case UserType.doctor:
-                                context.go('/doctor-dashboard');
-                                break;
-                              case UserType.assistant:
-                                context.go('/assistant-dashboard');
-                                break;
-                              case UserType.customer:
-                                context.go('/customer-dashboard');
-                                break;
-                            }
+                            authNotifier.selectRole(role).then((_) {
+                              if (!mounted) return;
+                              switch (role) {
+                                case UserType.farmManager:
+                                  context.go('/farm-manager-dashboard');
+                                  break;
+                                case UserType.supervisor:
+                                  context.go('/supervisor-dashboard');
+                                  break;
+                                case UserType.doctor:
+                                  context.go('/doctor-dashboard');
+                                  break;
+                                case UserType.assistant:
+                                  context.go('/assistant-dashboard');
+                                  break;
+                                case UserType.customer:
+                                  context.go('/customer-dashboard');
+                                  break;
+                              }
+                            });
                           },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

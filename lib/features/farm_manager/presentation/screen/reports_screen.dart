@@ -33,7 +33,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final milkReportState = ref.watch(milkReportProvider);
+    // final milkReportState = ref.watch(milkReportProvider); // Removed redundant watch
 
     return DefaultTabController(
       length: 2,
@@ -48,7 +48,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () {
-                    ref.read(milkReportProvider.notifier).clear();
+                    // ref.read(milkReportProvider.notifier).clear(); // Handled by autoDispose
                     if (context.canPop()) {
                       context.pop();
                     } else {
@@ -461,7 +461,6 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
   @override
   void dispose() {
-    ref.read(milkReportProvider.notifier).clear();
     _dateController.dispose();
     super.dispose();
   }

@@ -73,7 +73,7 @@ class UserModel {
     }
 
     return UserModel(
-      id: json['id']?.toString() ?? '',
+      id: json['id']?.toString() ?? json['user_id']?.toString() ?? '',
       mobile: json['mobile']?.toString() ?? '',
       firstName: json['first_name']?.toString() ?? '',
       lastName: json['last_name']?.toString() ?? '',

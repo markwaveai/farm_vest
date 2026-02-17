@@ -149,37 +149,9 @@ class AuthController extends Notifier<AuthState> {
       final loginResponse = await _repository.loginWithOtp(mobileNumber, otp);
       await _repository.saveToken(loginResponse.accessToken);
 
-      final availableRoles = loginResponse.roles.isNotEmpty
-          ? loginResponse.roles
-                .map((r) => UserType.fromString(r))
-                .toSet()
-                .toList()
-          : [UserType.customer];
-
-      final role = availableRoles.first;
-
-      state = state.copyWith(
-        isLoading: false,
-        role: role,
-        availableRoles: availableRoles,
-      );
-
-      // Fetch user data immediately after login to populate the session
-      try {
-        final userData = await _repository.getUserData(mobileNumber);
-        state = state.copyWith(userData: userData);
-      } catch (e) {
-        debugPrint("Error fetching user data after login: $e");
-      }
-
-      await _repository.saveUserSession(
-        mobile: mobileNumber,
-        roles: availableRoles,
-        activeRole: role,
-        userData: state.userData,
-      );
-
-      return {'roles': availableRoles, 'userData': null};
+      // Delegate session setup and FCM subscription to completeLoginWithData
+      // This ensures we subscribe to IoT topics correctly
+      return await completeLoginWithData(mobileNumber);
     } on AppException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
       return null;
@@ -364,8 +336,26 @@ class AuthController extends Notifier<AuthState> {
 
     // Subscribe to user topic for notifications
     if (userData != null) {
+      final notificationService = NotificationService();
+
+      // 1. Subscribe to User ID topic (Unique to this user)
+      // This is the CRITICAL one for targeting a "particular supervisor"
+      // The IoT team should send to topic: "user_<USER_ID>"
       debugPrint('Subscribing to topic: user_${userData.id}');
-      await NotificationService().subscribeToTopic('user_${userData.id}');
+      await notificationService.subscribeToTopic('user_${userData.id}');
+
+      // 2. Subscribe to Role topics (e.g., role_supervisor, role_doctor)
+      // This allows sending notifications to ALL Supervisors or ALL Doctors
+      for (final role in availableRoles) {
+        final topic = 'role_${role.name}'; // e.g. role_supervisor
+        debugPrint('Subscribing to topic: $topic');
+        await notificationService.subscribeToTopic(topic);
+      }
+
+      // 3. Subscribe to Test IoT topic (Safety check ensuring it's always subbed)
+      await notificationService.subscribeToTopic(
+        '${userData.id}_farmvest_iotalerts',
+      );
 
       // Register FCM Token with backend
       try {
@@ -394,6 +384,11 @@ class AuthController extends Notifier<AuthState> {
         ) {
           debugPrint('Error unsubscribing from topic: $e');
         });
+        NotificationService()
+            .unsubscribeFromTopic('${userId}_farmvest_iotalerts')
+            .catchError((e) {
+              debugPrint('Error unsubscribing from topic: $e');
+            });
       }
 
       // Clear state and session

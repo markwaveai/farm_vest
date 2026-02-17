@@ -3,6 +3,7 @@ import 'package:farm_vest/core/services/employee_api_services.dart';
 import 'package:farm_vest/core/services/farms_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:state_notifier/state_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:farm_vest/core/services/farm_manager_api_services.dart';
 import 'package:farm_vest/core/services/milk_api_services.dart';
@@ -46,7 +47,7 @@ class StaffListState {
 
 class StaffListNotifier extends StateNotifier<StaffListState> {
   StaffListNotifier() : super(StaffListState()) {
-    loadStaff();
+    Future.microtask(() => loadStaff());
   }
 
   Future<void> loadStaff() async {
@@ -292,6 +293,7 @@ class MilkReportState {
 
 class MilkReportNotifier extends StateNotifier<MilkReportState> {
   MilkReportNotifier() : super(MilkReportState.initial());
+
   void clear() {
     state = MilkReportState.initial();
   }
@@ -352,6 +354,6 @@ class MilkReportNotifier extends StateNotifier<MilkReportState> {
 }
 
 final milkReportProvider =
-    StateNotifierProvider<MilkReportNotifier, MilkReportState>(
+    StateNotifierProvider.autoDispose<MilkReportNotifier, MilkReportState>(
       (ref) => MilkReportNotifier(),
     );
