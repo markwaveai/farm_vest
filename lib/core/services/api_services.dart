@@ -296,9 +296,14 @@ class ApiServices {
     required String orderId,
     required String status,
     required List<dynamic> buffaloIds,
-    required String adminMobile,
+    // required String adminMobile,
   }) async {
     try {
+      final adminMobile = await fetchAdminMobile();
+      if (adminMobile == null) {
+        debugPrint("Admin mobile not found.");
+        return;
+      }
       final uri = Uri.parse(
         "${AppConstants.animalKartApiUrl}/order-tracking/update-status",
       );
@@ -311,6 +316,12 @@ class ApiServices {
 
       debugPrint('Updating AnimalKart status: $uri');
       debugPrint('Status Body: ${jsonEncode(body)}');
+      debugPrint(" URL: $uri");
+      debugPrint(" Headers:");
+      debugPrint("   Content-Type: ${AppConstants.applicationJson}");
+      debugPrint("   x-admin-mobile: $adminMobile");
+
+      debugPrint("🔹 Body: ${jsonEncode(body)}");
 
       final response = await http.post(
         uri,
@@ -320,7 +331,9 @@ class ApiServices {
         },
         body: jsonEncode(body),
       );
+      debugPrint(" Status Code: ${response.statusCode}");
 
+      debugPrint('Response: ${response.body}');
       if (response.statusCode >= 200 && response.statusCode < 300) {
         debugPrint('Successfully updated AnimalKart status');
       } else {
@@ -332,5 +345,35 @@ class ApiServices {
     } catch (e) {
       debugPrint('Error updating AnimalKart status: $e');
     }
+  }
+
+  static Future<String?> fetchAdminMobile() async {
+    try {
+      final uri = Uri.parse(
+        "${AppConstants.animalKartApiUrl}/users/admins/list",
+      );
+
+      debugPrint("Fetching admin list: $uri");
+
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': AppConstants.applicationJson},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data is List && data.isNotEmpty) {
+          final firstAdmin = data.first;
+          return firstAdmin['mobile'];
+        }
+      } else {
+        debugPrint("Failed to fetch admin list: ${response.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("Error fetching admin list: $e");
+    }
+
+    return null;
   }
 }

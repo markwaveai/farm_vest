@@ -336,7 +336,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
           orderId: order.order.id,
           status: "DELIVERED",
           buffaloIds: idsToUpdate,
-          adminMobile: order.investor.mobile,
+          // adminMobile: order.investor.mobile,
         );
 
         final animalsList = List<Map<String, dynamic>>.from(
