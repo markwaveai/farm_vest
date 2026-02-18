@@ -1,4 +1,5 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:flutter/material.dart';
 
 class VisitLegend extends StatelessWidget {
@@ -16,13 +17,13 @@ class VisitLegend extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildLegendItem(
-            "Available",
+            "Available".tr,
             AppTheme.white,
             borderColor: AppTheme.successGreen.withOpacity(0.5),
           ),
-          _buildLegendItem("Selected", AppTheme.successGreen),
+          _buildLegendItem("Selected".tr, AppTheme.successGreen),
           _buildLegendItem(
-            "Expired",
+            "Expired".tr,
             Colors.grey.shade600,
             borderColor: Colors.transparent,
           ),

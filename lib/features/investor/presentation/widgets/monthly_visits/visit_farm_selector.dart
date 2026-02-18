@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/investor/data/models/visit_model.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,7 +36,7 @@ class VisitFarmSelector extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Select Farm",
+            "Select Farm".tr,
             style: AppTheme.bodySmall.copyWith(
               color: Colors.grey[600],
               fontWeight: FontWeight.bold,
@@ -45,7 +46,7 @@ class VisitFarmSelector extends StatelessWidget {
           farmsAsync.when(
             data: (farms) {
               if (farms.isEmpty) {
-                return const Text("No farms found assigned to you.");
+                return Text("No farms found assigned to you.".tr);
               }
 
               return Container(
@@ -58,12 +59,12 @@ class VisitFarmSelector extends StatelessWidget {
                   child: DropdownButton<InvestorFarm>(
                     value: selectedFarm,
                     isExpanded: true,
-                    hint: const Text("Choose a farm"),
+                    hint: Text("Choose a farm".tr),
                     items: farms.map((farm) {
                       return DropdownMenuItem(
                         value: farm,
                         child: Text(
-                          "${farm.farmName} (${farm.location}) - ${farm.investorBuffaloesCount} Animals",
+                          "${farm.farmName} (${farm.location}) - ${farm.investorBuffaloesCount} ${"Animals".tr}",
                           style: AppTheme.bodyMedium,
                         ),
                       );
@@ -73,7 +74,11 @@ class VisitFarmSelector extends StatelessWidget {
                 ),
               );
             },
-            error: (e, s) => Text("Failed to load farms: $e"),
+            error: (e, s) => Text(
+              "Failed to load farms: @message".trParams({
+                'message': e.toString(),
+              }),
+            ),
             loading: () => const LinearProgressIndicator(),
           ),
         ],

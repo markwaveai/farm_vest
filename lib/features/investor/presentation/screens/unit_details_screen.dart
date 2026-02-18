@@ -163,7 +163,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                           decoration: BoxDecoration(
                             color:
                                 (animal?.healthStatus.toLowerCase() ==
-                                    'healthy')
+                                    ('healthy'.tr))
                                 ? AppTheme.successGreen
                                 : AppTheme.warningOrange,
                             borderRadius: BorderRadius.circular(

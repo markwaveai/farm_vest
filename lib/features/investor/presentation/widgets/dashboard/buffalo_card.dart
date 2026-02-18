@@ -460,7 +460,7 @@ class BuffaloCard extends StatelessWidget {
       onTap: () async {
         await Clipboard.setData(ClipboardData(text: rfid.toUpperCase()));
         Fluttertoast.showToast(
-          msg: "ID Copied",
+          msg: "ID Copied".tr,
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.black.withOpacity(0.8),

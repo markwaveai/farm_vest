@@ -1,4 +1,6 @@
+import 'package:farm_vest/core/services/localization_service.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -31,7 +33,7 @@ class VisitTimeGrid extends StatelessWidget {
             Icon(Icons.event_busy, size: 48, color: Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
-              "No slots available",
+              "No slots available".tr,
               style: TextStyle(color: Colors.grey[600]),
             ),
           ],
@@ -84,7 +86,10 @@ class VisitTimeGrid extends StatelessWidget {
         String displayTime = time;
         try {
           final dt = DateFormat("HH:mm:ss").parse(time);
-          displayTime = DateFormat("h:mm a").format(dt);
+          displayTime = DateFormat(
+            "h:mm a",
+            LocalizationService.currentLanguage,
+          ).format(dt);
         } catch (e) {
           // keep as is
         }
@@ -111,7 +116,7 @@ class VisitTimeGrid extends StatelessWidget {
               ? (hasBookedThisMonth && !isExpired
                     ? () => ToastUtils.showInfo(
                         context,
-                        "You have already booked a slot for this month.",
+                        "You have already booked a slot for this month.".tr,
                       )
                     : null)
               : () {

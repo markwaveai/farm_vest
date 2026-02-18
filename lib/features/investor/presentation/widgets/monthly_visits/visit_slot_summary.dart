@@ -1,4 +1,6 @@
+import 'package:farm_vest/core/services/localization_service.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/features/investor/data/models/visit_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,7 +60,7 @@ class VisitSlotSummary extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Slots Summary',
+                              'Slots Summary'.tr,
                               style: AppTheme.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w800,
                               ),
@@ -67,7 +69,10 @@ class VisitSlotSummary extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          DateFormat('MMMM d, yyyy').format(selectedDate),
+                          DateFormat(
+                            'MMMM d, yyyy',
+                            LocalizationService.currentLanguage,
+                          ).format(selectedDate),
                           style: AppTheme.bodySmall.copyWith(
                             color: Colors.grey[700],
                             fontWeight: FontWeight.w600,
@@ -82,7 +87,7 @@ class VisitSlotSummary extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildSummaryPill(
-                        title: 'Available Slots',
+                        title: 'Available Slots'.tr,
                         value: totalAvailable.toString(),
                         color: Colors.green,
                         icon: Icons.event_available,
@@ -92,8 +97,8 @@ class VisitSlotSummary extends StatelessWidget {
                     if (hasBooked)
                       Expanded(
                         child: _buildSummaryPill(
-                          title: 'Status',
-                          value: 'Booked',
+                          title: 'Status'.tr,
+                          value: 'Booked'.tr,
                           color: AppTheme.primary,
                           icon: Icons.check_circle,
                         ),
@@ -101,8 +106,8 @@ class VisitSlotSummary extends StatelessWidget {
                     else
                       Expanded(
                         child: _buildSummaryPill(
-                          title: 'Status',
-                          value: 'Open',
+                          title: 'Status'.tr,
+                          value: 'Open'.tr,
                           color: Colors.orange,
                           icon: Icons.event,
                         ),
