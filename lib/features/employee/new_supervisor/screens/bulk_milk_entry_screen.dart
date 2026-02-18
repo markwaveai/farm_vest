@@ -91,7 +91,6 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
             return !type.contains('calf');
           }).toList();
 
-          // Filter Logic
           final query = _searchController.text.trim().toLowerCase();
           final filteredAnimals = milkingAnimals.where((a) {
             if (query.isEmpty) return true;
@@ -101,37 +100,19 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
             return id.contains(query) || tag.contains(query);
           }).toList();
 
-          return Column(
-            children: [
-              _buildControlPanel(milkingAnimals.length),
-              if (!_isDistributedMode)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search by ID or Tag',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                      ),
-                    ),
-                    onChanged: (v) => setState(() {}),
-                  ),
-                ),
-              Expanded(
-                child: _isDistributedMode
-                    ? _buildDistributedView(milkingAnimals.length)
-                    : _buildDetailedList(filteredAnimals),
-              ),
-              _buildSubmitButton(milkingAnimals),
-            ],
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildControlPanel(milkingAnimals.length),
+                if (_isDistributedMode)
+                  _buildDistributedView(milkingAnimals.length)
+                else
+                  _buildDetailedList(filteredAnimals),
+                const SizedBox(height: 24),
+                _buildSubmitButton(milkingAnimals),
+                const SizedBox(height: 40),
+              ],
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -151,7 +132,6 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Date & Session Row
           Row(
             children: [
               Expanded(
@@ -205,7 +185,6 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          // Toggle Mode
           Container(
             decoration: BoxDecoration(
               color: Theme.of(context).dividerColor.withOpacity(0.05),
@@ -214,30 +193,6 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
             ),
             child: Row(
               children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _isDistributedMode = false),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: !_isDistributedMode
-                            ? AppTheme.primary
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'Per Animal',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: !_isDistributedMode
-                              ? Colors.white
-                              : Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
                 Expanded(
                   child: GestureDetector(
                     onTap: () => setState(() => _isDistributedMode = true),
@@ -255,9 +210,7 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
                         style: TextStyle(
                           color: _isDistributedMode
                               ? Colors.white
-                              : Theme.of(
-                                  context,
-                                ).colorScheme.onSurface, // Fixed color logic
+                              : Theme.of(context).colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -283,43 +236,89 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
   }
 
   Widget _buildDistributedView(int count) {
-    return SingleChildScrollView(
-      // Allow scrolling if keyboard opens
+    return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          const Icon(Icons.hub, size: 48, color: Colors.orange),
-          const SizedBox(height: 16),
+          const Icon(Icons.hub, size: 64, color: Colors.orange),
+          const SizedBox(height: 24),
           Text(
             "Enter Total Shed Production",
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
               color: Theme.of(context).colorScheme.onSurface,
+              letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             "This will be distributed equally among $count animals.\nAvg: ${_calculateAvg(count)} L/animal",
             textAlign: TextAlign.center,
-            style: TextStyle(color: Theme.of(context).hintColor),
-          ),
-          const SizedBox(height: 24),
-          TextField(
-            controller: _totalShedController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Theme.of(context).hintColor,
+              fontSize: 14,
+              height: 1.5,
             ),
-            decoration: const InputDecoration(
-              suffixText: 'Liters',
-              border: OutlineInputBorder(),
-              hintText: '0.0',
+          ),
+          const SizedBox(height: 32),
+          Container(
+            width: 250,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primary.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-            onChanged: (v) => setState(() {}), // Refresh UI for avg calculation
+            child: TextField(
+              controller: _totalShedController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primary,
+                letterSpacing: 1,
+              ),
+              decoration: InputDecoration(
+                suffixText: 'Liters',
+                suffixStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
+                hintText: '0.0',
+                hintStyle: TextStyle(color: AppTheme.primary.withOpacity(0.3)),
+                filled: true,
+                fillColor: AppTheme.primary.withOpacity(0.05),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: AppTheme.primary.withOpacity(0.2),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: AppTheme.primary.withOpacity(0.2),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: const BorderSide(
+                    color: AppTheme.primary,
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 20),
+              ),
+              onChanged: (v) => setState(() {}),
+            ),
           ),
         ],
       ),
@@ -333,96 +332,144 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
   }
 
   Widget _buildDetailedList(List<InvestorAnimal> animals) {
-    return ListView.separated(
+    return Padding(
       padding: const EdgeInsets.all(16),
-      itemCount: animals.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final animal = animals[index];
-        final id =
-            animal.internalId ??
-            0; // Fallback to 0 if internalId is null, verify backend
-        final displayId = animal.animalId.isNotEmpty
-            ? animal.animalId
-            : animal.earTagId ?? 'N/A';
-        final breed = animal.breed ?? 'Unknown';
+      child: Column(
+        children: animals.map((animal) {
+          final id = animal.internalId ?? 0;
+          final displayId = animal.animalId.isNotEmpty
+              ? animal.animalId
+              : animal.earTagId ?? 'N/A';
+          final breed = animal.breed ?? 'Unknown';
 
-        if (!_quantityControllers.containsKey(id)) {
-          _quantityControllers[id] = TextEditingController();
-        }
+          if (!_quantityControllers.containsKey(id)) {
+            _quantityControllers[id] = TextEditingController();
+          }
 
-        return Card(
-          elevation: 2,
-          color: Theme.of(context).cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: AppTheme.primary.withOpacity(0.1),
-                  child: Text(
-                    displayId.toString().substring(
-                      0,
-                      min(3, displayId.toString().length),
-                    ),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primary,
-                    ),
-                  ),
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: Card(
+              elevation: 4,
+              shadowColor: Colors.black.withOpacity(0.1),
+              color: Theme.of(context).cardColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "ID: $displayId",
-                        style: TextStyle(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: AppTheme.primary.withOpacity(0.1),
+                      child: Text(
+                        displayId.toString().substring(
+                          0,
+                          min(3, displayId.toString().length),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: AppTheme.primary,
                         ),
                       ),
-                      Text(
-                        breed,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).hintColor,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "ID: $displayId",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            breed,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Theme.of(context).hintColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      width: 110,
+                      height: 60, // keeps field compact & premium
+                      child: TextField(
+                        controller: _quantityControllers[id],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: 'Liters',
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).hintColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          floatingLabelStyle: const TextStyle(
+                            color: AppTheme.primary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+
+                          // 🔹 Grey filled background
+                          filled: true,
+                          fillColor: Colors.grey.shade200,
+
+                          // 🔹 No border by default
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+
+                          // 🔹 Highlight on focus
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppTheme.primary,
+                              width: 2,
+                            ),
+                          ),
+
+                          // 🔹 Balanced padding
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
+
+                          // 🔹 Bigger & clearer unit
+                          suffixText: 'L',
+                          suffixStyle: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primary,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 100,
-                  child: TextField(
-                    controller: _quantityControllers[id],
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
                     ),
-                    decoration: InputDecoration(
-                      labelText: 'Liters',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        }).toList(),
+      ),
     );
   }
 

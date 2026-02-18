@@ -420,6 +420,7 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
 
       // Type-specific validations
       if (animal.type == 'BUFFALO') {
+        if (animal.neckbandId.trim().isEmpty) return false;
         if (animal.breedName.trim().isEmpty) return false;
         if (animal.status.trim().isEmpty) return false;
       } else if (animal.type == 'CALF') {
@@ -443,10 +444,13 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
     }
 
     // Validate all animal entries
+    int buffaloSeq = 0;
+    int calfSeq = 0;
     final allAnimals = [...buffaloEntries, ...calfEntries];
     for (int i = 0; i < allAnimals.length; i++) {
       final animal = allAnimals[i];
-      final animalName = "${animal.type.toLowerCase()} #${i + 1}";
+      final int seq = animal.type == 'BUFFALO' ? ++buffaloSeq : ++calfSeq;
+      final animalName = "${animal.type.toLowerCase()} #$seq";
 
       if (animal.rfidTag.trim().isEmpty) {
         _showError('RFID Tag is required for $animalName');
@@ -479,6 +483,10 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
       }
 
       if (animal.type == 'BUFFALO') {
+        if (animal.neckbandId.trim().isEmpty) {
+          _showError('Neckband ID is required for $animalName');
+          return;
+        }
         if (animal.breedName.trim().isEmpty) {
           _showError('Breed Name is required for $animalName');
           return;

@@ -68,6 +68,12 @@ class _NewSupervisorDashboardState
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         toolbarHeight: showProfileInfo ? screenWidth * 0.22 : 64,
         automaticallyImplyLeading: false,
+        leading: _currentIndex != 4
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                onPressed: () => setState(() => _currentIndex = 4),
+              )
+            : null,
         centerTitle: false,
         title: showProfileInfo
             ? Column(
@@ -248,7 +254,7 @@ class _NewSupervisorDashboardState
                 color: AppTheme.lightSecondary,
                 //color: AppTheme.errorRed,
                 type: DashboardCardType.priority,
-                onTap: () {},
+                onTap: () => setState(() => _currentIndex = 0),
                 child: _buildStatContent(
                   context,
                   Icons.water_drop,

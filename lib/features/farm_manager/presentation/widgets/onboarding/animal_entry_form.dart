@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:farm_vest/core/utils/image_helper_compressor.dart';
 import 'package:farm_vest/core/services/biometric_service.dart';
 
 import 'package:farm_vest/core/theme/app_theme.dart';
@@ -43,17 +44,29 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
   }
 
   Future<void> _uploadAndAttachImage(File file) async {
+    // Compress image before uploading
+    File fileToUpload = file;
+    try {
+      fileToUpload = await ImageCompressionHelper.getCompressedImageIfNeeded(
+        file,
+        maxSizeKB: 250,
+        isDocument: false, // Animal photos are regular photos
+      );
+    } catch (e) {
+      debugPrint("Compression error: $e");
+    }
+
     // Add temporary image with uploading state
     setState(() {
       widget.entry.images = [
         ...widget.entry.images,
-        DashboardImage(localFile: file, isUploading: true),
+        DashboardImage(localFile: fileToUpload, isUploading: true),
       ];
     });
     widget.onUpdate();
 
     try {
-      final url = await AuthRepository.uploadImage(file);
+      final url = await AuthRepository.uploadImage(fileToUpload);
       if (url != null) {
         if (mounted) {
           setState(() {
@@ -334,10 +347,17 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     children: [
                       Expanded(
                         child: ModernTextField(
-                          label: 'Neckband ID',
+                          label: isBuffalo ? 'Neckband ID *' : 'Neckband ID',
                           hint: 'e.g. NB-8877',
                           value: animal.neckbandId,
                           icon: Icons.link_rounded,
+                          validator: (val) {
+                            if (isBuffalo &&
+                                (val == null || val.trim().isEmpty)) {
+                              return 'Neckband ID is required';
+                            }
+                            return null;
+                          },
                           onChanged: (val) {
                             setState(() => animal.neckbandId = val);
                             widget.onUpdate();
@@ -367,12 +387,15 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                   children: [
                     Expanded(
                       child: ModernTextField(
-                        label: 'RFID Tag',
+                        label: 'RFID Tag *',
                         hint: 'RFID-XXXX',
                         value: animal.rfidTag,
                         icon: Icons.qr_code_scanner_rounded,
                         maxLength: 15,
                         textCapitalization: TextCapitalization.characters,
+                        validator: (val) => (val == null || val.trim().isEmpty)
+                            ? 'RFID Tag is required'
+                            : null,
                         onChanged: (val) {
                           setState(() => animal.rfidTag = val);
                           widget.onUpdate();
@@ -382,12 +405,15 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     const SizedBox(width: 20),
                     Expanded(
                       child: ModernTextField(
-                        label: 'Ear Tag',
+                        label: 'Ear Tag *',
                         hint: 'ET-XXXX',
                         value: animal.earTag,
                         icon: Icons.local_offer_outlined,
                         maxLength: 12,
                         textCapitalization: TextCapitalization.characters,
+                        validator: (val) => (val == null || val.trim().isEmpty)
+                            ? 'Ear Tag is required'
+                            : null,
                         onChanged: (val) {
                           setState(() => animal.earTag = val);
                           widget.onUpdate();
@@ -405,11 +431,15 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     if (isBuffalo) ...[
                       Expanded(
                         child: ModernTextField(
-                          label: 'Breed Name',
+                          label: 'Breed Name *',
                           hint: 'e.g. Murrah',
                           value: animal.breedName,
                           icon: Icons.pets_outlined,
                           textCapitalization: TextCapitalization.characters,
+                          validator: (val) =>
+                              (val == null || val.trim().isEmpty)
+                              ? 'Breed Name is required'
+                              : null,
                           onChanged: (val) {
                             setState(() => animal.breedName = val);
                             widget.onUpdate();
@@ -420,7 +450,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                     ],
                     Expanded(
                       child: ModernTextField(
-                        label: 'Age (Months)',
+                        label: 'Age (Months) *',
                         hint: isBuffalo ? '36' : '6',
                         value: animal.ageMonths > 0
                             ? animal.ageMonths.toString()
@@ -463,7 +493,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Status',
+                                'Status *',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -541,7 +571,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Health Status',
+                              'Health Status *',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,

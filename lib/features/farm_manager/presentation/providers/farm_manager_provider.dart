@@ -1,4 +1,5 @@
 import 'package:farm_vest/core/services/employee_api_services.dart';
+import 'package:farm_vest/core/utils/image_helper_compressor.dart';
 import 'package:farm_vest/core/services/investor_api_services.dart';
 import 'package:farm_vest/core/services/sheds_api_services.dart';
 import 'package:farm_vest/core/services/farms_api_services.dart';
@@ -6,6 +7,7 @@ import 'package:farm_vest/features/farm_manager/data/models/farm_model.dart';
 import 'package:farm_vest/core/services/tickets_api_services.dart';
 import 'package:farm_vest/features/auth/data/repositories/auth_repository.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import 'package:farm_vest/core/services/api_services.dart';
@@ -134,12 +136,19 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
     final List<XFile>? pickedImages = await _picker.pickMultiImage();
     if (pickedImages == null || pickedImages.isEmpty) return;
 
-    List<DashboardImage> newImages = pickedImages
-        .map(
-          (xFile) =>
-              DashboardImage(localFile: File(xFile.path), isUploading: true),
-        )
-        .toList();
+    List<DashboardImage> newImages = [];
+    for (var xFile in pickedImages) {
+      File file = File(xFile.path);
+      try {
+        file = await ImageCompressionHelper.getCompressedImageIfNeeded(
+          file,
+          isDocument: false,
+        );
+      } catch (e) {
+        debugPrint("Compression error: $e");
+      }
+      newImages.add(DashboardImage(localFile: file, isUploading: true));
+    }
 
     state = state.copyWith(images: [...state.images, ...newImages]);
 
@@ -154,10 +163,17 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
     );
     if (pickedImage == null) return;
 
-    final newImage = DashboardImage(
-      localFile: File(pickedImage.path),
-      isUploading: true,
-    );
+    File file = File(pickedImage.path);
+    try {
+      file = await ImageCompressionHelper.getCompressedImageIfNeeded(
+        file,
+        isDocument: false,
+      );
+    } catch (e) {
+      debugPrint("Compression error: $e");
+    }
+
+    final newImage = DashboardImage(localFile: file, isUploading: true);
 
     state = state.copyWith(images: [...state.images, newImage]);
 
@@ -217,14 +233,15 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
 
       // Calculate approximate DOB from Age (Months) if DOB is not provided
       // String dateOfBirth = animal.dob;
-      // if (dateOfBirth.trim().isEmpty && animal.ageMonths > 0) {
-      //   final now = DateTime.now();
-      //   final approximateDob = now.subtract(
-      //     Duration(days: animal.ageMonths * 30),
-      //   );
-      //   dateOfBirth =
-      //       "${approximateDob.year}-${approximateDob.month.toString().padLeft(2, '0')}-${approximateDob.day.toString().padLeft(2, '0')}";
-      // }
+      String dateOfBirth = animal.dob;
+      if (dateOfBirth.trim().isEmpty && animal.ageMonths > 0) {
+        final now = DateTime.now();
+        final approximateDob = now.subtract(
+          Duration(days: (animal.ageMonths * 30.44).round()),
+        );
+        dateOfBirth =
+            "${approximateDob.year}-${approximateDob.month.toString().padLeft(2, '0')}-${approximateDob.day.toString().padLeft(2, '0')}";
+      }
 
       final animalData = {
         "animal_type": animal.type,
@@ -235,21 +252,28 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
             ? animal.earTag
             : 'ET-${animal.earTag}',
         "age_months": animal.ageMonths,
+        "age": (animal.ageMonths / 12).floor(),
+        "date_of_birth": dateOfBirth.isNotEmpty ? dateOfBirth : null,
         "health_status": animal.healthStatus.toUpperCase(),
         "images": imageUrls,
+        "row_number": "",
+        "parking_id": "",
+        "neckband_id": animal.neckbandId,
       };
 
       if (animal.type == 'BUFFALO') {
-        animalData["tag_number"] = animal.tagNumber;
+        animalData["tag_number"] =
+            int.tryParse(animal.tagNumber.replaceAll(RegExp(r'[^0-9]'), '')) ??
+            0;
         animalData["status"] = animal.status;
         animalData["breed_id"] = animal.breedId.isNotEmpty
             ? animal.breedId
             : '';
         animalData["breed_name"] = animal.breedName;
-        animalData["animalkart_buffalo_id"] = animal.animalId;
-        if (animal.neckbandId.isNotEmpty) {
-          animalData["neckband_id"] = animal.neckbandId;
-        }
+        animalData["animalkart_buffalo_id"] = animal.animalId.toString();
+      } else if (animal.type == 'CALF') {
+        animalData["parent_animal_id"] = animal.parentAnimalId;
+        animalData["tag_number"] = 0; // Default tag number for calves
       }
 
       return animalData;
@@ -257,7 +281,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
 
     final payload = {
       "investor_details": {
-        "investor_id": order.investor.id,
+        "investor_id": order.investor.id.toString(),
         "full_name": order.investor.fullName,
         "mobile": order.investor.mobile,
         "email": order.investor.email,
@@ -281,7 +305,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
         },
       },
       "investment_details": {
-        "animalkart_order_id": order.order.id,
+        "animalkart_order_id": order.order.id.toString(),
         "is_cpf_paid": isCpfPaid,
         "order_date": order.order.placedAt,
         "total_investment_amount": order.order.totalCost,
@@ -384,7 +408,9 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
 
   Future<bool> allocateAnimals({
     required String shedId,
-    required List<Map<String, dynamic>> allocations,
+    required String rowNumber,
+    required String animalId,
+    required String parkingId,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
@@ -394,23 +420,26 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       return false;
     }
 
-    // final payload = {"allocations": allocations};
-
     try {
       final success = await ShedsApiServices.allocateAnimals(
         shedId: shedId,
-        allocations: allocations,
+        rowNumber: rowNumber,
+        animalId: animalId,
+        parkingId: parkingId,
         token: token,
       );
 
       if (success) {
-        // Remove only the allocated animals from the list
-        final allocatedAnimalIds = allocations
-            .map((a) => a['animal_id'].toString())
-            .toSet();
-        final remainingAnimals = state.onboardedAnimalIds
-            .where((id) => !allocatedAnimalIds.contains(id.toString()))
-            .toList();
+        // Remove only the allocated animal from the list
+        final remainingAnimals = state.onboardedAnimalIds.where((animal) {
+          final id = (animal is Map)
+              ? (animal['rfid_tag'] ??
+                    animal['rfid'] ??
+                    animal['rfid_tag_number'] ??
+                    animal['animal_id'])
+              : animal.toString();
+          return id.toString() != animalId;
+        }).toList();
 
         state = state.copyWith(
           onboardedAnimalIds: remainingAnimals,

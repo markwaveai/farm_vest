@@ -152,31 +152,53 @@ class ShedsApiServices {
   static Future<bool> allocateAnimals({
     required String token,
     required String shedId,
-    required List<Map<String, dynamic>> allocations,
+    required String rowNumber,
+    required String animalId,
+    required String parkingId,
   }) async {
     try {
+      final body = {
+        "animal_id": int.tryParse(animalId) ?? animalId,
+        "row_number": rowNumber.toString(),
+        "parking_id": parkingId,
+      };
+      debugPrint("Allocation Payload: ${jsonEncode(body)}");
       final response = await http.post(
         Uri.parse("${AppConstants.appLiveUrl}/animal/shed_allocation/$shedId"),
         headers: {
           HttpHeaders.authorizationHeader: 'Bearer $token',
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
         },
-        body: jsonEncode({"allocations": allocations}),
+        body: jsonEncode(body),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       }
+      debugPrint("Allocation Failed: ${response.statusCode} ${response.body}");
       final errorBody = jsonDecode(response.body);
-      throw ServerException(
-        errorBody['detail'] is Map
-            ? errorBody['detail']['message']
-            : errorBody['detail'],
-        statusCode: response.statusCode,
-      );
+      String errorMessage = 'Failed to allocate animals';
+
+      if (errorBody['detail'] != null) {
+        if (errorBody['detail'] is String) {
+          errorMessage = errorBody['detail'];
+        } else if (errorBody['detail'] is Map) {
+          errorMessage =
+              errorBody['detail']['message'] ?? errorBody['detail'].toString();
+        } else if (errorBody['detail'] is List) {
+          final List details = errorBody['detail'];
+          if (details.isNotEmpty && details[0] is Map) {
+            errorMessage = "${details[0]['msg']}: ${details[0]['loc']}";
+          } else {
+            errorMessage = details.toString();
+          }
+        }
+      }
+
+      throw ServerException(errorMessage, statusCode: response.statusCode);
     } catch (e) {
-      debugPrint("Allocation Error: $e");
-      throw AppException(e.toString());
+      debugPrint("Allocation Error Catch: $e");
+      rethrow;
     }
   }
 
@@ -228,6 +250,7 @@ class ShedsApiServices {
         },
         body: jsonEncode(body),
       );
+      debugPrint("Onboard Request Body: ${jsonEncode(body)}");
 
       if (response.statusCode == 401) {
         onUnauthorized?.call();
@@ -237,10 +260,29 @@ class ShedsApiServices {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return jsonDecode(response.body);
       }
-      return null;
+
+      debugPrint("Onboard Failed: ${response.statusCode} ${response.body}");
+      final errorBody = jsonDecode(response.body);
+      String errorMessage = 'Failed to onboard animal';
+
+      if (errorBody['detail'] != null) {
+        if (errorBody['detail'] is String) {
+          errorMessage = errorBody['detail'];
+        } else if (errorBody['detail'] is Map) {
+          errorMessage =
+              errorBody['detail']['message'] ?? errorBody['detail'].toString();
+        } else if (errorBody['detail'] is List) {
+          final List details = errorBody['detail'];
+          if (details.isNotEmpty && details[0] is Map) {
+            errorMessage = "${details[0]['msg']}: ${details[0]['loc']}";
+          }
+        }
+      }
+
+      throw ServerException(errorMessage, statusCode: response.statusCode);
     } catch (e) {
       debugPrint("Exception: $e");
-      return null;
+      rethrow;
     }
   }
 }

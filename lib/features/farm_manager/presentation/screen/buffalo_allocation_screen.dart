@@ -1576,47 +1576,50 @@ class _BuffaloAllocationScreenState
           continue;
         }
 
-        // Convert draftAllocations to required format
-        final List<Map<String, dynamic>> allocations = currentShedDraft.entries
-            .map((e) {
-              final parts = e.key.split('-'); // e.g. ["R1", "A4"]
-              final rowId = parts[0]; // "R1"
-              final slotId = parts[1]; // "A4"
+        bool shedAllSuccess = true;
 
-              final String animalId = e.value;
-              final animalObj = onboardedAnimals.firstWhere((a) {
-                final aId = (a is Map)
-                    ? (a['rfid_tag'] ??
-                          a['rfid'] ??
-                          a['rfid_tag_number'] ??
-                          a['animal_id'])
-                    : a.toString();
-                return aId.toString() == animalId;
-              }, orElse: () => <String, dynamic>{});
+        for (var e in currentShedDraft.entries) {
+          final parts = e.key.split('-'); // e.g. ["R1", "A4"]
+          final rowId = parts[0]; // "R1"
+          final slotId = parts[1]; // "A4"
 
-              String rfidTag = animalId;
-              if (animalObj is Map) {
-                rfidTag =
-                    (animalObj['rfid_tag'] ?? animalObj['rfid'] ?? animalId)
-                        .toString();
-              }
+          final String draftIdentifier = e.value;
+          final animalObj = onboardedAnimals.firstWhere((a) {
+            final aId = (a is Map)
+                ? (a['rfid_tag'] ??
+                      a['rfid'] ??
+                      a['rfid_tag_number'] ??
+                      a['animal_id'])
+                : a.toString();
+            return aId.toString() == draftIdentifier;
+          }, orElse: () => <String, dynamic>{});
 
-              return {
-                'rfid_tag_number': rfidTag,
-                'parking_id': slotId,
-                'row_number': rowId,
-              };
-            })
-            .toList();
+          // Get numeric animal_id/id
+          String realAnimalId = draftIdentifier;
+          if (animalObj is Map) {
+            realAnimalId =
+                (animalObj['animal_id'] ?? animalObj['id'] ?? draftIdentifier)
+                    .toString();
+          }
 
-        final success = await ref
-            .read(farmManagerProvider.notifier)
-            .allocateAnimals(
-              shedId: shedId.toString(),
-              allocations: allocations,
-            );
+          // Clean rowNumber (e.g. "R1" -> "1")
+          final cleanRowNumber = rowId.replaceAll(RegExp(r'[^0-9]'), '');
 
-        if (success) {
+          final success = await ref
+              .read(farmManagerProvider.notifier)
+              .allocateAnimals(
+                shedId: shedId.toString(),
+                rowNumber: rowId,
+                animalId: realAnimalId,
+                parkingId: slotId,
+              );
+
+          if (!success) {
+            shedAllSuccess = false;
+          }
+        }
+
+        if (shedAllSuccess) {
           successCount++;
         } else {
           overallSuccess = false;
@@ -1658,9 +1661,10 @@ class _BuffaloAllocationScreenState
           .read(farmManagerProvider.notifier)
           .fetchUnallocatedAnimals(farmId: selectedFarmId);
     } else if (mounted) {
+      final error = ref.read(farmManagerProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to allocate animals to any shed.'),
+        SnackBar(
+          content: Text(error ?? 'Failed to allocate animals to any shed.'),
           backgroundColor: Colors.red,
         ),
       );
