@@ -17,7 +17,9 @@ import 'package:farm_vest/core/theme/theme_provider.dart';
 import 'package:farm_vest/core/widgets/biometric_lock_screen.dart';
 
 import 'package:farm_vest/core/services/remote_config_service.dart';
+import 'package:farm_vest/core/services/localization_service.dart';
 import 'package:farm_vest/core/providers/environment_provider.dart';
+import 'package:farm_vest/core/providers/locale_provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:flutter_app_badger/flutter_app_badger.dart'; // Commented out - package not in pubspec.yaml
 
@@ -112,6 +114,9 @@ Future<void> main() async {
   // Initialize Remote Config (URLs & Version)
   await RemoteConfigService.initialize();
 
+  // Initialize Localization
+  await LocalizationService.init();
+
   runApp(const ProviderScope(child: FarmVestApp()));
 }
 
@@ -132,6 +137,7 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
+    final currentLocale = ref.watch(localeProvider);
 
     return MaterialApp.router(
       title: 'FarmVest - Smart Dairy Farm Management',
@@ -140,8 +146,12 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
       themeMode: themeMode,
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
-      locale: const Locale('en', 'US'),
-      supportedLocales: const [Locale('en', 'US')],
+      locale: currentLocale,
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('hi', 'IN'),
+        Locale('te', 'IN'),
+      ],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

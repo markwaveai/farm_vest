@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../../../../core/providers/environment_provider.dart';
 import '../../../../core/theme/app_constants.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 
 class NewLoginScreen extends ConsumerStatefulWidget {
   const NewLoginScreen({super.key});
@@ -112,7 +113,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           });
           _startTimer();
         } else {
-          ToastUtils.showError(context, 'Please enter a valid email address');
+          ToastUtils.showError(
+            context,
+            'Please enter a valid email address'.tr,
+          );
         }
         return;
       }
@@ -134,7 +138,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             final error = ref.read(authProvider).error;
             ToastUtils.showError(
               context,
-              error ?? 'Failed to send OTP. Please try again.',
+              error ?? 'Failed to send OTP. Please try again.'.tr,
             );
           }
         }
@@ -142,7 +146,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     } else {
       if (_otp.length == 6) {
         if (_isEmailLogin) {
-          ToastUtils.showError(context, 'your email id is not registered');
+          ToastUtils.showError(context, 'your email id is not registered'.tr);
           return;
         }
         final loginData = await ref
@@ -164,7 +168,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             final error = ref.read(authProvider).error;
             ToastUtils.showError(
               context,
-              error ?? 'Invalid OTP or failed to login.',
+              error ?? 'Invalid OTP or failed to login.'.tr,
             );
           }
         }
@@ -182,9 +186,9 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
         if (response != null && response.status) {
           _startTimer();
           setState(() => _otp = '');
-          ToastUtils.showSuccess(context, 'OTP resent successfully');
+          ToastUtils.showSuccess(context, 'OTP resent successfully'.tr);
         } else {
-          ToastUtils.showError(context, 'Failed to resend OTP');
+          ToastUtils.showError(context, 'Failed to resend OTP'.tr);
         }
       }
     }
@@ -208,17 +212,17 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Developer Mode'),
+        title: Text('Developer Mode'.tr),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           obscureText: true,
-          decoration: const InputDecoration(hintText: 'Enter Developer Code'),
+          decoration: InputDecoration(hintText: 'Enter Developer Code'.tr),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr),
           ),
           TextButton(
             onPressed: () async {
@@ -226,10 +230,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                 Navigator.pop(context);
                 _showEnvironmentSelection();
               } else {
-                ToastUtils.showError(context, 'Invalid Code');
+                ToastUtils.showError(context, 'Invalid Code'.tr);
               }
             },
-            child: const Text('Submit'),
+            child: Text('Submit'.tr),
           ),
         ],
       ),
@@ -240,16 +244,16 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Environment'),
-        content: const Text('Choose which server to connect to:'),
+        title: Text('Select Environment'.tr),
+        content: Text('Choose which server to connect to:'.tr),
         actions: [
           TextButton(
             onPressed: () => _switchEnvironment(false),
-            child: const Text('LIVE'),
+            child: Text('LIVE'.tr),
           ),
           TextButton(
             onPressed: () => _switchEnvironment(true),
-            child: const Text('STAGING (Testing)'),
+            child: Text('STAGING (Testing)'.tr),
           ),
         ],
       ),
@@ -342,9 +346,9 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Back',
-                      style: TextStyle(
+                    Text(
+                      'Back'.tr,
+                      style: const TextStyle(
                         color: AppTheme.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -405,8 +409,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   children: [
                     Text(
                       _showRoleSelection
-                          ? 'Select Role'
-                          : (_isOtpSent ? 'Verify Your Phone' : 'Welcome Back'),
+                          ? 'Select Role'.tr
+                          : (_isOtpSent
+                                ? 'Verify Your Phone'.tr
+                                : 'Welcome Back'.tr),
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -419,12 +425,14 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: Text(
                         _showRoleSelection
-                            ? 'Choose how you want to log in'
+                            ? 'Choose how you want to log in'.tr
                             : (_isOtpSent
-                                  ? 'Enter the 6-digit code sent to\n${_isEmailLogin ? _email : '+91 $_phoneNumber'}'
+                                  ? '${'Enter the 6-digit code sent to'.tr}\n${_isEmailLogin ? _email : '+91 $_phoneNumber'}'
                                   : (_isEmailLogin
                                         ? 'Enter your email address to access your account'
-                                        : 'Enter your phone number to access your account')),
+                                              .tr
+                                        : 'Enter your phone number to access your account'
+                                              .tr)),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
@@ -498,7 +506,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             const SizedBox(height: 32),
           ],
           PrimaryButton(
-            text: _isOtpSent ? 'Verify & Login' : 'Continue',
+            text: _isOtpSent ? 'Verify & Login'.tr : 'Continue'.tr,
             isLoading: authState.isLoading,
             onPressed: (_isOtpSent
                 ? (_otp.length == 6 ? _handleContinue : null)
@@ -509,7 +517,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           const SizedBox(height: 24),
           if (!_isOtpSent)
             Text(
-              'By continuing, you agree to our Terms & Privacy Policy',
+              'By continuing, you agree to our Terms & Privacy Policy'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
@@ -572,7 +580,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            role.label,
+                            role.label, // Role labels are dynamic, might need .tr if they are keys
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -581,7 +589,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Log in as ${role.label}',
+                            'Log in as'.tr + ' ' + role.label,
                             style: TextStyle(
                               fontSize: 14,
                               color: theme.colorScheme.onSurface.withValues(
@@ -641,7 +649,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Didn't receive the code? ",
+              "Didn't receive the code? ".tr,
               style: TextStyle(
                 fontSize: 14,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -658,7 +666,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                       ? theme.colorScheme.primary
                       : theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
-                child: const Text('Resend OTP'),
+                child: Text('Resend OTP'.tr),
               ),
             ),
           ],
@@ -672,7 +680,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Mobile Number',
+          'Mobile Number'.tr,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -739,7 +747,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     letterSpacing: 2.0,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'Enter Your Phone Number',
+                    hintText: 'Enter Your Phone Number'.tr,
 
                     hintStyle: TextStyle(
                       fontSize: 12,

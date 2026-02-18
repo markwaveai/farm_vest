@@ -147,6 +147,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/buffalofit_icons/
+    - assets/lang/
 
     # - assets/animations/
 

@@ -6,6 +6,7 @@ import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:flutter/material.dart';
 import '../../new_supervisor/widgets/alert_cards.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 
 class ActualAlertScreen extends ConsumerWidget {
   const ActualAlertScreen({super.key});
@@ -19,9 +20,9 @@ class ActualAlertScreen extends ConsumerWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        title: const Text(
-          'ALERTS',
-          style: TextStyle(
+        title: Text(
+          'ALERTS'.tr,
+          style: const TextStyle(
             color: AppTheme.primary,
             fontWeight: FontWeight.bold,
           ),
@@ -43,7 +44,7 @@ class ActualAlertScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Farm Alerts',
+              'Farm Alerts'.tr,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -57,28 +58,28 @@ class ActualAlertScreen extends ConsumerWidget {
                 scrollDirection: Axis.horizontal,
                 children: [
                   FilterChipWidget(
-                    label: 'All',
+                    label: 'All'.tr,
                     selected: currentFilter == 'all',
                     onTap: () =>
                         ref.read(ticketStatusFilterProvider.notifier).state =
                             'all',
                   ),
                   FilterChipWidget(
-                    label: 'Critical',
+                    label: 'Critical'.tr,
                     selected: currentFilter == 'Critical',
                     onTap: () =>
                         ref.read(ticketStatusFilterProvider.notifier).state =
                             'Critical',
                   ),
                   FilterChipWidget(
-                    label: 'Today',
+                    label: 'Today'.tr,
                     selected: currentFilter == 'Today',
                     onTap: () =>
                         ref.read(ticketStatusFilterProvider.notifier).state =
                             'Today',
                   ),
                   FilterChipWidget(
-                    label: 'Completed',
+                    label: 'Completed'.tr,
                     selected: currentFilter == 'Completed',
                     onTap: () =>
                         ref.read(ticketStatusFilterProvider.notifier).state =
@@ -89,7 +90,7 @@ class ActualAlertScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Active Alerts',
+              'Active Alerts'.tr,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onSurface,
@@ -100,7 +101,7 @@ class ActualAlertScreen extends ConsumerWidget {
               child: ticketsAsync.when(
                 data: (tickets) {
                   if (tickets.isEmpty) {
-                    return const Center(child: Text('No alerts found'));
+                    return Center(child: Text('No alerts found'.tr));
                   }
                   return ListView.builder(
                     itemCount: tickets.length,
@@ -124,11 +125,11 @@ class ActualAlertScreen extends ConsumerWidget {
                           title: '$type Ticket #${ticket.id}',
                           subtitle: ticket.description,
                           time:
-                              '${DateTime.now().difference(createdAt).inMinutes} min ago',
-                          ids: 'Animal ID: ${ticket.animalId ?? 'N/A'}',
+                              '${DateTime.now().difference(createdAt).inMinutes} ${'min ago'.tr}',
+                          ids: '${'Animal ID'.tr}: ${ticket.animalId ?? 'N/A'}',
                           actionText: status == TicketStatus.pending.value
-                              ? 'Track Progress'
-                              : 'View Details',
+                              ? 'Track Progress'.tr
+                              : 'View Details'.tr,
                           headerColor: headerColor,
                         ),
                       );
@@ -136,12 +137,13 @@ class ActualAlertScreen extends ConsumerWidget {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(child: Text('Error: $err')),
+                error: (err, stack) =>
+                    Center(child: Text('${'Error'.tr}: $err')),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Completed Alerts',
+              'Completed Alerts'.tr,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 color: Theme.of(context).hintColor,

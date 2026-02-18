@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 
 class StatusPill extends StatelessWidget {
   final String text;

@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import '../widgets/employee_dashboard_card.dart';
 
 import 'health_issues_screen.dart';
@@ -140,17 +141,17 @@ class _AssistantDashboardScreenState
   String _getTitle(int index) {
     switch (index) {
       case 0:
-        return 'Health Issues';
+        return 'Health Issues'.tr;
       case 1:
-        return 'Milk Production';
+        return 'Milk Production'.tr;
       case 2:
-        return 'Raise Ticket';
+        return 'Raise Ticket'.tr;
       case 3:
-        return 'Buffalo Profile';
+        return 'Buffalo Profile'.tr;
       case 4:
-        return 'Assistant Dashboard';
+        return 'Assistant Dashboard'.tr;
       default:
-        return 'Assistant Dashboard';
+        return 'Assistant Dashboard'.tr;
     }
   }
 
@@ -180,7 +181,7 @@ class _AssistantDashboardScreenState
               IconButton(
                 icon: const Icon(Icons.swap_horiz),
                 onPressed: _showSwitchRoleBottomSheet,
-                tooltip: 'Switch Role',
+                tooltip: 'Switch Role'.tr,
               ),
             const NotificationBellButton(
               fallbackRoute: '/assistant-dashboard',
@@ -301,25 +302,25 @@ class _AssistantDashboardScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Welcome, Assistant Kumar!',
-                  style: TextStyle(
+                Text(
+                  'Welcome, @name!'.trParams({'name': 'Assistant Kumar'}),
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.white,
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingS),
-                const Text(
-                  'Supporting healthcare operations',
-                  style: TextStyle(fontSize: 16, color: AppTheme.white),
+                Text(
+                  'Supporting healthcare operations'.tr,
+                  style: const TextStyle(fontSize: 16, color: AppTheme.white),
                 ),
                 const SizedBox(height: AppConstants.spacingM),
                 Row(
                   children: [
-                    _buildQuickStat('Active Tasks', '8'),
+                    _buildQuickStat('Active Tasks'.tr, '8'),
                     const SizedBox(width: AppConstants.spacingL),
-                    _buildQuickStat('Completed', '15'),
+                    _buildQuickStat('Completed'.tr, '15'),
                   ],
                 ),
               ],

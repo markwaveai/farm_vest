@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_textfield.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 
 class ReportsScreen extends ConsumerStatefulWidget {
   final bool hideAppBar;
@@ -62,7 +63,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   },
                 ),
                 title: Text(
-                  "Farm Reports",
+                  "Farm Reports".tr,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.onSurface,
@@ -73,9 +74,9 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   indicatorWeight: 3,
                   labelColor: AppTheme.primary,
                   unselectedLabelColor: Theme.of(context).hintColor,
-                  tabs: const [
-                    Tab(text: "Daily"),
-                    Tab(text: "Weekly"),
+                  tabs: [
+                    Tab(text: "Daily".tr),
+                    Tab(text: "Weekly".tr),
                   ],
                 ),
               ),
@@ -91,15 +92,15 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
                   DropdownButtonFormField<String>(
                     value: _selectedSession,
-                    decoration: _inputDecoration("Session"),
-                    items: const [
+                    decoration: _inputDecoration("Session".tr),
+                    items: [
                       DropdownMenuItem(
                         value: 'Morning',
-                        child: Text('Morning'),
+                        child: Text('Morning'.tr),
                       ),
                       DropdownMenuItem(
                         value: 'Evening',
-                        child: Text('Evening'),
+                        child: Text('Evening'.tr),
                       ),
                     ],
                     onChanged: (value) {
@@ -148,12 +149,12 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                       final reportList = state.data['data'];
 
                       if (reportList is! List || reportList.isEmpty) {
-                        return const Text("No daily report found");
+                        return Text("No daily report found".tr);
                       }
 
                       final report = reportList[0];
                       return _milkReportCard(
-                        title: "Daily Milk Report",
+                        title: "Daily Milk Report".tr,
                         timing: report['timing'],
                         entryDate: report['entry_date'] ?? "-",
                         quantity: "${report['quantity'] ?? '-'}",
@@ -214,7 +215,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                         return Column(
                           children: report.map<Widget>((item) {
                             return _milkReportCard(
-                              title: "Weekly Milk Report",
+                              title: "Weekly Milk Report".tr,
                               entryDate: item['entry_date'] ?? "-",
                               quantity: "${item['quantity'] ?? '-'}",
                               titleColor: Colors.green,
@@ -257,7 +258,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
       child: IgnorePointer(
         child: CustomTextField(
           controller: _dateController,
-          hint: "Select Date",
+          hint: "Select Date".tr,
           enabled: true,
           prefixIcon: const Icon(Icons.calendar_today, size: 18),
         ),
@@ -282,7 +283,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
-        child: const Text("Get Report", style: TextStyle(fontSize: 16)),
+        child: Text("Get Report".tr, style: const TextStyle(fontSize: 16)),
       ),
     );
   }
@@ -412,7 +413,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
               Expanded(
                 child: _infoBadge(
                   icon: Icons.opacity,
-                  text: "$quantity Litres",
+                  text: "$quantity ${'Litres'.tr}",
                   color: quantityColor,
                 ),
               ),

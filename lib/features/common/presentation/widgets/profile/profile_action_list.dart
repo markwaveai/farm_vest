@@ -3,6 +3,7 @@ import 'package:farm_vest/core/services/secure_storage_service.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/theme/theme_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:farm_vest/core/widgets/language_selector.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 
 class ProfileActionList extends ConsumerStatefulWidget {
   const ProfileActionList({super.key});
@@ -61,26 +63,26 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
         final reason = BiometricService.lastError;
         Fluttertoast.showToast(
           msg: reason == null || reason.isEmpty
-              ? 'Authentication failed'
-              : 'Authentication failed: $reason',
+              ? 'Authentication failed'.tr
+              : '${'Authentication failed'.tr}: $reason',
         );
       }
     } else {
       final shouldDisable = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('Disable App Lock'),
-          content: const Text(
-            'Are you sure you want to disable fingerprint lock?',
+          title: Text('Disable App Lock'.tr),
+          content: Text(
+            'Are you sure you want to disable fingerprint lock?'.tr,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text('Cancel'.tr),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Disable'),
+              child: Text('Disable'.tr),
             ),
           ],
         ),
@@ -106,12 +108,12 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
       context: context,
       useRootNavigator: true, // Ensure we are using root navigator for dialog
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text('Logout'.tr),
+        content: Text('Are you sure you want to logout?'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr),
           ),
           TextButton(
             onPressed: () {
@@ -132,9 +134,9 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
                     debugPrint("Logout error: $e");
                   });
             },
-            child: const Text(
-              'Logout',
-              style: TextStyle(color: AppTheme.errorRed),
+            child: Text(
+              'Logout'.tr,
+              style: const TextStyle(color: AppTheme.errorRed),
             ),
           ),
         ],
@@ -156,23 +158,24 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
       context: context,
       useRootNavigator: true,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text(
-          'Are you sure you want to delete your account? This action is permanent and will remove all your data. You will be redirected to our website to complete the process.',
+        title: Text('Delete Account'.tr),
+        content: Text(
+          'Are you sure you want to delete your account? This action is permanent and will remove all your data. You will be redirected to our website to complete the process.'
+              .tr,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _launchURL(AppConstants.deleteAccountUrl);
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: AppTheme.errorRed),
+            child: Text(
+              'Delete'.tr,
+              style: const TextStyle(color: AppTheme.errorRed),
             ),
           ),
         ],
@@ -202,14 +205,17 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Switch Active Role',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                'Switch Active Role'.tr,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Choose which portal you want to access',
-                style: TextStyle(color: AppTheme.mediumGrey),
+                'Choose which portal you want to access'.tr,
+                style: const TextStyle(color: AppTheme.mediumGrey),
               ),
               const SizedBox(height: 24),
               ...availableRoles.map((role) {
@@ -291,9 +297,9 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
             ),
             tileColor: theme.colorScheme.surface,
             leading: const Icon(Icons.swap_horiz, color: AppTheme.primary),
-            title: const Text('Switch Role'),
+            title: Text('Switch Role'.tr),
             subtitle: Text(
-              'Currently as ${(authState.role ?? UserType.customer).label}',
+              'Currently as ${(authState.role ?? UserType.customer).label}', // Role labels might need separate translation strategy or are handled elsewhere
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: _showSwitchRoleBottomSheet,
@@ -307,8 +313,8 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
             ),
             tileColor: theme.colorScheme.surface,
             leading: const Icon(Icons.fingerprint, color: AppTheme.primary),
-            title: const Text('App Lock'),
-            subtitle: const Text('Use biometric to unlock the app'),
+            title: Text('App Lock'.tr),
+            subtitle: Text('Use biometric to unlock the app'.tr),
             trailing: Switch(
               value: _isBiometricEnabled,
               onChanged: _toggleBiometric,
@@ -324,9 +330,9 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
                 : Icons.dark_mode,
             color: AppTheme.primary,
           ),
-          title: const Text('Dark Mode'),
+          title: Text('Dark Mode'.tr),
           subtitle: Text(
-            theme.brightness == Brightness.dark ? 'Enabled' : 'Disabled',
+            theme.brightness == Brightness.dark ? 'Enabled'.tr : 'Disabled'.tr,
           ),
           trailing: Switch(
             value: theme.brightness == Brightness.dark,
@@ -339,8 +345,24 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
         ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           tileColor: theme.colorScheme.surface,
+          leading: const Icon(Icons.language, color: AppTheme.primary),
+          title: Text('Language'.tr),
+          subtitle: Text('Change language'.tr),
+          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) => const LanguageSelector(),
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+
+        ListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          tileColor: theme.colorScheme.surface,
           leading: const Icon(Icons.help_outline, color: AppTheme.primary),
-          title: const Text('Help & Support'),
+          title: Text('Help & Support'.tr),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () => context.go('/support'),
         ),
@@ -349,9 +371,9 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           tileColor: theme.colorScheme.surface,
           leading: const Icon(Icons.logout, color: AppTheme.errorRed),
-          title: const Text(
-            'Logout',
-            style: TextStyle(color: AppTheme.errorRed),
+          title: Text(
+            'Logout'.tr,
+            style: const TextStyle(color: AppTheme.errorRed),
           ),
           onTap: _showLogoutDialog,
         ),
@@ -360,9 +382,9 @@ class _ProfileActionListState extends ConsumerState<ProfileActionList> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           tileColor: theme.colorScheme.surface,
           leading: const Icon(Icons.delete, color: AppTheme.errorRed),
-          title: const Text(
-            'Delete Account',
-            style: TextStyle(color: AppTheme.errorRed),
+          title: Text(
+            'Delete Account'.tr,
+            style: const TextStyle(color: AppTheme.errorRed),
           ),
 
           // trailing: const Icon(Icons.arrow_forward_ios, size: 16),
