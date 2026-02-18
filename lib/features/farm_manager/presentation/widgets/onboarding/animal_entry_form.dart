@@ -71,14 +71,46 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
         if (mounted) {
           setState(() {
             final index = widget.entry.images.indexWhere(
-              (img) => img.localFile?.path == file.path,
+              (img) => img.localFile?.path == fileToUpload.path,
             );
             if (index != -1) {
               widget.entry.images[index] = DashboardImage(
-                localFile: file,
+                localFile: fileToUpload,
                 networkUrl: url,
                 isUploading: false,
+                hasError: false,
               );
+            } else {
+              // Try searching by original file path as a fallback
+              final fallbackIndex = widget.entry.images.indexWhere(
+                (img) => img.localFile?.path == file.path,
+              );
+              if (fallbackIndex != -1) {
+                widget.entry.images[fallbackIndex] = DashboardImage(
+                  localFile: file,
+                  networkUrl: url,
+                  isUploading: false,
+                  hasError: false,
+                );
+              }
+            }
+          });
+          widget.onUpdate();
+        }
+      } else {
+        // Handle url being null (even if no exception was thrown)
+        if (mounted) {
+          setState(() {
+            final index = widget.entry.images.indexWhere(
+              (img) => img.localFile?.path == fileToUpload.path,
+            );
+            if (index != -1) {
+              widget.entry.images[index] = DashboardImage(
+                localFile: fileToUpload,
+                isUploading: false,
+                hasError: true,
+              );
+              _showError('Upload failed. Please try again.');
             }
           });
           widget.onUpdate();
@@ -88,7 +120,7 @@ class _AnimalEntryFormState extends State<AnimalEntryForm> {
       if (mounted) {
         setState(() {
           final index = widget.entry.images.indexWhere(
-            (img) => img.localFile?.path == file.path,
+            (img) => img.localFile?.path == fileToUpload.path,
           );
           if (index != -1) {
             widget.entry.images[index] = DashboardImage(

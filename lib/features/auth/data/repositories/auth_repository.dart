@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:farm_vest/core/services/auth_api_services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 
 import 'package:farm_vest/core/utils/app_enums.dart';
@@ -32,8 +32,16 @@ class AuthRepository {
     }
   }
 
-  Future<LoginResponse> loginWithOtp(String mobile, String otp) async {
-    final response = await AuthApiServices.loginWithOtp(mobile, otp);
+  Future<LoginResponse> loginWithOtp({
+    String? mobile,
+    String? email,
+    required String otp,
+  }) async {
+    final response = await AuthApiServices.loginWithOtp(
+      mobile: mobile,
+      email: email,
+      otp: otp,
+    );
     await ensureFirebaseSession();
     return response;
   }
@@ -48,8 +56,16 @@ class AuthRepository {
     return prefs.getString('access_token');
   }
 
-  Future<WhatsappOtpResponse?> sendOtp(String mobile) async {
-    return await AuthApiServices.sendWhatsappOtp(mobile);
+  Future<WhatsappOtpResponse?> sendOtp(
+    String mobile,
+    String email,
+    OtpType otpType,
+  ) async {
+    return await AuthApiServices.sendWhatsappOtp(
+      phone: mobile,
+      otpType: otpType,
+      email: email,
+    );
   }
 
   Future<UserModel?> getUserData(String mobile) async {
@@ -132,7 +148,9 @@ class AuthRepository {
       bucket: AppConstants.storageBucketName,
     );
 
-    final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
+    final ref = storage.ref().child(
+      '${AppConstants.profilePicsPath}/$userId/profile.jpg',
+    );
 
     final snapshot = await ref.putFile(
       file,
@@ -148,7 +166,9 @@ class AuthRepository {
         bucket: AppConstants.storageBucketName,
       );
 
-      final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
+      final ref = storage.ref().child(
+        '${AppConstants.profilePicsPath}/$userId/profile.jpg',
+      );
 
       // Try to get download URL - this will throw if file doesn't exist
       final url = await ref.getDownloadURL();
@@ -176,7 +196,9 @@ class AuthRepository {
         bucket: AppConstants.storageBucketName,
       );
 
-      final ref = storage.ref().child('farmvest/userpics/$userId/profile.jpg');
+      final ref = storage.ref().child(
+        '${AppConstants.profilePicsPath}/$userId/profile.jpg',
+      );
       await ref.delete();
 
       FloatingToast.showSimpleToast('Profile image deleted successfully');
@@ -216,7 +238,7 @@ class AuthRepository {
       final timestamp = now.millisecondsSinceEpoch;
 
       final ref = storage.ref().child(
-        'farmvest/buffaloesonboarding/$dateFolder/image_$timestamp.jpg',
+        '${AppConstants.buffaloOnboardingPath}/$dateFolder/image_$timestamp.jpg',
       );
 
       final snapshot = await ref.putFile(

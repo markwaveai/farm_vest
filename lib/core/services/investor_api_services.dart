@@ -38,7 +38,11 @@ class InvestorApiServices {
         Uri.parse("${AppConstants.appLiveUrl}/investors/get_all_investors"),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
+      print("URL: ${AppConstants.appLiveUrl}/investors/get_all_investors");
+print("Token: $token");
+print("Status Code: ${response.statusCode}");
 
+    print("Response Body: ${response.body}");
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return (data['data'] as List<dynamic>)
@@ -117,7 +121,7 @@ class InvestorApiServices {
         Uri.parse(url),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
       );
-
+     
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return InvestorAnimalsResponse.fromJson(data);

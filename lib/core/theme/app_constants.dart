@@ -31,22 +31,35 @@ class AppConstants {
   static String appLiveUrl = liveUrl; // Default to Live
   static String visitApiUrl = appLiveUrl;
 
+  static bool _isStaging = false;
+  static bool get isStaging => _isStaging;
+
+  static String get profilePicsPath =>
+      isStaging ? 'farmvest/stagingUserPics' : 'farmvest/userpics';
+
+  static String get buffaloOnboardingPath => isStaging
+      ? 'farmvest/stagingbuffaloesonboarding'
+      : 'farmvest/buffaloesonboarding';
+
   static const String authApiKey =
       'bWFya3dhdmUtZmFybXZlc3QtdGVzdHRpbmctYXBpa2V5';
 
   static void useLocal() {
+    _isStaging = true;
     appLiveUrl = localUrl;
     visitApiUrl = localUrl;
     animalKartApiUrl = animalKartStagingApiUrl; // Usually staging for local dev
   }
 
   static void useStaging() {
+    _isStaging = true;
     appLiveUrl = stagingUrl;
     visitApiUrl = stagingUrl;
     animalKartApiUrl = animalKartStagingApiUrl;
   }
 
   static void useLive() {
+    _isStaging = false;
     appLiveUrl = liveUrl;
     visitApiUrl = liveUrl;
     animalKartApiUrl = animalKartLiveApiUrl;

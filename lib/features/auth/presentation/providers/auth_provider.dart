@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:farm_vest/core/services/auth_api_services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:farm_vest/core/services/notification_service.dart';
@@ -122,11 +123,15 @@ class AuthController extends Notifier<AuthState> {
     return await _repository.getCurrentFirebaseImageUrl(userId);
   }
 
-  Future<WhatsappOtpResponse?> sendWhatsappOtp(String phone) async {
+  Future<WhatsappOtpResponse?> sendWhatsappOtp(
+    String phone,
+    String email,
+    OtpType otpType,
+  ) async {
     state = state.copyWith(isLoading: true, error: null, mobileNumber: phone);
 
     try {
-      final response = await _repository.sendOtp(phone);
+      final response = await _repository.sendOtp(phone, email, otpType);
       state = state.copyWith(isLoading: false, otpResponse: response);
       return response;
     } on AppException catch (e) {
@@ -135,23 +140,28 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
-  Future<Map<String, dynamic>?> loginWithOtp(
-    String mobileNumber,
-    String otp,
-  ) async {
+  Future<Map<String, dynamic>?> loginWithOtp({
+    String? mobileNumber,
+    String? email,
+    required String otp,
+  }) async {
     state = state.copyWith(
       isLoading: true,
       error: null,
-      mobileNumber: mobileNumber,
+      mobileNumber: mobileNumber ?? state.mobileNumber,
     );
 
     try {
-      final loginResponse = await _repository.loginWithOtp(mobileNumber, otp);
+      final loginResponse = await _repository.loginWithOtp(
+        mobile: mobileNumber,
+        email: email,
+        otp: otp,
+      );
       await _repository.saveToken(loginResponse.accessToken);
 
       // Delegate session setup and FCM subscription to completeLoginWithData
       // This ensures we subscribe to IoT topics correctly
-      return await completeLoginWithData(mobileNumber);
+      return await completeLoginWithData(mobileNumber ?? state.mobileNumber!);
     } on AppException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
       return null;

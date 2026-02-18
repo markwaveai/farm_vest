@@ -8,14 +8,20 @@ import 'package:farm_vest/features/auth/data/models/user_model.dart';
 import 'package:farm_vest/features/auth/data/models/whatsapp_otp_response.dart';
 import 'package:http/http.dart' as http;
 
+enum OtpType { whatsapp, email }
+
 class AuthApiServices {
   static VoidCallback? onUnauthorized;
 
-  static Future<WhatsappOtpResponse> sendWhatsappOtp(String phone) async {
+  static Future<WhatsappOtpResponse> sendWhatsappOtp({
+    String? phone,
+    String? email,
+    OtpType? otpType,
+  }) async {
     try {
       final uri = Uri.parse(
         "${AppConstants.appLiveUrl}/auth/send-whatsapp-otp",
-      ).replace(queryParameters: {"mobile": phone});
+      ).replace(queryParameters: {"method": otpType?.name ?? "whatsapp"});
 
       final response = await http.post(
         uri,
@@ -23,6 +29,12 @@ class AuthApiServices {
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
           //  "Authorization": AppConstants.authApiKey,
         },
+        body: jsonEncode({
+          if (otpType == OtpType.email)
+            "email": email ?? ""
+          else
+            "mobile": phone ?? "",
+        }),
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -66,10 +78,11 @@ class AuthApiServices {
     }
   }
 
-  static Future<LoginResponse> loginWithOtp(
-    String mobileNumber,
-    String otp,
-  ) async {
+  static Future<LoginResponse> loginWithOtp({
+    String? mobile,
+    String? email,
+    required String otp,
+  }) async {
     try {
       final response = await http.post(
         Uri.parse("${AppConstants.appLiveUrl}/auth/token"),
@@ -77,7 +90,11 @@ class AuthApiServices {
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
           //  HttpHeaders.authorizationHeader: AppConstants.authApiKey,
         },
-        body: jsonEncode({"mobile_number": mobileNumber, "otp": otp}),
+        body: jsonEncode({
+          "mobile_number": mobile ?? "",
+          "email": email ?? "",
+          "otp": otp,
+        }),
       );
 
       if (response.statusCode == 401) {

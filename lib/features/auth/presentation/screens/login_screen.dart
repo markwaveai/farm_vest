@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
+import 'package:farm_vest/core/services/auth_api_services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:farm_vest/core/widgets/primary_button.dart';
 import 'package:farm_vest/features/investor/presentation/providers/investor_providers.dart';
@@ -106,52 +108,51 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
   Future<void> _handleContinue() async {
     if (!_isOtpSent) {
       if (_isEmailLogin) {
-        if (_email.isNotEmpty && _email.contains('@')) {
+        if (_email.isEmpty || !_email.contains('@')) {
+          ToastUtils.showError(
+            context,
+            'Please enter a valid email address'.tr,
+          );
+          return;
+        }
+      } else {
+        if (_phoneNumber.length != 10) return;
+      }
+
+      final response = await ref
+          .read(authProvider.notifier)
+          .sendWhatsappOtp(
+            _phoneNumber,
+            _email,
+            _isEmailLogin ? OtpType.email : OtpType.whatsapp,
+          );
+
+      if (response != null && response.status) {
+        if (mounted) {
           setState(() {
             _isOtpSent = true;
             _otp = '';
           });
           _startTimer();
-        } else {
+        }
+      } else {
+        if (mounted) {
+          final error = ref.read(authProvider).error;
           ToastUtils.showError(
             context,
-            'Please enter a valid email address'.tr,
+            error ?? 'Failed to send OTP. Please try again.'.tr,
           );
-        }
-        return;
-      }
-      if (_phoneNumber.length == 10) {
-        final response = await ref
-            .read(authProvider.notifier)
-            .sendWhatsappOtp(_phoneNumber);
-
-        if (response != null && response.status) {
-          if (mounted) {
-            setState(() {
-              _isOtpSent = true;
-              _otp = '';
-            });
-            _startTimer();
-          }
-        } else {
-          if (mounted) {
-            final error = ref.read(authProvider).error;
-            ToastUtils.showError(
-              context,
-              error ?? 'Failed to send OTP. Please try again.'.tr,
-            );
-          }
         }
       }
     } else {
       if (_otp.length == 6) {
-        if (_isEmailLogin) {
-          ToastUtils.showError(context, 'your email id is not registered'.tr);
-          return;
-        }
         final loginData = await ref
             .read(authProvider.notifier)
-            .loginWithOtp(_phoneNumber, _otp);
+            .loginWithOtp(
+              mobileNumber: _isEmailLogin ? null : _phoneNumber,
+              email: _isEmailLogin ? _email : "",
+              otp: _otp,
+            );
 
         if (loginData != null) {
           final List<UserType> roles = loginData['roles'] as List<UserType>;
@@ -180,7 +181,11 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     if (_remainingSeconds == 0) {
       final response = await ref
           .read(authProvider.notifier)
-          .sendWhatsappOtp(_phoneNumber);
+          .sendWhatsappOtp(
+            _phoneNumber,
+            _email,
+            _isEmailLogin ? OtpType.email : OtpType.whatsapp,
+          );
 
       if (mounted) {
         if (response != null && response.status) {
