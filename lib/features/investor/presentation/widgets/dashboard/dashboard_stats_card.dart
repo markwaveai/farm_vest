@@ -119,7 +119,7 @@ class DashboardStatsCard extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            ('Error: $err'.tr),
+            ('Error: @message'.trParams({'message': err.toString()})),
             style: const TextStyle(fontSize: 12, color: Colors.red),
           ),
         ),

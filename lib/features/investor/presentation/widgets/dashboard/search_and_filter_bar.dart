@@ -1,7 +1,8 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/investor/presentation/providers/investor_providers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SearchAndFilterBar extends ConsumerStatefulWidget {
@@ -62,7 +63,7 @@ class _SearchAndFilterBarState extends ConsumerState<SearchAndFilterBar> {
             autocorrect: false,
             enableSuggestions: false,
             decoration: InputDecoration(
-              hintText: 'Search by ID...',
+              hintText: 'Search by ID...'.tr,
               hintStyle: TextStyle(
                 color: isDark ? Colors.grey[500] : Colors.grey,
               ),
@@ -151,7 +152,7 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Filters', style: Theme.of(context).textTheme.titleLarge),
+              Text('Filters'.tr, style: Theme.of(context).textTheme.titleLarge),
               Row(
                 children: [
                   TextButton(
@@ -162,7 +163,7 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
                         currentLocations.clear();
                       });
                     },
-                    child: const Text('Clear All'),
+                    child: Text('Clear All'.tr),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -174,7 +175,7 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
           ),
           const Divider(),
           _buildFilterSection(
-            title: 'Health Status',
+            title: 'Health Status'.tr,
             items: ['all', ...allHealthStatuses],
             selectedItems: {currentFilter},
             onSelectionChanged: (selected) {
@@ -185,7 +186,7 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
             singleSelect: true,
           ),
           _buildFilterSection(
-            title: 'Farms',
+            title: 'Farms'.tr,
             items: allFarms,
             selectedItems: currentFarms,
             onSelectionChanged: (selected) {
@@ -196,7 +197,7 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
             },
           ),
           _buildFilterSection(
-            title: 'Locations',
+            title: 'Locations'.tr,
             items: allLocations,
             selectedItems: currentLocations,
             onSelectionChanged: (selected) {
@@ -228,8 +229,8 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Apply Filters',
+                child: Text(
+                  'Apply Filters'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -270,7 +271,7 @@ class _FilterSheetContentState extends ConsumerState<_FilterSheetContent> {
             return FilterChip(
               label: Text(
                 item == 'all'
-                    ? 'All'
+                    ? 'All'.tr
                     : item[0].toUpperCase() +
                           item.substring(1).toLowerCase().replaceAll('_', ' '),
               ),

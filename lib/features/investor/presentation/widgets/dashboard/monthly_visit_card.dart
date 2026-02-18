@@ -1,3 +1,4 @@
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -54,7 +55,7 @@ class MonthlyVisitCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Book Farm Visit',
+                          'Book Farm Visit'.tr,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -63,7 +64,7 @@ class MonthlyVisitCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Schedule your monthly visit',
+                          'Schedule your monthly visit'.tr,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(color: Colors.grey, fontSize: 14),
                         ),

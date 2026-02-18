@@ -205,7 +205,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
               const SizedBox(height: AppConstants.spacingM),
 
               _buildInfoCard(context, [
-                _buildInfoRow(context, 'RFID:', animal?.rfid ?? kHyphen),
+                _buildInfoRow(context, 'RFID:'.tr, animal?.rfid ?? kHyphen),
                 _buildInfoRow(
                   context,
                   ('Neck Band ID:'.tr),
@@ -223,7 +223,9 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                 _buildInfoRow(
                   context,
                   ('Age:'.tr),
-                  animal?.age != null ? '${animal!.age} Months' : kHyphen,
+                  animal?.age != null
+                      ? '${animal!.age} ${"Months".tr}'
+                      : kHyphen,
                 ),
 
                 _buildInfoRow(
@@ -424,7 +426,11 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
         'icon': Icons.restaurant,
         'isOrange': false,
       },
-      {'label': 'Health Alerts'.tr, 'icon': Icons.monitor_heart, 'isOrange': true},
+      {
+        'label': 'Health Alerts'.tr,
+        'icon': Icons.monitor_heart,
+        'isOrange': true,
+      },
       {
         'label': 'Temperature Alerts'.tr,
         'icon': Icons.thermostat,
@@ -458,55 +464,55 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
       },
     );
   }
-Widget _buildCategoryCard(
-  BuildContext context,
-  String label,
-  IconData icon, {
-  required bool isOrange,
-}) {
-  final baseColor = isOrange ? AppTheme.secondary : AppTheme.primary;
-  final gradientColors = isOrange
-      ? [AppTheme.secondary, AppTheme.lightSecondary]
-      : [AppTheme.primary, AppTheme.lightGreen];
 
-  return Opacity(
-    opacity: 0.8, 
-    child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: gradientColors,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: baseColor.withValues(alpha: 0.15), 
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+  Widget _buildCategoryCard(
+    BuildContext context,
+    String label,
+    IconData icon, {
+    required bool isOrange,
+  }) {
+    final baseColor = isOrange ? AppTheme.secondary : AppTheme.primary;
+    final gradientColors = isOrange
+        ? [AppTheme.secondary, AppTheme.lightSecondary]
+        : [AppTheme.primary, AppTheme.lightGreen];
+
+    return Opacity(
+      opacity: 0.8,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppConstants.radiusL),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradientColors,
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white, size: 32),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+          boxShadow: [
+            BoxShadow(
+              color: baseColor.withValues(alpha: 0.15),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            textAlign: TextAlign.center,
-          ),
-        
-        ],
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 

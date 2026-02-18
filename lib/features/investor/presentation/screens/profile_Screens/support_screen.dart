@@ -1,4 +1,5 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:farm_vest/features/investor/presentation/screens/profile_Screens/live_chart_screen.dart';
@@ -21,47 +22,55 @@ class SupportScreen extends StatefulWidget {
 }
 
 class _SupportScreenState extends State<SupportScreen> {
-  final List<FAQ> _faqs = [
-    FAQ(
-      question: 'How do I book a monthly visit?',
-      answer:
-          'Go to Monthly Visits section, select an available slot, and confirm your booking. You can book up to 10 visits per month.',
-      icon: Icons.calendar_today,
-    ),
-    FAQ(
-      question: 'Can I view live CCTV footage?',
-      answer:
-          'Yes, you can access live CCTV feeds from the Live CCTV section. Make sure you have a stable internet connection for best quality.',
-      icon: Icons.videocam,
-    ),
-    FAQ(
-      question: 'How is my buffalo\'s health monitored?',
-      answer:
-          'Our team conducts regular health checkups, monitors vital signs, and maintains detailed health records accessible through the app.',
-      icon: Icons.medical_services,
-    ),
-    FAQ(
-      question: 'How are revenue calculations done?',
-      answer:
-          'Revenue is calculated based on daily milk production, current market rates, and any additional services. You can view detailed breakdowns in the Revenue section.',
-      icon: Icons.attach_money,
-    ),
-    FAQ(
-      question: 'What factors affect asset valuation?',
-      answer:
-          'Asset valuation considers age, milk production capacity, health score, and current market conditions. The valuation is updated monthly.',
-      icon: Icons.trending_up,
-    ),
-    FAQ(
-      question: 'How do I contact support?',
-      answer:
-          'You can contact support through the app, call our helpline, or raise a ticket. Our team is available 24/7 for emergencies.',
-      icon: Icons.support_agent,
-    ),
-  ];
+  // Moved _faqs to build method to support localization updates
 
   @override
   Widget build(BuildContext context) {
+    final List<FAQ> faqs = [
+      FAQ(
+        question: 'How do I book a monthly visit?'.tr,
+        answer:
+            'Go to Monthly Visits section, select an available slot, and confirm your booking. You can book up to 10 visits per month.'
+                .tr,
+        icon: Icons.calendar_today,
+      ),
+      FAQ(
+        question: 'Can I view live CCTV footage?'.tr,
+        answer:
+            'Yes, you can access live CCTV feeds from the Live CCTV section. Make sure you have a stable internet connection for best quality.'
+                .tr,
+        icon: Icons.videocam,
+      ),
+      FAQ(
+        question: 'How is my buffalo\'s health monitored?'.tr,
+        answer:
+            'Our team conducts regular health checkups, monitors vital signs, and maintains detailed health records accessible through the app.'
+                .tr,
+        icon: Icons.medical_services,
+      ),
+      FAQ(
+        question: 'How are revenue calculations done?'.tr,
+        answer:
+            'Revenue is calculated based on daily milk production, current market rates, and any additional services. You can view detailed breakdowns in the Revenue section.'
+                .tr,
+        icon: Icons.attach_money,
+      ),
+      FAQ(
+        question: 'What factors affect asset valuation?'.tr,
+        answer:
+            'Asset valuation considers age, milk production capacity, health score, and current market conditions. The valuation is updated monthly.'
+                .tr,
+        icon: Icons.trending_up,
+      ),
+      FAQ(
+        question: 'How do I contact support?'.tr,
+        answer:
+            'You can contact support through the app, call our helpline, or raise a ticket. Our team is available 24/7 for emergencies.'
+                .tr,
+        icon: Icons.support_agent,
+      ),
+    ];
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
@@ -73,7 +82,7 @@ class _SupportScreenState extends State<SupportScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Support & FAQ'),
+          title: Text('Support & FAQ'.tr),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => NavigationHelper.safePopOrNavigate(
@@ -89,7 +98,7 @@ class _SupportScreenState extends State<SupportScreen> {
             children: [
               // Quick Actions
               Text(
-                'Quick Actions',
+                'Quick Actions'.tr,
                 style: AppTheme.headingMedium.copyWith(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
@@ -107,36 +116,36 @@ class _SupportScreenState extends State<SupportScreen> {
                 childAspectRatio: 1.1,
                 children: [
                   _buildActionCard(
-                    'Contact Support',
-                    'Chat with our team',
+                    'Contact Support'.tr,
+                    'Chat with our team'.tr,
                     Icons.chat,
                     AppTheme.primary,
                     () => _showContactOptions(context),
                   ),
                   _buildActionCard(
-                    'Raise Ticket',
-                    'Report an issue',
+                    'Raise Ticket'.tr,
+                    'Report an issue'.tr,
                     Icons.report_problem,
                     AppTheme.warningOrange,
                     () => _openRaiseTicket(context),
                   ),
                   _buildActionCard(
-                    'Ticket History',
-                    'View past tickets',
+                    'Ticket History'.tr,
+                    'View past tickets'.tr,
                     Icons.history,
                     AppTheme.primary,
                     () => _openTicketHistory(context),
                   ),
                   _buildActionCard(
-                    'Call MarkWave',
-                    'Direct phone support',
+                    'Call MarkWave'.tr,
+                    'Direct phone support'.tr,
                     Icons.phone,
                     AppTheme.secondary,
                     () => _makePhoneCall(),
                   ),
                   _buildActionCard(
-                    'App Guide',
-                    'Learn how to use',
+                    'App Guide'.tr,
+                    'Learn how to use'.tr,
                     Icons.help_outline,
                     AppTheme.darkSecondary,
                     () => _showAppGuide(context),
@@ -162,16 +171,16 @@ class _SupportScreenState extends State<SupportScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Emergency Support',
+                            Text(
+                              'Emergency Support'.tr,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.errorRed,
                               ),
                             ),
                             const SizedBox(height: AppConstants.spacingXS),
-                            const Text(
-                              'For urgent health issues or emergencies',
+                            Text(
+                              'For urgent health issues or emergencies'.tr,
                               style: AppTheme.bodySmall,
                             ),
                             const SizedBox(height: AppConstants.spacingS),
@@ -180,7 +189,7 @@ class _SupportScreenState extends State<SupportScreen> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.errorRed,
                               ),
-                              child: const Text('Call Now'),
+                              child: Text('Call Now'.tr),
                             ),
                           ],
                         ),
@@ -193,7 +202,7 @@ class _SupportScreenState extends State<SupportScreen> {
 
               // FAQs
               Text(
-                'Frequently Asked Questions',
+                'Frequently Asked Questions'.tr,
                 style: AppTheme.headingMedium.copyWith(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
@@ -202,7 +211,7 @@ class _SupportScreenState extends State<SupportScreen> {
               ),
               const SizedBox(height: AppConstants.spacingM),
 
-              ...(_faqs.map((faq) => _buildFAQCard(faq))),
+              ...(faqs.map((faq) => _buildFAQCard(faq))),
 
               const SizedBox(height: AppConstants.spacingL),
 
@@ -214,7 +223,7 @@ class _SupportScreenState extends State<SupportScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Contact Information',
+                        'Contact Information'.tr,
                         style: AppTheme.headingSmall.copyWith(
                           color: Theme.of(context).brightness == Brightness.dark
                               ? Colors.white
@@ -223,20 +232,24 @@ class _SupportScreenState extends State<SupportScreen> {
                       ),
                       const SizedBox(height: AppConstants.spacingM),
 
-                      _buildContactInfo(Icons.phone, 'Phone', '+91 7702710290'),
+                      _buildContactInfo(
+                        Icons.phone,
+                        'Phone'.tr,
+                        '+91 7702710290'.tr,
+                      ),
                       _buildContactInfo(
                         Icons.email,
-                        'Email',
-                        'contact@markwave.ai',
+                        'Email'.tr,
+                        'contact@markwave.ai'.tr,
                       ),
                       _buildContactInfo(
                         Icons.access_time,
-                        'Support Hours',
-                        '24/7 Available',
+                        'Support Hours'.tr,
+                        '24/7 Available'.tr,
                       ),
                       _buildContactInfo(
                         Icons.location_on,
-                        'Address',
+                        'Address'.tr,
                         'PSR Prime Towers, 2nd Floor,506,DLF,\nGachibowli, Hyderabad-500032',
                       ),
                     ],
@@ -392,24 +405,24 @@ class _SupportScreenState extends State<SupportScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Contact Support', style: AppTheme.headingMedium),
+            Text('Contact Support'.tr, style: AppTheme.headingMedium),
             const SizedBox(height: AppConstants.spacingL),
 
             ListTile(
               leading: const Icon(Icons.chat, color: AppTheme.primary),
-              title: const Text('Live Chat'),
-              subtitle: const Text('Chat with our support team'),
+              title: Text('Live Chat'.tr),
+              subtitle: Text('Chat with our support team'.tr),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const ChatScreen()),
                 );
-                ToastUtils.showInfo(context, 'Opening live chat...');
+                ToastUtils.showInfo(context, 'Opening live chat...'.tr);
               },
             ),
             ListTile(
               leading: const Icon(Icons.phone, color: AppTheme.primary),
-              title: const Text('Phone Call'),
+              title: Text('Phone Call'.tr),
               subtitle: const Text('+91 77027 10290'),
               onTap: () {
                 Navigator.pop(context);
@@ -418,11 +431,11 @@ class _SupportScreenState extends State<SupportScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.email, color: AppTheme.primary),
-              title: const Text('Email'),
+              title: Text('Email'.tr),
               subtitle: const Text('contact@markwave.ai'),
               onTap: () {
                 Navigator.pop(context);
-                ToastUtils.showInfo(context, 'Opening email app...');
+                ToastUtils.showInfo(context, 'Opening email app...'.tr);
               },
             ),
           ],
@@ -457,36 +470,40 @@ class _SupportScreenState extends State<SupportScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('App Instructions'),
-        content: const SingleChildScrollView(
+        title: Text('App Instructions'.tr),
+        content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('1. Dashboard', style: AppTheme.bodyMedium),
+              Text('1. Dashboard'.tr, style: AppTheme.bodyMedium),
               Text(
-                'Access all features from the main dashboard. Each card takes you to a specific section.',
+                'Access all features from the main dashboard. Each card takes you to a specific section.'
+                    .tr,
                 style: AppTheme.bodySmall,
               ),
               SizedBox(height: AppConstants.spacingM),
 
-              Text('2. Unit Details', style: AppTheme.bodyMedium),
+              Text('2. Unit Details'.tr, style: AppTheme.bodyMedium),
               Text(
-                'View detailed information about your buffalo including health status and basic info.',
+                'View detailed information about your buffalo including health status and basic info.'
+                    .tr,
                 style: AppTheme.bodySmall,
               ),
               SizedBox(height: AppConstants.spacingM),
 
-              Text('3. Live CCTV', style: AppTheme.bodyMedium),
+              Text('3. Live CCTV'.tr, style: AppTheme.bodyMedium),
               Text(
-                'Monitor your unit in real-time. Use fullscreen mode for better viewing.',
+                'Monitor your unit in real-time. Use fullscreen mode for better viewing.'
+                    .tr,
                 style: AppTheme.bodySmall,
               ),
               SizedBox(height: AppConstants.spacingM),
 
-              Text('4. Monthly Visits', style: AppTheme.bodyMedium),
+              Text('4. Monthly Visits'.tr, style: AppTheme.bodyMedium),
               Text(
-                'Book up to 10 visits per month. Available slots are shown in green.',
+                'Book up to 10 visits per month. Available slots are shown in green.'
+                    .tr,
                 style: AppTheme.bodySmall,
               ),
             ],
@@ -495,7 +512,7 @@ class _SupportScreenState extends State<SupportScreen> {
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Got it'),
+            child: Text('Got it'.tr),
           ),
         ],
       ),
@@ -503,11 +520,11 @@ class _SupportScreenState extends State<SupportScreen> {
   }
 
   void _makePhoneCall() {
-    ToastUtils.showInfo(context, 'Calling +91 98765 43210...');
+    ToastUtils.showInfo(context, 'Calling +91 98765 43210...'.tr);
   }
 
   void _callEmergency() {
-    ToastUtils.showError(context, 'Calling emergency support...');
+    ToastUtils.showError(context, 'Calling emergency support...'.tr);
   }
 }
 
@@ -522,8 +539,7 @@ class RaiseSupportTicketSheet extends StatefulWidget {
 class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
   final TextEditingController _issueController = TextEditingController();
   String _selectedPriority = 'Medium';
-
-  final priorities = ['Low', 'Medium', 'High', 'Critical'];
+  final List<String> _priorityKeys = ['Low', 'Medium', 'High', 'Critical'];
 
   @override
   void initState() {
@@ -569,28 +585,29 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
           ),
 
           // Title
-          const Text('Raise a Support Ticket', style: AppTheme.headingMedium),
+          Text('Raise a Support Ticket'.tr, style: AppTheme.headingMedium),
           const SizedBox(height: 6),
-          const Text(
-            'Tell us what went wrong. Our team will get back to you shortly.',
+          Text(
+            'Tell us what went wrong. Our team will get back to you shortly.'
+                .tr,
             style: AppTheme.bodySmall,
           ),
 
           const SizedBox(height: 24),
 
           // Priority selector
-          const Text('Priority', style: AppTheme.bodyMedium),
+          Text('Priority'.tr, style: AppTheme.bodyMedium),
           const SizedBox(height: 8),
 
           Wrap(
             spacing: 8,
-            children: priorities.map((priority) {
-              final isSelected = _selectedPriority == priority;
+            children: _priorityKeys.map((priorityKey) {
+              final isSelected = _selectedPriority == priorityKey;
               return ChoiceChip(
-                label: Text(priority),
+                label: Text(priorityKey.tr),
                 selected: isSelected,
                 onSelected: (_) {
-                  setState(() => _selectedPriority = priority);
+                  setState(() => _selectedPriority = priorityKey);
                 },
                 checkmarkColor: Colors.black,
                 selectedColor: AppTheme.primary.withOpacity(0.15),
@@ -605,7 +622,7 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
           const SizedBox(height: 24),
 
           // Issue description
-          const Text('Describe the issue', style: AppTheme.bodyMedium),
+          Text('Describe the issue'.tr, style: AppTheme.bodyMedium),
           const SizedBox(height: 8),
 
           TextField(
@@ -613,7 +630,7 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
             maxLines: 4,
             maxLength: 300,
             decoration: InputDecoration(
-              hintText: 'Please describe your issue in detail...',
+              hintText: 'Please describe your issue in detail...'.tr,
               filled: true,
               fillColor: Colors.grey.shade100,
               border: OutlineInputBorder(
@@ -638,7 +655,7 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('Submit Ticket'),
+              child: Text('Submit Ticket'.tr),
             ),
           ),
         ],
@@ -651,7 +668,7 @@ class _RaiseSupportTicketSheetState extends State<RaiseSupportTicketSheet> {
 
     ToastUtils.showSuccess(
       context,
-      'Ticket raised successfully! Our support team will contact you soon.',
+      'Ticket raised successfully! Our support team will contact you soon.'.tr,
     );
   }
 }
@@ -713,15 +730,15 @@ class _TicketHistorySheetState extends State<TicketHistorySheet>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Support Ticket History', style: AppTheme.headingMedium),
+          Text('Support Ticket History'.tr, style: AppTheme.headingMedium),
           const SizedBox(height: 12),
 
           TabBar(
             controller: _tabController,
             labelColor: AppTheme.primary,
-            tabs: const [
-              Tab(text: 'Active'),
-              Tab(text: 'Closed'),
+            tabs: [
+              Tab(text: 'Active'.tr),
+              Tab(text: 'Closed'.tr),
             ],
           ),
 
@@ -746,7 +763,7 @@ class _TicketHistorySheetState extends State<TicketHistorySheet>
     final filtered = tickets.where((t) => t.isClosed == isClosed).toList();
 
     if (filtered.isEmpty) {
-      return const Center(child: Text('No tickets found'));
+      return Center(child: Text('No tickets found'.tr));
     }
 
     return ListView.builder(
@@ -758,7 +775,7 @@ class _TicketHistorySheetState extends State<TicketHistorySheet>
           showDelete: isClosed,
           onDelete: () {
             setState(() => tickets.remove(ticket));
-            ToastUtils.showInfo(context, 'Ticket removed from history');
+            ToastUtils.showInfo(context, 'Ticket removed from history'.tr);
           },
         );
       },
@@ -790,7 +807,7 @@ class _TicketCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    ticket.issue,
+                    ticket.issue.tr,
                     style: AppTheme.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -807,10 +824,13 @@ class _TicketCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            Text('Priority: ${ticket.priority}', style: AppTheme.bodySmall),
+            Text(
+              '${'Priority'.tr}: ${ticket.priority.tr}',
+              style: AppTheme.bodySmall,
+            ),
             const SizedBox(height: 4),
             Text(
-              'Raised on: ${ticket.createdAt.day}/${ticket.createdAt.month}/${ticket.createdAt.year}',
+              '${'Raised on'.tr}: ${ticket.createdAt.day}/${ticket.createdAt.month}/${ticket.createdAt.year}',
               style: AppTheme.bodySmall,
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:farm_vest/core/services/api_services.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/core/services/visits_api_services.dart';
 import 'package:farm_vest/core/utils/navigation_helper.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
@@ -105,12 +106,12 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Book Your Visit'),
+        title: Text('Book Your Visit'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () => _showBookingHistory(),
-            tooltip: 'Booking History',
+            tooltip: 'Booking History'.tr,
           ),
         ],
         leading: IconButton(
@@ -188,7 +189,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Available Slots",
+                            "Available Slots".tr,
                             style: AppTheme.headingMedium.copyWith(
                               color: theme.colorScheme.onSurface,
                             ),
@@ -204,7 +205,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                                     : AppTheme.black87,
                               ),
                               label: Text(
-                                "View Pass",
+                                "View Pass".tr,
                                 style: TextStyle(
                                   color: isDark
                                       ? AppTheme.white
@@ -234,7 +235,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                           ),
                           error: (e, s) => Center(
                             child: Text(
-                              "Could not load slots. Please try again.",
+                              "Could not load slots. Please try again.".tr,
                             ),
                           ),
                           loading: () =>
@@ -258,8 +259,8 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                     const SizedBox(height: 16),
                     Text(
                       farmsAsync.isLoading
-                          ? "Loading farms..."
-                          : "Please select a farm to continue",
+                          ? "Loading farms...".tr
+                          : "Please select a farm to continue".tr,
                       style: AppTheme.bodyLarge.copyWith(color: Colors.grey),
                     ),
                   ],
@@ -297,14 +298,14 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Confirm Booking",
+                "Confirm Booking".tr,
                 style: AppTheme.headingMedium.copyWith(
                   color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                "You are booking a visit at ${_selectedFarm?.farmName ?? ''} on:",
+                "${'You are booking a visit at'.tr} ${_selectedFarm?.farmName ?? ''}:",
                 style: AppTheme.bodyMedium.copyWith(
                   color: theme.colorScheme.onSurface,
                 ),
@@ -357,9 +358,9 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    "Confirm & Generate pass",
-                    style: TextStyle(
+                  child: Text(
+                    "Confirm & Generate pass".tr,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -379,12 +380,12 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     final mobile = authState.mobileNumber;
 
     if (mobile == null) {
-      ToastUtils.showError(context, "User not identified");
+      ToastUtils.showError(context, "User not identified".tr);
       return;
     }
 
     if (_selectedFarm == null) {
-      ToastUtils.showError(context, "Please select a farm first");
+      ToastUtils.showError(context, "Please select a farm first".tr);
       return;
     }
 
@@ -436,7 +437,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
     } catch (e) {
       if (!mounted) return;
       Navigator.pop(context); // close loading
-      ToastUtils.showError(context, "Booking failed: ${e.toString()}");
+      ToastUtils.showError(context, "${'Booking failed'.tr}: ${e.toString()}");
     }
   }
 
@@ -453,15 +454,15 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
             children: [
               const Icon(Icons.check_circle, color: Colors.green, size: 64),
               const SizedBox(height: 16),
-              Text("Booking Confirmed!", style: AppTheme.headingMedium),
+              Text("Booking Confirmed!".tr, style: AppTheme.headingMedium),
               const SizedBox(height: 8),
-              Text("Here is your entry pass", style: AppTheme.bodyMedium),
+              Text("Here is your entry pass".tr, style: AppTheme.bodyMedium),
               const SizedBox(height: 24),
               _buildQrCode(visit),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text("Done"),
+                child: Text("Done".tr),
               ),
             ],
           ),
@@ -485,7 +486,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Your Entry Pass",
+                  "Your Entry Pass".tr,
                   style: AppTheme.headingMedium.copyWith(
                     color: isDark ? AppTheme.white : AppTheme.black87,
                   ),
@@ -504,7 +505,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                       ? "${visit.farmName}, ${visit.farmLocation}"
                       : (visit.farmName ??
                             visit.farmLocation ??
-                            "Unknown Farm"),
+                            "Unknown Farm".tr),
                   style: AppTheme.bodyMedium,
                 ),
                 const SizedBox(height: 24),
@@ -522,7 +523,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Close"),
+                    child: Text("Close".tr),
                   ),
                 ),
               ],
@@ -570,7 +571,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("My Bookings", style: AppTheme.headingMedium),
+                    Text("My Bookings".tr, style: AppTheme.headingMedium),
                     IconButton(
                       onPressed: () => ref.invalidate(myVisitsProvider),
                       icon: const Icon(Icons.refresh),
@@ -587,9 +588,9 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                       );
 
                       if (sortedVisits.isEmpty) {
-                        return const Center(
+                        return Center(
                           child: Text(
-                            "No bookings found",
+                            "No bookings found".tr,
                             style: TextStyle(color: Colors.grey),
                           ),
                         );
@@ -657,10 +658,10 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                                 ],
                               ),
                               trailing: isPast
-                                  ? const Chip(
+                                  ? Chip(
                                       label: Text(
-                                        "Completed",
-                                        style: TextStyle(fontSize: 10),
+                                        "Completed".tr,
+                                        style: const TextStyle(fontSize: 10),
                                       ),
                                     )
                                   : IconButton(
@@ -678,7 +679,7 @@ class _MonthlyVisitsScreenState extends ConsumerState<MonthlyVisitsScreen> {
                         },
                       );
                     },
-                    error: (e, s) => Center(child: Text("Error: $e")),
+                    error: (e, s) => Center(child: Text("${'Error'.tr}: $e")),
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
                   ),
