@@ -18,8 +18,8 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
   String selectedTab = "Buffalo Profile";
   final List<String> tabs = [
     "Buffalo Profile",
-    "Milk Production",
-    "Heat Cycle",
+    // "Milk Production",
+    // "Heat Cycle",
   ];
 
   String milkFilter = "Today";
@@ -55,8 +55,8 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 16),
-        _buildTabs(),
+        // const SizedBox(height: 16),
+        // _buildTabs(),
         const SizedBox(height: 16),
         Expanded(child: _buildTabContent()),
       ],
@@ -65,10 +65,10 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
 
   Widget _buildTabContent() {
     switch (selectedTab) {
-      case "Milk Production":
-        return _buildMilkProductionTab();
-      case "Heat Cycle":
-        return _buildHeatCycleTab();
+      // case "Milk Production":
+      //   return _buildMilkProductionTab();
+      // case "Heat Cycle":
+      //   return _buildHeatCycleTab();
       case "Buffalo Profile":
       default:
         return _buildBuffaloProfileTab();

@@ -199,17 +199,20 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
     }
   }
 
-  void _handleLogoTap() {
-    _tapResetTimer?.cancel();
-    _logoTapCount++;
-    if (_logoTapCount >= 5) {
-      _logoTapCount = 0;
-      _showDeveloperCodeDialog();
-    } else {
-      _tapResetTimer = Timer(const Duration(seconds: 2), () {
-        _logoTapCount = 0;
-      });
-    }
+  // void _handleLogoTap() {
+  //   _tapResetTimer?.cancel();
+  //   _logoTapCount++;
+  //   if (_logoTapCount >= 5) {
+  //     _logoTapCount = 0;
+  //     _showDeveloperCodeDialog();
+  //   } else {
+  //     _tapResetTimer = Timer(const Duration(seconds: 2), () {
+  //       _logoTapCount = 0;
+  //     });
+  //   }
+  // }
+  void _handleLogoLongPress() {
+    _showDeveloperCodeDialog();
   }
 
   void _showDeveloperCodeDialog() {
@@ -308,13 +311,14 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               // Header with back button
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 8,
+                  vertical: 0,
                 ),
                 child: Row(
                   children: [
@@ -385,10 +389,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                       ],
                     ),
                     child: GestureDetector(
-                      onTap: _handleLogoTap,
+                      onLongPress: _handleLogoLongPress,
                       child: Image.asset(
                         'assets/images/farmvest_logo.png',
-                        height: 100,
+                        height: 90,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) => Icon(
                           Icons.agriculture,
@@ -400,7 +404,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   ),
                 ),
 
-              const SizedBox(height: 20),
+              //const SizedBox(height: 20),
 
               // Title and subtitle
               AnimatedSwitcher(
@@ -419,7 +423,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                                 ? 'Verify Your Phone'.tr
                                 : 'Welcome Back'.tr),
                       style: const TextStyle(
-                        fontSize: 32,
+                        fontSize: 286,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.white,
                         letterSpacing: -0.5,
@@ -495,14 +499,17 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
             duration: const Duration(milliseconds: 400),
             child: _isOtpSent
                 ? _buildOtpDisplay(theme, isDark)
-                : Column(
-                    children: [
-                      _buildLoginTabs(theme, isDark),
-                      const SizedBox(height: 32),
-                      _isEmailLogin
-                          ? _buildEmailDisplay(theme, isDark)
-                          : _buildPhoneNumberDisplay(theme, isDark),
-                    ],
+                : ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 200),
+                    child: Column(
+                      children: [
+                        _buildLoginTabs(theme, isDark),
+                        const SizedBox(height: 32),
+                        _isEmailLogin
+                            ? _buildEmailDisplay(theme, isDark)
+                            : _buildPhoneNumberDisplay(theme, isDark),
+                      ],
+                    ),
                   ),
           ),
           const SizedBox(height: 40),
@@ -553,7 +560,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
               },
               borderRadius: BorderRadius.circular(20),
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
@@ -742,7 +749,12 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   keyboardType: TextInputType.phone,
                   maxLength: 10,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  onChanged: (value) => setState(() => _phoneNumber = value),
+                  onChanged: (value) {
+                    setState(() => _phoneNumber = value);
+                    if (value.length == 10) {
+                      _phoneFocusNode.unfocus();
+                    }
+                  },
                   onSubmitted: (_) => _handleContinue(),
 
                   style: TextStyle(
@@ -755,7 +767,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                     hintText: 'Enter Your Phone Number'.tr,
 
                     hintStyle: TextStyle(
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.normal,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                       letterSpacing: 2.0,
@@ -957,7 +969,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                   onChanged: (value) => setState(() => _email = value),
                   onSubmitted: (_) => _handleContinue(),
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onSurface,
                   ),
