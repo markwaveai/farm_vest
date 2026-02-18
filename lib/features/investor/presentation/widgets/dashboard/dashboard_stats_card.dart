@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/core/utils/svg_utils.dart';
 import 'package:farm_vest/features/investor/presentation/providers/investor_providers.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +57,7 @@ class DashboardStatsCard extends ConsumerWidget {
               child: _buildStatItem(
                 context,
                 value: data['count'] ?? '0',
-                label: 'Buffaloes',
+                label: ('Buffaloes'.tr),
                 icon: Icons.pets,
                 isSmallPhone: isSmallPhone,
                 isMediumPhone: isMediumPhone,
@@ -67,7 +68,7 @@ class DashboardStatsCard extends ConsumerWidget {
               child: _buildStatItem(
                 context,
                 value: data['calves'] ?? '0',
-                label: 'Calves',
+                label: ('Calves'.tr),
                 icon: SvgPicture.string(
                   SvgUtils.calvesSvg,
                   height: 26,
@@ -87,7 +88,7 @@ class DashboardStatsCard extends ConsumerWidget {
               child: _buildStatItem(
                 context,
                 value: data['assetValue'] ?? '0',
-                label: 'Asset Value',
+                label: ('Asset Value'.tr),
                 icon: Icons.account_balance,
                 isSmallPhone: isSmallPhone,
                 isMediumPhone: isMediumPhone,
@@ -98,7 +99,7 @@ class DashboardStatsCard extends ConsumerWidget {
               child: _buildStatItem(
                 context,
                 value: data['revenue']?.toString() ?? '₹0',
-                label: 'Revenue',
+                label: ('Revenue'.tr),
                 icon: Icons.trending_up,
                 isSmallPhone: isSmallPhone,
                 isMediumPhone: isMediumPhone,
@@ -118,7 +119,7 @@ class DashboardStatsCard extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            'Error: $err',
+            ('Error: $err'.tr),
             style: const TextStyle(fontSize: 12, color: Colors.red),
           ),
         ),

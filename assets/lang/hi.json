@@ -517,5 +517,31 @@
     "Failed to update profile": "प्रोफ़ाइल अपडेट करने में विफल",
     "My Profile": "मेरी प्रोफ़ाइल",
     "Language": "भाषा",
-    "Select Language": "भाषा चुनें"
+    "Select Language": "भाषा चुनें",
+    "Full Name": "पूरा नाम",
+    "Phone": "फोन",
+    "Address": "पता",
+    "Membership Since": "सदस्यता से",
+    "Please enter ": "कृपया इन्हें भरें",
+    "Buffaloes": "भैंस",
+    "Asset Value": "संस्थापना मूल्य",
+    "Revenue": "आय",
+    "Ear Tag": "ईयर टैग",
+    "Parking Slot": "पार्किंग स्लॉट",
+    "Vaccination": "टीकाकरण",
+    "Deworming": "डीवॉर्मिंग",
+    "Breeding": "प्रजनन",
+    "Feed": "चारा",
+    "Milking": "दूध",
+    "Monthly visit booking issue": "मासिक यात्रा किनारी बुकिंग अवसर",
+    "Ticket removed from history": "टिकट इतिहास से हटा दिया गया",
+    "Closed": "बंद",
+    "Live CCTV not loading": "लाइव कैटवी लोड नहीं हो रही",
+    "Ticket raised successfully! Our support team will contact you soon.": "टिकट सफलतापूर्वक जमा कर दिया! हमारी समर्थन टीम आपको जल्द ही संपर्क करेगी।",
+    "Please describe your issue in detail...": "कृपया अपनी समस्या विस्तार से बताएं...",
+    "How do I book a monthly visit?": "मैंने मासिक यात्रा किनारी कैसे करता हूं?",
+    "Go to Monthly Visits section, select an available slot, and confirm your booking. You can book up to 10 visits per month.": "मासिक यात्रा किनारी जानकारी लें, एक उपलब्ध स्लॉट चुनें और अपनी बुकिंग की जांच करें। आप प्रति मास 10 यात्रा किनारी बुकिंग कर सकते हैं।"
+   
+
+    
 }

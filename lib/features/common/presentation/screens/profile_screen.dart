@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/features/auth/data/models/user_model.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
@@ -123,8 +124,8 @@ class _CommonProfileScreenState extends ConsumerState<ProfileScreen> {
                 _isEditing = false;
               });
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Profile updated successfully"),
+                SnackBar(
+                  content: Text("Profile updated successfully".tr),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -132,8 +133,8 @@ class _CommonProfileScreenState extends ConsumerState<ProfileScreen> {
           } else {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Failed to update profile"),
+                 SnackBar(
+                  content: Text("Failed to update profile".tr),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -247,12 +248,12 @@ class _CommonProfileScreenState extends ConsumerState<ProfileScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        title: const Text('My Profile'),
+        title: Text('My Profile'.tr),
         actions: [
           IconButton(
             icon: Icon(_isEditing ? Icons.save : Icons.edit),
             onPressed: _isSaving ? null : _toggleEdit,
-            tooltip: _isEditing ? 'Save Changes' : 'Edit Profile',
+            tooltip: _isEditing ? 'Save Changes'.tr : 'Edit Profile'.tr,
           ),
         ],
       ),

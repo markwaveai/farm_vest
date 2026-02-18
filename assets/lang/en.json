@@ -517,5 +517,20 @@
     "Failed to update profile": "Failed to update profile",
     "My Profile": "My Profile",
     "Language": "Language",
-    "Select Language": "Select Language"
+    "Select Language": "Select Language",
+    "Full Name": "Full Name",
+    "Phone": "Phone",
+    "Address": "Address",
+    "Membership Since": "Membership Since",
+    "Please enter ": "Please enter",
+    "Buffaloes": "Buffaloes",
+    "Asset Value": "Asset Value",
+    "Revenue": "Revenue",
+    "Ear Tag": "Ear Tag",
+    "Parking Slot": "Parking Slot",
+    "Vaccination": "Vaccination",
+    "Deworming": "Deworming",
+    "Breeding": "Breeding",
+    "Feed": "Feed",
+    "Milking": "Milking"
 }

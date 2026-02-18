@@ -1,3 +1,4 @@
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -305,7 +306,7 @@ class BuffaloCard extends StatelessWidget {
           // RFID
           // if (rfid.isNotEmpty) ...[
           _buildInfoRow(
-            'RFID',
+            ('RFID'.tr),
             (animal.rfid?.isNotEmpty ?? false)
                 ? animal.rfid!.toUpperCase()
                 : kHyphen,
@@ -318,7 +319,7 @@ class BuffaloCard extends StatelessWidget {
           // Neck Band ID
           // if (neckBandId.isNotEmpty) ...[
           _buildInfoRow(
-            'Neck Band ID',
+            ('Neck Band ID'.tr),
             (animal.neckBandId?.isNotEmpty ?? false)
                 ? animal.neckBandId!.toUpperCase()
                 : kHyphen,
@@ -328,7 +329,7 @@ class BuffaloCard extends StatelessWidget {
           SizedBox(height: rowGap),
           // ],
           _buildInfoRow(
-            'Ear Tag',
+            ('Ear Tag'.tr),
             (animal.earTagId?.isNotEmpty ?? false)
                 ? animal.earTagId!.toUpperCase()
                 : kHyphen,
@@ -355,7 +356,7 @@ class BuffaloCard extends StatelessWidget {
 
           // Farm
           _buildInfoRow(
-            'Farm',
+            ('Farm'.tr),
             (animal.farmName?.isNotEmpty ?? false) ? animal.farmName! : kHyphen,
             isDark: isDark,
             fontSize: fontSize,
@@ -364,7 +365,7 @@ class BuffaloCard extends StatelessWidget {
 
           // Shed
           _buildInfoRow(
-            'Shed',
+            ('Shed'.tr),
             (animal.shedName?.isNotEmpty ?? false) ? animal.shedName! : kHyphen,
             isDark: isDark,
             fontSize: fontSize,
@@ -372,7 +373,7 @@ class BuffaloCard extends StatelessWidget {
           SizedBox(height: rowGap),
           //PARKING SLOT
           _buildInfoRow(
-            'Parking Slot',
+            ('Parking Slot'.tr),
             (animal.parkingId?.isNotEmpty ?? false)
                 ? animal.parkingId!.toUpperCase()
                 : kHyphen,
@@ -382,7 +383,7 @@ class BuffaloCard extends StatelessWidget {
           SizedBox(height: rowGap),
           // Location
           _buildInfoRow(
-            'Location',
+            ('Location'.tr),
             (animal.farmLocation?.isNotEmpty ?? false)
                 ? animal.farmLocation!.toUpperCase()
                 : kHyphen,
@@ -497,7 +498,7 @@ class BuffaloCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                'RFID',
+                ('RFID'.tr),
                 style: TextStyle(
                   fontSize: badgeFont,
                   color: AppTheme.primary,
@@ -596,7 +597,7 @@ class BuffaloCard extends StatelessWidget {
             Icon(Icons.pets, size: iconSize, color: AppTheme.white),
             SizedBox(width: isSmallPhone ? 3 : 4),
             Text(
-              'Calves',
+              ('Calves'.tr),
               style: TextStyle(
                 color: AppTheme.white,
                 fontSize: fontSize,
@@ -642,7 +643,7 @@ class BuffaloCard extends StatelessWidget {
             Icon(Icons.videocam, size: iconSize, color: AppTheme.white),
             SizedBox(width: isSmallPhone ? 3 : 4),
             Text(
-              'Live',
+              ('Live'.tr),
               style: TextStyle(
                 color: AppTheme.white,
                 fontSize: fontSize,

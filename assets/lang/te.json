@@ -517,5 +517,24 @@
     "Failed to update profile": "ప్రొఫైల్ అప్‌డేట్ చేయడంలో విఫలమైంది",
     "My Profile": "నా ప్రొఫైల్",
     "Language": "భాష",
-    "Select Language": "భాషను ఎంచుకోండి"
+    "Select Language": "భాషను ఎంచుకోండి",
+    "Full Name": "పూర్తి పేరు",
+    "Phone": "ఫోన్",
+    "Address": "పటా",
+    "Membership Since": "సదస్యత సే",
+    "Please enter ": "ప్రస్తుతి ఇంచండి",
+    "Buffaloes": "భైంస",
+    "Asset Value": "సంస్థాపన మూలయ",
+    "Revenue": "ప్రకారం",
+    "Ear Tag": "ఇయర్ ట్యాగ్",
+    "Parking Slot": "పార్కింగ్ స్లాట్",
+    "Vaccination": "టీకాకరణ",
+    "Deworming": "డీవార్మింగ్",
+    "Breeding": "ప్రజనన",
+    "Feed": "చారా",
+    "Milking": "పాలు",
+    "Monthly visit booking issue": "మాసిక యాత్రా కినారి బుకింగ్ అవసర"
+    
+
+
 }

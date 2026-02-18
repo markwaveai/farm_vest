@@ -4,6 +4,7 @@ import 'package:farm_vest/core/services/biometric_service.dart'
     show BiometricService;
 import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:farm_vest/core/utils/image_helper_compressor.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/features/investor/presentation/widgets/support/chat_bubble.dart';
 import 'package:farm_vest/features/investor/presentation/widgets/support/typing_indicator.dart';
 import 'package:flutter/material.dart';
@@ -25,12 +26,12 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<ChatMessage> _messages = [
     ChatMessage(
       text:
-          "Please stay on the chat screen. The next available representative will join shortly.",
+          ("Please stay on the chat screen. The next available representative will join shortly.".tr),
       type: MessageType.system,
       time: DateTime.now(),
     ),
     ChatMessage(
-      text: "Hi, my name is Durga, and I am here to assist you.",
+      text: ("Hi, my name is Durga, and I am here to assist you.".tr),
       type: MessageType.ai,
       time: DateTime.now(),
     ),
@@ -62,7 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
         _isTyping = false;
         _messages.add(
           ChatMessage(
-            text: "Thanks for sharing. I’m checking this now.",
+            text:( "Thanks for sharing. I’m checking this now.".tr),
             type: MessageType.ai,
             time: DateTime.now(),
           ),
@@ -75,19 +76,19 @@ class _ChatScreenState extends State<ChatScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('End Chat'),
-        content: const Text('Are you sure you want to end this session?'),
+        title:  Text('End Chat'.tr),
+        content:  Text('Are you sure you want to end this session?'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child:  Text('Cancel'.tr),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog
               Navigator.pop(context); // Close chat screen
             },
-            child: const Text('End Chat', style: TextStyle(color: Colors.red)),
+            child:  Text('End Chat'.tr, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -98,12 +99,12 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat with us"),
+        title:  Text("Chat with us".tr),
         actions: [
           TextButton(
             onPressed: _endChat,
-            child: const Text(
-              "End Chat",
+            child:  Text(
+              "End Chat".tr,
               style: TextStyle(color: Colors.orange),
             ),
           ),
@@ -180,7 +181,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: TextField(
                 controller: _controller,
                 decoration: InputDecoration(
-                  hintText: "Start typing your message",
+                  hintText: "Start typing your message".tr,
                   border: InputBorder.none,
                   isDense: true,
                 ),
@@ -233,7 +234,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to pick image')));
+      ).showSnackBar(SnackBar(content: Text('Failed to pick image'.tr)));
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/features/auth/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +40,7 @@ class ProfileInfoCard extends StatelessWidget {
           _buildFormField(
             theme: theme,
             isDark: isDark,
-            label: 'Full Name',
+            label: ('Full Name'.tr),
             controller: nameController,
             icon: Icons.person,
             enabled: isEditing,
@@ -48,7 +49,7 @@ class ProfileInfoCard extends StatelessWidget {
           _buildFormField(
             theme: theme,
             isDark: isDark,
-            label: 'Email',
+            label: ('Email'.tr),
             controller: emailController,
             icon: Icons.email,
             enabled: isEditing,
@@ -57,7 +58,7 @@ class ProfileInfoCard extends StatelessWidget {
           _buildFormField(
             theme: theme,
             isDark: isDark,
-            label: 'Phone',
+            label: ('Phone'.tr),
             controller: phoneController,
             icon: Icons.phone,
             enabled: false,
@@ -66,7 +67,7 @@ class ProfileInfoCard extends StatelessWidget {
           _buildFormField(
             theme: theme,
             isDark: isDark,
-            label: 'Address',
+            label: ('Address'.tr),
             controller: addressController,
             icon: Icons.location_on,
             maxLines: 2,
@@ -79,7 +80,7 @@ class ProfileInfoCard extends StatelessWidget {
             _buildReadOnlyField(
               theme: theme,
               isDark: isDark,
-              label: 'Membership Since',
+              label: ('Membership Since'.tr),
               value: membershipDate,
               icon: Icons.calendar_today,
             ),
@@ -129,7 +130,7 @@ class ProfileInfoCard extends StatelessWidget {
       readOnly: !enabled,
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Please enter $label';
+          return 'Please enter $label'.tr;
         }
         return null;
       },

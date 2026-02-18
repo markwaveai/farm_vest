@@ -1,3 +1,4 @@
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/core/utils/toast_utils.dart';
 import 'package:farm_vest/core/services/animal_api_services.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
@@ -87,7 +88,7 @@ class _InvestorDashboardScreenState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'My Buffaloes',
+                        ('My Buffaloes'.tr),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -112,9 +113,9 @@ class _InvestorDashboardScreenState
               buffalosAsync.when(
                 data: (data) {
                   if (data.isEmpty) {
-                    return const SliverFillRemaining(
+                    return SliverFillRemaining(
                       hasScrollBody: false,
-                      child: Center(child: Text('No buffaloes found')),
+                      child: Center(child: Text('No buffaloes found'.tr)),
                     );
                   }
 
@@ -205,7 +206,7 @@ class _InvestorDashboardScreenState
     String? buffaloId,
   ) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Invoice feature coming soon available")),
+       SnackBar(content: Text("Invoice feature coming soon available".tr)),
     );
   }
 
@@ -221,7 +222,7 @@ class _InvestorDashboardScreenState
     }
 
     if (!context.mounted) return;
-    ToastUtils.showInfo(context, "Fetching calves...");
+    ToastUtils.showInfo(context, "Fetching calves".tr);
 
     try {
       final response = await AnimalApiServices.getCalves(
@@ -234,7 +235,7 @@ class _InvestorDashboardScreenState
       final List<InvestorAnimal> calves = response.data;
 
       if (calves.isEmpty) {
-        ToastUtils.showInfo(context, "No calves found for this buffalo.");
+        ToastUtils.showInfo(context, "No calves found for this buffalo".tr);
         return;
       }
 
@@ -250,7 +251,7 @@ class _InvestorDashboardScreenState
       );
     } catch (e) {
       if (context.mounted) {
-        ToastUtils.showError(context, "Failed to fetch calves: $e");
+        ToastUtils.showError(context, "Failed to fetch calves: $e".tr);
       }
     }
   }

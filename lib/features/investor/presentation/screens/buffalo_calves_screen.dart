@@ -1,4 +1,5 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:farm_vest/core/theme/app_constants.dart';
@@ -35,12 +36,12 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
         animalId: widget.parentId,
         rfid: kHyphen, // Don't use ID as RFID
         images: const [],
-        farmName: 'FarmVest Unit',
+        farmName: ('FarmVest Unit'.tr),
         farmLocation: '',
-        shedName: 'Checking...',
+        shedName: ('Checking...'.tr),
         shedId: 0,
-        animalType: 'Buffalo',
-        healthStatus: 'Unknown',
+        animalType: ('Buffalo'.tr),
+        healthStatus: ('Unknown'.tr),
       );
     }
   }
@@ -58,7 +59,7 @@ class _BuffaloCalvesScreenState extends State<BuffaloCalvesScreen> {
           ? AppTheme.darkSurfaceVariant
           : AppTheme.lightGrey,
       appBar: AppBar(
-        title: Text('Lineage: ${widget.parent?.rfid ?? widget.parentId}'),
+        title: Text('Lineage: ${widget.parent?.rfid ?? widget.parentId}'.tr),
         centerTitle: true,
         backgroundColor: isDark ? AppTheme.darkSurfaceVariant : Colors.white,
         elevation: 1,
@@ -184,8 +185,8 @@ class _RecursiveTreeBuilder extends StatelessWidget {
                   color: AppTheme.primary,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
-                  'PARENT',
+                child: Text(
+                  'PARENT'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 10,

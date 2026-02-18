@@ -1,4 +1,5 @@
 import 'package:farm_vest/core/theme/app_constants.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +32,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Unit Details'),
+          title: Text('Unit Details'.tr),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => NavigationHelper.safePopOrNavigate(
@@ -177,7 +178,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                             ],
                           ),
                           child: Text(
-                            animal?.healthStatus.toUpperCase() ?? 'UNKNOWN',
+                            animal?.healthStatus.toUpperCase() ?? 'UNKNOWN'.tr,
                             style: const TextStyle(
                               color: AppTheme.white,
                               fontSize: 12,
@@ -194,7 +195,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
 
               // Unit Information
               Text(
-                'Unit Information',
+                'Unit Information'.tr,
                 style: AppTheme.headingMedium.copyWith(
                   color: isDark ? Colors.white : Colors.black,
                 ),
@@ -207,55 +208,55 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                 _buildInfoRow(context, 'RFID:', animal?.rfid ?? kHyphen),
                 _buildInfoRow(
                   context,
-                  'Neck Band ID:',
+                  ('Neck Band ID:'.tr),
                   animal?.neckBandId?.isEmpty == true
                       ? kHyphen
                       : animal?.neckBandId ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Ear Tag ID:',
+                  ('Ear Tag ID:'.tr),
                   animal?.earTagId?.isEmpty == true
                       ? kHyphen
                       : animal?.earTagId ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Age:',
+                  ('Age:'.tr),
                   animal?.age != null ? '${animal!.age} Months' : kHyphen,
                 ),
 
                 _buildInfoRow(
                   context,
-                  'Breed Type:',
+                  ('Breed Type:'.tr),
                   animal?.breed?.isEmpty == true
                       ? kHyphen
                       : animal?.breed ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Farm Name:',
+                  ('Farm Name:'.tr),
                   animal?.farmName?.isEmpty == true
                       ? kHyphen
                       : animal?.farmName ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Shed Name:',
+                  ('Shed Name:'.tr),
                   animal?.shedName?.toString() == null
                       ? kHyphen
                       : animal?.shedName.toString() ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Parking ID:',
+                  ('Parking ID:'.tr),
                   animal?.parkingId?.isEmpty == true
                       ? kHyphen
                       : animal?.parkingId ?? kHyphen,
                 ),
                 _buildInfoRow(
                   context,
-                  'Location:',
+                  ('Location:'.tr),
                   animal?.farmLocation?.isEmpty == true
                       ? kHyphen
                       : animal?.farmLocation ?? kHyphen,
@@ -263,7 +264,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
                 if (animal?.onboardedAt != null)
                   _buildInfoRow(
                     context,
-                    'Onboarded At:',
+                    ('Onboarded At:'.tr),
                     animal?.onboardedAt != null
                         ? DateFormat('dd MMM yyyy').format(animal!.onboardedAt!)
                         : kHyphen,
@@ -273,7 +274,7 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
 
               // Health Summary
               Text(
-                'Health Summary',
+                ('Health Summary'.tr),
                 style: AppTheme.headingMedium.copyWith(
                   color: isDark ? Colors.white : Colors.black,
                 ),
@@ -407,30 +408,30 @@ class _UnitDetailsScreenState extends State<UnitDetailsScreen> {
 
   Widget _buildAlertsGrid(BuildContext context) {
     final alerts = [
-      {'label': 'Heat Detection', 'icon': Icons.whatshot, 'isOrange': true},
+      {'label': 'Heat Detection'.tr, 'icon': Icons.whatshot, 'isOrange': true},
       {
-        'label': 'Posture Alerts',
+        'label': 'Posture Alerts'.tr,
         'icon': Icons.accessibility_new,
         'isOrange': false,
       },
       {
-        'label': 'Activity Alerts',
+        'label': 'Activity Alerts'.tr,
         'icon': Icons.directions_run,
         'isOrange': false,
       },
       {
-        'label': 'Rumination Alerts',
+        'label': 'Rumination Alerts'.tr,
         'icon': Icons.restaurant,
         'isOrange': false,
       },
-      {'label': 'Health Alerts', 'icon': Icons.monitor_heart, 'isOrange': true},
+      {'label': 'Health Alerts'.tr, 'icon': Icons.monitor_heart, 'isOrange': true},
       {
-        'label': 'Temperature Alerts',
+        'label': 'Temperature Alerts'.tr,
         'icon': Icons.thermostat,
         'isOrange': true,
       },
       {
-        'label': 'Vaccination Alerts',
+        'label': 'Vaccination Alerts'.tr,
         'icon': Icons.medical_services,
         'isOrange': false,
       },
