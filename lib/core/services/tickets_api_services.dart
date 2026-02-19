@@ -262,4 +262,32 @@ class TicketsApiServices {
       return 0;
     }
   }
+
+  static Future<List<Map<String, dynamic>>> getAssistants({
+    required String token,
+  }) async {
+    try {
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/doctor/get_my_assistants",
+      ).replace(queryParameters: {'role': 'ASSISTANT_DOCTOR'});
+
+      final response = await http.get(
+        uri,
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['data'] != null) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+      }
+      return [];
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
 }

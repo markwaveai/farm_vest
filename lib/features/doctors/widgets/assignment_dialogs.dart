@@ -1,7 +1,10 @@
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:farm_vest/core/services/tickets_api_services.dart';
+import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AssignTicketDialog extends StatefulWidget {
+class AssignTicketDialog extends ConsumerStatefulWidget {
   final String ticketId;
   final String buffaloId;
   final Function(String assistantName) onAssign;
@@ -14,17 +17,40 @@ class AssignTicketDialog extends StatefulWidget {
   });
 
   @override
-  State<AssignTicketDialog> createState() => _AssignTicketDialogState();
+  ConsumerState<AssignTicketDialog> createState() => _AssignTicketDialogState();
 }
 
-class _AssignTicketDialogState extends State<AssignTicketDialog> {
-  String? _selectedAssistant;
-  final List<String> _assistants = [
-    'Dr. Sudheer',
-    'Dr. Rajesh',
-    'Dr. Priya',
-    'Dr. Amit',
-  ]; // Mock data
+class _AssignTicketDialogState extends ConsumerState<AssignTicketDialog> {
+  String? _selectedAssistantId;
+  List<Map<String, dynamic>> _assistants = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAssistants();
+  }
+
+  Future<void> _fetchAssistants() async {
+    final token = await ref.read(authProvider.notifier).getToken();
+    if (token == null) return;
+
+    try {
+      final assistants = await TicketsApiServices.getAssistants(token: token);
+      if (mounted) {
+        setState(() {
+          _assistants = assistants;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,50 +86,61 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
                 const SizedBox(height: 8),
                 _buildDetailRow('Buffalo:', widget.buffaloId),
                 const SizedBox(height: 24),
-                DropdownButtonFormField<String>(
-                  value: _selectedAssistant,
-                  decoration: InputDecoration(
-                    labelText: 'Assign to',
-                    labelStyle: TextStyle(color: Theme.of(context).hintColor),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white12
-                            : Colors.grey.shade300,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white12
-                            : Colors.grey.shade300,
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                  ),
-                  items: _assistants.map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        value,
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : DropdownButtonFormField<String>(
+                        value: _selectedAssistantId,
+                        decoration: InputDecoration(
+                          labelText: 'Assign to',
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).hintColor,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white12
+                                  : Colors.grey.shade300,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white12
+                                  : Colors.grey.shade300,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
+                        ),
+                        items: _assistants.map((assistant) {
+                          final name = '${assistant["name"]}';
+                          return DropdownMenuItem<String>(
+                            value: assistant['id'].toString(),
+                            child: Text(
+                              name,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedAssistantId = newValue;
+                          });
+                        },
+                        dropdownColor: Theme.of(context).cardColor,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedAssistant = newValue;
-                    });
-                  },
-                  dropdownColor: Theme.of(context).cardColor,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
                 const SizedBox(height: 24),
                 Row(
                   children: [
@@ -124,16 +161,23 @@ class _AssignTicketDialogState extends State<AssignTicketDialog> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: _selectedAssistant != null
+                        onPressed: _selectedAssistantId != null
                             ? () {
-                                final selected = _selectedAssistant!;
-                                widget.onAssign(selected);
+                                final selectedAssistant = _assistants
+                                    .firstWhere(
+                                      (a) =>
+                                          a['id'].toString() ==
+                                          _selectedAssistantId,
+                                    );
+                                final assistantName =
+                                    '${selectedAssistant["first_name"]} ${selectedAssistant["last_name"]}';
+                                widget.onAssign(assistantName);
                                 Navigator.pop(context);
                                 showDialog(
                                   context: context,
                                   builder: (context) => AssignmentSuccessDialog(
                                     ticketId: widget.ticketId,
-                                    assignedTo: selected,
+                                    assignedTo: assistantName,
                                   ),
                                 );
                               }
