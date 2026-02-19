@@ -6,6 +6,7 @@ import 'package:farm_vest/core/theme/app_theme.dart';
 
 import 'package:farm_vest/features/investor/data/models/investor_animal_model.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/farm_manager_provider.dart';
+import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/staff_list_provider.dart';
 import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
@@ -417,6 +418,13 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
         role: UserType.farmManager,
         currentIndex: _currentIndex,
         onTap: (index) {
+          if (index == 0) {
+            // Reset Onboarding state when switching to it
+            ref.read(farmManagerProvider.notifier).clearOrder();
+          } else if (index == 3) {
+            // Reset Buffalo Profile search when switching to it
+            ref.read(animalSearchQueryProvider.notifier).state = 'all';
+          }
           setState(() => _currentIndex = index);
         },
       ),
