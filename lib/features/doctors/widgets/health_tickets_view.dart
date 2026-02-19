@@ -43,6 +43,16 @@ class _HealthTicketsViewState extends ConsumerState<HealthTicketsView> {
   }
 
   @override
+  void didUpdateWidget(HealthTicketsView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialFilter != oldWidget.initialFilter) {
+      setState(() {
+        selectedFilter = widget.initialFilter;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final healthState = ref.watch(doctorsProvider);
     final tickets = widget.ticketType == 'VACCINATION'
@@ -77,8 +87,7 @@ class _HealthTicketsViewState extends ConsumerState<HealthTicketsView> {
                     itemBuilder: (context, index) {
                       final ticket = filteredTickets[index];
                       return HealthTicketCard(
-                        ticketId:
-                            "${ticket.animalId ?? 'Animal'}-${ticket.description}",
+                        ticketId: ticket.animalId ?? 'Animal',
                         description: ticket.description,
                         timeAgo: ticket.createdAt != null
                             ? DateFormat(

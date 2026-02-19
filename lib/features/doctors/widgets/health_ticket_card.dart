@@ -117,36 +117,22 @@ class HealthTicketCard extends StatelessWidget {
                 ? Colors.white12
                 : AppTheme.grey1,
           ),
-          const SizedBox(height: 12),
+         const SizedBox(height: 12),
           Row(
             children: [
-              _iconText(context, Icons.remove_red_eye, "View Profile"),
-              const SizedBox(width: 20),
-              GestureDetector(
-                onTap: onActionTap,
-                child: _iconText(
-                  context,
-                  isVaccination
-                      ? Icons.vaccines_outlined
-                      : Icons.medical_services_outlined,
-                  isVaccination ? "Add Vaccine" : "Treatment",
-                ),
-              ),
-              const Spacer(),
-              _statusChip(context),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _cardBottom(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-      child: Row(
-        children: [
-          GestureDetector(
+              // _iconText(context, Icons.remove_red_eye, "View Profile"),
+              // const SizedBox(width: 20),
+              // GestureDetector(
+              //   onTap: onActionTap,
+              //   child: _iconText(
+              //     context,
+              //     isVaccination
+              //         ? Icons.vaccines_outlined
+              //         : Icons.medical_services_outlined,
+              //     isVaccination ? "Add Vaccine" : "Treatment",
+              //   ),
+              // ),
+               GestureDetector(
             onTap: onViewDetailsTap,
             child: _iconText(
               context,
@@ -154,28 +140,54 @@ class HealthTicketCard extends StatelessWidget {
               "Ticket Details",
             ),
           ),
+              const Spacer(),
+              _statusChip(context),
+            ],
+         ),
+         ],
+      ),
+    );
+  }
+
+  Widget _cardBottom(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+      child: Center(
+        child:
+          // GestureDetector(
+          //   onTap: onViewDetailsTap,
+          //   child: _iconText(
+          //     context,
+          //     Icons.confirmation_num_outlined,
+          //     "Ticket Details",
+          //   ),
+         // ),
           // const Spacer(),
-          if (onAssignTap != null) ...[
-            SizedBox(width: 20),
+          onAssignTap != null?
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.darkPrimary,
+                 minimumSize: const Size(100, 35), 
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 6,
+              ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               onPressed: onAssignTap,
               child: Text(
                 "Assign",
-                style: TextStyle(
+                style: TextStyle(fontSize: 16,
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Theme.of(context).colorScheme.onSurface
                       : Colors.white,
                 ),
               ),
-            ),
-          ],
-        ],
+            ):const SizedBox(),
+          
+        
       ),
     );
   }

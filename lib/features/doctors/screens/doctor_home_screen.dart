@@ -21,6 +21,7 @@ class DoctorHomeScreen extends ConsumerStatefulWidget {
 
 class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
   int _currentIndex = 4;
+  String _selectedFilter = "All";
 
   @override
   void initState() {
@@ -167,14 +168,23 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
           : _currentIndex == 2
           ? const TransferTicketsView()
           : _currentIndex == 1
-          ? const HealthTicketsView(ticketType: 'VACCINATION')
+          ? HealthTicketsView(
+              ticketType: 'VACCINATION',
+              initialFilter: _selectedFilter,
+            )
           : _currentIndex == 0
-          ? const HealthTicketsView(ticketType: 'HEALTH')
+          ? HealthTicketsView(
+              ticketType: 'HEALTH',
+              initialFilter: _selectedFilter,
+            )
           : _buildDashboard(healthState, healthCounts, vaccinationCounts),
       bottomNavigationBar: EmployeeBottomNavigation(
         role: UserType.doctor,
         currentIndex: _currentIndex,
         onTap: (index) {
+          if (index == 0 || index == 1) {
+            _selectedFilter = "All";
+          }
           setState(() => _currentIndex = index);
         },
       ),
@@ -250,7 +260,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 ),
                 backgroundColor: AppTheme.primary,
                 isLoading: healthState.isLoading,
-                onTap: () => setState(() => _currentIndex = 0),
+                onTap: () => setState(() {
+                  _selectedFilter = "All";
+                  _currentIndex = 0;
+                }),
               ),
               DashboardStatCard(
                 title: 'Pending Tickets',
@@ -263,7 +276,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 ),
                 backgroundColor: AppTheme.orange,
                 isLoading: healthState.isLoading,
-                onTap: () => setState(() => _currentIndex = 0),
+                onTap: () => setState(() {
+                  _selectedFilter = "Pending";
+                  _currentIndex = 0;
+                }),
               ),
               DashboardStatCard(
                 title: 'In Progress Tickets',
@@ -276,7 +292,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 ),
                 backgroundColor: AppTheme.lightPrimary,
                 isLoading: healthState.isLoading,
-                onTap: () => setState(() => _currentIndex = 0),
+                onTap: () => setState(() {
+                  _selectedFilter = "In progress";
+                  _currentIndex = 0;
+                }),
               ),
               DashboardStatCard(
                 title: 'Completed Tickets',
@@ -289,7 +308,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 ),
                 backgroundColor: AppTheme.lightGreen,
                 isLoading: healthState.isLoading,
-                onTap: () => setState(() => _currentIndex = 0),
+                onTap: () => setState(() {
+                  _selectedFilter = "Completed";
+                  _currentIndex = 0;
+                }),
               ),
             ]),
             const SizedBox(height: 24),
@@ -309,7 +331,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 ),
                 backgroundColor: AppTheme.successGreen,
                 isLoading: healthState.isLoading,
-                onTap: () => setState(() => _currentIndex = 1),
+                onTap: () => setState(() {
+                  _selectedFilter = "All";
+                  _currentIndex = 1;
+                }),
               ),
               DashboardStatCard(
                 title: 'Pending Tickets',
@@ -321,7 +346,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 ),
                 backgroundColor: AppTheme.orange,
                 isLoading: healthState.isLoading,
-                onTap: () => setState(() => _currentIndex = 1),
+                onTap: () => setState(() {
+                  _selectedFilter = "Pending";
+                  _currentIndex = 1;
+                }),
               ),
               DashboardStatCard(
                 title: 'In Progress Tickets',
@@ -336,7 +364,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 ),
                 backgroundColor: AppTheme.lightPrimary,
                 isLoading: healthState.isLoading,
-                onTap: () => setState(() => _currentIndex = 1),
+                onTap: () => setState(() {
+                  _selectedFilter = "In progress";
+                  _currentIndex = 1;
+                }),
               ),
               DashboardStatCard(
                 title: 'Completed Tickets',
@@ -352,7 +383,10 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
                 ),
                 backgroundColor: AppTheme.lightGreen,
                 isLoading: healthState.isLoading,
-                onTap: () => setState(() => _currentIndex = 1),
+                onTap: () => setState(() {
+                  _selectedFilter = "Completed";
+                  _currentIndex = 1;
+                }),
               ),
             ]),
           ],
@@ -380,9 +414,15 @@ class _DoctorHomeScreenState extends ConsumerState<DoctorHomeScreen> {
         TextButton(
           onPressed: () {
             if (ticketType == 'VACCINATION') {
-              setState(() => _currentIndex = 1);
+              setState(() {
+                _selectedFilter = "All";
+                _currentIndex = 1;
+              });
             } else {
-              setState(() => _currentIndex = 0);
+              setState(() {
+                _selectedFilter = "All";
+                _currentIndex = 0;
+              });
             }
           },
           style: TextButton.styleFrom(

@@ -331,8 +331,8 @@ class TicketDetailsBottomSheet extends StatelessWidget {
             Expanded(
               child: _infoItem(
                 context,
-                'Shed ID',
-                'Shed 03',
+                'SHED NAME',
+                'SHED NAME ',
                 Icons.location_on_outlined,
               ),
             ),
