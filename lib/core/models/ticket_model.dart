@@ -30,7 +30,12 @@ class Ticket {
       animalId: json['animal_id']?.toString(),
       rfid: json['rfid']?.toString(),
       createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
+          ? DateTime.tryParse(
+              json['created_at'].toString().contains('Z') ||
+                      json['created_at'].toString().contains('+')
+                  ? json['created_at']
+                  : '${json['created_at']}Z',
+            )
           : null,
       priority: json['priority'],
       metadata:

@@ -81,7 +81,9 @@ class _HealthTicketsViewState extends ConsumerState<HealthTicketsView> {
                             "${ticket.animalId ?? 'Animal'}-${ticket.description}",
                         description: ticket.description,
                         timeAgo: ticket.createdAt != null
-                            ? DateFormat('hh:mm a').format(ticket.createdAt!)
+                            ? DateFormat(
+                                'hh:mm a',
+                              ).format(ticket.createdAt!.toLocal())
                             : "Recently",
                         status: ticket.status,
                         isVaccination: widget.ticketType == 'VACCINATION',
