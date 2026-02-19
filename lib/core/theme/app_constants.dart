@@ -22,7 +22,7 @@ class AppConstants {
   // static String localUrl = 'http://192.168.0.226:8000/api'; // For Physical Device (Your IP)
 
   static String animalKartStagingApiUrl =
-      'https://animalkart-stagging-jn6cma3vvq-el.a.run.app';
+      'https://animalkart-stagging-612299373064.asia-south1.run.app';
   static String animalKartLiveApiUrl =
       'https://animalkart-live-apis-jn6cma3vvq-el.a.run.app';
 

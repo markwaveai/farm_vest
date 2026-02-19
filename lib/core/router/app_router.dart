@@ -41,6 +41,7 @@ import 'package:farm_vest/features/employee/presentation/screens/raise_ticket_sc
 import 'package:farm_vest/features/investor/presentation/screens/investor_dashboard_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/profile_Screens/support_screen.dart';
 import 'package:farm_vest/features/investor/presentation/screens/unit_details_screen.dart';
+import 'package:farm_vest/features/investor/presentation/screens/investor_coins_screen.dart';
 
 // 1. Define the GlobalKey for the navigator.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -67,6 +68,15 @@ class AppRouter {
         builder: (context, state) {
           return const NewLoginScreen();
         },
+      ),
+
+      GoRoute(
+        path: '/investor-coins',
+        builder: (context, state) => const InvestorCoinsScreen(),
+      ),
+      GoRoute(
+        path: '/investorcoins',
+        builder: (context, state) => const InvestorCoinsScreen(),
       ),
 
       // Customer Routes

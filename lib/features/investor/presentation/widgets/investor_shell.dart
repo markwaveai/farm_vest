@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 
+import 'package:farm_vest/features/investor/presentation/providers/investor_providers.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class InvestorShell extends ConsumerStatefulWidget {
@@ -106,6 +108,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
                       onPressed: _showSwitchRoleBottomSheet,
                       tooltip: 'Switch Role',
                     ),
+                  _buildWalletButton(),
                   const NotificationBellButton(
                     fallbackRoute: '/customer-dashboard',
                   ),
@@ -148,6 +151,53 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
         // drawer: _buildDrawer(userData), // Removed side menu
         body: widget.child,
       ),
+    );
+  }
+
+  Widget _buildWalletButton() {
+    final coinsAsync = ref.watch(investorCoinsProvider);
+    return coinsAsync.when(
+      data: (response) {
+        if (response == null) return const SizedBox.shrink();
+        final coins = response.coins.remainingCoins;
+        return GestureDetector(
+          onTap: () => context.push('/investor-coins'),
+          child: Container(
+            margin: const EdgeInsets.only(right: 0),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.green.withOpacity(0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.account_balance_wallet_rounded,
+                  color: AppTheme.primary,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  NumberFormat.currency(
+                    locale: 'en_IN',
+                    symbol: '₹',
+                    decimalDigits: 0,
+                  ).format(coins),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 

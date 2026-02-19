@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:farm_vest/core/error/exceptions.dart';
+import 'package:farm_vest/features/investor/data/models/investor_coins_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../theme/app_constants.dart';
@@ -119,7 +120,6 @@ class ApiServices {
 
       debugPrint("[MilkEntry] URL: $uri");
       debugPrint("[MilkEntry] Body: ${jsonEncode(body)}");
-
 
       final response = await http.post(
         uri,
@@ -358,6 +358,34 @@ class ApiServices {
     } catch (e) {
       debugPrint('Error updating AnimalKart status: $e');
     }
+  }
+
+  static Future<InvestorCoinsResponse?> getInvestorCoins(
+    String investorNumber,
+  ) async {
+    try {
+      final uri = Uri.parse(
+        "${AppConstants.animalKartStagingApiUrl}/users/coinTransaction/$investorNumber",
+      );
+
+      debugPrint("Fetching investor coins: $uri");
+
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': AppConstants.applicationJson},
+      );
+
+      debugPrint("Investor coins response Status: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return InvestorCoinsResponse.fromJson(data);
+      }
+    } catch (e) {
+      debugPrint("Error fetching investor coins: $e");
+    }
+
+    return null;
   }
 
   static Future<String?> fetchAdminMobile() async {

@@ -1,4 +1,4 @@
-import 'package:device_preview/device_preview.dart';
+// import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -118,14 +118,7 @@ Future<void> main() async {
   // Initialize Localization
   await LocalizationService.init();
 
-  runApp(
-    ProviderScope(
-      child: DevicePreview(
-        enabled: !kReleaseMode,
-        builder: (context) => const FarmVestApp(),
-      ),
-    ),
-  );
+  runApp(ProviderScope(child: const FarmVestApp()));
 }
 
 class FarmVestApp extends ConsumerStatefulWidget {
@@ -154,7 +147,7 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
       themeMode: themeMode,
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
-      locale: DevicePreview.locale(context), // Add this line
+      locale: currentLocale,
       supportedLocales: const [
         Locale('en', 'US'),
         Locale('hi', 'IN'),
@@ -166,10 +159,7 @@ class _FarmVestAppState extends ConsumerState<FarmVestApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       builder: (context, child) {
-        // Wrap with DevicePreview builder first
-        final childWithPreview = DevicePreview.appBuilder(context, child);
-
-        final built = childWithPreview!;
+        final built = child!;
         final isStaging = ref.watch(isStagingProvider);
 
         if (isStaging) {
