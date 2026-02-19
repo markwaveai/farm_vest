@@ -14,6 +14,8 @@ import 'package:farm_vest/core/utils/app_enums.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'package:farm_vest/features/employee/new_supervisor/widgets/supervisor_views.dart';
+import 'package:farm_vest/features/farm_manager/presentation/screen/onboard_animal_screen.dart';
+import 'package:farm_vest/features/farm_manager/presentation/providers/farm_manager_provider.dart';
 
 class NewSupervisorDashboard extends ConsumerStatefulWidget {
   const NewSupervisorDashboard({super.key});
@@ -51,7 +53,7 @@ class _NewSupervisorDashboardState
         appBarTitle = 'Alerts';
         break;
       case 2:
-        appBarTitle = 'Farm Statistics';
+        appBarTitle = 'Buffalo Onboarding';
         break;
       case 3:
         appBarTitle = 'Buffalo Profile';
@@ -71,7 +73,18 @@ class _NewSupervisorDashboardState
         leading: _currentIndex != 4
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                onPressed: () => setState(() => _currentIndex = 4),
+                onPressed: () {
+                  if (_currentIndex == 2) {
+                    final currentOrder = ref
+                        .read(farmManagerProvider)
+                        .currentOrder;
+                    if (currentOrder != null) {
+                      ref.read(farmManagerProvider.notifier).clearOrder();
+                      return;
+                    }
+                  }
+                  setState(() => _currentIndex = 4);
+                },
               )
             : null,
         centerTitle: false,
@@ -157,7 +170,7 @@ class _NewSupervisorDashboardState
         children: [
           const BulkMilkEntryView(), // 0
           const SupervisorAlertsView(), // 1
-          const SupervisorStatsView(), // 2
+          const OnboardAnimalScreen(hideAppBar: true), // 2
           const BuffaloProfileView(), // 3
           _buildDashboardContent(dashboardState, screenWidth, user), // 4
         ],
@@ -254,7 +267,6 @@ class _NewSupervisorDashboardState
                 color: AppTheme.lightSecondary,
                 //color: AppTheme.errorRed,
                 type: DashboardCardType.priority,
-                onTap: () => setState(() => _currentIndex = 0),
                 child: _buildStatContent(
                   context,
                   Icons.water_drop,
@@ -263,7 +275,7 @@ class _NewSupervisorDashboardState
                   AppTheme.lightSecondary,
                 ),
               ),
-              
+
               CustomCard(
                 color: AppTheme.errorRed,
                 //color: AppTheme.warningOrange,
@@ -378,7 +390,7 @@ class _NewSupervisorDashboardState
                   context,
                   Icons.medical_services,
                   'Health ticket',
-                  AppTheme.errorRed,
+                  AppTheme.primary,
                 ),
               ),
               CustomCard(

@@ -4,7 +4,7 @@ import 'package:farm_vest/core/utils/app_enums.dart';
 
 class NavItemData {
   final String label;
-  final String icon;
+  final dynamic icon;
   NavItemData(this.label, this.icon);
 }
 
@@ -32,7 +32,7 @@ class EmployeeBottomNavigation extends StatelessWidget {
         return [
           NavItemData('Milk Entry', 'assets/icons/injection.png'),
           NavItemData('Alerts', 'assets/icons/Notification_icon.png'),
-          NavItemData('Stats', 'assets/icons/stats.png'),
+          NavItemData('Onboard', Icons.pets),
         ];
       case UserType.farmManager:
         return [
@@ -84,17 +84,9 @@ class EmployeeBottomNavigation extends StatelessWidget {
     );
   }
 
-  Widget _navItem(
-    BuildContext context,
-    String assetPath,
-    String label,
-    int index,
-  ) {
+  Widget _navItem(BuildContext context, dynamic icon, String label, int index) {
     final isSelected = currentIndex == index;
-    final theme = Theme.of(context);
-    final color = isSelected
-        ? AppTheme.primary
-        : theme.hintColor.withValues(alpha: 0.7);
+    final color = AppTheme.primary;
 
     return Expanded(
       child: InkWell(
@@ -114,12 +106,14 @@ class EmployeeBottomNavigation extends StatelessWidget {
                     ? AppTheme.primary.withValues(alpha: 0.1)
                     : Colors.transparent,
               ),
-              child: Image.asset(
-                assetPath,
-                width: 24,
-                height: 24,
-                color: color,
-              ),
+              child: icon is IconData
+                  ? Icon(icon, size: 24, color: color)
+                  : Image.asset(
+                      icon as String,
+                      width: 24,
+                      height: 24,
+                      color: color,
+                    ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -127,8 +121,8 @@ class EmployeeBottomNavigation extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: color,
-                fontSize: 10, // Slightly smaller to accommodate longer labels
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),
             ),
           ],

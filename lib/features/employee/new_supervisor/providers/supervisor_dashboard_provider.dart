@@ -140,7 +140,6 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
       final milkEntries = await supervisorRepo.getMilkEntries();
       final ticketsResponse = await supervisorRepo.getTickets();
       final transfersResponse = await supervisorRepo.getTransferTickets();
-      final allTicketsCount = await supervisorRepo.getTicketsCount();
 
       // Sum milk quantity for entries that match today's date
       final milkData = milkEntries['data'] as List<dynamic>? ?? [];
@@ -183,6 +182,12 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
         final status = TicketStatus.fromString(t.status);
         return status == TicketStatus.pending;
       }).length;
+
+      // Count all tickets locally from already-fetched data.
+      // Do NOT use a separate getTicketsCount() API call — it fires
+      // immediately after ticket creation and returns a stale value
+      // because the backend hasn't finished indexing the new ticket yet.
+      final allTicketsCount = allTickets.length + transferTickets.length;
 
       // Fetch pending allocations
       int pendingCount = 0;
@@ -280,14 +285,16 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
   }
 
   Future<Map<String, dynamic>?> createDistributedMilkEntry({
-    required List<String> dates,
+    required String startDate,
+    required String endDate,
     required String timing,
     required String totalQuantity,
   }) async {
     final supervisorRepo = ref.read(supervisorRepositoryProvider);
     try {
       final response = await supervisorRepo.createDistributedMilkEntry(
-        dates: dates,
+        startDate: startDate,
+        endDate: endDate,
         timing: timing,
         totalQuantity: totalQuantity,
       );

@@ -45,6 +45,12 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
+      // Always clear selected order so we start with the search/intransit list
+      ref.read(farmManagerProvider.notifier).clearOrder();
+
+      // Force refresh data whenever we enter this screen
+      ref.invalidate(paidOrdersProvider(IntransitOrdersParams(mobile: null)));
+
       final auth = ref.read(authProvider);
       if (auth.role == UserType.farmManager) {
         final fId = int.tryParse(auth.userData?.farmId ?? '');
@@ -644,374 +650,491 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
     final dashboardState = ref.watch(farmManagerProvider);
     final order = dashboardState.currentOrder;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: widget.hideAppBar
-          ? null
-          : AppBar(
-              backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-              title: Text(
-                'Buffalo Onboarding',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              leading: IconButton(
-                icon: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                onPressed: () {
-                  ref.read(farmManagerProvider.notifier).clearOrder();
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    final userRole = ref.read(authProvider).role;
-                    if (userRole == UserType.supervisor) {
-                      context.go('/supervisor-dashboard');
-                    } else {
-                      context.go('/farm-manager-dashboard');
-                    }
-                  }
-                },
-              ),
-            ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Search Section
-            SectionTitle('Find Investor Orders'),
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: CustomTextField(
-                    hint: 'Enter mobile number...',
-                    controller: searchController,
-                    prefixIcon: const Icon(Icons.phone_android_rounded),
-                    keyboardType: TextInputType.phone,
-                    maxLength: 10,
-                    showCounter: false,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    // Theme aware text field is handled by CustomTextField but we ensure its consistent
+    return PopScope(
+      canPop: ref.watch(farmManagerProvider).currentOrder == null,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        final currentOrder = ref.read(farmManagerProvider).currentOrder;
+        if (currentOrder != null) {
+          ref.read(farmManagerProvider.notifier).clearOrder();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: widget.hideAppBar
+            ? null
+            : AppBar(
+                backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                title: Text(
+                  'Buffalo Onboarding',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: searchController.text.trim().length < 10
-                      ? null
-                      : _showPaidOrdersDialog,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                leading: IconButton(
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  onPressed: () {
+                    final currentOrder = ref
+                        .read(farmManagerProvider)
+                        .currentOrder;
+                    if (currentOrder != null) {
+                      ref.read(farmManagerProvider.notifier).clearOrder();
+                    } else {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        final userRole = ref.read(authProvider).role;
+                        if (userRole == UserType.supervisor) {
+                          context.go('/supervisor-dashboard');
+                        } else {
+                          context.go('/farm-manager-dashboard');
+                        }
+                      }
+                    }
+                  },
+                ),
+              ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search Section
+              SectionTitle('Find Investor Orders'),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: CustomTextField(
+                      hint: 'Enter mobile number...',
+                      controller: searchController,
+                      prefixIcon: const Icon(Icons.phone_android_rounded),
+                      keyboardType: TextInputType.phone,
+                      maxLength: 10,
+                      showCounter: false,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      // Theme aware text field is handled by CustomTextField but we ensure its consistent
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: searchController.text.trim().length < 10
+                        ? null
+                        : _showPaidOrdersDialog,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Find Orders'),
+                  ),
+                ],
+              ),
+
+              if (order == null) ...[
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SectionTitle('In-Transit Orders'),
+                    TextButton.icon(
+                      onPressed: () {
+                        ref.invalidate(
+                          paidOrdersProvider(
+                            IntransitOrdersParams(mobile: null),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                      label: const Text('Refresh'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ref
+                    .watch(
+                      paidOrdersProvider(IntransitOrdersParams(mobile: null)),
+                    )
+                    .when(
+                      data: (data) {
+                        final query = searchController.text.trim();
+                        final filtered = query.isEmpty
+                            ? data.orders
+                            : data.orders
+                                  .where(
+                                    (o) => o.investor.mobile.contains(query),
+                                  )
+                                  .toList();
+
+                        if (filtered.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(40),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.inventory_2_outlined,
+                                    size: 48,
+                                    color: Theme.of(context).disabledColor,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    query.isEmpty
+                                        ? 'No In-Transit Orders Found'
+                                        : 'No orders matching "$query"',
+                                    style: TextStyle(
+                                      color: Theme.of(context).hintColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        return ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: filtered.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final item = filtered[index];
+                            return OrderCard(
+                              item: item,
+                              onTap: () {
+                                ref
+                                    .read(farmManagerProvider.notifier)
+                                    .setOrder(item);
+                              },
+                            );
+                          },
+                        );
+                      },
+                      loading: () => const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(40),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                      error: (err, stack) => Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Text(
+                            'Could not load orders: $err',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ),
+                    ),
+              ],
+
+              if (order != null) ...[
+                const SizedBox(height: 24),
+
+                // Farm Selection Dropdown
+                SectionTitle('Select Target Farm'),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<int>(
+                  value:
+                      dashboardState.farms.any((f) => f.id == _selectedFarmId)
+                      ? _selectedFarmId
+                      : null,
+                  isExpanded: true,
+                  dropdownColor: Theme.of(context).cardColor,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 14,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Select a farm',
+                    prefixIcon: Icon(
+                      Icons.location_on_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).cardColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                      ),
+                    ),
+                  ),
+                  items: dashboardState.farms.map((farm) {
+                    return DropdownMenuItem<int>(
+                      value: farm.id,
+                      child: Text(
+                        farm.farmName,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedFarmId = value;
+                    });
+                  },
+                ),
+
+                const SizedBox(height: 24),
+
+                // Investor Summary Card
+                InfoCard(
+                  title: 'Investor Profile',
+                  icon: Icons.person_outline_rounded,
+                  color: Colors.blue,
+                  children: [
+                    InfoDataRow(label: 'Name', value: order.investor.fullName),
+                    InfoDataRow(label: 'Mobile', value: order.investor.mobile),
+                    InfoDataRow(label: 'Email', value: order.investor.email),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Investment Summary Card
+                InfoCard(
+                  title: 'Investment Details',
+                  icon: Icons.account_balance_wallet_outlined,
+                  color: Colors.teal,
+                  children: [
+                    InfoDataRow(label: 'Order ID', value: order.order.id),
+                    InfoDataRow(
+                      label: 'Total Units',
+                      value: (order.order.numUnits ?? 0).toString(),
+                    ),
+                    InfoDataRow(
+                      label: 'Total Buffalos',
+                      value: order.order.buffaloCount.toString(),
+                    ),
+                    InfoDataRow(
+                      label: 'Total Calves',
+                      value: order.order.calfCount.toString(),
+                    ),
+                    InfoDataRow(
+                      label: 'In-Transit Buffalos',
+                      value: order.order.inTransitBuffaloCount.toString(),
+                    ),
+                    InfoDataRow(
+                      label: 'In-Transit Calves',
+                      value: order.order.inTransitCalfCount.toString(),
+                    ),
+                    InfoDataRow(
+                      label: 'Total Cost',
+                      value:
+                          '₹${NumberFormat('#,##,###').format(order.order.totalCost)}',
+                    ),
+                    InfoDataRow(
+                      label: 'UTR Number',
+                      value: order.transaction.utrNumber,
+                    ),
+                    InfoDataRow(
+                      label: 'Date',
+                      value: order.order.placedAt.split('T')[0],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                const SizedBox(height: 20),
+
+                SectionTitle('Animals to Onboard'),
+                const SizedBox(height: 8),
+                Text(
+                  'Enter identification details for each animal',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Buffalo Forms
+                if (buffaloEntries.isNotEmpty) ...[
+                  CollapsibleSectionTitle(
+                    title: 'Buffaloes (${buffaloEntries.length})',
+                    isExpanded: _isBuffaloExpanded,
+                    onToggle: () => setState(
+                      () => _isBuffaloExpanded = !_isBuffaloExpanded,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  if (_isBuffaloExpanded)
+                    ...buffaloEntries.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final buffalo = entry.value;
+                      final calf = (index < calfEntries.length)
+                          ? calfEntries[index]
+                          : null;
+
+                      return AnimalEntryForm(
+                        key: ValueKey('buffalo_${index}_${buffalo.animalId}'),
+                        entry: buffalo,
+                        calfEntry: calf,
+                        index: index,
+                        buffaloEntries: buffaloEntries,
+                        calfEntries: calfEntries,
+                        // title: 'Buffalo', // Widget determines title from type
+                        onRemove: () {
+                          setState(() {
+                            buffaloEntries.removeAt(index);
+                            if (index < calfEntries.length) {
+                              calfEntries.removeAt(index);
+                            }
+                            // Re-index remaining entries
+                            final updatedEntries = <AnimalOnboardingEntry>[];
+                            for (int i = 0; i < buffaloEntries.length; i++) {
+                              final updatedBuffalo = buffaloEntries[i].copyWith(
+                                rfidTag: buffaloEntries[i].rfidTag,
+                                earTag: buffaloEntries[i].earTag,
+                                neckbandId: buffaloEntries[i].neckbandId,
+                                dob: buffaloEntries[i].dob,
+                                healthStatus: buffaloEntries[i].healthStatus,
+                                type: buffaloEntries[i].type,
+                              );
+                              updatedEntries.add(updatedBuffalo);
+                            }
+                            buffaloEntries = updatedEntries;
+                          });
+                        },
+                        onUpdate: () => setState(() {}),
+                      );
+                    }),
+                ],
+
+                const SizedBox(height: 24),
+
+                // Removed Global Image Selector in favor of per-animal validation
+                const SizedBox(height: 24),
+
+                if (kDebugMode &&
+                    (buffaloEntries.isNotEmpty || calfEntries.isNotEmpty))
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          int seed = DateTime.now().millisecondsSinceEpoch;
+                          for (int i = 0; i < buffaloEntries.length; i++) {
+                            final entry = buffaloEntries[i];
+                            entry.rfidTag = 'RFID-TEST-${(seed + i) % 100000}';
+                            entry.earTag = 'ET-${(seed + i) % 1000}';
+                            entry.ageMonths = 36;
+                            entry.dob = '2021-01-01';
+                          }
+                          for (int i = 0; i < calfEntries.length; i++) {
+                            final entry = calfEntries[i];
+                            entry.rfidTag =
+                                'RFID-CTEST-${(seed + i + 100) % 100000}';
+                            entry.earTag = 'CET-${(seed + i + 100) % 1000}';
+                            entry.ageMonths = 6;
+                            entry.dob = '2023-01-01';
+                            if (buffaloEntries.isNotEmpty) {
+                              entry.parentAnimalId = 'BUFFALOTEMP_0';
+                            }
+                          }
+                        });
+                      },
+                      icon: const Icon(Icons.auto_fix_high),
+                      label: const Text('Autofill Test Data'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppTheme.secondary,
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 16),
+
+                // CPF Status Checkbox
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: _isCpfPaid
+                        ? AppTheme.successGreen.withOpacity(0.05)
+                        : Colors.orange.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _isCpfPaid
+                          ? AppTheme.successGreen.withOpacity(0.2)
+                          : Colors.orange.withOpacity(0.2),
+                    ),
+                  ),
+                  child: CheckboxListTile(
+                    title: const Text(
+                      "CPF (Care & Protection Fee) Paid",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      _isCpfPaid
+                          ? "Visualization and insurance coverage active"
+                          : "No visualization - Self risk management",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _isCpfPaid
+                            ? AppTheme.successGreen
+                            : Colors.orange.shade700,
+                      ),
+                    ),
+                    value: _isCpfPaid,
+                    onChanged: (val) =>
+                        setState(() => _isCpfPaid = val ?? true),
+                    activeColor: AppTheme.successGreen,
+                    checkColor: Colors.white,
+                    controlAffinity: ListTileControlAffinity.leading,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Find Orders'),
-                ),
-              ],
-            ),
-
-            if (dashboardState.error != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  dashboardState.error!,
-                  style: const TextStyle(color: Colors.red, fontSize: 12),
-                ),
-              ),
-
-            if (order != null) ...[
-              const SizedBox(height: 24),
-
-              // Farm Selection Dropdown
-              SectionTitle('Select Target Farm'),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<int>(
-                value: dashboardState.farms.any((f) => f.id == _selectedFarmId)
-                    ? _selectedFarmId
-                    : null,
-                isExpanded: true,
-                dropdownColor: Theme.of(context).cardColor,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 14,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Select a farm',
-                  prefixIcon: Icon(
-                    Icons.location_on_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  filled: true,
-                  fillColor: Theme.of(context).cardColor,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).dividerColor,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).dividerColor,
-                    ),
-                  ),
-                ),
-                items: dashboardState.farms.map((farm) {
-                  return DropdownMenuItem<int>(
-                    value: farm.id,
-                    child: Text(farm.farmName, overflow: TextOverflow.ellipsis),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedFarmId = value;
-                  });
-                },
-              ),
-
-              const SizedBox(height: 24),
-
-              // Investor Summary Card
-              InfoCard(
-                title: 'Investor Profile',
-                icon: Icons.person_outline_rounded,
-                color: Colors.blue,
-                children: [
-                  InfoDataRow(label: 'Name', value: order.investor.fullName),
-                  InfoDataRow(label: 'Mobile', value: order.investor.mobile),
-                  InfoDataRow(label: 'Email', value: order.investor.email),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Investment Summary Card
-              InfoCard(
-                title: 'Investment Details',
-                icon: Icons.account_balance_wallet_outlined,
-                color: Colors.teal,
-                children: [
-                  InfoDataRow(label: 'Order ID', value: order.order.id),
-                  InfoDataRow(
-                    label: 'Total Units',
-                    value: (order.order.numUnits ?? 0).toString(),
-                  ),
-                  InfoDataRow(
-                    label: 'Total Buffalos',
-                    value: order.order.buffaloCount.toString(),
-                  ),
-                  InfoDataRow(
-                    label: 'Total Calves',
-                    value: order.order.calfCount.toString(),
-                  ),
-                  InfoDataRow(
-                    label: 'In-Transit Buffalos',
-                    value: order.order.inTransitBuffaloCount.toString(),
-                  ),
-                  InfoDataRow(
-                    label: 'In-Transit Calves',
-                    value: order.order.inTransitCalfCount.toString(),
-                  ),
-                  InfoDataRow(
-                    label: 'Total Cost',
-                    value:
-                        '₹${NumberFormat('#,##,###').format(order.order.totalCost)}',
-                  ),
-                  InfoDataRow(
-                    label: 'UTR Number',
-                    value: order.transaction.utrNumber,
-                  ),
-                  InfoDataRow(
-                    label: 'Date',
-                    value: order.order.placedAt.split('T')[0],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              const SizedBox(height: 20),
-
-              SectionTitle('Animals to Onboard'),
-              const SizedBox(height: 8),
-              Text(
-                'Enter identification details for each animal',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).hintColor,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Buffalo Forms
-              if (buffaloEntries.isNotEmpty) ...[
-                CollapsibleSectionTitle(
-                  title: 'Buffaloes (${buffaloEntries.length})',
-                  isExpanded: _isBuffaloExpanded,
-                  onToggle: () =>
-                      setState(() => _isBuffaloExpanded = !_isBuffaloExpanded),
-                ),
-                const SizedBox(height: 12),
-
-                if (_isBuffaloExpanded)
-                  ...buffaloEntries.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final buffalo = entry.value;
-                    final calf = (index < calfEntries.length)
-                        ? calfEntries[index]
-                        : null;
-
-                    return AnimalEntryForm(
-                      key: ValueKey('buffalo_${index}_${buffalo.animalId}'),
-                      entry: buffalo,
-                      calfEntry: calf,
-                      index: index,
-                      buffaloEntries: buffaloEntries,
-                      calfEntries: calfEntries,
-                      // title: 'Buffalo', // Widget determines title from type
-                      onRemove: () {
-                        setState(() {
-                          buffaloEntries.removeAt(index);
-                          if (index < calfEntries.length) {
-                            calfEntries.removeAt(index);
-                          }
-                          // Re-index remaining entries
-                          final updatedEntries = <AnimalOnboardingEntry>[];
-                          for (int i = 0; i < buffaloEntries.length; i++) {
-                            final updatedBuffalo = buffaloEntries[i].copyWith(
-                              rfidTag: buffaloEntries[i].rfidTag,
-                              earTag: buffaloEntries[i].earTag,
-                              neckbandId: buffaloEntries[i].neckbandId,
-                              dob: buffaloEntries[i].dob,
-                              healthStatus: buffaloEntries[i].healthStatus,
-                              type: buffaloEntries[i].type,
-                            );
-                            updatedEntries.add(updatedBuffalo);
-                          }
-                          buffaloEntries = updatedEntries;
-                        });
-                      },
-                      onUpdate: () => setState(() {}),
-                    );
-                  }),
-              ],
-
-              const SizedBox(height: 24),
-
-              // Removed Global Image Selector in favor of per-animal validation
-              const SizedBox(height: 24),
-
-              if (kDebugMode &&
-                  (buffaloEntries.isNotEmpty || calfEntries.isNotEmpty))
-                Center(
-                  child: TextButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        int seed = DateTime.now().millisecondsSinceEpoch;
-                        for (int i = 0; i < buffaloEntries.length; i++) {
-                          final entry = buffaloEntries[i];
-                          entry.rfidTag = 'RFID-TEST-${(seed + i) % 100000}';
-                          entry.earTag = 'ET-${(seed + i) % 10000}';
-                          entry.ageMonths = 36;
-                          entry.dob = '2021-01-01';
-                        }
-                        for (int i = 0; i < calfEntries.length; i++) {
-                          final entry = calfEntries[i];
-                          entry.rfidTag =
-                              'RFID-CTEST-${(seed + i + 100) % 100000}';
-                          entry.earTag = 'CET-${(seed + i + 100) % 10000}';
-                          entry.ageMonths = 6;
-                          entry.dob = '2023-01-01';
-                          if (buffaloEntries.isNotEmpty) {
-                            entry.parentAnimalId = 'BUFFALOTEMP_0';
-                          }
-                        }
-                      });
-                    },
-                    icon: const Icon(Icons.auto_fix_high),
-                    label: const Text('Autofill Test Data'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppTheme.secondary,
-                    ),
-                  ),
                 ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // CPF Status Checkbox
-              Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: _isCpfPaid
-                      ? AppTheme.successGreen.withOpacity(0.05)
-                      : Colors.orange.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: _isCpfPaid
-                        ? AppTheme.successGreen.withOpacity(0.2)
-                        : Colors.orange.withOpacity(0.2),
-                  ),
-                ),
-                child: CheckboxListTile(
-                  title: const Text(
-                    "CPF (Care & Protection Fee) Paid",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    _isCpfPaid
-                        ? "Visualization and insurance coverage active"
-                        : "No visualization - Self risk management",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: _isCpfPaid
-                          ? AppTheme.successGreen
-                          : Colors.orange.shade700,
-                    ),
-                  ),
-                  value: _isCpfPaid,
-                  onChanged: (val) => setState(() => _isCpfPaid = val ?? true),
-                  activeColor: AppTheme.successGreen,
-                  checkColor: Colors.white,
-                  controlAffinity: ListTileControlAffinity.leading,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              CustomActionButton(
-                onPressed: _isFormValid() ? _submit : null,
-                color: AppTheme.primary,
-                width: double.infinity,
-                child: _isSubmitting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
+                CustomActionButton(
+                  onPressed: _isFormValid() ? _submit : null,
+                  color: AppTheme.primary,
+                  width: double.infinity,
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Confirm Onboarding',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )
-                    : const Text(
-                        'Confirm Onboarding',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-              ),
-              const SizedBox(height: 40),
+                ),
+                const SizedBox(height: 40),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

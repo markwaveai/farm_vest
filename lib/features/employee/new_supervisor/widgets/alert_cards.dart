@@ -121,7 +121,7 @@ class AlertCardDivided extends StatelessWidget {
                 const Spacer(),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: headerColor,
+                    backgroundColor: Colors.orange,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                     ),

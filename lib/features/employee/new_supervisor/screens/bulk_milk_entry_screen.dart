@@ -185,41 +185,41 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).dividerColor.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Theme.of(context).dividerColor),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _isDistributedMode = true),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _isDistributedMode
-                            ? AppTheme.primary
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'Shed Total',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: _isDistributedMode
-                              ? Colors.white
-                              : Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Container(
+          //   decoration: BoxDecoration(
+          //     color: Theme.of(context).dividerColor.withOpacity(0.05),
+          //     borderRadius: BorderRadius.circular(8),
+          //     border: Border.all(color: Theme.of(context).dividerColor),
+          //   ),
+          //   child: Row(
+          //     children: [
+          //       // Expanded(
+          //       //   child: GestureDetector(
+          //       //     onTap: () => setState(() => _isDistributedMode = true),
+          //       //     child: Container(
+          //       //       padding: const EdgeInsets.symmetric(vertical: 12),
+          //       //       decoration: BoxDecoration(
+          //       //         color: _isDistributedMode
+          //       //             ? AppTheme.primary
+          //       //             : Colors.transparent,
+          //       //         borderRadius: BorderRadius.circular(8),
+          //       //       ),
+          //       //       child: Text(
+          //       //         'Shed Total',
+          //       //         textAlign: TextAlign.center,
+          //       //         style: TextStyle(
+          //       //           color: _isDistributedMode
+          //       //               ? Colors.white
+          //       //               : Theme.of(context).colorScheme.onSurface,
+          //       //           fontWeight: FontWeight.bold,
+          //       //         ),
+          //       //       ),
+          //       //     ),
+          //       //   ),
+          //       // ),
+          //     ],
+          //   ),
+          // ),
           if (_isDistributedMode) ...[
             const SizedBox(height: 12),
             Text(
@@ -492,8 +492,8 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
         onPressed: _isSubmitting ? null : () => _submit(animals),
         child: _isSubmitting
             ? const SizedBox(
-                height: 20,
-                width: 20,
+                height: 40,
+                width: 40,
                 child: CircularProgressIndicator(
                   color: Colors.white,
                   strokeWidth: 2,
@@ -535,7 +535,8 @@ class _BulkMilkEntryScreenState extends ConsumerState<BulkMilkEntryScreen> {
 
       try {
         final res = await notifier.createDistributedMilkEntry(
-          dates: dates,
+          startDate: DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start),
+          endDate: DateFormat('yyyy-MM-dd').format(_selectedDateRange!.end),
           timing: _selectedTiming,
           totalQuantity: total,
         );

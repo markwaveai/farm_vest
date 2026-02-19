@@ -86,28 +86,61 @@ class AnimalApiServices {
     try {
       String url =
           "${AppConstants.animalKartStagingApiUrl}/order-tracking/intransit";
+      if (mobile != null && mobile.isNotEmpty) {
+        url += "?mobile=$mobile";
+      }
+      final body = <String, dynamic>{"filter_status": "intransit"};
+
+      debugPrint("getIntransitOrders Request URL: $url");
+      debugPrint("getIntransitOrders Request Body: ${jsonEncode(body)}");
 
       final response = await http.post(
         Uri.parse(url),
         headers: {
           'x-admin-mobile': managerMobile,
           'Content-Type': AppConstants.applicationJson,
+          'filter_status': 'intransit',
         },
-        body: jsonEncode({"mobile": mobile ?? ""}),
+        body: jsonEncode(body),
       );
 
+      debugPrint("getIntransitOrders Response Body: ${response.body}");
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = jsonDecode(response.body);
+        final root = jsonDecode(response.body);
+        final List<AnimalkartOrder> allOrders = [];
 
-        // Handle the user and orders structure
-        final Map<String, dynamic> userJson = data['user'] ?? {};
-        final List<dynamic> ordersData = (data['orders'] is List)
-            ? data['orders']
-            : [];
+        if (root['data'] != null && root['data'] is List) {
+          final list = root['data'] as List;
+          for (var entry in list) {
+            if (entry is Map<String, dynamic>) {
+              final Map<String, dynamic> userJson = entry['user'] ?? {};
+              final List<dynamic> ordersData = (entry['orders'] is List)
+                  ? entry['orders']
+                  : [];
 
-        return ordersData.map((e) {
-          return AnimalkartOrder.fromOrderAndUser(e, userJson);
-        }).toList();
+              allOrders.addAll(
+                ordersData.map((e) {
+                  return AnimalkartOrder.fromOrderAndUser(e, userJson);
+                }),
+              );
+            }
+          }
+        } else {
+          // Handle the singular user and orders structure if fallback is needed
+          final Map<String, dynamic> userJson = root['user'] ?? {};
+          final List<dynamic> ordersData = (root['orders'] is List)
+              ? root['orders']
+              : [];
+
+          allOrders.addAll(
+            ordersData.map((e) {
+              return AnimalkartOrder.fromOrderAndUser(e, userJson);
+            }),
+          );
+        }
+
+        return allOrders;
       } else {
         throw ServerException(
           'Failed to load paid orders',

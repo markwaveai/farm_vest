@@ -61,7 +61,8 @@ class SupervisorRepository {
   }
 
   Future<Map<String, dynamic>> createDistributedMilkEntry({
-    required List<String> dates,
+    required String startDate,
+    required String endDate,
     required String timing,
     required String totalQuantity,
   }) async {
@@ -72,7 +73,8 @@ class SupervisorRepository {
     }
     return await ApiServices.createDistributedMilkEntry(
       token: token,
-      dates: dates,
+      startDate: startDate,
+      endDate: endDate,
       timing: timing.toUpperCase(),
       totalQuantity: double.tryParse(totalQuantity) ?? 0.0,
     );

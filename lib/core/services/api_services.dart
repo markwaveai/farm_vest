@@ -100,21 +100,26 @@ class ApiServices {
 
   static Future<Map<String, dynamic>> createDistributedMilkEntry({
     required String token,
-    required List<String> dates,
+    required String startDate,
+    required String endDate,
     required String timing,
     required double totalQuantity,
   }) async {
     try {
       final uri = Uri.parse(
-        "${AppConstants.appLiveUrl}/milk/create_distributed_entry",
+        "${AppConstants.appLiveUrl}/milk/create_milk_entry",
       );
 
       final body = {
-        "dates": dates,
+        "start_date": startDate,
+        "end_date": endDate,
         "timing": timing,
-        "total_quantity": totalQuantity,
-        "entry_frequency": "DAILY",
+        "quantity": totalQuantity,
       };
+
+      debugPrint("[MilkEntry] URL: $uri");
+      debugPrint("[MilkEntry] Body: ${jsonEncode(body)}");
+
 
       final response = await http.post(
         uri,
@@ -126,17 +131,25 @@ class ApiServices {
         body: jsonEncode(body),
       );
 
+      debugPrint("[MilkEntry] Status: ${response.statusCode}");
+      debugPrint("[MilkEntry] Response: ${response.body}");
+
       if (response.statusCode == 401) {
         onUnauthorized?.call();
         throw ServerException('Unauthorized', statusCode: 401);
       }
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
+        final decoded = jsonDecode(response.body);
+        // Normalise to always return a map with 'status' so callers can check it
+        if (decoded is Map<String, dynamic>) {
+          return {'status': 'success', ...decoded};
+        }
+        return {'status': 'success', 'message': 'Milk entry created'};
       } else {
         final errorBody = jsonDecode(response.body);
         throw ServerException(
-          errorBody['detail'] ?? 'Failed to create distributed entries',
+          errorBody['detail'] ?? 'Failed to create milk entry',
           statusCode: response.statusCode,
         );
       }

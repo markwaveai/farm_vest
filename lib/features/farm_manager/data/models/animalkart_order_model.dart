@@ -79,16 +79,16 @@ class OrderInfo {
             .toInt();
 
     return OrderInfo(
-      id: json['id'],
-      breedId: json['breedId'],
+      id: (json['id'] ?? '').toString(),
+      breedId: (json['breedId'] ?? '').toString(),
       buffaloCount: (json['buffaloCount'] ?? 0).toInt(),
       calfCount: (json['calfCount'] ?? 0).toInt(),
       inTransitBuffaloCount: transitBuf,
       inTransitCalfCount: transitCalf,
       numUnits: numUnits,
       totalCost: (json['totalCost'] ?? 0).toDouble(),
-      status: json['status'],
-      placedAt: json['placedAt'],
+      status: (json['status'] ?? '').toString(),
+      placedAt: (json['placedAt'] ?? '').toString(),
       buffaloIds: buffaloIds,
       calfIds: calfIds,
     );
@@ -112,7 +112,7 @@ class TransactionInfo {
 
   factory TransactionInfo.fromJson(Map<String, dynamic> json) {
     return TransactionInfo(
-      id: json['id'],
+      id: (json['id'] ?? '').toString(),
       amount: (json['amount'] ?? 0).toDouble(),
       utrNumber: json['utrNumber'] ?? '',
       paymentType: json['paymentType'] ?? '',
@@ -150,8 +150,8 @@ class InvestorInfo {
 
   factory InvestorInfo.fromJson(Map<String, dynamic> json) {
     return InvestorInfo(
-      id: json['id'],
-      firstName: json['first_name'] ?? '',
+      id: (json['id'] ?? '').toString(),
+      firstName: json['first_name'] ?? json['name'] ?? '',
       lastName: json['last_name'] ?? '',
       email: json['email'] ?? '',
       mobile: json['mobile'] ?? '',

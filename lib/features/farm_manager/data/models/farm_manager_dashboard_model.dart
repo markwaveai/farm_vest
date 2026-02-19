@@ -62,6 +62,7 @@ class FarmManagerDashboardState {
     String? error,
     List<DashboardImage>? images,
     AnimalkartOrder? currentOrder,
+    bool clearCurrentOrder = false,
     List<dynamic>? onboardedAnimalIds,
     List<Shed>? sheds,
     List<Farm>? farms,
@@ -78,7 +79,9 @@ class FarmManagerDashboardState {
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       images: images ?? this.images,
-      currentOrder: currentOrder ?? this.currentOrder,
+      currentOrder: clearCurrentOrder
+          ? null
+          : (currentOrder ?? this.currentOrder),
       onboardedAnimalIds: onboardedAnimalIds ?? this.onboardedAnimalIds,
       sheds: sheds ?? this.sheds,
       farms: farms ?? this.farms,

@@ -575,7 +575,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
   }
 
   void clearOrder() {
-    state = state.copyWith(currentOrder: null);
+    state = state.copyWith(clearCurrentOrder: true);
   }
 
   Future<List<Map<String, dynamic>>> getPendingTransfers() async {

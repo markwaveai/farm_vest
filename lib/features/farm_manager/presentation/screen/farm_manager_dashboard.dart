@@ -278,7 +278,23 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        automaticallyImplyLeading: false,
+        leading: _currentIndex != 4
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                onPressed: () {
+                  if (_currentIndex == 0) {
+                    final currentOrder = ref
+                        .read(farmManagerProvider)
+                        .currentOrder;
+                    if (currentOrder != null) {
+                      ref.read(farmManagerProvider.notifier).clearOrder();
+                      return;
+                    }
+                  }
+                  setState(() => _currentIndex = 4);
+                },
+              )
+            : null,
         title: showProfileInfo
             ? Align(
                 alignment: Alignment.centerLeft,

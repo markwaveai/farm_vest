@@ -50,7 +50,7 @@ class SupervisorStatsView extends ConsumerWidget {
             'Active Health Issues',
             stats.activeIssues,
             Icons.warning,
-            AppTheme.errorRed,
+            AppTheme.primary,
           ),
           const SizedBox(height: 12),
           _buildStatCard(
@@ -199,6 +199,7 @@ class SupervisorAlertsView extends ConsumerWidget {
                   return const Center(child: Text('No alerts found'));
                 }
                 return ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 60),
                   itemCount: tickets.length,
                   itemBuilder: (context, index) {
                     final ticket = tickets[index];
@@ -212,7 +213,7 @@ class SupervisorAlertsView extends ConsumerWidget {
                     if (priority == 'CRITICAL' || priority == 'HIGH')
                       headerColor = Colors.red;
                     if (type == TicketType.health.value)
-                      headerColor = Colors.orange;
+                      headerColor = AppTheme.primary;
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
@@ -235,7 +236,6 @@ class SupervisorAlertsView extends ConsumerWidget {
               error: (err, stack) => Center(child: Text('Error: $err')),
             ),
           ),
-          const SizedBox(height: 100),
         ],
       ),
     );
@@ -719,7 +719,8 @@ class _BulkMilkEntryViewState extends ConsumerState<BulkMilkEntryView> {
 
       try {
         final res = await notifier.createDistributedMilkEntry(
-          dates: dates,
+          startDate: DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start),
+          endDate: DateFormat('yyyy-MM-dd').format(_selectedDateRange!.end),
           timing: _selectedTiming,
           totalQuantity: total,
         );

@@ -173,7 +173,9 @@ class _QuickActionDialogContentState
                               controller: idController,
                               focusNode: idFocusNode,
                               onChanged: (val) {
-                              setState(() {}); // Rebuild to update button state
+                                setState(
+                                  () {},
+                                ); // Rebuild to update button state
                                 ref
                                     .read(supervisorDashboardProvider.notifier)
                                     .searchSuggestions(val);
@@ -189,7 +191,8 @@ class _QuickActionDialogContentState
                               },
                             ),
                           ),
-                        if (suggestions.isNotEmpty && _selectedAnimalId == null)
+                          if (suggestions.isNotEmpty &&
+                              _selectedAnimalId == null)
                             Container(
                               margin: const EdgeInsets.only(top: 4),
                               decoration: BoxDecoration(
@@ -236,12 +239,14 @@ class _QuickActionDialogContentState
                                       setState(() {
                                         _selectedAnimalId = animal.internalId;
                                         _selectedAnimalTag = tag;
-                                      _selectedAnimalIdString = animal.animalId;
+                                        _selectedAnimalIdString =
+                                            animal.animalId;
                                         idController.text = tag;
                                       });
                                       ref
                                           .read(
-                                          supervisorDashboardProvider.notifier,
+                                            supervisorDashboardProvider
+                                                .notifier,
                                           )
                                           .clearSuggestions();
                                     },
@@ -305,7 +310,7 @@ class _QuickActionDialogContentState
                           },
                           onGalleryPick: () async {
                             final picker = ImagePicker();
-                          final images = await picker.pickMultiImage();
+                            final images = await picker.pickMultiImage();
                             if (images.isNotEmpty) {
                               final remaining = 5 - _pickedImages.length;
                               final imagesToAdd = images.take(remaining);
@@ -348,7 +353,9 @@ class _QuickActionDialogContentState
                                 final query = idController.text.trim();
                                 if (query.isNotEmpty) {
                                   ref
-                                    .read(supervisorDashboardProvider.notifier)
+                                      .read(
+                                        supervisorDashboardProvider.notifier,
+                                      )
                                       .locateAnimal(query);
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -488,19 +495,15 @@ class _QuickActionDialogContentState
                             );
                           }
 
-                          final body = {
+                          final body = <String, dynamic>{
                             'animal_id': finalAnimalIdString,
                             'description': reasonController.text,
                             'priority': selectedPriority.toUpperCase(),
-                            'disease':
-                                widget.type == QuickActionType.healthTicket
-                                ? [selectedDisease]
-                                : null,
-                            'images': uploadedUrls,
-                            if (widget.type ==
-                                QuickActionType.transferRequest) ...{
+                            if (widget.type == QuickActionType.healthTicket)
+                              'disease': [selectedDisease],
+                            if (uploadedUrls.isNotEmpty) 'images': uploadedUrls,
+                            if (widget.type == QuickActionType.transferRequest)
                               'transfer_direction': 'OUT',
-                            },
                           };
 
                           final res = await ref

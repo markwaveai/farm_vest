@@ -45,7 +45,7 @@ final paidOrdersProvider =
       final managerMobile = prefs.getString('mobile_number') ?? "";
 
       final response = await AnimalApiServices.getIntransitOrders(
-        mobile: params.mobile.toString(),
+        mobile: params.mobile,
         managerMobile: managerMobile,
       );
 

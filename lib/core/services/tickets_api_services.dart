@@ -93,24 +93,29 @@ class TicketsApiServices {
     required String ticketType,
   }) async {
     try {
+      final url = "${AppConstants.appLiveUrl}/ticket/?ticket_type=$ticketType";
+      final encodedBody = jsonEncode(body);
+      debugPrint("[CreateTicket] URL: $url");
+      debugPrint("[CreateTicket] Body: $encodedBody");
+
       final response = await http.post(
-        Uri.parse("${AppConstants.appLiveUrl}/ticket/?ticket_type=$ticketType"),
+        Uri.parse(url),
         headers: {
           HttpHeaders.authorizationHeader: 'Bearer $token',
           HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
         },
-        body: jsonEncode(body),
+        body: encodedBody,
       );
+
+      debugPrint("[CreateTicket] Status: ${response.statusCode}");
+      debugPrint("[CreateTicket] Response: ${response.body}");
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return true;
       }
-      debugPrint(
-        "Create Ticket Failed (${response.statusCode}): ${response.body}",
-      );
       return false;
     } catch (e) {
-      debugPrint("Create Ticket Exception: $e");
+      debugPrint("[CreateTicket] Exception: $e");
       return false;
     }
   }
