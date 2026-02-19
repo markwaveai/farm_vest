@@ -618,5 +618,17 @@
     "Available": "అందుబాటులో ఉంది",
     "Selected": "ఎంపిక చేయబడింది",
     "Expired": "గడువు ముగిసింది",
-    "You have already booked a slot for this month.": "మీరు ఈ నెలలో ఒక స్లాట్‌ని బుక్ చేసారు."
+    "You have already booked a slot for this month.": "మీరు ఈ నెలలో ఒక స్లాట్‌ని బుక్ చేసారు.",
+    "My Wallet": "నా వాలెట్",
+    "No wallet data found": "వాలెట్ డేటా కనుగొనబడలేదు",
+    "Transaction History": "లావాదేవీల చరిత్ర",
+    "items": "వస్తువులు",
+    "Remaining Balance": "మిగిలిన బ్యాలెన్స్",
+    "STAGING": "స్టేజింగ్",
+    "Coins": "నాణేలు",
+    "Total Earnings": "మొత్తం ఆదాయం",
+    "Total Spent": "మొత్తం ఖర్చు",
+    "Direct Ref.": "డైరెక్ట్ రెఫ్.",
+    "Indirect Ref.": "ఇండైరెక్ట్ రెఫ్.",
+    "till date": "నేటి వరకు"
 }

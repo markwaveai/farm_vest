@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/features/investor/presentation/providers/investor_providers.dart';
 import 'package:farm_vest/features/investor/data/models/investor_coins_model.dart';
-import 'package:intl/intl.dart';
+import 'package:farm_vest/core/utils/string_extensions.dart';
+import 'package:farm_vest/core/utils/number_extensions.dart';
 
 class InvestorCoinsScreen extends ConsumerWidget {
   const InvestorCoinsScreen({super.key});
@@ -15,7 +16,7 @@ class InvestorCoinsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('My Wallet'),
+        title: Text('My Wallet'.tr),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: AppTheme.dark,
@@ -24,7 +25,7 @@ class InvestorCoinsScreen extends ConsumerWidget {
       body: coinsAsync.when(
         data: (response) {
           if (response == null) {
-            return const Center(child: Text('No wallet data found'));
+            return Center(child: Text('No wallet data found'.tr));
           }
           return RefreshIndicator(
             onRefresh: () => ref.refresh(investorCoinsProvider.future),
@@ -40,16 +41,16 @@ class InvestorCoinsScreen extends ConsumerWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Transaction History',
-                          style: TextStyle(
+                        Text(
+                          'Transaction History'.tr,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.dark,
                           ),
                         ),
                         Text(
-                          '${response.transactions.length} items',
+                          '${response.transactions.length} ${'items'.tr}',
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 14,
@@ -74,7 +75,7 @@ class InvestorCoinsScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, stack) => Center(child: Text('Error: $err'.tr)),
       ),
     );
   }
@@ -105,9 +106,9 @@ class InvestorCoinsScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Remaining Balance',
-                style: TextStyle(
+              Text(
+                'Remaining Balance'.tr,
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -122,13 +123,13 @@ class InvestorCoinsScreen extends ConsumerWidget {
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.stars, color: Colors.amber, size: 16),
-                    SizedBox(width: 4),
+                    const Icon(Icons.stars, color: Colors.amber, size: 16),
+                    const SizedBox(width: 4),
                     Text(
-                      'STAGING',
-                      style: TextStyle(
+                      'STAGING'.tr,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -145,7 +146,7 @@ class InvestorCoinsScreen extends ConsumerWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                _formatAmount(coins.remainingCoins),
+                coins.remainingCoins.formatIndianDecimal(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 36,
@@ -154,9 +155,9 @@ class InvestorCoinsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Coins',
-                style: TextStyle(
+              Text(
+                'Coins'.tr,
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
@@ -170,13 +171,13 @@ class InvestorCoinsScreen extends ConsumerWidget {
           Row(
             children: [
               _buildStatsItem(
-                'Total Earnings',
+                'Total Earnings'.tr,
                 coins.totalCoins,
                 Icons.arrow_upward,
               ),
               const SizedBox(width: 24),
               _buildStatsItem(
-                'Total Spent',
+                'Total Spent'.tr,
                 coins.spendingCoins,
                 Icons.shopping_bag,
               ),
@@ -186,13 +187,13 @@ class InvestorCoinsScreen extends ConsumerWidget {
           Row(
             children: [
               _buildStatsItem(
-                'Direct Ref.',
+                'Direct Ref.'.tr,
                 coins.directReferralsCoins,
                 Icons.person,
               ),
               const SizedBox(width: 24),
               _buildStatsItem(
-                'Indirect Ref.',
+                'Indirect Ref.'.tr,
                 coins.indirectReferralsCoins,
                 Icons.people,
               ),
@@ -224,7 +225,7 @@ class InvestorCoinsScreen extends ConsumerWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                _formatAmount(value),
+                value.formatIndianDecimal(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -232,9 +233,9 @@ class InvestorCoinsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 4),
-              const Text(
-                'Coins',
-                style: TextStyle(color: Colors.white60, fontSize: 10),
+              Text(
+                'Coins'.tr,
+                style: const TextStyle(color: Colors.white60, fontSize: 10),
               ),
             ],
           ),
@@ -319,7 +320,7 @@ class InvestorCoinsScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '${isCredit ? "+" : "-"}${tx.coins.toStringAsFixed(0)}',
+                '${isCredit ? "+" : "-"}${tx.coins.formatIndianDecimal()}',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -375,10 +376,5 @@ class InvestorCoinsScreen extends ConsumerWidget {
     }
   }
 
-  String _formatAmount(double amount) {
-    final format = NumberFormat.decimalPattern(
-      'en_IN',
-    ); // Use decimal with commas
-    return format.format(amount);
-  }
+  // Method removed in favor of extension
 }

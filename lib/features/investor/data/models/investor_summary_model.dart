@@ -1,3 +1,5 @@
+import 'package:farm_vest/core/utils/number_extensions.dart';
+
 /// Model for investor profile details.
 ///
 /// Contains personal information about the investor.
@@ -162,10 +164,10 @@ class InvestorSummary {
   int get totalAnimals => totalBuffaloes + totalCalves;
 
   /// Gets formatted asset value with currency symbol.
-  String get formattedAssetValue => '₹${assetValue.toStringAsFixed(0)}';
+  String get formattedAssetValue => assetValue.formatRupee();
 
   /// Gets formatted revenue with currency symbol.
-  String get formattedRevenue => '₹${revenue.toStringAsFixed(0)}';
+  String get formattedRevenue => revenue.formatRupee();
 
   /// Creates a copy of this [InvestorSummary] with the given fields replaced.
   InvestorSummary copyWith({

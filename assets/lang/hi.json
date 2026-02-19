@@ -618,5 +618,17 @@
     "Available": "उपलब्ध",
     "Selected": "चयनित",
     "Expired": "समाप्त",
-    "You have already booked a slot for this month.": "आपने इस महीने के लिए पहले से ही एक स्लॉट बुक कर लिया है।"
+    "You have already booked a slot for this month.": "आपने इस महीने के लिए पहले से ही एक स्लॉट बुक कर लिया है।",
+    "My Wallet": "मेरा वॉलेट",
+    "No wallet data found": "कोई वॉलेट डेटा नहीं मिला",
+    "Transaction History": "लेनदेन इतिहास",
+    "items": "मदें",
+    "Remaining Balance": "शेष राशि",
+    "STAGING": "स्टेजिंग",
+    "Coins": "सिक्के",
+    "Total Earnings": "कुल कमाई",
+    "Total Spent": "कुल खर्च",
+    "Direct Ref.": "सीधा रेफ.",
+    "Indirect Ref.": "अप्रत्यक्ष रेफ.",
+    "till date": "आज तक"
 }

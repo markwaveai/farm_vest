@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:farm_vest/core/utils/app_enums.dart';
 
 import 'package:farm_vest/features/investor/presentation/providers/investor_providers.dart';
-import 'package:intl/intl.dart';
+import 'package:farm_vest/core/utils/number_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class InvestorShell extends ConsumerStatefulWidget {
@@ -180,11 +180,7 @@ class _InvestorShellState extends ConsumerState<InvestorShell> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  NumberFormat.currency(
-                    locale: 'en_IN',
-                    symbol: '₹',
-                    decimalDigits: 0,
-                  ).format(coins),
+                  coins.formatRupee(),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,

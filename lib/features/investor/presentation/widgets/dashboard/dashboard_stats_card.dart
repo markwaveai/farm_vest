@@ -89,6 +89,7 @@ class DashboardStatsCard extends ConsumerWidget {
                 context,
                 value: data['assetValue'] ?? '0',
                 label: ('Asset Value'.tr),
+                subLabel: ('(till date)'.tr),
                 icon: Icons.account_balance,
                 isSmallPhone: isSmallPhone,
                 isMediumPhone: isMediumPhone,
@@ -100,6 +101,7 @@ class DashboardStatsCard extends ConsumerWidget {
                 context,
                 value: data['revenue']?.toString() ?? '₹0',
                 label: ('Revenue'.tr),
+                subLabel: ('(till date)'.tr),
                 icon: Icons.trending_up,
                 isSmallPhone: isSmallPhone,
                 isMediumPhone: isMediumPhone,
@@ -131,6 +133,7 @@ class DashboardStatsCard extends ConsumerWidget {
     BuildContext context, {
     required String value,
     required String label,
+    String? subLabel,
     required Object icon,
     required bool isSmallPhone,
     required bool isMediumPhone,
@@ -187,6 +190,15 @@ class DashboardStatsCard extends ConsumerWidget {
         SizedBox(height: gap),
         Text(value, style: valueStyle),
         Text(label, style: labelStyle),
+        if (subLabel != null)
+          Text(
+            subLabel,
+            style: labelStyle?.copyWith(
+              fontSize: labelFontSize * 0.8,
+              fontStyle: FontStyle.italic,
+              color: isDark ? Colors.grey[500] : Colors.grey[500],
+            ),
+          ),
       ],
     );
   }

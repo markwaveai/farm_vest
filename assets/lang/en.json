@@ -618,5 +618,17 @@
     "Available": "Available",
     "Selected": "Selected",
     "Expired": "Expired",
-    "You have already booked a slot for this month.": "You have already booked a slot for this month."
+    "You have already booked a slot for this month.": "You have already booked a slot for this month.",
+    "My Wallet": "My Wallet",
+    "No wallet data found": "No wallet data found",
+    "Transaction History": "Transaction History",
+    "items": "items",
+    "Remaining Balance": "Remaining Balance",
+    "STAGING": "STAGING",
+    "Coins": "Coins",
+    "Total Earnings": "Total Earnings",
+    "Total Spent": "Total Spent",
+    "Direct Ref.": "Direct Ref.",
+    "Indirect Ref.": "Indirect Ref.",
+    "till date": "till date"
 }
