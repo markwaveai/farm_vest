@@ -423,7 +423,7 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
                                 ? 'Verify Your Phone'.tr
                                 : 'Welcome Back'.tr),
                       style: const TextStyle(
-                        fontSize: 286,
+                        fontSize: 26,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.white,
                         letterSpacing: -0.5,
