@@ -69,13 +69,13 @@ class _InvestorDashboardScreenState
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               // Consolidated Stats & Financial Overview
-              const SliverToBoxAdapter(child: DashboardStatsCard()),
+              SliverToBoxAdapter(child: DashboardStatsCard()),
 
               // Monthly Visits Card
-              const SliverToBoxAdapter(child: MonthlyVisitCard()),
+              SliverToBoxAdapter(child: MonthlyVisitCard()),
 
               // Search & Filter
-              const SliverToBoxAdapter(child: SearchAndFilterBar()),
+              SliverToBoxAdapter(child: SearchAndFilterBar()),
 
               // "My Buffaloes" Header and Toggle
               SliverToBoxAdapter(
@@ -206,7 +206,7 @@ class _InvestorDashboardScreenState
     String? buffaloId,
   ) async {
     ScaffoldMessenger.of(context).showSnackBar(
-       SnackBar(content: Text("Invoice feature coming soon available".tr)),
+      SnackBar(content: Text("Invoice feature coming soon available".tr)),
     );
   }
 
