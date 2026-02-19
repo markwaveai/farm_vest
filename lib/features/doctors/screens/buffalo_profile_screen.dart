@@ -30,7 +30,18 @@ class _BuffaloProfileScreenState extends State<BuffaloProfileScreen> {
         ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        leading: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+            onPressed: () {
+              context.go('/farm-manager-dashboard');
+            },
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () {},

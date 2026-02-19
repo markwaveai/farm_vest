@@ -469,7 +469,7 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
-              'assets/icons/buffalo_icon.png',
+              'assets/icons/Murrah_buffalo icon.png',
               width: 80,
               height: 80,
               fit: BoxFit.contain,

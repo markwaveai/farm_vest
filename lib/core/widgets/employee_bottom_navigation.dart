@@ -36,7 +36,10 @@ class EmployeeBottomNavigation extends StatelessWidget {
         ];
       case UserType.farmManager:
         return [
-          NavItemData('Onboard', 'assets/icons/new_heat.png'),
+          NavItemData(
+            'Onboard',
+            'assets/icons/Buffalo onbording iconFinal one.png',
+          ),
           NavItemData('Allocation', 'assets/icons/swap.png'),
           NavItemData('Reports', 'assets/icons/stats.png'),
         ];
@@ -78,7 +81,12 @@ class EmployeeBottomNavigation extends StatelessWidget {
           _navItem(context, roleItems[1].icon, roleItems[1].label, 1),
           const SizedBox(width: 48), // Space for FAB
           _navItem(context, roleItems[2].icon, roleItems[2].label, 2),
-          _navItem(context, 'assets/icons/buffalo_icon.png', 'Buffalo', 3),
+          _navItem(
+            context,
+            'assets/icons/Murrah_buffalo icon.png',
+            'Buffalo',
+            3,
+          ),
         ],
       ),
     );

@@ -198,25 +198,17 @@ class _BuffaloAllocationScreenState
               leading: Container(
                 margin: const EdgeInsets.only(left: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white,
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
                   icon: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white,
+                    Icons.arrow_back,
+                    color: Colors.black,
                     size: 20,
                   ),
                   onPressed: () {
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      if (userRole == UserType.supervisor) {
-                        context.go('/supervisor-dashboard');
-                      } else {
-                        context.go('/farm-manager-dashboard');
-                      }
-                    }
+                    context.go('/farm-manager-dashboard');
                   },
                 ),
               ),
@@ -286,7 +278,6 @@ class _BuffaloAllocationScreenState
         ),
         child: Column(
           children: [
-            const SizedBox(height: 100), // Space for transparent AppBar
             // Shed Selector
             _buildShedSelector(dashboardState),
 
@@ -381,7 +372,7 @@ class _BuffaloAllocationScreenState
           ),
         ),
         SizedBox(
-          height: 80,
+          height: 70,
           child: ListView.builder(
             controller: _shedScrollController,
             scrollDirection: Axis.horizontal,
@@ -406,7 +397,7 @@ class _BuffaloAllocationScreenState
                   onTap: () => _onShedSelected(shed.id),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    width: 150,
+                    width: 120,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isSelected ? AppTheme.primary : Colors.white,
@@ -666,7 +657,7 @@ class _BuffaloAllocationScreenState
     );
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.7),
@@ -724,14 +715,14 @@ class _BuffaloAllocationScreenState
       return !allAllocatedIds.contains(id.toString());
     }).toList();
 
-    return Container(
-      height: 120, // Increased height for investor name
-      margin: const EdgeInsets.symmetric(vertical: 8),
+    return SizedBox(
+      height: 140,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
             child: Text(
               'Select Animal to Allocate',
               style: TextStyle(
@@ -741,7 +732,6 @@ class _BuffaloAllocationScreenState
               ),
             ),
           ),
-          const SizedBox(height: 8),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -803,8 +793,9 @@ class _BuffaloAllocationScreenState
                     });
                   },
                   child: Container(
-                    width: 100, // Widened for name
-                    margin: const EdgeInsets.only(right: 12),
+                    width: 90,
+                    height: 90,
+                    // margin: const EdgeInsets.only(right: 12),
                     decoration: BoxDecoration(
                       color: isSelected ? AppTheme.primary : Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -812,7 +803,7 @@ class _BuffaloAllocationScreenState
                         color: isSelected
                             ? AppTheme.primary
                             : AppTheme.primary.withOpacity(0.2),
-                        width: 2,
+                        //width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
@@ -822,71 +813,82 @@ class _BuffaloAllocationScreenState
                         ),
                       ],
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (imageUrl != null)
-                          Container(
-                            width: 80,
-                            height: 45,
-                            margin: const EdgeInsets.only(bottom: 4),
-                            decoration: BoxDecoration(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 0,
+                        horizontal: 4,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          if (imageUrl != null)
+                            ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              color: isSelected
-                                  ? Colors.white.withOpacity(0.1)
-                                  : Colors.grey.shade50,
-                              image: DecorationImage(
-                                image: NetworkImage(imageUrl),
-                                fit: BoxFit.contain,
+                              child: Image.network(
+                                imageUrl,
+                                width: 66,
+                                height: 50,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.pets_rounded,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : AppTheme.primary,
+                                  size: 22,
+                                ),
                               ),
+                            )
+                          else
+                            Icon(
+                              Icons.pets_rounded,
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppTheme.primary,
+                              size: 20,
                             ),
-                          )
-                        else
-                          Icon(
-                            Icons.pets_rounded,
-                            color: isSelected ? Colors.white : AppTheme.primary,
-                            size: 20,
+                          const SizedBox(height: 4),
+                          Text(
+                            displayRfid.contains('-')
+                                ? displayRfid.split('-').last
+                                : displayRfid,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: isSelected ? Colors.white : AppTheme.dark,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        if (imageUrl == null) const SizedBox(height: 4),
-                        Text(
-                          displayRfid.contains('-')
-                              ? displayRfid.split('-').last
-                              : displayRfid,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : AppTheme.dark,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          investorName.split(' ').first,
-                          style: TextStyle(
-                            fontSize: 9,
-                            color: isSelected
-                                ? Colors.white.withOpacity(0.8)
-                                : AppTheme.grey1,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (onboardedTime.isNotEmpty) ...[
                           const SizedBox(height: 2),
                           Text(
-                            onboardedTime,
+                            investorName.split(' ').first,
                             style: TextStyle(
-                              fontSize: 8,
+                              fontSize: 9,
                               color: isSelected
                                   ? Colors.white.withOpacity(0.8)
                                   : AppTheme.grey1,
                             ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                          if (onboardedTime.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              onboardedTime,
+                              style: TextStyle(
+                                fontSize: 8,
+                                color: isSelected
+                                    ? Colors.white.withOpacity(0.8)
+                                    : AppTheme.grey1,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 );

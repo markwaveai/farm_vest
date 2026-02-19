@@ -65,6 +65,19 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
   Widget build(BuildContext context) {
     final staffState = ref.watch(staffListProvider);
 
+    // Listen for errors to show SnackBars
+    ref.listen<StaffListState>(staffListProvider, (prev, next) {
+      if (next.error != null && next.error != prev?.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -177,23 +190,6 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
           Expanded(
             child: staffState.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : staffState.error != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          staffState.error!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                        TextButton(
-                          onPressed: () =>
-                              ref.read(staffListProvider.notifier).loadStaff(),
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  )
                 : staffState.staff.isEmpty
                 ? Center(
                     child: Column(

@@ -837,7 +837,9 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           onChanged: (value) => setState(() => _otp = value),
           onCompleted: (value) {
             setState(() => _otp = value);
-            _handleContinue();
+            Future.delayed(const Duration(seconds: 1), () {
+              if (mounted) _handleContinue();
+            });
           },
         ),
       ],

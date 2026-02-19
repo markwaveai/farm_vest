@@ -234,6 +234,20 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
   Widget build(BuildContext context) {
     final ds = ref.watch(farmManagerProvider);
     final ss = ref.watch(staffListProvider);
+
+    // Listen for errors to show SnackBars
+    ref.listen<FarmManagerDashboardState>(farmManagerProvider, (prev, next) {
+      if (next.error != null && next.error != prev?.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+
     final authState = ref.watch(authProvider);
     final user = authState.userData;
 
@@ -380,8 +394,6 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
               ? const Center(
                   child: CircularProgressIndicator(color: AppTheme.primary),
                 )
-              : ds.error != null
-              ? _buildErrorView(ds.error!)
               : RefreshIndicator(
                   onRefresh: () async {
                     await ref
@@ -509,13 +521,6 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
           Icons.hourglass_empty_rounded,
           Colors.pink,
           () => context.push('/buffalo-allocation'),
-        ),
-        _buildStatCard(
-          "Transfers",
-          "View",
-          Icons.compare_arrows_rounded,
-          Colors.purple,
-          () => context.push('/manager-transfer-approvals'),
         ),
       ],
     );
@@ -689,7 +694,7 @@ class _FarmManagerDashboardState extends ConsumerState<FarmManagerDashboard> {
       );
     }
     return Column(
-      children: ds.onboardedAnimalIds.take(3).map((item) {
+      children: ds.onboardedAnimalIds.map((item) {
         String rfid = 'Unknown';
         if (item is String) {
           rfid = item.split('-').last;

@@ -1,3 +1,4 @@
+import 'package:farm_vest/features/farm_manager/data/models/farm_manager_dashboard_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:farm_vest/core/theme/app_theme.dart';
 import 'package:farm_vest/core/widgets/custom_button.dart';
@@ -638,6 +639,19 @@ class _OnboardAnimalScreenState extends ConsumerState<OnboardAnimalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen for errors to show SnackBars
+    ref.listen<FarmManagerDashboardState>(farmManagerProvider, (prev, next) {
+      if (next.error != null && next.error != prev?.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+
     // Listen for changes in the current order to reset the form
     ref.listen(farmManagerProvider.select((s) => s.currentOrder), (prev, next) {
       if (prev?.order.id != next?.order.id) {

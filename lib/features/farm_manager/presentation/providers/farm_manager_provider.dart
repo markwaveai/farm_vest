@@ -10,6 +10,7 @@ import 'package:farm_vest/features/auth/presentation/providers/auth_provider.dar
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
+import 'dart:async';
 import 'package:farm_vest/core/services/api_services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,13 +22,24 @@ import '../../data/models/shed_model.dart';
 class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
   final ImagePicker _picker = ImagePicker();
 
+  Timer? _refreshTimer;
+
   @override
   FarmManagerDashboardState build() {
+    // Start periodic auto-refresh every 30 seconds
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      _fetchDashboardData(isAutoRefresh: true);
+    });
+
+    ref.onDispose(() {
+      _refreshTimer?.cancel();
+    });
+
     _fetchDashboardData();
     return FarmManagerDashboardState(isLoading: true);
   }
 
-  Future<void> _fetchDashboardData() async {
+  Future<void> _fetchDashboardData({bool isAutoRefresh = false}) async {
     final authState = ref.read(authProvider);
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
@@ -37,85 +49,86 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       return;
     }
 
+    // Set initial loading state but keep previous data if any
+    if (!isAutoRefresh) {
+      state = state.copyWith(isLoading: true, error: null);
+    }
+
     try {
+      int investorCount = state.investorCount;
+      int totalStaff = state.totalStaff;
+      List<Shed> sheds = state.sheds;
+      List<Farm> farms = state.farms;
+      List<dynamic> onboardedAnimals = state.onboardedAnimalIds;
+
       // 1. Fetch Investors
-      final investors = await InvestorApiServices.getAllInvestors(token: token);
-      final investorCount = investors.length;
+      try {
+        final investors = await InvestorApiServices.getAllInvestors(
+          token: token,
+        );
+        investorCount = investors.length;
+      } catch (e) {
+        debugPrint("Error fetching investors: $e");
+      }
 
       // 2. Fetch Staff Count
-      final employeesData = await EmployeeApiServices.getEmployees(
-        token: token,
-      );
-      final totalStaff = employeesData.length;
-
-      // 3. Fetch Pending Leaves
-      // final leavesData = await ApiServices.getLeaveRequests(token);
-      // Filter locally or via API if supported. API supports status_filter.
-      // But getLeaveRequests signature in ApiServices.dart (lines 227) didn't take params?
-      // Wait, let me check ApiServices.getLeaveRequests defined at lines 227.
-      // It does NOT take status_filter in the Dart definition I saw earlier.
-      // I should assume it returns all and filter here, OR update ApiServices.
-      // The backend supports status_filter. The Dart service I saw earlier:
-      /*
-      static Future<Map<String, dynamic>> getLeaveRequests(String token) async {
-         ... uri = .../leaves/requests ...
+      try {
+        final employeesData = await EmployeeApiServices.getEmployees(
+          token: token,
+        );
+        totalStaff = employeesData.length;
+      } catch (e) {
+        debugPrint("Error fetching employees: $e");
       }
-      */
-      // It doesn't allow params. So filtering locally.
-      // final leaves = leavesData['data'] as List? ?? [];
-      // final pendingLeaves = leaves
-      //     .where((l) => l['status'] == 'PENDING')
-      //     .length;
 
-      // 4. Fetch Pending Tickets
-      // final ticketsData = await TicketsApiServices.getTickets(
-      //   token: token,
-      //   status: 'PENDING',
-      // );
-      // final pendingTickets = ticketsData.length;
-
-      // 5. Fetch Sheds
+      // 3. Fetch Sheds & Unallocated Animals
       final farmIdStr = authState.userData?.farmId;
       final farmId = (farmIdStr != null && farmIdStr.isNotEmpty)
           ? int.tryParse(farmIdStr)
           : null;
 
-      List<Shed> sheds = [];
-      List<Farm> farms = [];
-      List<Map<String, dynamic>> onboardedAnimals = [];
-
       final roleStr = authState.userData?.role;
       final isFM = roleStr == 'FARM_MANAGER' || roleStr == 'SUPERVISOR';
 
       if (farmId != null || isFM) {
-        final shedResponse = await ShedsApiServices.getShedList(
-          token: token,
-          farmId: farmId,
-          page: 1,
-        );
-        sheds = shedResponse.data;
+        try {
+          final shedResponse = await ShedsApiServices.getShedList(
+            token: token,
+            farmId: farmId,
+            page: 1,
+          );
+          sheds = shedResponse.data;
 
-        final pagination = shedResponse.pagination;
-        state = state.copyWith(
-          currentShedPage: pagination.currentPage,
-          totalShedPages: pagination.totalPages,
-          hasMoreSheds: pagination.currentPage < pagination.totalPages,
-        );
+          final pagination = shedResponse.pagination;
+          state = state.copyWith(
+            currentShedPage: pagination.currentPage,
+            totalShedPages: pagination.totalPages,
+            hasMoreSheds: pagination.currentPage < pagination.totalPages,
+          );
+        } catch (e) {
+          debugPrint("Error fetching sheds: $e");
+        }
 
-        // 6. Fetch Unallocated Animals
-        onboardedAnimals = await ShedsApiServices.getUnallocatedAnimals(
-          token: token,
-          farmId: farmId,
-        );
+        try {
+          onboardedAnimals = await ShedsApiServices.getUnallocatedAnimals(
+            token: token,
+            farmId: farmId,
+          );
+        } catch (e) {
+          debugPrint("Error fetching unallocated animals: $e");
+        }
       }
 
-      // 7. Fetch All Farms (for dropdowns)
-      farms = await FarmsApiServices.getFarms(token: token);
+      // 4. Fetch All Farms
+      try {
+        farms = await FarmsApiServices.getFarms(token: token);
+      } catch (e) {
+        debugPrint("Error fetching farms: $e");
+      }
 
       state = state.copyWith(
         investorCount: investorCount,
         totalStaff: totalStaff,
-        // pendingApprovals: pendingLeaves + pendingTickets,
         sheds: sheds,
         farms: farms,
         onboardedAnimalIds: onboardedAnimals,
@@ -123,7 +136,8 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
         error: null,
       );
     } catch (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
+      debugPrint("Global dashboard error: $e");
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 

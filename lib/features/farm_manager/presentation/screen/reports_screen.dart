@@ -34,7 +34,18 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final milkReportState = ref.watch(milkReportProvider); // Removed redundant watch
+    // Listen for errors to show SnackBars
+    ref.listen<MilkReportState>(milkReportProvider, (prev, next) {
+      if (next.error != null && next.error != prev?.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
 
     return DefaultTabController(
       length: 2,
@@ -46,21 +57,21 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             : AppBar(
                 backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                 elevation: 0,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    // ref.read(milkReportProvider.notifier).clear(); // Handled by autoDispose
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      final userRole = ref.read(authProvider).role;
-                      if (userRole == UserType.supervisor) {
-                        context.go('/supervisor-dashboard');
-                      } else {
-                        context.go('/farm-manager-dashboard');
-                      }
-                    }
-                  },
+                leading: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.black,
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      context.go('/farm-manager-dashboard');
+                    },
+                  ),
                 ),
                 title: Text(
                   "Farm Reports".tr,
@@ -84,153 +95,158 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _datePickerField(context),
-                  const SizedBox(height: 16),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _datePickerField(context),
+                    const SizedBox(height: 16),
 
-                  DropdownButtonFormField<String>(
-                    value: _selectedSession,
-                    decoration: _inputDecoration("Session".tr),
-                    items: [
-                      DropdownMenuItem(
-                        value: 'Morning',
-                        child: Text('Morning'.tr),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Evening',
-                        child: Text('Evening'.tr),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedSession = value!;
-                      });
-                    },
-                  ),
+                    DropdownButtonFormField<String>(
+                      value: _selectedSession,
+                      decoration: _inputDecoration("Session".tr),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'Morning',
+                          child: Text('Morning'.tr),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Evening',
+                          child: Text('Evening'.tr),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedSession = value!;
+                        });
+                      },
+                    ),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                  _getReportButton(
-                    _isDateSelected
-                        ? () {
-                            final date =
-                                "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
+                    _getReportButton(
+                      _isDateSelected
+                          ? () {
+                              final date =
+                                  "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
 
-                            ref
-                                .read(milkReportProvider.notifier)
-                                .getDailyReport(
-                                  date: date,
-                                  timing: _selectedSession.toUpperCase(),
-                                );
-                          }
-                        : null,
-                  ),
-                  const SizedBox(height: 16),
+                              ref
+                                  .read(milkReportProvider.notifier)
+                                  .getDailyReport(
+                                    date: date,
+                                    timing: _selectedSession.toUpperCase(),
+                                  );
+                            }
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
 
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final state = ref.watch(milkReportProvider);
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final state = ref.watch(milkReportProvider);
 
-                      if (state.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+                        if (state.isLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
 
-                      if (state.error != null) {
-                        return Text(
-                          state.error!,
-                          style: const TextStyle(color: Colors.red),
+                        if (state.error != null) {
+                          return const SizedBox();
+                        }
+
+                        if (state.data == null) return const SizedBox();
+
+                        final reportList = state.data['data'];
+
+                        if (reportList is! List || reportList.isEmpty) {
+                          return Text("No daily report found".tr);
+                        }
+
+                        final report = reportList[0];
+                        final selectedDateString = _selectedDate != null
+                            ? "${_selectedDate!.day}-${_selectedDate!.month}-${_selectedDate!.year}"
+                            : "-";
+                        return _milkReportCard(
+                          title: "Daily Milk Report".tr,
+                          timing: report['timing'],
+                          entryDate: selectedDateString,
+                          quantity: "${report['quantity'] ?? '-'}",
+                          titleColor: Colors.orange,
+                          quantityColor: AppTheme.lightPrimary,
                         );
-                      }
-
-                      if (state.data == null) return const SizedBox();
-
-                      final reportList = state.data['data'];
-
-                      if (reportList is! List || reportList.isEmpty) {
-                        return Text("No daily report found".tr);
-                      }
-
-                      final report = reportList[0];
-                      return _milkReportCard(
-                        title: "Daily Milk Report".tr,
-                        timing: report['timing'],
-                        entryDate: report['entry_date'] ?? "-",
-                        quantity: "${report['quantity'] ?? '-'}",
-                        titleColor: Colors.orange,
-                        quantityColor: AppTheme.lightPrimary,
-                      );
-                    },
-                  ),
-                ],
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
 
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _datePickerField(context),
-                  const SizedBox(height: 24),
-                  // _getReportButton(() {
+            // Padding(
+            //   padding: const EdgeInsets.all(16),
+            //   child: SingleChildScrollView(
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         _datePickerField(context),
+            //         const SizedBox(height: 24),
+            //         // _getReportButton(() {
 
-                  // }),
-                  _getReportButton(
-                    _isDateSelected
-                        ? () {
-                            final date =
-                                "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
+            //         // }),
+            //         _getReportButton(
+            //           _isDateSelected
+            //               ? () {
+            //                   final date =
+            //                       "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
 
-                            ref
-                                .read(milkReportProvider.notifier)
-                                .getWeeklyReport(date: date);
-                          }
-                        : null,
-                  ),
-                  const SizedBox(height: 16),
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final state = ref.watch(milkReportProvider);
+            //                   ref
+            //                       .read(milkReportProvider.notifier)
+            //                       .getWeeklyReport(date: date);
+            //                 }
+            //               : null,
+            //         ),
+            //         const SizedBox(height: 16),
+            //         Consumer(
+            //           builder: (context, ref, _) {
+            //             final state = ref.watch(milkReportProvider);
 
-                      if (state.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+            //             if (state.isLoading) {
+            //               return const Center(
+            //                 child: CircularProgressIndicator(),
+            //               );
+            //             }
 
-                      if (state.error != null) {
-                        return Text(
-                          state.error!,
-                          style: const TextStyle(color: Colors.red),
-                        );
-                      }
+            //             if (state.error != null) {
+            //               return const SizedBox();
+            //             }
 
-                      if (state.data == null || state.data['data'] == null) {
-                        return const SizedBox();
-                      }
+            //             if (state.data == null || state.data['data'] == null) {
+            //               return const SizedBox();
+            //             }
 
-                      final report = state.data['data'];
+            //             final report = state.data['data'];
 
-                      if (report is List) {
-                        return Column(
-                          children: report.map<Widget>((item) {
-                            return _milkReportCard(
-                              title: "Weekly Milk Report".tr,
-                              entryDate: item['entry_date'] ?? "-",
-                              quantity: "${item['quantity'] ?? '-'}",
-                              titleColor: Colors.green,
-                              quantityColor: Colors.green,
-                            );
-                          }).toList(),
-                        );
-                      }
+            //             if (report is List) {
+            //               return Column(
+            //                 children: report.map<Widget>((item) {
+            //                   return _milkReportCard(
+            //                     title: "Weekly Milk Report".tr,
+            //                     entryDate: item['entry_date'] ?? "-",
+            //                     quantity: "${item['quantity'] ?? '-'}",
+            //                     titleColor: Colors.green,
+            //                     quantityColor: Colors.green,
+            //                   );
+            //                 }).toList(),
+            //               );
+            //             }
 
-                      return const SizedBox();
-                    },
-                  ),
-                ],
-              ),
-            ),
+            //             return const SizedBox();
+            //           },
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -398,17 +414,18 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                     color: Colors.blue,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 5),
               ],
 
               Expanded(
+                flex: 1,
                 child: _infoBadge(
-                  icon: Icons.calendar_today,
+                  icon: Icons.event_note,
                   text: entryDate,
                   color: Colors.purple,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 5),
 
               Expanded(
                 child: _infoBadge(

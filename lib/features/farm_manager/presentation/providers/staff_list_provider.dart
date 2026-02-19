@@ -337,16 +337,37 @@ class MilkReportNotifier extends StateNotifier<MilkReportState> {
         return;
       }
 
-      final dateObj = DateTime.parse(date);
-      // Backend doesn't support "WEEKLY" param, but returns entries covering this date.
-      // We assume weekly entries are those with longer duration, or we just show all.
-      // For now, we just fetch for the date.
-      final result = await MilkApiServices.getMilkReport(
-        token: token,
-        reportDate: dateObj,
-      );
+      final startDate = DateTime.parse(date);
+      final List<dynamic> allEntries = [];
 
-      state = state.copyWith(isLoading: false, data: {'data': result});
+      // Fetch entries for each of the 7 days of the week
+      for (int i = 0; i < 7; i++) {
+        final dayDate = startDate.add(Duration(days: i));
+        try {
+          final dayEntries = await MilkApiServices.getMilkReport(
+            token: token,
+            reportDate: dayDate,
+          );
+          // Tag each entry with its date if not already set
+          for (final entry in dayEntries) {
+            if (entry is Map) {
+              final tagged = Map<String, dynamic>.from(entry);
+              if (tagged['entry_date'] == null ||
+                  (tagged['entry_date'] as String).isEmpty) {
+                tagged['entry_date'] =
+                    "${dayDate.year}-${dayDate.month.toString().padLeft(2, '0')}-${dayDate.day.toString().padLeft(2, '0')}";
+              }
+              allEntries.add(tagged);
+            } else {
+              allEntries.add(entry);
+            }
+          }
+        } catch (_) {
+          // Skip days that fail individually
+        }
+      }
+
+      state = state.copyWith(isLoading: false, data: {'data': allEntries});
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
