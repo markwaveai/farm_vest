@@ -28,6 +28,9 @@ class AppConstants {
 
   static String animalKartApiUrl = animalKartLiveApiUrl;
 
+  static const String notificationServiceUrl =
+      'https://notification-service-jn6cma3vvq-el.a.run.app';
+
   static String appLiveUrl = liveUrl; // Default to Live
   static String visitApiUrl = appLiveUrl;
 

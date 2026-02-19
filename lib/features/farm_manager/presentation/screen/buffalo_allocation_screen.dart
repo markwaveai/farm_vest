@@ -64,10 +64,17 @@ class _BuffaloAllocationScreenState
 
       final authState = ref.read(authProvider);
       final farmId = int.tryParse(authState.userData?.farmId ?? '');
-      ref.read(farmManagerProvider.notifier).fetchSheds(farmId: farmId);
-      ref
-          .read(farmManagerProvider.notifier)
-          .fetchUnallocatedAnimals(farmId: farmId);
+
+      // Only fetch if provider doesn't already have data (build() fetches on init)
+      final currentState = ref.read(farmManagerProvider);
+      if (currentState.sheds.isEmpty) {
+        ref.read(farmManagerProvider.notifier).fetchSheds(farmId: farmId);
+      }
+      if (currentState.onboardedAnimalIds.isEmpty) {
+        ref
+            .read(farmManagerProvider.notifier)
+            .fetchUnallocatedAnimals(farmId: farmId);
+      }
 
       if (selectedShedId != null) {
         ref

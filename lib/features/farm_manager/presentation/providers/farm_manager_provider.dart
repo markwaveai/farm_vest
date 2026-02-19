@@ -81,7 +81,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
         debugPrint("Error fetching employees: $e");
       }
 
-      // 3. Fetch Sheds & Unallocated Animals
+      // 3. Fetch Sheds & Unallocated Animals (skip on auto-refresh to reduce API calls)
       final farmIdStr = authState.userData?.farmId;
       final farmId = (farmIdStr != null && farmIdStr.isNotEmpty)
           ? int.tryParse(farmIdStr)
@@ -90,7 +90,7 @@ class FarmManagerDashboardNotifier extends Notifier<FarmManagerDashboardState> {
       final roleStr = authState.userData?.role;
       final isFM = roleStr == 'FARM_MANAGER' || roleStr == 'SUPERVISOR';
 
-      if (farmId != null || isFM) {
+      if (!isAutoRefresh && (farmId != null || isFM)) {
         try {
           final shedResponse = await ShedsApiServices.getShedList(
             token: token,

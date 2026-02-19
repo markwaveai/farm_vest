@@ -291,11 +291,20 @@ class AppRouter {
         builder: (context, state) {
           final extra = state.extra;
 
-          final fallbackRoute = (extra is Map<String, String>)
-              ? extra['fallbackRoute']
-              : null;
+          String? fallbackRoute;
+          String? initialFilter;
 
-          return NotificationsScreen(fallbackRoute: fallbackRoute ?? '/');
+          if (extra is Map<String, dynamic>) {
+            fallbackRoute = extra['fallbackRoute'] as String?;
+            initialFilter = extra['initialFilter'] as String?;
+          } else if (extra is Map<String, String>) {
+            fallbackRoute = extra['fallbackRoute'];
+          }
+
+          return NotificationsScreen(
+            fallbackRoute: fallbackRoute ?? '/',
+            initialFilter: initialFilter,
+          );
         },
       ),
     ],
