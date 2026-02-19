@@ -203,13 +203,17 @@ class TicketsApiServices {
     String? ticketType,
   }) async {
     try {
-      var url = "${AppConstants.appLiveUrl}/ticket/get_health_tickets";
+      final queryParams = <String, String>{'size': '1000'};
       if (ticketType != null) {
-        url += "?ticket_type=$ticketType";
+        queryParams['ticket_type'] = ticketType;
       }
 
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/ticket/get_health_tickets",
+      ).replace(queryParameters: queryParams);
+
       final response = await http.get(
-        Uri.parse(url),
+        uri,
         headers: {
           HttpHeaders.authorizationHeader: 'Bearer $token',
           HttpHeaders.acceptHeader: 'application/json',
