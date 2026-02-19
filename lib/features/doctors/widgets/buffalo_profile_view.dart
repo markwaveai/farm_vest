@@ -53,6 +53,13 @@ class _BuffaloProfileViewState extends ConsumerState<BuffaloProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen for search query changes to keep controller in sync (e.g. when reset from dashboard)
+    ref.listen<String>(animalSearchQueryProvider, (previous, next) {
+      if (next == 'all' && _searchController.text.isNotEmpty) {
+        _searchController.text = '';
+      }
+    });
+
     return Column(
       children: [
         // const SizedBox(height: 16),

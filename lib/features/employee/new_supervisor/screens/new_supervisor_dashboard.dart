@@ -16,6 +16,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:farm_vest/features/employee/new_supervisor/widgets/supervisor_views.dart';
 import 'package:farm_vest/features/farm_manager/presentation/screen/onboard_animal_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/farm_manager_provider.dart';
+import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
 
 class NewSupervisorDashboard extends ConsumerStatefulWidget {
   const NewSupervisorDashboard({super.key});
@@ -179,6 +180,13 @@ class _NewSupervisorDashboardState
         role: UserType.supervisor,
         currentIndex: _currentIndex,
         onTap: (index) {
+          if (index == 3) {
+            // Reset Buffalo Profile search when switching to it
+            ref.read(animalSearchQueryProvider.notifier).state = 'all';
+          } else if (index == 2) {
+            // Reset Onboarding state when switching to it
+            ref.read(farmManagerProvider.notifier).clearOrder();
+          }
           setState(() => _currentIndex = index);
         },
       ),
