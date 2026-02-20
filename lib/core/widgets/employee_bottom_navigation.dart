@@ -31,7 +31,7 @@ class EmployeeBottomNavigation extends StatelessWidget {
       case UserType.supervisor:
         return [
           NavItemData('Milk Entry', 'assets/icons/injection.png'),
-          NavItemData('Alerts', 'assets/icons/Notification_icon.png'),
+          NavItemData('Tickets', 'assets/icons/Notification_icon.png'),
           NavItemData('Onboard', Icons.pets),
         ];
       case UserType.farmManager:

@@ -124,7 +124,9 @@ class InvestorAnimal {
       tagNumber: (animalData['tag_number'] != null)
           ? animalData['tag_number'].toString()
           : null,
-      shedId: shedData['id'] is int ? shedData['id'] : null,
+      shedId: shedData['id'] is int
+          ? shedData['id']
+          : (int.tryParse(shedData['shed_id']?.toString() ?? '')),
       shedName: (shedData['shed_name'] ?? shedData['name'] ?? '').toString(),
       healthStatus: (animalData['health_status'] ?? kHyphen).toString(),
       animalType: (animalData['animal_type'] ?? 'Buffalo').toString(),

@@ -17,6 +17,7 @@ import 'package:farm_vest/features/employee/new_supervisor/widgets/supervisor_vi
 import 'package:farm_vest/features/farm_manager/presentation/screen/onboard_animal_screen.dart';
 import 'package:farm_vest/features/farm_manager/presentation/providers/farm_manager_provider.dart';
 import 'package:farm_vest/features/employee/new_supervisor/providers/supervisor_animals_provider.dart';
+import 'package:farm_vest/features/doctors/widgets/health_tickets_view.dart';
 
 class NewSupervisorDashboard extends ConsumerStatefulWidget {
   const NewSupervisorDashboard({super.key});
@@ -51,7 +52,7 @@ class _NewSupervisorDashboardState
         appBarTitle = 'Milk Entry';
         break;
       case 1:
-        appBarTitle = 'Alerts';
+        appBarTitle = 'Total Tickets';
         break;
       case 2:
         appBarTitle = 'Buffalo Onboarding';
@@ -170,7 +171,10 @@ class _NewSupervisorDashboardState
         index: _currentIndex,
         children: [
           const BulkMilkEntryView(), // 0
-          const SupervisorAlertsView(), // 1
+          const HealthTicketsView(
+            ticketType: 'HEALTH',
+            showActions: false,
+          ), // 1
           const OnboardAnimalScreen(hideAppBar: true), // 2
           const BuffaloProfileView(), // 3
           _buildDashboardContent(dashboardState, screenWidth, user), // 4

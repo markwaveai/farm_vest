@@ -241,6 +241,47 @@ class AnimalApiServices {
     }
   }
 
+  static Future<InvestorAnimalsResponse> getPagedAnimals({
+    required String token,
+    String? healthStatus,
+    int? shedId,
+    int page = 1,
+    int size = 15,
+  }) async {
+    try {
+      final queryParams = {'page': page.toString(), 'size': size.toString()};
+      if (healthStatus != null && healthStatus.isNotEmpty) {
+        queryParams['health_status'] = healthStatus;
+      }
+      if (shedId != null) {
+        queryParams['shed_id'] = shedId.toString();
+      }
+
+      final uri = Uri.parse(
+        "${AppConstants.appLiveUrl}/animal/get_total_animals",
+      ).replace(queryParameters: queryParams);
+
+      debugPrint("getPagedAnimals URI: $uri");
+
+      final response = await http.get(
+        uri,
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      );
+      debugPrint("getPagedAnimals StatusCode: ${response.statusCode}");
+debugPrint("getPagedAnimals Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return InvestorAnimalsResponse.fromJson(jsonDecode(response.body));
+      } else if (response.statusCode == 401) {
+        onUnauthorized?.call();
+        throw ServerException('Unauthorized', statusCode: 401);
+      }
+      return const InvestorAnimalsResponse(status: 'error', count: 0, data: []);
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
   static Future<int> getTotalAnimals(String token) async {
     try {
       final response = await http.get(

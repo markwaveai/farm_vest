@@ -235,7 +235,11 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
         ticketType: ticketType,
       );
       if (response['status'] == 'success') {
-        await _fetchData(); // Refresh data after successful entry
+        // Optimistic update: increment count immediately in UI
+        _updateStatsOptimistically(ticketType: ticketType);
+
+        // Delay refresh by 2s to allow backend indexing to complete
+        Future.delayed(const Duration(seconds: 2), () => _fetchData());
         return response;
       }
       return null;
@@ -251,13 +255,41 @@ class SupervisorDashboardNotifier extends Notifier<SupervisorDashboardState> {
     try {
       final response = await supervisorRepo.createTransferTicket(body: body);
       if (response['status'] == 'success') {
-        await _fetchData(); // Refresh data after successful entry
+        // Optimistic update: increment count immediately in UI
+        _updateStatsOptimistically(ticketType: 'TRANSFER');
+
+        // Delay refresh by 2s to allow backend indexing to complete
+        Future.delayed(const Duration(seconds: 2), () => _fetchData());
         return response;
       }
       return null;
     } catch (e) {
       rethrow;
     }
+  }
+
+  void _updateStatsOptimistically({required String ticketType}) {
+    final currentStats = state.stats;
+    final currentAllTickets = int.tryParse(currentStats.allTicketsCount) ?? 0;
+    int currentActiveIssues = int.tryParse(currentStats.activeIssues) ?? 0;
+    int currentTransfers = int.tryParse(currentStats.transfers) ?? 0;
+
+    if (ticketType == 'HEALTH') {
+      currentActiveIssues++;
+    } else if (ticketType == 'TRANSFER') {
+      currentTransfers++;
+    }
+
+    state = state.copyWith(
+      stats: SupervisorDashboardStats(
+        totalAnimals: currentStats.totalAnimals,
+        milkToday: currentStats.milkToday,
+        activeIssues: currentActiveIssues.toString(),
+        transfers: currentTransfers.toString(),
+        pendingAllocations: currentStats.pendingAllocations,
+        allTicketsCount: (currentAllTickets + 1).toString(),
+      ),
+    );
   }
 
   Future<Map<String, dynamic>?> createMilkEntry({

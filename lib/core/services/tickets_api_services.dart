@@ -19,7 +19,7 @@ class TicketsApiServices {
   }) async {
     try {
       var url = "${AppConstants.appLiveUrl}/ticket/get_health_tickets";
-      final queryParams = <String, String>{};
+      final queryParams = <String, String>{'size': '1000'};
       if (status != null) queryParams['status_filter'] = status;
       if (ticketType != null) queryParams['ticket_type'] = ticketType;
 
@@ -61,7 +61,7 @@ class TicketsApiServices {
   }) async {
     try {
       final url =
-          "${AppConstants.appLiveUrl}/ticket/get_health_tickets?ticket_type=TRANSFER&status_filter=$status";
+          "${AppConstants.appLiveUrl}/ticket/get_health_tickets?ticket_type=TRANSFER&status_filter=$status&size=1000";
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -243,7 +243,7 @@ class TicketsApiServices {
   }) async {
     try {
       var url = "${AppConstants.appLiveUrl}/ticket/get_health_tickets";
-      final queryParams = <String, String>{};
+      final queryParams = <String, String>{'size': '1000'};
       if (status != null) queryParams['status_filter'] = status;
       if (ticketType != null) queryParams['ticket_type'] = ticketType;
 
