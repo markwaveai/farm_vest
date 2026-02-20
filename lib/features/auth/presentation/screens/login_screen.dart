@@ -836,9 +836,10 @@ class _NewLoginScreenState extends ConsumerState<NewLoginScreen> {
           hapticFeedbackType: HapticFeedbackType.lightImpact,
           onChanged: (value) => setState(() => _otp = value),
           onCompleted: (value) {
-            setState(() => _otp = value);
-            Future.delayed(const Duration(seconds: 1), () {
-              if (mounted) _handleContinue();
+            _otp = value;
+            _otpFocusNode.unfocus();
+            Future.microtask(() {
+              _handleContinue();
             });
           },
         ),

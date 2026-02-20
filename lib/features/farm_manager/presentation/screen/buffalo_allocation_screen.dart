@@ -190,6 +190,7 @@ class _BuffaloAllocationScreenState
       appBar: widget.hideAppBar
           ? null
           : AppBar(
+              toolbarHeight: 50,
               title: Text(
                 appBarTitle,
                 style: const TextStyle(
@@ -283,66 +284,91 @@ class _BuffaloAllocationScreenState
             ],
           ),
         ),
-        child: Column(
-          children: [
-            // Shed Selector
-            _buildShedSelector(dashboardState),
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              // Shed Selector
+              _buildShedSelector(dashboardState),
+              const SizedBox(height: 10),
 
-            if (selectedShedId == null)
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.warehouse_rounded,
-                        size: 64,
-                        color: AppTheme.grey1.withOpacity(0.3),
+              if (selectedShedId == null)
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.warehouse_rounded,
+                          size: 64,
+                          color: AppTheme.grey1.withOpacity(0.3),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Please select a shed to start allocation',
+                          style: TextStyle(color: AppTheme.grey1, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else if (dashboardState.isLoading)
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (dashboardState.currentShedAvailability != null) ...[
+                // Stats Card - Capacity, Shed Pick, Total Draft
+                _buildStatsHeader(dashboardState.currentShedAvailability!),
+
+                // Pending Animals Tray visible for both Manager and Supervisor
+                if (onboardedAnimals.isNotEmpty)
+                  _buildPendingAnimalsTray(onboardedAnimals),
+
+                // Shed Allocation Section Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Shed Allocation',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Please select a shed to start allocation',
-                        style: TextStyle(color: AppTheme.grey1, fontSize: 14),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              )
-            else if (dashboardState.isLoading)
-              const Expanded(child: Center(child: CircularProgressIndicator()))
-            else if (dashboardState.currentShedAvailability != null) ...[
-              // Header Stats Card
-              _buildStatsHeader(dashboardState.currentShedAvailability!),
 
-              // Pending Animals Tray visible for both Manager and Supervisor
-              if (onboardedAnimals.isNotEmpty)
-                _buildPendingAnimalsTray(onboardedAnimals),
-
-              // Shed Grid - Row Carousel
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    itemCount:
-                        dashboardState.currentShedAvailability!.rows.length,
-                    itemBuilder: (context, index) {
-                      final entry = dashboardState
-                          .currentShedAvailability!
-                          .rows
-                          .entries
-                          .elementAt(index);
-                      return SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        child: _buildGlassColumn(entry.key, entry.value),
-                      );
-                    },
+                // Shed Grid - Row Carousel
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      itemCount:
+                          dashboardState.currentShedAvailability!.rows.length,
+                      itemBuilder: (context, index) {
+                        final entry = dashboardState
+                            .currentShedAvailability!
+                            .rows
+                            .entries
+                            .elementAt(index);
+                        return SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.45,
+                          child: _buildGlassColumn(entry.key, entry.value),
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -723,7 +749,7 @@ class _BuffaloAllocationScreenState
     }).toList();
 
     return SizedBox(
-      height: 140,
+      height: 160,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -800,8 +826,8 @@ class _BuffaloAllocationScreenState
                     });
                   },
                   child: Container(
-                    width: 90,
-                    height: 90,
+                    width: 95,
+                    height: 115,
                     // margin: const EdgeInsets.only(right: 12),
                     decoration: BoxDecoration(
                       color: isSelected ? AppTheme.primary : Colors.white,
